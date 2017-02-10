@@ -1,0 +1,6 @@
+// N = number of jobs : integer
+15
+// P = processing times of jobs : integer array of N
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+// D = due dates of jobs : integer array of N
+12 1 11 2 10 3 9 4 8 5 7 6 6 7 13
