@@ -18,3 +18,14 @@ C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.
 C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.csproj.GenerateResource.Cache
 C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.exe
 C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.pdb
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.csprojResolveAssemblyReference.cache
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.Dashboard.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.DataManager.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.MultipleProblemMultipleAlgorithm.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.ProblemViewer.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.SingleProblemSingleAlgorithm.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.DefaultSolutionViewer.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Properties.Resources.resources
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.csproj.GenerateResource.Cache
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.exe
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.pdb
