@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="Domains\ProblemDomain\ChargingStation.cs" />
     <Compile Include="Domains\ProblemDomain\Job.cs" />
+    <Compile Include="Domains\ProblemDomain\ProblemConstants.cs" />
     <Compile Include="Domains\ProblemDomain\Site.cs" />
     <Compile Include="Domains\ProblemDomain\Vehicle.cs" />
     <Compile Include="Forms\AlgorithmViewer.cs">
@@ -132,6 +133,7 @@
     <Compile Include="Implementations\ProblemBase.cs" />
     <Compile Include="Implementations\ProblemModelBase.cs" />
     <Compile Include="Implementations\ProblemModels\DefaultProblemModel.cs" />
+    <Compile Include="Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs" />
     <Compile Include="Implementations\Problems\AbstractProblem.cs" />
     <Compile Include="Implementations\Problems\DefaultProblem.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
@@ -139,6 +141,7 @@
     <Compile Include="Implementations\SolutionBase.cs" />
     <Compile Include="Implementations\Solutions\BackwardLoadingSolution.cs" />
     <Compile Include="Implementations\Solutions\DefaultSolution.cs" />
+    <Compile Include="Implementations\Solutions\VRPSolution.cs" />
     <Compile Include="Interfaces\IAlgorithm.cs" />
     <Compile Include="Interfaces\IProblem.cs" />
     <Compile Include="Interfaces\IProblemModel.cs" />
@@ -154,6 +157,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />
+    <Compile Include="Utils\AssignedRoute.cs" />
     <Compile Include="Utils\Calculators.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
     <Compile Include="Utils\ProblemUtil.cs" />

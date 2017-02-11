@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Models;
+using MPMFEVRP.Implementations.ProblemModels;
 
 namespace MPMFEVRP.Implementations.Problems
 {
@@ -121,9 +122,9 @@ namespace MPMFEVRP.Implementations.Problems
 
             lambda = 2;//TODO We entered 2 for now; we'd love to experiment on it.
         }
-        public ProblemToAlgorithm ToAlgorithm()
+        public EVvsGDV_MaxProfit_VRP_Model ToAlgorithm()
         {
-            return new ProblemToAlgorithm(numCustomers,numES,numNodes,siteArray,numVehicleCategories,numVehicles,vehicleArray,travelSpeed,tMax,lambda,distance,energyConsumption,timeConsumption);// TODO This is not going to stay as blank constructor!
+            return new EVvsGDV_MaxProfit_VRP_Model(numCustomers,numES,numNodes,siteArray,numVehicleCategories,numVehicles,vehicleArray,travelSpeed,tMax,lambda,distance,energyConsumption,timeConsumption);// TODO This is not going to stay as blank constructor!
         }
 
         public abstract override string ToString();

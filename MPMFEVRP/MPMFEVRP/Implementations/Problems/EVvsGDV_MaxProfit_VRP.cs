@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Utils;
+using MPMFEVRP.Implementations.ProblemModels;
 
 
 namespace MPMFEVRP.Implementations.Problems
@@ -33,9 +34,9 @@ namespace MPMFEVRP.Implementations.Problems
             numVehicles[0] = 6;
             numVehicles[1] = numCustomers;
         }
-        public new ProblemToAlgorithm ToAlgorithm()
+        public new EVvsGDV_MaxProfit_VRP_Model ToAlgorithm()
         {
-            return new ProblemToAlgorithm( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
+            return new EVvsGDV_MaxProfit_VRP_Model( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
         }
         public override string ToString()
         {

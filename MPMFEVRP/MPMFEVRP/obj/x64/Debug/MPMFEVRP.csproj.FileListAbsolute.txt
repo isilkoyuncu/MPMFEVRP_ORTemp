@@ -29,3 +29,12 @@ C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64
 C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.csproj.GenerateResource.Cache
 C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.exe
 C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.pdb
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\MPMFEVRP.exe.config
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\MPMFEVRP.exe
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\MPMFEVRP.pdb
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\BestRandom.dll
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\GanttChart.dll
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.Concert.dll
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.CPLEX.dll
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.Concert.xml
+C:\Users\Minik\Desktop\MPMFEVRP_ORTemp\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.CPLEX.xml
