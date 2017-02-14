@@ -5,13 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Domains.ProblemDomain;
-using MPMFEVRP.Utils;
 using MPMFEVRP.Implementations.ProblemModels;
 
 
 namespace MPMFEVRP.Implementations.Problems
 {
-    class EVvsGDV_MaxProfit_VRP:AbstractProblem
+    class EVvsGDV_MaxProfit_VRP:ProblemBase
     {
         /* This problem is a heteregoneus VRP which allows any number of vehicle types, but they belong to two categories: EV and GDV
          * The objective is to maximize profit = revenue - cost (fixed per day & variable per mile)
@@ -30,17 +29,22 @@ namespace MPMFEVRP.Implementations.Problems
                 (reader.getVehicleArray()[1].Category != VehicleCategories.GDV))
                 throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
 
-            constructAbstractProblem(reader);
-            numVehicles[0] = 6;
-            numVehicles[1] = numCustomers;
+            //numVehicles[0] = 6;
+            //numVehicles[1] = numCustomers;
         }
-        public new EVvsGDV_MaxProfit_VRP_Model ToAlgorithm()
+
+        public override string GetName()
+        {
+            return "EV vs GDV Maximum Profit VRP";
+        }
+
+        public new EVvsGDV_MaxProfit_VRP_Model GetProblemModel()
         {
             return new EVvsGDV_MaxProfit_VRP_Model( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
         }
         public override string ToString()
         {
-            return InputFileName;
+            throw new NotImplementedException();
         }
     }
 }

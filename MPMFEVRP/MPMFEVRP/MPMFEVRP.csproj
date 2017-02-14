@@ -79,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domains\ProblemDomain\ChargingStation.cs" />
-    <Compile Include="Domains\ProblemDomain\Job.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemConstants.cs" />
     <Compile Include="Domains\ProblemDomain\Site.cs" />
     <Compile Include="Domains\ProblemDomain\Vehicle.cs" />
@@ -134,7 +133,6 @@
     <Compile Include="Implementations\ProblemModelBase.cs" />
     <Compile Include="Implementations\ProblemModels\DefaultProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs" />
-    <Compile Include="Implementations\Problems\AbstractProblem.cs" />
     <Compile Include="Implementations\Problems\DefaultProblem.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
     <Compile Include="Implementations\Problems\Readers\KoyuncuYavuzReader.cs" />

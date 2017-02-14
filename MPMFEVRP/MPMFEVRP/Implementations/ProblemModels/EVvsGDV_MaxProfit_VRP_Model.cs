@@ -99,21 +99,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
         public override double CalculateObjectiveFunctionValue(ISolution solution)
         {
-            double OFV = int.MinValue;//maxLateness
-            if (solution.GetType() == typeof(DefaultSolution))
-            {
-                int completionTime = 0;
-                int lateness = int.MinValue;
-                for (int i = 0; i < totalJobs; i++)
-                {
-                    int position = Array.IndexOf(ids, solution.IDs[i]);
-                    completionTime += processingTimes[position];
-                    lateness = completionTime - dueDates[position];
-                    if (OFV < lateness)
-                        OFV = lateness;
-                }
-            }
-            return OFV;
+            throw new NotImplementedException();
+
         }
 
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)

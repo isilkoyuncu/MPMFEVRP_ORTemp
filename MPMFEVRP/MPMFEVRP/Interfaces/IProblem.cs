@@ -12,7 +12,7 @@ namespace MPMFEVRP.Interfaces
     {
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
 
-        List<Job> Jobs { get; }//TODO This is project-dependent, can we make the interfaces general?
+        
 
         string GetName();
 
