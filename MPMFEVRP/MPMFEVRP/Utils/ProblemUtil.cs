@@ -72,7 +72,7 @@ namespace MPMFEVRP.Utils
             Random r = new Random();
             for (int i = 0; i < numberOfJobs; i++)
             {
-                problem.Jobs.Add(new Job(r.Next(processingTimeLowerLimit, processingTimeUpperLimit), r.Next(dueDateLowerLimit, dueDateUpperLimit), "Job " + i));
+                //problem.Jobs.Add(new Job(r.Next(processingTimeLowerLimit, processingTimeUpperLimit), r.Next(dueDateLowerLimit, dueDateUpperLimit), "Job " + i));
             }
             return problem;
         }

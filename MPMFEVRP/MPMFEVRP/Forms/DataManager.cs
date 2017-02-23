@@ -37,7 +37,8 @@ namespace MPMFEVRP.Forms
 
         void UpdateProblemLabels()
         {
-            label_numberOfJobs.Text = theProblem.Jobs.Count.ToString();
+            //label_numberOfJobs.Text = theProblem.Jobs.Count.ToString();
+            throw new NotImplementedException();
         }
 
         private void button_addJob_Click(object sender, EventArgs e)
@@ -47,7 +48,7 @@ namespace MPMFEVRP.Forms
             int dueDate = int.Parse(textBox_dueDate.Text),
                 processingTime = int.Parse(textBox_processingTime.Text);
             string description = textBox_description.Text;
-            theProblem.Jobs.Add(new Job(processingTime, dueDate, description));
+            //theProblem.Jobs.Add(new Job(processingTime, dueDate, description)); //TODO needs to be DELETED !!!!!
             UpdateProblemLabels();
         }
 

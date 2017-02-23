@@ -12,10 +12,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
     {
         public DefaultProblemModel(IProblem problem)
         {
-            this.totalJobs = problem.Jobs.Count;
-            this.processingTimes = problem.Jobs.Select(x => x.ProcessingTime).ToArray();
-            this.dueDates = problem.Jobs.Select(x => x.DueDate).ToArray();
-            this.ids = problem.Jobs.Select(x => x.ID).ToArray();
+            //this.totalJobs = problem.Jobs.Count;
+            //this.processingTimes = problem.Jobs.Select(x => x.ProcessingTime).ToArray();
+            //this.dueDates = problem.Jobs.Select(x => x.DueDate).ToArray();
+            //this.ids = problem.Jobs.Select(x => x.ID).ToArray();
+            throw new NotImplementedException();
         }
 
         public override ISolution GetRandomSolution(int seed)

@@ -24,18 +24,18 @@ namespace MPMFEVRP.Forms
             var manager = new ProjectManager();
 
             Random r = new Random();
-            foreach (var job in theProblem.Jobs)
-            {
-                var task = new ColoredTask()
-                {
-                    Name = job.Description,
-                    Color = Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256))
-                };
-                manager.Add(task);
-                manager.SetEnd(task, job.DueDate);
-                manager.SetDuration(task, job.ProcessingTime);
-                manager.SetStart(task, job.DueDate - job.ProcessingTime);
-            }
+            //foreach (var job in theProblem.Jobs)
+            //{
+            //    var task = new ColoredTask()
+            //    {
+            //        Name = job.Description,
+            //        Color = Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256))
+            //    };
+            //    manager.Add(task);
+            //    manager.SetEnd(task, job.DueDate);
+            //    manager.SetDuration(task, job.ProcessingTime);
+            //    manager.SetStart(task, job.DueDate - job.ProcessingTime);
+            //}
 
             var chart = new Chart();
             chart.Init(manager);

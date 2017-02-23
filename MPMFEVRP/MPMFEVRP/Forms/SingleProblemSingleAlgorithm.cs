@@ -44,7 +44,8 @@ namespace MPMFEVRP.Forms
 
         void UpdateProblemLabels()
         {
-            label_numberOfJobs.Text = theProblem.Jobs.Count.ToString();
+            //label_numberOfJobs.Text = theProblem.Jobs.Count.ToString();
+            throw new NotImplementedException();
         }
 
         private void button_viewProblem_Click(object sender, EventArgs e)

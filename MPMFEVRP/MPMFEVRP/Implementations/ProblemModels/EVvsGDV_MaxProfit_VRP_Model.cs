@@ -19,7 +19,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
         Site[] siteArray;
 
         //Vehicle-related information
-        int numVehicleCategories;    //Vehicle categories, must equal numVehicles.Length!
+        int numVehicleCategories;    //Vehicle categories, must equal numVehicles.Length!B
         int[] numVehicles;   //array length must equal numVehicleCategories!
         Vehicle[] vehicleArray;
 

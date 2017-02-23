@@ -24,12 +24,12 @@ namespace MPMFEVRP.Forms
             theProblem = problem;
             theSolution = solution;
 
-            Dictionary<string, Job> solutionSortedJobs = new Dictionary<string, Job>();
+            //Dictionary<string, Job> solutionSortedJobs = new Dictionary<string, Job>();
 
-            foreach (var job in problem.Jobs)
-            {
-                solutionSortedJobs.Add(job.ID, job);
-            }
+            //foreach (var job in problem.Jobs)
+            //{
+            //    solutionSortedJobs.Add(job.ID, job);
+            //}
 
             var manager = new ProjectManager();
 
@@ -41,14 +41,14 @@ namespace MPMFEVRP.Forms
             {
                 var task = new ColoredTask()
                 {
-                    Name = solutionSortedJobs[jobID].Description,
+                    //Name = solutionSortedJobs[jobID].Description,
                     Color = Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256)),
                 };
                 manager.Add(task);
                 manager.SetStart(task, cumulTime);
-                manager.SetDuration(task, solutionSortedJobs[jobID].ProcessingTime);
-                manager.SetEnd(task, cumulTime += solutionSortedJobs[jobID].ProcessingTime);
-                lateness = cumulTime - solutionSortedJobs[jobID].DueDate;
+                //manager.SetDuration(task, solutionSortedJobs[jobID].ProcessingTime);
+                //manager.SetEnd(task, cumulTime += solutionSortedJobs[jobID].ProcessingTime);
+                //lateness = cumulTime - solutionSortedJobs[jobID].DueDate;
                 task.Name += " (late by " + lateness.ToString() + ")";
                 if (maxLateness < lateness)
                     maxLateness = lateness;
