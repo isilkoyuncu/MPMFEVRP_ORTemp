@@ -11,43 +11,6 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
-
-        //Site-related information (sites: depot, customer, ES)
-        int numCustomers;    //Number of Customers, not all of which must be served
-        int numES;  //# of ES, which includes the depot. If this is 0, intra-day charging is not allowed even at the depot. 
-        int numNodes;   //This is numCustomers+nES+1 (1 is for the depot)
-        Site[] siteArray;
-
-        //Vehicle-related information
-        int numVehicleCategories;    //Vehicle categories, must equal numVehicles.Length!B
-        int[] numVehicles;   //array length must equal numVehicleCategories!
-        Vehicle[] vehicleArray;
-
-        //Overall (not site- or vehicle-related information)
-        double travelSpeed;   //This is miles per minute
-        double tMax;    //Leghts of the workday, minutes
-        int lambda; //Max number of recharges per EV in a workday
-        double[,] distance;   //[numNodes,numNodes]  
-        double[, ,] energyConsumption;    //[numNodes,numNodes,numVehicleTypes]
-        double[,] timeConsumption;  //[numNodes,numNodes]
-
-        //Externals
-        public int NumCustomers { get { return numCustomers; } }
-        public int NumES { get { return numES; } }
-        public int NumNodes { get { return numNodes; } }
-        public Site[] SiteArray { get { return siteArray; } }
-
-        public int NumVehicleCategories { get { return numVehicleCategories; } }
-        public int[] NumVehicles { get { return numVehicles; } }
-        public Vehicle[] VehicleArray { get { return vehicleArray; } }
-
-        public double TravelSpeed { get { return travelSpeed; } }
-        public double TMax { get { return tMax; } }
-        public int Lambda { get { return lambda; } }
-        public double[,] Distance { get { return distance; } }
-        public double[,,] EnergyConsumption { get { return energyConsumption; } }
-        public double[,] TimeConsumption { get { return timeConsumption; } }
-
         public EVvsGDV_MaxProfit_VRP_Model()//empty constructor
         {
 
