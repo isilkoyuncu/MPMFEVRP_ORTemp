@@ -15,11 +15,7 @@ namespace MPMFEVRP.Implementations
     {
 
         protected string InputFileName;   //For record only
-
-        protected int numCustomers;    //Number of Customers, not all of which must be served
-        protected int numES;  // Number of ES may or may not include a replica of the depot
-        protected int numNodes;   //This is numCustomers+nES+1 = siteArray.Length
-        protected Site[] siteArray;
+        protected SiteRelatedData SRD;
 
         protected int numVehicleCategories;    //Vehicle categories, must equal numVehicles.Length!
         protected int[] numVehicles;   //array length must equal numVehicleCategories!
@@ -43,16 +39,16 @@ namespace MPMFEVRP.Implementations
         {
 
             InputFileName = reader.getRecommendedOutputFileFullName();
-            numCustomers = reader.getNumberOfCustomers();
-            numES = reader.getNumberOfES();
-            numNodes = numCustomers + numES + 1;
+            SRD.numCustomers = reader.getNumberOfCustomers();
+            SRD.numES = reader.getNumberOfES();
+            SRD.numNodes = SRD.numCustomers + SRD.numES + 1;
             numVehicleCategories = reader.getVehicleArray().Length;
             numVehicles = new int[numVehicleCategories];
             for (int v = 0; v < numVehicleCategories; v++)
-                numVehicles[v] = numCustomers;//TODO We entered numCustomers as the available number of vehicles in a category to make it unrestrictive. Limiting the numbers of vehicles is something we'd love to experiment on, and thus, this point will have to be clarified later on.
+                numVehicles[v] = SRD.numCustomers;//TODO We entered numCustomers as the available number of vehicles in a category to make it unrestrictive. Limiting the numbers of vehicles is something we'd love to experiment on, and thus, this point will have to be clarified later on.
 
-            siteArray = new Site[numNodes];
-            for (int s = 0; s < numNodes; s++)
+            SRD.siteArray = new Site[SRD.numNodes];
+            for (int s = 0; s < SRD.numNodes; s++)
             {
                 siteArray[s] = new Site(reader.getSiteArray()[s]);
             }
@@ -67,7 +63,7 @@ namespace MPMFEVRP.Implementations
             travelSpeed = reader.getTravelSpeed();
 
             //Assign Distance matrix if any
-            distance = new double[numNodes, numNodes];
+            distance = new double[SRD.numNodes, SRD.numNodes];
             if (reader.getDistanceMatrix() != null)//This is the case when distances are given in the data file (asymmetric, or whatever)
             {
                 distance = (double[,])reader.getDistanceMatrix().Clone();
@@ -97,17 +93,17 @@ namespace MPMFEVRP.Implementations
             }
 
             tMax = -1;
-            for (int s = 0; s < numNodes; s++)
+            for (int s = 0; s < SRD.numNodes; s++)
             {
                 if (tMax < siteArray[s].DueDate)
                     tMax = siteArray[s].DueDate;
             }
 
-            energyConsumption = new double[numNodes, numNodes, numVehicleCategories];
-            timeConsumption = new double[numNodes, numNodes];
+            energyConsumption = new double[SRD.numNodes, SRD.numNodes, numVehicleCategories];
+            timeConsumption = new double[SRD.numNodes, SRD.numNodes];
 
-            for (int i = 0; i < numNodes; i++)
-                for (int j = 0; j < numNodes; j++)
+            for (int i = 0; i < SRD.numNodes; i++)
+                for (int j = 0; j < SRD.numNodes; j++)
                 {
                     for (int vc = 0; vc < numVehicleCategories; vc++)
                     {
