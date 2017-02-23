@@ -17,9 +17,7 @@ namespace MPMFEVRP.Implementations
         protected string InputFileName;   //For record only
         protected SiteRelatedData SRD;
 
-        protected int numVehicleCategories;    //Vehicle categories, must equal numVehicles.Length!
-        protected int[] numVehicles;   //array length must equal numVehicleCategories!
-        protected Vehicle[] vehicleArray;
+        
 
         protected double travelSpeed;   //This is miles per minute
 
@@ -39,16 +37,16 @@ namespace MPMFEVRP.Implementations
         {
 
             InputFileName = reader.getRecommendedOutputFileFullName();
-            SRD.numCustomers = reader.getNumberOfCustomers();
-            SRD.numES = reader.getNumberOfES();
-            SRD.numNodes = SRD.numCustomers + SRD.numES + 1;
+            SRD.NumCustomers = reader.getNumberOfCustomers();
+            SRD.NumES = reader.getNumberOfES();
+            SRD.NumNodes = SRD.NumCustomers + SRD.NumES + 1;
             numVehicleCategories = reader.getVehicleArray().Length;
             numVehicles = new int[numVehicleCategories];
             for (int v = 0; v < numVehicleCategories; v++)
                 numVehicles[v] = SRD.numCustomers;//TODO We entered numCustomers as the available number of vehicles in a category to make it unrestrictive. Limiting the numbers of vehicles is something we'd love to experiment on, and thus, this point will have to be clarified later on.
 
-            SRD.siteArray = new Site[SRD.numNodes];
-            for (int s = 0; s < SRD.numNodes; s++)
+            SRD.SiteArray = new Site[SRD.NumNodes];
+            for (int s = 0; s < SRD.NumNodes; s++)
             {
                 siteArray[s] = new Site(reader.getSiteArray()[s]);
             }
@@ -63,7 +61,7 @@ namespace MPMFEVRP.Implementations
             travelSpeed = reader.getTravelSpeed();
 
             //Assign Distance matrix if any
-            distance = new double[SRD.numNodes, SRD.numNodes];
+            distance = new double[SRD.NumNodes, SRD.NumNodes];
             if (reader.getDistanceMatrix() != null)//This is the case when distances are given in the data file (asymmetric, or whatever)
             {
                 distance = (double[,])reader.getDistanceMatrix().Clone();
@@ -93,17 +91,17 @@ namespace MPMFEVRP.Implementations
             }
 
             tMax = -1;
-            for (int s = 0; s < SRD.numNodes; s++)
+            for (int s = 0; s < SRD.NumNodes; s++)
             {
                 if (tMax < siteArray[s].DueDate)
                     tMax = siteArray[s].DueDate;
             }
 
-            energyConsumption = new double[SRD.numNodes, SRD.numNodes, numVehicleCategories];
-            timeConsumption = new double[SRD.numNodes, SRD.numNodes];
+            energyConsumption = new double[SRD.NumNodes, SRD.NumNodes, numVehicleCategories];
+            timeConsumption = new double[SRD.NumNodes, SRD.NumNodes];
 
-            for (int i = 0; i < SRD.numNodes; i++)
-                for (int j = 0; j < SRD.numNodes; j++)
+            for (int i = 0; i < SRD.NumNodes; i++)
+                for (int j = 0; j < SRD.NumNodes; j++)
                 {
                     for (int vc = 0; vc < numVehicleCategories; vc++)
                     {
