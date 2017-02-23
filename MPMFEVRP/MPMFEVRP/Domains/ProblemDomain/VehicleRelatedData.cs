@@ -19,7 +19,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public VehicleRelatedData() { }
         public VehicleRelatedData(int numVehicleCategories, int[] numVehicles, Vehicle[] vehicleArray)
         {
+            this.numVehicleCategories = numVehicleCategories;
+            this.numVehicles = numVehicles;
+            this.vehicleArray = vehicleArray; //TODO same as site array. Can we do it?
+        }
 
+        public VehicleRelatedData(VehicleRelatedData VRD)
+        {
+            numVehicleCategories = VRD.NumVehicleCategories;
+            numVehicles = VRD.NumVehicles;
+            vehicleArray = VRD.VehicleArray; //TODO same as site array.
         }
     }
 }

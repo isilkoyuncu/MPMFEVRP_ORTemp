@@ -12,8 +12,7 @@ namespace MPMFEVRP.Interfaces
     {
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
 
-        List<Site> Sites { get; }
-        List<Vehicle> Vehicles { get; }
+        ProblemFramework PF { get; }
 
         string GetName();
 

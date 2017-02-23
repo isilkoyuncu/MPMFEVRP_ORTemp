@@ -19,18 +19,22 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            IAlgorithm createdAlgorithm = (IAlgorithm)Activator.CreateInstance(typeof(OptimalAlgorithm));
+            throw new NotImplementedException();
 
-            foreach (var algorithm in allAlgorithms)
-            {
-                createdAlgorithm = (IAlgorithm)Activator.CreateInstance(algorithm);
-                if (createdAlgorithm.GetName() == algorithmName)
-                {
-                    return createdAlgorithm;
-                }
-            }
+            // TODO uncomment this after writing optimal algorithm
 
-            return createdAlgorithm;
+            //IAlgorithm createdAlgorithm = (IAlgorithm)Activator.CreateInstance(typeof(OptimalAlgorithm));
+
+            //foreach (var algorithm in allAlgorithms)
+            //{
+            //    createdAlgorithm = (IAlgorithm)Activator.CreateInstance(algorithm);
+            //    if (createdAlgorithm.GetName() == algorithmName)
+            //    {
+            //        return createdAlgorithm;
+            //    }
+            //}
+
+            //return createdAlgorithm;
         }
 
         public static List<String> GetAllAlgorithmNames()

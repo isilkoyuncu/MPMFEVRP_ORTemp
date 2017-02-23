@@ -26,13 +26,17 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(IProblemModel model)
         {
-            unexploredList = new SolutionList();
+            //TODO uncomment this afer writing new default solution
 
-            // Step 0: Create root and add it to unexploredList
-            ISolution root = new DefaultSolution(model);
-            unexploredList.Add(root);
 
-            lowerBound = root.LowerBound;
+            //unexploredList = new SolutionList();
+
+            //// Step 0: Create root and add it to unexploredList
+
+            //ISolution root = new DefaultSolution(model);
+            //unexploredList.Add(root);
+
+            //lowerBound = root.LowerBound;
         }
 
         public override void SpecializedReset()

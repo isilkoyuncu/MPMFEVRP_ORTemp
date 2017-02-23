@@ -19,9 +19,12 @@ namespace MPMFEVRP.Implementations.ProblemModels
             throw new NotImplementedException();
         }
 
+        
         public override ISolution GetRandomSolution(int seed)
         {
-            return new DefaultSolution(this, new Random(seed));
+            throw new NotImplementedException();
+            //TODO uncomment this afer writing new default solution
+            //return new DefaultSolution(this, new Random(seed));
         }
 
         public override string GetName()
@@ -46,19 +49,19 @@ namespace MPMFEVRP.Implementations.ProblemModels
             //TODO: Compatibility of Solution to Problem must be checked here
             //TODO: The code here assumes the solution is always the sequence-based solution, this must be generalized
             double OFV = int.MinValue;//maxLateness
-            if (solution.GetType() == typeof(DefaultSolution))
-            {
-                int completionTime = 0;
-                int lateness = int.MinValue;
-                for (int i = 0; i < totalJobs; i++)
-                {
-                    int position = Array.IndexOf(ids, solution.IDs[i]);
-                    completionTime += processingTimes[position];
-                    lateness = completionTime - dueDates[position];
-                    if (OFV < lateness)
-                        OFV = lateness;
-                }
-            }
+            //if (solution.GetType() == typeof(DefaultSolution))
+            //{
+            //    int completionTime = 0;
+            //    int lateness = int.MinValue;
+            //    for (int i = 0; i < totalJobs; i++)
+            //    {
+            //        int position = Array.IndexOf(ids, solution.IDs[i]);
+            //        completionTime += processingTimes[position];
+            //        lateness = completionTime - dueDates[position];
+            //        if (OFV < lateness)
+            //            OFV = lateness;
+            //    }
+            //}
             return OFV;
         }
 

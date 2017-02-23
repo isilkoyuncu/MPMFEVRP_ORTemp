@@ -20,6 +20,8 @@ namespace MPMFEVRP.Implementations.Problems
 
         public EVvsGDV_MaxProfit_VRP(IReader reader)
         {
+            objectiveFunctionType = Models.ObjectiveFunctionTypes.Maximize;
+
             //This code is extremely strict, for sake of simplicity!
             //First, we must be given exactly 2 vehicles
             if (reader.getVehicleArray().Length != 2)
@@ -38,10 +40,10 @@ namespace MPMFEVRP.Implementations.Problems
             return "EV vs GDV Maximum Profit VRP";
         }
 
-        public new EVvsGDV_MaxProfit_VRP_Model GetProblemModel()
-        {
-            return new EVvsGDV_MaxProfit_VRP_Model( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
-        }
+        //public new EVvsGDV_MaxProfit_VRP_Model GetProblemModel()
+        //{
+        //    return new EVvsGDV_MaxProfit_VRP_Model( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
+        //}
         public override string ToString()
         {
             throw new NotImplementedException();

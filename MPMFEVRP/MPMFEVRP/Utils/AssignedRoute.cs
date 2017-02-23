@@ -43,7 +43,7 @@ namespace MPMFEVRP.Utils
             sitesVisited = new List<int>(); sitesVisited.Add(0);//The depot is the only visited site, this is how we get the route going
             totalDistance = 0.0;
             totalCollectedPrize = 0.0;
-            totalFixedCost = fromProblem.VehicleArray[vehicleCategory].FixedCost;
+            totalFixedCost = fromProblem.VRD.VehicleArray[vehicleCategory].FixedCost;
             totalVariableTravelCost = 0.0;
             totalProfit = - totalFixedCost;
             arrivalTime = new List<double>(); arrivalTime.Add(0.0);//Starting at the depot at time 0
@@ -56,30 +56,30 @@ namespace MPMFEVRP.Utils
         {
             int lastSite = sitesVisited.Last();
             sitesVisited.Add(nextSite);
-            totalDistance += fromProblem.Distance[lastSite, nextSite];
-            totalCollectedPrize += fromProblem.SiteArray[nextSite].Prize[vehicleCategory];
-            totalVariableTravelCost += fromProblem.Distance[lastSite, nextSite] * fromProblem.VehicleArray[vehicleCategory].VariableCostPerMile;
-            totalProfit += fromProblem.SiteArray[nextSite].Prize[vehicleCategory] - fromProblem.Distance[lastSite, nextSite] * fromProblem.VehicleArray[vehicleCategory].VariableCostPerMile;
+            totalDistance += fromProblem.SRD.Distance[lastSite, nextSite];
+            totalCollectedPrize += fromProblem.SRD.SiteArray[nextSite].Prize[vehicleCategory];
+            totalVariableTravelCost += fromProblem.SRD.Distance[lastSite, nextSite] * fromProblem.VRD.VehicleArray[vehicleCategory].VariableCostPerMile;
+            totalProfit += fromProblem.SRD.SiteArray[nextSite].Prize[vehicleCategory] - fromProblem.SRD.Distance[lastSite, nextSite] * fromProblem.VRD.VehicleArray[vehicleCategory].VariableCostPerMile;
             double nextArrivalTime;
             double nextDepartureTime;
             double nextArrivalSOC;
             double nextDepartureSOC;
             bool nextFeasible;
 
-            nextArrivalTime = departureTime.Last() + fromProblem.TimeConsumption[lastSite, nextSite];
-            nextArrivalSOC = departureSOC.Last() - fromProblem.EnergyConsumption[lastSite, nextSite, vehicleCategory];
-            switch (fromProblem.SiteArray[nextSite].SiteType)
+            nextArrivalTime = departureTime.Last() + fromProblem.SRD.TimeConsumption[lastSite, nextSite];
+            nextArrivalSOC = departureSOC.Last() - fromProblem.SRD.EnergyConsumption[lastSite, nextSite, vehicleCategory];
+            switch (fromProblem.SRD.SiteArray[nextSite].SiteType)
             {
                 case SiteTypes.Depot:
                     nextDepartureTime = nextArrivalTime;
                     nextDepartureSOC = nextArrivalSOC;
                     break;
                 case SiteTypes.Customer:
-                    nextDepartureTime = nextArrivalTime + fromProblem.SiteArray[nextSite].ServiceDuration;
-                    nextDepartureSOC = Math.Min(1.0, nextArrivalSOC + fromProblem.SiteArray[nextSite].RechargingRate * fromProblem.SiteArray[nextSite].ServiceDuration);
+                    nextDepartureTime = nextArrivalTime + fromProblem.SRD.SiteArray[nextSite].ServiceDuration;
+                    nextDepartureSOC = Math.Min(1.0, nextArrivalSOC + fromProblem.SRD.SiteArray[nextSite].RechargingRate * fromProblem.SRD.SiteArray[nextSite].ServiceDuration);
                     break;
                 case SiteTypes.ExternalStation:
-                    nextDepartureTime = nextArrivalTime + ((1.0 - nextArrivalSOC) / fromProblem.SiteArray[nextSite].RechargingRate);
+                    nextDepartureTime = nextArrivalTime + ((1.0 - nextArrivalSOC) / fromProblem.SRD.SiteArray[nextSite].RechargingRate);
                     nextDepartureSOC = 1.0;
                     break;
                 default:
@@ -88,7 +88,7 @@ namespace MPMFEVRP.Utils
             nextFeasible = feasible.Last();
             if (nextFeasible)
             {
-                if ((nextArrivalSOC < -1.0 * ProblemConstants.ERROR_TOLERANCE) || (nextDepartureTime > fromProblem.TMax + ProblemConstants.ERROR_TOLERANCE))
+                if ((nextArrivalSOC < -1.0 * ProblemConstants.ERROR_TOLERANCE) || (nextDepartureTime > fromProblem.CRD.TMax + ProblemConstants.ERROR_TOLERANCE))
                     nextFeasible = false;
             }//if (nextFeasible[vc])
 

@@ -9,20 +9,10 @@ namespace MPMFEVRP.Interfaces
 {
     public interface IProblemModel
     {
-        int NumCustomers { get; }
-        int NumES { get; }
-        int NumNodes { get; }
-        Site[] SiteArray { get; }
-
-        int NumVehicleCategories { get; }
-        int[] NumVehicles { get; }
-        Vehicle[] VehicleArray { get; }
-
-        double TravelSpeed { get; }
-        double TMax { get; }
-        double[,] Distance { get; }
-        double[,,] EnergyConsumption { get; }
-        double[,] TimeConsumption { get; }
+        string InputFileName { get; }
+        SiteRelatedData SRD { get; }
+        VehicleRelatedData VRD { get; }
+        ContextRelatedData CRD { get; }        
 
         string GetName();
         string GetDescription();

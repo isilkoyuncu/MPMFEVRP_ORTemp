@@ -34,7 +34,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
             int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
             Random random = new Random(randomSeed);
-            bestSolutionFound = new DefaultSolution(model, random);
+            //TODO write new default solution
+            //bestSolutionFound = new DefaultSolution(model, random);
         }
 
         public override void SpecializedRun()

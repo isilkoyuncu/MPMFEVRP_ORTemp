@@ -11,51 +11,53 @@ using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
-    public class OptimalAlgorithm : AlgorithmBase
-    {
-        string[] auxIdArray;
+    //TODO DELETE THIS!!!!
 
-        public override string GetName()
-        {
-            return "Optimal Algorithm";
-        }
+    //public class OptimalAlgorithm : AlgorithmBase
+    //{
+    //    string[] auxIdArray;
 
-        public override void SpecializedInitialize(IProblemModel model)
-        {
-            auxIdArray = model.IDs.ToArray();
-        }
+    //    public override string GetName()
+    //    {
+    //        return "Optimal Algorithm";
+    //    }
 
-        int CompareTwoJobs(string id1, string id2)
-        {
-            int index1 = 0, index2 = 0;
-            for (int i = 0; i < model.IDs.Length; i++)
-            {
-                if (id1 == model.IDs[i])
-                    index1 = i;
-                else if (id2 == model.IDs[i])
-                    index2 = i;
-            }
-            if (model.DueDates[index1] < model.DueDates[index2])
-                return -1;
-            if (model.DueDates[index1] > model.DueDates[index2])
-                return 1;
-            return 0;
-        }
+    //    public override void SpecializedInitialize(IProblemModel model)
+    //    {
+    //        auxIdArray = model.IDs.ToArray();
+    //    }
 
-        public override void SpecializedRun()
-        {
-            Array.Sort(auxIdArray, CompareTwoJobs);
-        }
+    //    int CompareTwoJobs(string id1, string id2)
+    //    {
+    //        int index1 = 0, index2 = 0;
+    //        for (int i = 0; i < model.IDs.Length; i++)
+    //        {
+    //            if (id1 == model.IDs[i])
+    //                index1 = i;
+    //            else if (id2 == model.IDs[i])
+    //                index2 = i;
+    //        }
+    //        if (model.DueDates[index1] < model.DueDates[index2])
+    //            return -1;
+    //        if (model.DueDates[index1] > model.DueDates[index2])
+    //            return 1;
+    //        return 0;
+    //    }
 
-        public override void SpecializedConclude()
-        {
-            bestSolutionFound = new DefaultSolution();
-            bestSolutionFound.IDs.AddRange(auxIdArray);
-        }
+    //    public override void SpecializedRun()
+    //    {
+    //        Array.Sort(auxIdArray, CompareTwoJobs);
+    //    }
 
-        public override void SpecializedReset()
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public override void SpecializedConclude()
+    //    {
+    //        bestSolutionFound = new DefaultSolution();
+    //        bestSolutionFound.IDs.AddRange(auxIdArray);
+    //    }
+
+    //    public override void SpecializedReset()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }

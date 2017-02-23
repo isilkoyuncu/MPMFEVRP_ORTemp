@@ -38,18 +38,22 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ISolution createdSolution = (ISolution)Activator.CreateInstance(typeof(DefaultSolution));
+            throw new NotImplementedException();
 
-            foreach (var solution in allSolutions)
-            {
-                createdSolution = (ISolution)Activator.CreateInstance(solution, problemData);
-                if (createdSolution.GetName() == solutionName)
-                {
-                    return createdSolution;
-                }
-            }
+            //TODO uncomment these after writing default solution
 
-            return createdSolution;
+            //ISolution createdSolution = (ISolution)Activator.CreateInstance(typeof(DefaultSolution));
+
+            //foreach (var solution in allSolutions)
+            //{
+            //    createdSolution = (ISolution)Activator.CreateInstance(solution, problemData);
+            //    if (createdSolution.GetName() == solutionName)
+            //    {
+            //        return createdSolution;
+            //    }
+            //}
+
+            //return createdSolution;
         }
     }
 }

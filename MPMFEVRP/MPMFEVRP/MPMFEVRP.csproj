@@ -78,7 +78,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domains\ProblemDomain\ProblemFramework.cs" />
     <Compile Include="Domains\ProblemDomain\ChargingStation.cs" />
+    <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemConstants.cs" />
     <Compile Include="Domains\ProblemDomain\Site.cs" />
     <Compile Include="Domains\ProblemDomain\SiteRelatedData.cs" />
