@@ -33,13 +33,5 @@ namespace MPMFEVRP.Implementations
         {
             throw new NotImplementedException();
         }
-
-        public EVvsGDV_MaxProfit_VRP_Model GetProblemModel()
-        {
-            throw new NotImplementedException();
-            //return new EVvsGDV_MaxProfit_VRP_Model(pf); //I think at some point instead of getting everything from reader, reader needs to put info to problem framework
-            //and we should continue with pf.
-            // TODO I'm not sure whether this should be here or not
-        }
     }
 }

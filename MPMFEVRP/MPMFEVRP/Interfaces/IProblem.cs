@@ -17,5 +17,7 @@ namespace MPMFEVRP.Interfaces
         string GetName();
 
         string CreateRawData();
+
+        // TODO for the different types of problems we need to add and indicatior here (GVRP classification)
     }
 }

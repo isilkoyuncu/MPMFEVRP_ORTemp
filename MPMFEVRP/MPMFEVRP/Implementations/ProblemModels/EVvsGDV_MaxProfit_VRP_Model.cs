@@ -13,8 +13,10 @@ namespace MPMFEVRP.Implementations.ProblemModels
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
         public EVvsGDV_MaxProfit_VRP_Model(){ }//empty constructor
-        public EVvsGDV_MaxProfit_VRP_Model(IReader reader)
+        public EVvsGDV_MaxProfit_VRP_Model(IReader reader) //IProblem will come here
         {
+            //TODO this code needs to go to PF constructor
+
             InputFileName = reader.getRecommendedOutputFileFullName();
             srd.NumCustomers = reader.getNumberOfCustomers();
             srd.NumES = reader.getNumberOfES();

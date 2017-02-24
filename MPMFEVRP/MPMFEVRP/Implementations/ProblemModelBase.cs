@@ -10,7 +10,7 @@ namespace MPMFEVRP.Implementations
 {
     public abstract class ProblemModelBase : IProblemModel
     {
-        protected string inputFileName;
+        protected string inputFileName; // This is not for reading but just for record keeping and reporting 
         protected SiteRelatedData srd;
         protected VehicleRelatedData vrd;
         protected ContextRelatedData crd;
