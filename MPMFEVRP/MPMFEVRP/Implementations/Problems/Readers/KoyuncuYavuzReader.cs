@@ -7,9 +7,9 @@ using MPMFEVRP.Interfaces;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Utils;
 
-namespace MPMFEVRP.Implementations.Problems
+namespace MPMFEVRP.Implementations.Problems.Readers
 {
-    class KoyuncuYavuzReader : IReader
+    public class KoyuncuYavuzReader : IReader
     {
         //File related input
         string sourceDirectory;
@@ -84,6 +84,8 @@ namespace MPMFEVRP.Implementations.Problems
             sr.Close();
             ProcessRawDataFromFile(wholeFile);
         }
+
+
         public void ProcessRawDataFromFile(string wholeFile)
         {
             string[] allRows = wholeFile.Split(new char[] { '\n' });
@@ -182,6 +184,8 @@ namespace MPMFEVRP.Implementations.Problems
                 }
             }
         }
+
+
         public string getRecommendedOutputFileFullName()
         {
             string output = sourceDirectory;

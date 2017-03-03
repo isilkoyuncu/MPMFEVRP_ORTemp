@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Implementations.Problems;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
@@ -13,9 +14,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
         public EVvsGDV_MaxProfit_VRP_Model(){ }//empty constructor
-        public EVvsGDV_MaxProfit_VRP_Model(IReader reader) //IProblem will come here
+        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem, ProblemDataPackage pdp) //IProblem will come here
         {
-            
+            nameOfProblemOfModel = problem.GetName();
         }
 
         public override string GetDescription()

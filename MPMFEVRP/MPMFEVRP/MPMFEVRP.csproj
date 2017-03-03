@@ -78,7 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Domains\ProblemDomain\ProblemFramework.cs" />
+    <Compile Include="Domains\ProblemDomain\ProblemDataPackage.cs" />
     <Compile Include="Domains\ProblemDomain\ChargingStation.cs" />
     <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemConstants.cs" />
@@ -134,7 +134,6 @@
     <Compile Include="Implementations\Algorithms\BestOfRandom.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
     <Compile Include="Implementations\Algorithms\Greedy.cs" />
-    <Compile Include="Implementations\Algorithms\OptimalAlgorithm.cs" />
     <Compile Include="Implementations\ProblemBase.cs" />
     <Compile Include="Implementations\ProblemModelBase.cs" />
     <Compile Include="Implementations\ProblemModels\DefaultProblemModel.cs" />
@@ -165,6 +164,7 @@
     <Compile Include="Utils\AssignedRoute.cs" />
     <Compile Include="Utils\Calculators.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
+    <Compile Include="Utils\ProblemModelUtil.cs" />
     <Compile Include="Utils\ProblemUtil.cs" />
     <Compile Include="Utils\RawDataParser.cs" />
     <Compile Include="Utils\SolutionUtil.cs" />

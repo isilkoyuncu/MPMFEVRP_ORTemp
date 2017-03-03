@@ -11,16 +11,19 @@ namespace MPMFEVRP.Implementations
     public abstract class ProblemModelBase : IProblemModel
     {
         protected string inputFileName; // This is not for reading but just for record keeping and reporting 
-        protected SiteRelatedData srd;
-        protected VehicleRelatedData vrd;
-        protected ContextRelatedData crd;
         public string InputFileName { get { return inputFileName; } set {; } }
-        public SiteRelatedData SRD { get { return srd; } }
-        public VehicleRelatedData VRD { get { return vrd; } }
-        public ContextRelatedData CRD { get { return crd; } }
 
-        public abstract string GetDescription();
+        protected string nameOfProblemOfModel;
+        public string NameOfProblemOfModel { get { return nameOfProblemOfModel; } }
+
+        protected ProblemDataPackage pdp;
+        public SiteRelatedData SRD { get { return pdp.SRD; } }
+        public VehicleRelatedData VRD { get { return pdp.VRD; } }
+        public ContextRelatedData CRD { get { return pdp.CRD; } }
+
         public abstract string GetName();
+        public abstract string GetDescription();
+
         public abstract ISolution GetRandomSolution(int seed);
         public abstract bool CheckFeasibilityOfSolution(ISolution solution);
         public abstract double CalculateObjectiveFunctionValue(ISolution solution);

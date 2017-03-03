@@ -17,11 +17,16 @@ namespace MPMFEVRP.Forms
     public partial class SingleProblemSingleAlgorithm : Form
     {
         IProblem theProblem;
+        IProblemModel theProblemModel;
         IAlgorithm theAlgorithm;
 
         public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();
+
+            comboBox_problems.Items.AddRange(ProblemUtil.GetAllProblemNames().ToArray());
+            comboBox_problems.SelectedIndexChanged += ComboBox_problems_SelectedIndexChanged;
+            comboBox_problems.SelectedIndex = 0;
 
             comboBox_algorithms.Items.AddRange(AlgorithmUtil.GetAllAlgorithmNames().ToArray());
             comboBox_algorithms.SelectedIndexChanged += ComboBox_algorithms_SelectedIndexChanged;
@@ -36,6 +41,15 @@ namespace MPMFEVRP.Forms
             ParamUtil.DrawParameters(panel_parameters, theAlgorithm.AlgorithmParameters.GetAllParameters());
         }
 
+        private void ComboBox_problems_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            theProblem = ProblemUtil.CreateProblemByName(comboBox_problems.SelectedItem.ToString());
+            if (theProblem == null)
+                MessageBox.Show("We just selected the problem, but it failed to create!");
+            else
+                UpdateProblemLabels();
+        }
+
         private void ComboBox_problemModels_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (theProblem != null)
@@ -45,7 +59,7 @@ namespace MPMFEVRP.Forms
         void UpdateProblemLabels()
         {
             //label_numberOfJobs.Text = theProblem.Jobs.Count.ToString();
-            throw new NotImplementedException();
+            label_problem.Text = "IProblem theProblem created as a " + theProblem.GetName();
         }
 
         private void button_viewProblem_Click(object sender, EventArgs e)
@@ -71,20 +85,17 @@ namespace MPMFEVRP.Forms
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 label_selectedFile.Text = dialog.FileName;
-                button_loadFromFile.Click += (s2, e2) =>
+                try
                 {
-                    try
-                    {
-                        String fileContents = File.ReadAllText(dialog.FileName);
-                        theProblem = ProblemUtil.CreateProblemByRawData(fileContents);
-                        UpdateProblemLabels();
-                        Log("Problem loaded from file.");
-                    }
-                    catch (Exception)
-                    {
-                        MessageBox.Show("There is something wrong while parsing the file!", "File parse error!");
-                    }
-                };
+                    String fileContents = File.ReadAllText(dialog.FileName);
+                    theProblem = ProblemUtil.CreateProblemByRawData(fileContents);
+                    UpdateProblemLabels();
+                    Log("Problem loaded from file.");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("There is something wrong while parsing the file!", "File parse error!");
+                }
             }
         }
 
@@ -124,9 +135,5 @@ namespace MPMFEVRP.Forms
             new DataManager().Show();
         }
 
-        private void button_loadFromFile_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

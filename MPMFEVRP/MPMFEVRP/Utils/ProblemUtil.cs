@@ -60,7 +60,8 @@ namespace MPMFEVRP.Utils
             IReader KYreader = new KoyuncuYavuzReader();
             KYreader.ProcessRawDataFromFile(rawData);
 
-            IProblem theProblem = new EVvsGDV_MaxProfit_VRP(KYreader);
+            ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
+            IProblem theProblem = new EVvsGDV_MaxProfit_VRP(dataPackage);
 
             return theProblem;
         }

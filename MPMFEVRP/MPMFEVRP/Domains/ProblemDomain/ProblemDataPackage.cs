@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Utils;
-using MPMFEVRP.Interfaces;
+using MPMFEVRP.Implementations.Problems.Readers;
 
 namespace MPMFEVRP.Domains.ProblemDomain
 {
-    public class ProblemFramework
+    public class ProblemDataPackage
     {
         string inputFileName;   //For record only
         public string InputFileName { get { return inputFileName; } }
@@ -18,10 +18,15 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public VehicleRelatedData VRD { get { return vrd; } }
         ContextRelatedData crd;
         public ContextRelatedData CRD { get { return crd; } }
-        public ProblemFramework() { }
-        public ProblemFramework(IReader reader)
+
+        public ProblemDataPackage() { }
+        public ProblemDataPackage(KoyuncuYavuzReader reader)
         {
             inputFileName = reader.getRecommendedOutputFileFullName();
+            srd = new SiteRelatedData();
+            vrd = new VehicleRelatedData();
+            crd = new ContextRelatedData();
+
             srd.NumCustomers = reader.getNumberOfCustomers();
             srd.NumES = reader.getNumberOfES();
             srd.NumNodes = srd.NumCustomers + srd.NumES + 1;
