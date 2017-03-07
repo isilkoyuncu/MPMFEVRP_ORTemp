@@ -39,7 +39,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             return problemName;
         }
 
-        public override ISolution GetRandomSolution(int seed)
+        public override ISolution GetRandomSolution(int seed, Type solutionType)
         {
             throw new NotImplementedException();
         }
@@ -58,6 +58,15 @@ namespace MPMFEVRP.Implementations.ProblemModels
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {
             throw new NotImplementedException();
+        }
+
+        void PopulateCompatibleSolutionTypes()
+        {
+            compatibleSolutions = new List<Type>()
+            {
+                typeof(CustomerClusteredSolution),
+                typeof(RouteBasedSolution)
+            };
         }
     }
 }

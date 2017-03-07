@@ -22,7 +22,10 @@ namespace MPMFEVRP.Implementations
         public abstract string GetDescription();
         public abstract string GetNameOfProblemOfModel();
 
-        public abstract ISolution GetRandomSolution(int seed);
+        protected List<Type> compatibleSolutions;
+        public List<Type> GetCompatibleSolutions() { return compatibleSolutions; }
+
+        public abstract ISolution GetRandomSolution(int seed, Type SolutionType);
         public abstract bool CheckFeasibilityOfSolution(ISolution solution);
         public abstract double CalculateObjectiveFunctionValue(ISolution solution);
         public abstract bool CompareTwoSolutions(ISolution solution1, ISolution solution2);

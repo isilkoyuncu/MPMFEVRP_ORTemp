@@ -20,8 +20,10 @@ namespace MPMFEVRP.Interfaces
         string GetDescription();
         string GetNameOfProblemOfModel();
 
+        List<Type> GetCompatibleSolutions();
+
         //Stuff exclusive to the "model"
-        ISolution GetRandomSolution(int seed);
+        ISolution GetRandomSolution(int seed, Type solutionType);
         bool CheckFeasibilityOfSolution(ISolution solution);
         double CalculateObjectiveFunctionValue(ISolution solution);
         bool CompareTwoSolutions(ISolution solution1, ISolution solution2);

@@ -134,9 +134,9 @@
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
     <Compile Include="Implementations\Problems\Readers\KoyuncuYavuzReader.cs" />
     <Compile Include="Implementations\SolutionBase.cs" />
-    <Compile Include="Implementations\Solutions\BackwardLoadingSolution.cs" />
     <Compile Include="Implementations\Solutions\DefaultSolution.cs" />
-    <Compile Include="Implementations\Solutions\VRPSolution.cs" />
+    <Compile Include="Implementations\Solutions\CustomerClusteredSolution.cs" />
+    <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Interfaces\IAlgorithm.cs" />
     <Compile Include="Interfaces\IProblem.cs" />
     <Compile Include="Interfaces\IProblemModel.cs" />

@@ -11,15 +11,15 @@ using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
-    public class NewCompleteSolution: SolutionBase
+    public class CustomerClusteredSolution: SolutionBase
     {
         List<AssignedRoute> routes;
 
-        public NewCompleteSolution()
+        public CustomerClusteredSolution()
         {
 
         }
-        public NewCompleteSolution(EVvsGDV_MaxProfit_VRP_Model fromProblem, List<Tuple<int,int,int>> XSetTo1)
+        public CustomerClusteredSolution(EVvsGDV_MaxProfit_VRP_Model fromProblem, List<Tuple<int,int,int>> XSetTo1)
         {
             routes = new List<AssignedRoute>();
             //first determining the number of routes
