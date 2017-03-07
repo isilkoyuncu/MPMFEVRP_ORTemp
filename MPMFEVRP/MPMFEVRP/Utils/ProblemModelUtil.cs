@@ -24,7 +24,7 @@ namespace MPMFEVRP.Utils
             foreach (var problemModel in allProblemModels)
             {
                 if (problemModel.GetMethod("GetNameOfProblemOfModel").Invoke(Activator.CreateInstance(problemModel), null).ToString() == problem.GetName())
-                    result.Add(problemModel.GetMethod("GetNameOfProblemOfModel").Invoke(Activator.CreateInstance(problemModel), null).ToString());
+                    result.Add(problemModel.GetMethod("GetName").Invoke(Activator.CreateInstance(problemModel), null).ToString());
             }
 
             return result;

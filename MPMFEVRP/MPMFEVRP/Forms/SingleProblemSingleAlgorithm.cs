@@ -51,6 +51,7 @@ namespace MPMFEVRP.Forms
                 comboBox_problemModels.Items.Clear();
                 comboBox_problemModels.Items.AddRange(ProblemModelUtil.GetCompatibleProblemModelNames(theProblem).ToArray());
                 comboBox_problemModels.SelectedIndexChanged += ComboBox_problemModels_SelectedIndexChanged;
+                comboBox_problemModels.SelectedIndex = 0;
                 UpdateProblemLabels();
             }
         }
@@ -66,14 +67,17 @@ namespace MPMFEVRP.Forms
 
         void UpdateProblemLabels()
         {
-            //label_numberOfJobs.Text = theProblem.Jobs.Count.ToString();
-            label_problem.Text = "IProblem theProblem created as a " + theProblem.GetName();
+
         }
 
         private void button_viewProblem_Click(object sender, EventArgs e)
         {
             if (theProblem != null)
-                new ProblemViewer(theProblem).Show();
+            {
+                MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
+                //TODO: Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
+                //new ProblemViewer(theProblem).Show();
+            }
             else
                 MessageBox.Show("You should create a problem first!", "No problem!");
         }
@@ -95,8 +99,8 @@ namespace MPMFEVRP.Forms
                 label_selectedFile.Text = dialog.FileName;
                 try
                 {
-                    String fileContents = File.ReadAllText(dialog.FileName);
-                    theProblem = ProblemUtil.CreateProblemByRawData(fileContents);
+                    //String fileContents = File.ReadAllText(dialog.FileName);
+                    theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileName);
                     UpdateProblemLabels();
                     Log("Problem loaded from file.");
                 }
@@ -140,7 +144,9 @@ namespace MPMFEVRP.Forms
 
         private void button_openDataManager_Click(object sender, EventArgs e)
         {
-            new DataManager().Show();
+            MessageBox.Show("This part is currently under development. It will eventually link to the Data Manager, which is a different project within this environment.");
+            //TODO: Fix the following line to the other project, not just a form within this project, and then uncomment it as well as eliminate the message box in the line above.
+            //new DataManager().Show();
         }
 
     }

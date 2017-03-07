@@ -14,7 +14,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
         string problemName;
-        public EVvsGDV_MaxProfit_VRP_Model(){ }//empty constructor
+        public EVvsGDV_MaxProfit_VRP_Model()
+        {
+            Implementations.Problems.EVvsGDV_MaxProfit_VRP problem = new Problems.EVvsGDV_MaxProfit_VRP();
+            problemName = problem.GetName();
+        }//empty constructor
         public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem, ProblemDataPackage pdp) //IProblem will come here
         {
             problemName = problem.GetName();
@@ -27,7 +31,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
         public override string GetName()
         {
-            return "EV vs GDV Profit Maximization Problem";
+            return "EV vs GDV Profit Maximization Problem's Model";
         }
 
         public override string GetNameOfProblemOfModel()

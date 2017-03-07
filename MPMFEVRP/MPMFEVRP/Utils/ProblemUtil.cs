@@ -67,6 +67,17 @@ namespace MPMFEVRP.Utils
             return theProblem;
         }
 
+        public static IProblem CreateProblemByFileName(String fullFileName)
+        {
+            KoyuncuYavuzReader KYreader = new KoyuncuYavuzReader(fullFileName);
+            KYreader.Read();
+
+            ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
+            IProblem theProblem = new EVvsGDV_MaxProfit_VRP(dataPackage);
+
+            return theProblem;
+        }
+
         // TODO this random problem needs to be changed
         public static IProblem CreateRandomProblem(int numberOfJobs, int dueDateLowerLimit, int dueDateUpperLimit, int processingTimeLowerLimit, int processingTimeUpperLimit)
         {

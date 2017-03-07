@@ -46,8 +46,6 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         //Intermediate steps related
         int numCustomers = 0;
         int numESS = 0;
-        Site site;
-        Vehicle vehicle;
         string distType;
 
         //Output related fields
@@ -105,8 +103,6 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             RechargingRate = new double[nTabularRows];
             prize = new double[nTabularRows][];
 
-            Site[] siteArray = new Site[nTabularRows];
-
         char[] cellSeparator = new char[] { '\t', '\r'};
             string[] cellsInCurrentRow;
             for (int r = 1; r <= nTabularRows; r++)
@@ -130,6 +126,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 for (int i = 0; i < prize[r - 1].Length; i++)
                     prize[r - 1][i] = double.Parse(cellsInCurrentRow[9 + i]);
             }
+            populateSiteArray();
 
             int blankRowPosition2 = blankRowPosition+1;
             while (allRows[blankRowPosition2] != "\r")
@@ -144,8 +141,6 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             VehVariableCost = new double[nTabularRows2 - nTabularRows - 2];
             VehMaxChargingRate = new double[nTabularRows2 - nTabularRows - 2];
 
-            Vehicle[] vehicleArray = new Vehicle[VehID.Length];
-
             for (int r = nTabularRows+3; r <= nTabularRows2; r++)
             {
                 //Read vehicle related data
@@ -158,8 +153,9 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 VehFixedCost[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[5]);
                 VehVariableCost[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[6]);
                 VehMaxChargingRate[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[7]);
-
             }
+            populateVehicleArray();
+
             cellsInCurrentRow = allRows[blankRowPosition2+1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             TravelSpeed= double.Parse(cellsInCurrentRow[1]);
             cellsInCurrentRow = allRows[blankRowPosition2 + 3].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
@@ -194,21 +190,31 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             output += file_extension;
             return output;
         }
-        public Site[] getSiteArray()
+        void populateSiteArray()
         {
-            Site[]  siteArray = new Site[ID.Length]; 
-            for(int i=0; i < ID.Length; i++)
+            Site site;
+
+            siteArray = new Site[ID.Length];
+            for (int i = 0; i < ID.Length; i++)
             {
                 site = new Site(ID[i], Type[i], X[i], Y[i], Demand[i], ReadyTime[i], DueDate[i], ServiceDuration[i], RechargingRate[i], prize[i]);
                 siteArray[i] = site;
             }
+        }
+        public Site[] getSiteArray()
+        {
+            if (siteArray == null)
+                populateSiteArray();
+            
             return siteArray;
         }
         public int getNumberOfCustomers() { return numCustomers; }
         public int getNumberOfES() { return numESS; }
-        public Vehicle[] getVehicleArray()
+        void populateVehicleArray()
         {
-            Vehicle[]  vehicleArray = new Vehicle[VehID.Length];
+            Vehicle vehicle;
+
+            vehicleArray = new Vehicle[VehID.Length];
             for (int i = 0; i < VehID.Length; i++)
             {
                 VehicleCategories VehCat;
@@ -227,6 +233,12 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 vehicle = new Vehicle(VehID[i], VehCat, VehLoadCap[i], VehBatteryCap[i], VehConsumpRate[i], VehFixedCost[i], VehVariableCost[i], VehMaxChargingRate[i]);
                 vehicleArray[i] = vehicle;
             }
+        }
+        public Vehicle[] getVehicleArray()
+        {
+            if (vehicleArray == null)
+                populateVehicleArray();
+
             return vehicleArray;
         }
         public double getTravelSpeed() { return TravelSpeed; }

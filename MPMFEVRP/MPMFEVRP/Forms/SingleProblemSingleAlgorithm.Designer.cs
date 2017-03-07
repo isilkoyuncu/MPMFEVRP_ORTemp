@@ -31,7 +31,6 @@
             this.groupBox_problem = new System.Windows.Forms.GroupBox();
             this.groupBox_problemModel = new System.Windows.Forms.GroupBox();
             this.comboBox_problemModels = new System.Windows.Forms.ComboBox();
-            this.label_problem = new System.Windows.Forms.Label();
             this.comboBox_problems = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button_openDataManager = new System.Windows.Forms.Button();
@@ -60,7 +59,6 @@
             // groupBox_problem
             // 
             this.groupBox_problem.Controls.Add(this.groupBox_problemModel);
-            this.groupBox_problem.Controls.Add(this.label_problem);
             this.groupBox_problem.Controls.Add(this.comboBox_problems);
             this.groupBox_problem.Controls.Add(this.label1);
             this.groupBox_problem.Controls.Add(this.button_openDataManager);
@@ -94,15 +92,6 @@
             this.comboBox_problemModels.Name = "comboBox_problemModels";
             this.comboBox_problemModels.Size = new System.Drawing.Size(249, 21);
             this.comboBox_problemModels.TabIndex = 15;
-            // 
-            // label_problem
-            // 
-            this.label_problem.AutoSize = true;
-            this.label_problem.Location = new System.Drawing.Point(7, 48);
-            this.label_problem.Name = "label_problem";
-            this.label_problem.Size = new System.Drawing.Size(35, 13);
-            this.label_problem.TabIndex = 13;
-            this.label_problem.Text = "label2";
             // 
             // comboBox_problems
             // 
@@ -327,7 +316,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_openDataManager;
         private System.Windows.Forms.ComboBox comboBox_problems;
-        private System.Windows.Forms.Label label_problem;
         private System.Windows.Forms.GroupBox groupBox_problemModel;
         private System.Windows.Forms.ComboBox comboBox_problemModels;
     }
