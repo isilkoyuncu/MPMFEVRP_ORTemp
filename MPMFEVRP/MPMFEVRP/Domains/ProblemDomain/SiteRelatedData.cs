@@ -16,7 +16,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double[,] timeConsumption;  //[numNodes,numNodes]
         double[,,] energyConsumption;    //[numNodes,numNodes,numVehicleTypes]
 
-        public int NumCustomers { get { return numCustomers; } set {; } } 
+        public int NumCustomers { get { return numCustomers; } set { numCustomers = value; } } 
         public int NumES { get { return numES; } set {; } }  
         public int NumNodes { get { return numNodes;  } set {; } }   
         public Site[] SiteArray { get { return siteArray; } set {; } }
