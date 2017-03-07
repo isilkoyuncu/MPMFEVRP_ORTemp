@@ -10,7 +10,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class DefaultProblemModel : ProblemModelBase
     {
-        public DefaultProblemModel(IProblem problem)
+        string problemName;
+        public DefaultProblemModel()
+        {
+        }
+            public DefaultProblemModel(IProblem problem)
         {
             //this.totalJobs = problem.Jobs.Count;
             //this.processingTimes = problem.Jobs.Select(x => x.ProcessingTime).ToArray();
@@ -70,6 +74,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
             // TODO return as bool may be improved to an enum later on
             // TODO if problem model can be generalized, this can go to ProblemModelBase
             return (CalculateObjectiveFunctionValue(incumbent) > CalculateObjectiveFunctionValue(challenger));
+        }
+
+        public override string GetNameOfProblemOfModel()
+        {
+            return problemName;
         }
     }
 }

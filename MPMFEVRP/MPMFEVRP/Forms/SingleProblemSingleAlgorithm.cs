@@ -47,13 +47,18 @@ namespace MPMFEVRP.Forms
             if (theProblem == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
+            {
+                comboBox_problemModels.Items.Clear();
+                comboBox_problemModels.Items.AddRange(ProblemModelUtil.GetCompatibleProblemModelNames(theProblem).ToArray());
+                comboBox_problemModels.SelectedIndexChanged += ComboBox_problemModels_SelectedIndexChanged;
                 UpdateProblemLabels();
+            }
         }
 
         private void ComboBox_problemModels_SelectedIndexChanged(object sender, EventArgs e)
         {
-            theProblemModel = ProblemUtil.CreateProblemByName(comboBox_problems.SelectedItem.ToString());
-            if (theProblem == null)
+            theProblemModel = ProblemModelUtil.CreateProblemModelByName(comboBox_problemModels.SelectedItem.ToString());
+            if (theProblemModel == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
                 UpdateProblemLabels();

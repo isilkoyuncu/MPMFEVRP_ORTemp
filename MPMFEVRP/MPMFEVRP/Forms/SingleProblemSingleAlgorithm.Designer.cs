@@ -29,6 +29,9 @@
         private void InitializeComponent()
         {
             this.groupBox_problem = new System.Windows.Forms.GroupBox();
+            this.groupBox_problemModel = new System.Windows.Forms.GroupBox();
+            this.comboBox_problemModels = new System.Windows.Forms.ComboBox();
+            this.label_problem = new System.Windows.Forms.Label();
             this.comboBox_problems = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button_openDataManager = new System.Windows.Forms.Button();
@@ -47,14 +50,11 @@
             this.button_viewSolution = new System.Windows.Forms.Button();
             this.groupBox_status = new System.Windows.Forms.GroupBox();
             this.textBox_log = new System.Windows.Forms.TextBox();
-            this.label_problem = new System.Windows.Forms.Label();
-            this.groupBox_problemModel = new System.Windows.Forms.GroupBox();
-            this.comboBox_problemModel = new System.Windows.Forms.ComboBox();
             this.groupBox_problem.SuspendLayout();
+            this.groupBox_problemModel.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox_algorithms.SuspendLayout();
             this.groupBox_status.SuspendLayout();
-            this.groupBox_problemModel.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox_problem
@@ -75,6 +75,34 @@
             this.groupBox_problem.TabIndex = 0;
             this.groupBox_problem.TabStop = false;
             this.groupBox_problem.Text = "Problem";
+            // 
+            // groupBox_problemModel
+            // 
+            this.groupBox_problemModel.Controls.Add(this.comboBox_problemModels);
+            this.groupBox_problemModel.Location = new System.Drawing.Point(6, 416);
+            this.groupBox_problemModel.Name = "groupBox_problemModel";
+            this.groupBox_problemModel.Size = new System.Drawing.Size(261, 62);
+            this.groupBox_problemModel.TabIndex = 14;
+            this.groupBox_problemModel.TabStop = false;
+            this.groupBox_problemModel.Text = "Problem Model";
+            // 
+            // comboBox_problemModels
+            // 
+            this.comboBox_problemModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_problemModels.FormattingEnabled = true;
+            this.comboBox_problemModels.Location = new System.Drawing.Point(6, 34);
+            this.comboBox_problemModels.Name = "comboBox_problemModels";
+            this.comboBox_problemModels.Size = new System.Drawing.Size(249, 21);
+            this.comboBox_problemModels.TabIndex = 15;
+            // 
+            // label_problem
+            // 
+            this.label_problem.AutoSize = true;
+            this.label_problem.Location = new System.Drawing.Point(7, 48);
+            this.label_problem.Name = "label_problem";
+            this.label_problem.Size = new System.Drawing.Size(35, 13);
+            this.label_problem.TabIndex = 13;
+            this.label_problem.Text = "label2";
             // 
             // comboBox_problems
             // 
@@ -253,34 +281,6 @@
             this.textBox_log.Size = new System.Drawing.Size(320, 424);
             this.textBox_log.TabIndex = 14;
             // 
-            // label_problem
-            // 
-            this.label_problem.AutoSize = true;
-            this.label_problem.Location = new System.Drawing.Point(7, 48);
-            this.label_problem.Name = "label_problem";
-            this.label_problem.Size = new System.Drawing.Size(35, 13);
-            this.label_problem.TabIndex = 13;
-            this.label_problem.Text = "label2";
-            // 
-            // groupBox_problemModel
-            // 
-            this.groupBox_problemModel.Controls.Add(this.comboBox_problemModel);
-            this.groupBox_problemModel.Location = new System.Drawing.Point(6, 416);
-            this.groupBox_problemModel.Name = "groupBox_problemModel";
-            this.groupBox_problemModel.Size = new System.Drawing.Size(261, 62);
-            this.groupBox_problemModel.TabIndex = 14;
-            this.groupBox_problemModel.TabStop = false;
-            this.groupBox_problemModel.Text = "groupBox2";
-            // 
-            // comboBox_problemModel
-            // 
-            this.comboBox_problemModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_problemModel.FormattingEnabled = true;
-            this.comboBox_problemModel.Location = new System.Drawing.Point(6, 34);
-            this.comboBox_problemModel.Name = "comboBox_problemModel";
-            this.comboBox_problemModel.Size = new System.Drawing.Size(249, 21);
-            this.comboBox_problemModel.TabIndex = 15;
-            // 
             // SingleProblemSingleAlgorithm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -296,12 +296,12 @@
             this.Text = "SingleProblemSingleAlgorithm";
             this.groupBox_problem.ResumeLayout(false);
             this.groupBox_problem.PerformLayout();
+            this.groupBox_problemModel.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox_algorithms.ResumeLayout(false);
             this.groupBox_algorithms.PerformLayout();
             this.groupBox_status.ResumeLayout(false);
             this.groupBox_status.PerformLayout();
-            this.groupBox_problemModel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -329,6 +329,6 @@
         private System.Windows.Forms.ComboBox comboBox_problems;
         private System.Windows.Forms.Label label_problem;
         private System.Windows.Forms.GroupBox groupBox_problemModel;
-        private System.Windows.Forms.ComboBox comboBox_problemModel;
+        private System.Windows.Forms.ComboBox comboBox_problemModels;
     }
 }

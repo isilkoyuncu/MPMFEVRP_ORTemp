@@ -10,6 +10,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Implementations.Problems.Readers;
 
 namespace MPMFEVRP.Utils
 {
@@ -57,7 +58,7 @@ namespace MPMFEVRP.Utils
 
         public static IProblem CreateProblemByRawData(String rawData)
         {
-            IReader KYreader = new KoyuncuYavuzReader();
+            KoyuncuYavuzReader KYreader = new KoyuncuYavuzReader();
             KYreader.ProcessRawDataFromFile(rawData);
 
             ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
