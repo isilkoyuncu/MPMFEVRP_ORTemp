@@ -184,7 +184,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
 
         public string getRecommendedOutputFileFullName()
         {
-            string output = sourceDirectory;
+            string output = "";// sourceDirectory;
             output += "KoyuncuYavuz_";//This is the prefix
             output += file_name;
             output += file_extension;
