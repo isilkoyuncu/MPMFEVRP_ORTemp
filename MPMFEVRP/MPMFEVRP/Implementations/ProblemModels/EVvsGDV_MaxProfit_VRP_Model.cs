@@ -46,7 +46,29 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
         public override bool CheckFeasibilityOfSolution(ISolution solution)
         {
-            throw new NotImplementedException();
+            Type solutionType = solution.GetType();
+
+            if (solutionType == typeof(CustomerSetBasedSolution))
+            {
+                CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)solution;
+                return CheckFeasibilityOfSolution(csbs);
+            }
+            //else if (solutionType == typeof(RouteBasedSolution))
+            //{
+            //    RouteBasedSolution rbs = (RouteBasedSolution)solution;
+            //    return CheckFeasibilityOfSolution(rbs);
+            //}
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("solution plugged into EVvsGDV_MaxProfit_VRP_Model.CheckFeasibilityOfSolution is incompatible!");
+                return false;
+            }
+        }
+        bool CheckFeasibilityOfSolution(CustomerSetBasedSolution solution)
+        {
+            bool outcome = true;
+            //TODO check for any infeasibility and return false as soon as one is found!
+            return outcome;
         }
 
         public override double CalculateObjectiveFunctionValue(ISolution solution)

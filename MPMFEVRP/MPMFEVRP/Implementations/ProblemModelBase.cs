@@ -29,5 +29,10 @@ namespace MPMFEVRP.Implementations
         public abstract bool CheckFeasibilityOfSolution(ISolution solution);
         public abstract double CalculateObjectiveFunctionValue(ISolution solution);
         public abstract bool CompareTwoSolutions(ISolution solution1, ISolution solution2);
+
+        protected bool IsSolutionTypeCompatible(Type solutionType)
+        {
+            return compatibleSolutions.Contains(solutionType);
+        }
     }
 }

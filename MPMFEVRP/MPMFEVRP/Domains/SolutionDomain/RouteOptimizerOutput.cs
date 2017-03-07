@@ -8,12 +8,20 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class RouteOptimizerOutput
     {
-        bool feasible;
-        double ofv;
+        RouteOptimizationStatus status;
+        public RouteOptimizationStatus Status { get { return status; } }
+
+        bool[] feasible =new bool[2];
+        double[] ofv = new double[2];
+        Route[] optimizedRoute = new Route[2]; //TODO public
+
         List<int> route = new List<int>();
         int vehicleIDnumber;
 
-        public RouteOptimizerOutput() { }
+        public RouteOptimizerOutput()
+        {
+            status = RouteOptimizationStatus.NotYetOptimized;
+        }
         public RouteOptimizerOutput(bool feasible, double ofv, List<int> route, int vehicleIDnumber)
         {
             this.feasible = feasible;
