@@ -12,9 +12,9 @@ namespace MPMFEVRP.Domains.ProblemDomain
         int[] numVehicles;   //array length must equal numVehicleCategories!
         Vehicle[] vehicleArray;
 
-        public int NumVehicleCategories { get { return numVehicleCategories; } set {; } }
-        public int[] NumVehicles { get { return numVehicles; } set {; } }
-        public Vehicle[] VehicleArray { get { return vehicleArray; } set {; } }
+        public int NumVehicleCategories { get { return numVehicleCategories; } set { numVehicleCategories = value; } }
+        public int[] NumVehicles { get { return numVehicles; } set { numVehicles = value; } }
+        public Vehicle[] VehicleArray { get { return vehicleArray; } set { vehicleArray = value; } }
 
         public VehicleRelatedData() { }
         public VehicleRelatedData(int numVehicleCategories, int[] numVehicles, Vehicle[] vehicleArray)

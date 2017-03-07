@@ -17,12 +17,12 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double[,,] energyConsumption;    //[numNodes,numNodes,numVehicleTypes]
 
         public int NumCustomers { get { return numCustomers; } set { numCustomers = value; } } 
-        public int NumES { get { return numES; } set {; } }  
-        public int NumNodes { get { return numNodes;  } set {; } }   
-        public Site[] SiteArray { get { return siteArray; } set {; } }
-        public double[,] Distance { get { return distance; } set {; } }
-        public double[,] TimeConsumption { get { return timeConsumption; } set {; } }
-        public double[,,] EnergyConsumption{ get { return energyConsumption; } set {; } }
+        public int NumES { get { return numES; } set { numES = value; } }  
+        public int NumNodes { get { return numNodes;  } set { numNodes = value; } }   
+        public Site[] SiteArray { get { return siteArray; } set { siteArray = value; } }
+        public double[,] Distance { get { return distance; } set { distance = value; } }
+        public double[,] TimeConsumption { get { return timeConsumption; } set { timeConsumption = value; } }
+        public double[,,] EnergyConsumption{ get { return energyConsumption; } set { energyConsumption = value; } }
 
         public SiteRelatedData() { }
         public SiteRelatedData(int numCustomers, int numES, int numNodes, Site[] siteArray, double[,] distance, double[,] timeConsumption, double[,,] energyConsumption)

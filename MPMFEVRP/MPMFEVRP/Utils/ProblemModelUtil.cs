@@ -41,7 +41,7 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            IProblemModel createdProblemModel = (IProblemModel)Activator.CreateInstance(typeof(DefaultProblemModel));
+            IProblemModel createdProblemModel = (IProblemModel)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
 
             foreach (var problemModel in allProblemModels)
             {

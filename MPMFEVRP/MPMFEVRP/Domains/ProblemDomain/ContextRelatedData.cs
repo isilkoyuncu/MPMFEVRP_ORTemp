@@ -12,9 +12,9 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double tMax;    //Leghts of the workday, minutes
         int lambda; //Max number of recharges per EV in a workday
 
-        public double TravelSpeed { get { return travelSpeed; } set {; } }
-        public double TMax { get { return tMax; } set {; } }
-        public int Lambda { get { return lambda; } set {; } }
+        public double TravelSpeed { get { return travelSpeed; } set { travelSpeed = value; } }
+        public double TMax { get { return tMax; } set { tMax = value; } }
+        public int Lambda { get { return lambda; } set { lambda = value; } }
         public ContextRelatedData() { }
         public ContextRelatedData(double travelSpeed,double tMax, int lambda)
         {
