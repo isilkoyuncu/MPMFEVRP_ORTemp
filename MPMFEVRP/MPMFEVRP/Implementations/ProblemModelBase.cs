@@ -13,9 +13,6 @@ namespace MPMFEVRP.Implementations
         protected string inputFileName; // This is not for reading but just for record keeping and reporting 
         public string InputFileName { get { return inputFileName; } set {; } }
 
-        protected string nameOfProblemOfModel;
-        public string NameOfProblemOfModel { get { return nameOfProblemOfModel; } }
-
         protected ProblemDataPackage pdp;
         public SiteRelatedData SRD { get { return pdp.SRD; } }
         public VehicleRelatedData VRD { get { return pdp.VRD; } }
@@ -23,6 +20,7 @@ namespace MPMFEVRP.Implementations
 
         public abstract string GetName();
         public abstract string GetDescription();
+        public abstract string GetNameOfProblemOfModel();
 
         public abstract ISolution GetRandomSolution(int seed);
         public abstract bool CheckFeasibilityOfSolution(ISolution solution);

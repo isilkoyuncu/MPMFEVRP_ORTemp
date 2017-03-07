@@ -10,7 +10,7 @@ using MPMFEVRP.Implementations.ProblemModels;
 
 namespace MPMFEVRP.Implementations.Problems
 {
-    class EVvsGDV_MaxProfit_VRP:ProblemBase
+    public class EVvsGDV_MaxProfit_VRP:ProblemBase
     {
         /* This problem is a heteregoneus VRP which allows any number of vehicle types, but they belong to two categories: EV and GDV
          * The objective is to maximize profit = revenue - cost (fixed per day & variable per mile)

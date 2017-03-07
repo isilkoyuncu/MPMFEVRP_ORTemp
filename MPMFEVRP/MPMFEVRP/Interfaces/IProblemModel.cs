@@ -10,7 +10,6 @@ namespace MPMFEVRP.Interfaces
     public interface IProblemModel
     {
         string InputFileName { get; }
-        string NameOfProblemOfModel { get; }
 
         //Individual Data Fields
         SiteRelatedData SRD { get; }
@@ -19,6 +18,7 @@ namespace MPMFEVRP.Interfaces
 
         string GetName();
         string GetDescription();
+        string GetNameOfProblemOfModel();
 
         //Stuff exclusive to the "model"
         ISolution GetRandomSolution(int seed);

@@ -52,7 +52,10 @@ namespace MPMFEVRP.Forms
 
         private void ComboBox_problemModels_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (theProblem != null)
+            theProblemModel = ProblemUtil.CreateProblemByName(comboBox_problems.SelectedItem.ToString());
+            if (theProblem == null)
+                MessageBox.Show("We just selected the problem, but it failed to create!");
+            else
                 UpdateProblemLabels();
         }
 
