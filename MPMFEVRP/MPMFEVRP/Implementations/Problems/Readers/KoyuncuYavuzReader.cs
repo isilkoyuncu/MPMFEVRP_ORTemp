@@ -126,7 +126,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 for (int i = 0; i < prize[r - 1].Length; i++)
                     prize[r - 1][i] = double.Parse(cellsInCurrentRow[9 + i]);
             }
-            populateSiteArray();
+            PopulateSiteArray();
 
             int blankRowPosition2 = blankRowPosition+1;
             while (allRows[blankRowPosition2] != "\r")
@@ -154,7 +154,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 VehVariableCost[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[6]);
                 VehMaxChargingRate[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[7]);
             }
-            populateVehicleArray();
+            PopulateVehicleArray();
 
             cellsInCurrentRow = allRows[blankRowPosition2+1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             TravelSpeed= double.Parse(cellsInCurrentRow[1]);
@@ -182,7 +182,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         }
 
 
-        public string getRecommendedOutputFileFullName()
+        public string GetRecommendedOutputFileFullName()
         {
             string output = "";// sourceDirectory;
             output += "KoyuncuYavuz_";//This is the prefix
@@ -190,7 +190,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             output += file_extension;
             return output;
         }
-        void populateSiteArray()
+        void PopulateSiteArray()
         {
             Site site;
 
@@ -201,16 +201,16 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 siteArray[i] = site;
             }
         }
-        public Site[] getSiteArray()
+        public Site[] GetSiteArray()
         {
             if (siteArray == null)
-                populateSiteArray();
+                PopulateSiteArray();
             
             return siteArray;
         }
-        public int getNumberOfCustomers() { return numCustomers; }
-        public int getNumberOfES() { return numESS; }
-        void populateVehicleArray()
+        public int GetNumberOfCustomers() { return numCustomers; }
+        public int GetNumberOfES() { return numESS; }
+        void PopulateVehicleArray()
         {
             Vehicle vehicle;
 
@@ -234,16 +234,16 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 vehicleArray[i] = vehicle;
             }
         }
-        public Vehicle[] getVehicleArray()
+        public Vehicle[] GetVehicleArray()
         {
             if (vehicleArray == null)
-                populateVehicleArray();
+                PopulateVehicleArray();
 
             return vehicleArray;
         }
-        public double getTravelSpeed() { return TravelSpeed; }
-        public double[,] getDistanceMatrix() { return Distance; }
-        public bool isLongLat()
+        public double GetTravelSpeed() { return TravelSpeed; }
+        public double[,] GetDistanceMatrix() { return Distance; }
+        public bool IsLongLat()
         {
             if(distType=="Long-Lat")
             {

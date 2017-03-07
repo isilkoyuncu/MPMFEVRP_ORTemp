@@ -27,9 +27,11 @@ namespace MPMFEVRP.Forms
             new MultipleProblemMultipleAlgorithm().ShowDialog();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button_DataManager_Click(object sender, EventArgs e)
         {
-            new DataManager().Show();
+            MessageBox.Show("This part is currently under development. It will eventually link to the Data Manager, which is a different project within this environment.");
+            //TODO: Fix the following line to the other project, not just a form within this project, and then uncomment it as well as eliminate the message box in the line above.
+            //new DataManager().Show();
         }
     }
 }

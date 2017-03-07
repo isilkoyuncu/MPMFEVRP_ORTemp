@@ -12,13 +12,13 @@ namespace MPMFEVRP.Interfaces
         //Any class implementing this will be responsible of knowing all info that authors reported (constant or calculation) in the paper but not in the instance files
 
         void ProcessRawDataFromFile(string rawData);
-        string getRecommendedOutputFileFullName();       
-        Site[] getSiteArray();
-        Vehicle[] getVehicleArray();
-        int getNumberOfCustomers();
-        int getNumberOfES();
-        double getTravelSpeed();
-        double[,] getDistanceMatrix();
-        bool isLongLat();
+        string GetRecommendedOutputFileFullName();       
+        Site[] GetSiteArray();
+        Vehicle[] GetVehicleArray();
+        int GetNumberOfCustomers();
+        int GetNumberOfES();
+        double GetTravelSpeed();
+        double[,] GetDistanceMatrix();
+        bool IsLongLat();
     }
 }

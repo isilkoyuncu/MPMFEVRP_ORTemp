@@ -72,7 +72,7 @@
             this.button_addProblem.TabIndex = 5;
             this.button_addProblem.Text = "Load Problem from File";
             this.button_addProblem.UseVisualStyleBackColor = true;
-            this.button_addProblem.Click += new System.EventHandler(this.button_addProblem_Click);
+            this.button_addProblem.Click += new System.EventHandler(this.Button_addProblem_Click);
             // 
             // button_viewProblem
             // 
@@ -83,7 +83,7 @@
             this.button_viewProblem.TabIndex = 5;
             this.button_viewProblem.Text = "View Problem";
             this.button_viewProblem.UseVisualStyleBackColor = true;
-            this.button_viewProblem.Click += new System.EventHandler(this.button_viewProblem_Click);
+            this.button_viewProblem.Click += new System.EventHandler(this.Button_viewProblem_Click);
             // 
             // linkLabel_deleteSelectedProblem
             // 
@@ -94,7 +94,7 @@
             this.linkLabel_deleteSelectedProblem.TabIndex = 5;
             this.linkLabel_deleteSelectedProblem.TabStop = true;
             this.linkLabel_deleteSelectedProblem.Text = "Delete Selected";
-            this.linkLabel_deleteSelectedProblem.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_deleteSelectedProblem_LinkClicked);
+            this.linkLabel_deleteSelectedProblem.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel_deleteSelectedProblem_LinkClicked);
             // 
             // listBox_problems
             // 
@@ -127,7 +127,7 @@
             this.button_run.TabIndex = 4;
             this.button_run.Text = "RUN";
             this.button_run.UseVisualStyleBackColor = true;
-            this.button_run.Click += new System.EventHandler(this.button_run_Click);
+            this.button_run.Click += new System.EventHandler(this.Button_run_Click);
             // 
             // linkLabel_deleteSelectedAlgorithm
             // 
@@ -138,7 +138,7 @@
             this.linkLabel_deleteSelectedAlgorithm.TabIndex = 3;
             this.linkLabel_deleteSelectedAlgorithm.TabStop = true;
             this.linkLabel_deleteSelectedAlgorithm.Text = "Delete Selected";
-            this.linkLabel_deleteSelectedAlgorithm.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_deleteSelected_LinkClicked);
+            this.linkLabel_deleteSelectedAlgorithm.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel_deleteSelected_LinkClicked);
             // 
             // button_addAlgo
             // 
@@ -148,7 +148,7 @@
             this.button_addAlgo.TabIndex = 2;
             this.button_addAlgo.Text = "Add";
             this.button_addAlgo.UseVisualStyleBackColor = true;
-            this.button_addAlgo.Click += new System.EventHandler(this.button_addAlgo_Click);
+            this.button_addAlgo.Click += new System.EventHandler(this.Button_addAlgo_Click);
             // 
             // listBox_algorithms
             // 
@@ -197,7 +197,7 @@
             this.button_report.TabIndex = 5;
             this.button_report.Text = "Report";
             this.button_report.UseVisualStyleBackColor = true;
-            this.button_report.Click += new System.EventHandler(this.button_report_click);
+            this.button_report.Click += new System.EventHandler(this.Button_report_click);
             // 
             // button_openDataManager
             // 
@@ -207,7 +207,7 @@
             this.button_openDataManager.TabIndex = 6;
             this.button_openDataManager.Text = "Open Data Manager";
             this.button_openDataManager.UseVisualStyleBackColor = true;
-            this.button_openDataManager.Click += new System.EventHandler(this.button_openDataManager_Click);
+            this.button_openDataManager.Click += new System.EventHandler(this.Button_openDataManager_Click);
             // 
             // MultipleProblemMultipleAlgorithm
             // 

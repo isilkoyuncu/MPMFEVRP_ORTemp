@@ -30,7 +30,7 @@
         {
             this.Button_single = new System.Windows.Forms.Button();
             this.Button_multiple = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.button_DataManager = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Button_single
@@ -62,26 +62,26 @@
             this.Button_multiple.UseVisualStyleBackColor = true;
             this.Button_multiple.Click += new System.EventHandler(this.Button_multiple_Click);
             // 
-            // button1
+            // button_DataManager
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Image = global::MPMFEVRP.Properties.Resources.data;
-            this.button1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
-            this.button1.Size = new System.Drawing.Size(260, 92);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Data Manager\r\n";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button_DataManager.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_DataManager.Image = global::MPMFEVRP.Properties.Resources.data;
+            this.button_DataManager.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button_DataManager.Location = new System.Drawing.Point(12, 12);
+            this.button_DataManager.Name = "button_DataManager";
+            this.button_DataManager.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
+            this.button_DataManager.Size = new System.Drawing.Size(260, 92);
+            this.button_DataManager.TabIndex = 2;
+            this.button_DataManager.Text = "Data Manager\r\n";
+            this.button_DataManager.UseVisualStyleBackColor = true;
+            this.button_DataManager.Click += new System.EventHandler(this.Button_DataManager_Click);
             // 
             // Dashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 312);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button_DataManager);
             this.Controls.Add(this.Button_multiple);
             this.Controls.Add(this.Button_single);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
@@ -97,6 +97,6 @@
 
         private System.Windows.Forms.Button Button_single;
         private System.Windows.Forms.Button Button_multiple;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button_DataManager;
     }
 }

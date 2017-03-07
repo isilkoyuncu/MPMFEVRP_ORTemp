@@ -100,12 +100,6 @@
     <Compile Include="Forms\Dashboard.Designer.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\DataManager.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\DataManager.Designer.cs">
-      <DependentUpon>DataManager.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\MultipleProblemMultipleAlgorithm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -136,9 +130,7 @@
     <Compile Include="Implementations\Algorithms\Greedy.cs" />
     <Compile Include="Implementations\ProblemBase.cs" />
     <Compile Include="Implementations\ProblemModelBase.cs" />
-    <Compile Include="Implementations\ProblemModels\DefaultProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs" />
-    <Compile Include="Implementations\Problems\DefaultProblem.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
     <Compile Include="Implementations\Problems\Readers\KoyuncuYavuzReader.cs" />
     <Compile Include="Implementations\SolutionBase.cs" />
@@ -171,9 +163,6 @@
     <Compile Include="Utils\StringOperations.cs" />
     <EmbeddedResource Include="Forms\Dashboard.resx">
       <DependentUpon>Dashboard.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\DataManager.resx">
-      <DependentUpon>DataManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MultipleProblemMultipleAlgorithm.resx">
       <DependentUpon>MultipleProblemMultipleAlgorithm.cs</DependentUpon>

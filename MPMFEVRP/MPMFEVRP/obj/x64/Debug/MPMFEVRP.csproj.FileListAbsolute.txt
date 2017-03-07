@@ -47,7 +47,6 @@ C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPM
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.CPLEX.xml
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.csprojResolveAssemblyReference.cache
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.Dashboard.resources
-C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.DataManager.resources
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.MultipleProblemMultipleAlgorithm.resources
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.ProblemViewer.resources
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.SingleProblemSingleAlgorithm.resources

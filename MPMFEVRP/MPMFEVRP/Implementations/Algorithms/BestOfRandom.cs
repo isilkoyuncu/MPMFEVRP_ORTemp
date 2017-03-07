@@ -13,7 +13,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     public class BestOfRandom : AlgorithmBase
     {
-        DefaultProblemModel problemData;
+        IProblemModel problemData;
 
         int poolSize = 20;
 
@@ -30,7 +30,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(IProblemModel model)
         {
-            problemData = (DefaultProblemModel)model;
+            problemData = model;
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
             int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
             Random random = new Random(randomSeed);

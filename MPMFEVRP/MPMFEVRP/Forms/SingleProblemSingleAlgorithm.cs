@@ -70,7 +70,7 @@ namespace MPMFEVRP.Forms
 
         }
 
-        private void button_viewProblem_Click(object sender, EventArgs e)
+        private void Button_viewProblem_Click(object sender, EventArgs e)
         {
             if (theProblem != null)
             {
@@ -87,13 +87,14 @@ namespace MPMFEVRP.Forms
             textBox_log.AppendText(DateTime.Now.ToString("HH:mm:ss tt") + ": " + message + "\n");
         }
 
-        private void button_browseForFile_Click(object sender, EventArgs e)
+        private void Button_browseForFile_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            dialog.RestoreDirectory = true;
-            dialog.Multiselect = false;
-
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = true,
+                Multiselect = false
+            };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 label_selectedFile.Text = dialog.FileName;
@@ -111,7 +112,7 @@ namespace MPMFEVRP.Forms
             }
         }
 
-        private void button_run_Click(object sender, EventArgs e)
+        private void Button_run_Click(object sender, EventArgs e)
         {
             if (theProblem == null)
             {
@@ -119,9 +120,8 @@ namespace MPMFEVRP.Forms
             }
             else
             {
-                IProblemModel model = new DefaultProblemModel(theProblem);
                 Log("Algorithm initializing.");
-                theAlgorithm.Initialize(model);
+                theAlgorithm.Initialize(theProblemModel);
                 Log("Algorithm running.");
                 theAlgorithm.Run();
                 Log("Algorithm concluding.");
@@ -130,7 +130,7 @@ namespace MPMFEVRP.Forms
             }
         }
 
-        private void button_viewSolution_Click(object sender, EventArgs e)
+        private void Button_viewSolution_Click(object sender, EventArgs e)
         {
             if (theAlgorithm != null && theAlgorithm.Solution != null)
             {
@@ -142,7 +142,7 @@ namespace MPMFEVRP.Forms
             }
         }
 
-        private void button_openDataManager_Click(object sender, EventArgs e)
+        private void Button_openDataManager_Click(object sender, EventArgs e)
         {
             MessageBox.Show("This part is currently under development. It will eventually link to the Data Manager, which is a different project within this environment.");
             //TODO: Fix the following line to the other project, not just a form within this project, and then uncomment it as well as eliminate the message box in the line above.

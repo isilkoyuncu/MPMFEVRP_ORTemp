@@ -15,7 +15,7 @@ namespace MPMFEVRP.Implementations
         protected ISolution bestSolutionFound;
         public ISolution Solution { get { return bestSolutionFound; } }
 
-        protected DefaultProblemModel model;
+        protected IProblemModel model;
 
         protected AlgorithmParameters algorithmParameters;
         public AlgorithmParameters AlgorithmParameters { get { return algorithmParameters; } }
@@ -43,8 +43,8 @@ namespace MPMFEVRP.Implementations
 
         public void Initialize(IProblemModel model)
         {
-            // TODO common initialize for all algorithms
-            this.model = (DefaultProblemModel)model;
+            // common initialize for all algorithms
+            this.model = model;
             this.bestSolutionFound = SolutionUtil.CreateSolutionByName(algorithmParameters.GetParameter(ParameterID.SOLUTION_TYPES).GetStringValue(), model);
             SpecializedInitialize(model);
         }

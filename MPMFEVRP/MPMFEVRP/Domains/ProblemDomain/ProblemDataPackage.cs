@@ -22,15 +22,15 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public ProblemDataPackage() { }
         public ProblemDataPackage(KoyuncuYavuzReader reader)
         {
-            inputFileName = reader.getRecommendedOutputFileFullName();
+            inputFileName = reader.GetRecommendedOutputFileFullName();
             srd = new SiteRelatedData();
             vrd = new VehicleRelatedData();
             crd = new ContextRelatedData();
 
-            srd.NumCustomers = reader.getNumberOfCustomers();
-            srd.NumES = reader.getNumberOfES();
+            srd.NumCustomers = reader.GetNumberOfCustomers();
+            srd.NumES = reader.GetNumberOfES();
             srd.NumNodes = srd.NumCustomers + srd.NumES + 1;
-            vrd.NumVehicleCategories = reader.getVehicleArray().Length;
+            vrd.NumVehicleCategories = reader.GetVehicleArray().Length;
             vrd.NumVehicles = new int[vrd.NumVehicleCategories];
             for (int v = 0; v < vrd.NumVehicleCategories; v++)
                 vrd.NumVehicles[v] = srd.NumCustomers;//TODO We entered numCustomers as the available number of vehicles in a category to make it unrestrictive. Limiting the numbers of vehicles is something we'd love to experiment on, and thus, this point will have to be clarified later on.
@@ -38,27 +38,27 @@ namespace MPMFEVRP.Domains.ProblemDomain
             srd.SiteArray = new Site[srd.NumNodes];
             for (int s = 0; s < srd.NumNodes; s++)
             {
-                srd.SiteArray[s] = new Site(reader.getSiteArray()[s]);
+                srd.SiteArray[s] = new Site(reader.GetSiteArray()[s]);
             }
 
             vrd.VehicleArray = new Vehicle[vrd.NumVehicleCategories];
             for (int v = 0; v < vrd.NumVehicleCategories; v++)
             {
-                vrd.VehicleArray[v] = new Vehicle(reader.getVehicleArray()[v]);
+                vrd.VehicleArray[v] = new Vehicle(reader.GetVehicleArray()[v]);
             }
 
             //Assign travel speed
-            crd.TravelSpeed = reader.getTravelSpeed();
+            crd.TravelSpeed = reader.GetTravelSpeed();
 
             //Assign Distance matrix if any
             srd.Distance = new double[srd.NumNodes, srd.NumNodes];
-            if (reader.getDistanceMatrix() != null)//This is the case when distances are given in the data file (asymmetric, or whatever)
+            if (reader.GetDistanceMatrix() != null)//This is the case when distances are given in the data file (asymmetric, or whatever)
             {
-                srd.Distance = (double[,])reader.getDistanceMatrix().Clone();
+                srd.Distance = (double[,])reader.GetDistanceMatrix().Clone();
             }
             else//The distances are not given in the data file, but they have to be calculated
             {
-                if (reader.isLongLat())//Haversine calculations
+                if (reader.IsLongLat())//Haversine calculations
                 {
                     for (int i = 0; i < srd.NumNodes; i++)
                     {

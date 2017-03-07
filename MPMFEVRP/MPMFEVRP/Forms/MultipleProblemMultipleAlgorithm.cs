@@ -18,6 +18,8 @@ namespace MPMFEVRP.Forms
     {
         BindingList<IAlgorithm> algorithms;
         BindingList<IProblem> problems;
+        BindingList<IProblemModel> problemModels;
+
 
         public MultipleProblemMultipleAlgorithm()
         {
@@ -57,14 +59,14 @@ namespace MPMFEVRP.Forms
                 new AlgorithmViewer(algorithms[listBox_algorithms.SelectedIndex]).ShowDialog();
         }
 
-        private void button_addAlgo_Click(object sender, EventArgs e)
+        private void Button_addAlgo_Click(object sender, EventArgs e)
         {
             IAlgorithm algorithm = AlgorithmUtil.CreateAlgorithmByName(comboBox_algorithms.SelectedItem.ToString());
             algorithms.Add(algorithm);
             new AlgorithmViewer(algorithm).ShowDialog();
         }
 
-        private void linkLabel_deleteSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LinkLabel_deleteSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (listBox_algorithms.SelectedIndex != -1)
                 algorithms.RemoveAt(listBox_algorithms.SelectedIndex);
@@ -78,51 +80,55 @@ namespace MPMFEVRP.Forms
             textBox_log.ScrollToCaret();
         }
 
-        private void button_report_click(object sender, EventArgs e)
+        private void Button_report_click(object sender, EventArgs e)
         {
             MessageBox.Show("This feature is coming...", "Coming...");
         }
 
-        private void button_run_Click(object sender, EventArgs e)
+        private void Button_run_Click(object sender, EventArgs e)
         {
             foreach (var algorithm in algorithms)
             {
                 foreach (var problem in problems)
                 {
-                    IProblemModel model = new DefaultProblemModel(problem);
+                    // TODO The following line is from the template, which simply assumes that each problem can be worked using onyl a single model, and there is exactly one problem (type) in nthe entire project.
+                    // Now that we have enriched the project, the line below must be corrected to handle differnet problem models for different problems 
+                    throw new NotImplementedException();
+                    //IProblemModel model = new DefaultProblemModel(problem);
 
-                    algorithm.Initialize(model);
-                    Log("Algorithm " + algorithm.ToString() + " is initialized.");
+                    //algorithm.Initialize(model);
+                    //Log("Algorithm " + algorithm.ToString() + " is initialized.");
 
-                    Log("Algorithm " + algorithm.ToString() + " started running.");
-                    algorithm.Run();
+                    //Log("Algorithm " + algorithm.ToString() + " started running.");
+                    //algorithm.Run();
 
-                    Log("Algorithm " + algorithm.ToString() + " finished.");
-                    Log("================");
-                    // TODO algorithm statistics
-                    //log("Solution status: " + algorithm.Solution.Status);
-                    //log("Total cost: " + algorithm.Solution.TotalCost);
-                    //log("Run time: " + algorithm.AlgorithmStatistics.RunTimeMilliSeconds + " ms");
+                    //Log("Algorithm " + algorithm.ToString() + " finished.");
+                    //Log("================");
+                    //// TODO algorithm statistics
+                    ////log("Solution status: " + algorithm.Solution.Status);
+                    ////log("Total cost: " + algorithm.Solution.TotalCost);
+                    ////log("Run time: " + algorithm.AlgorithmStatistics.RunTimeMilliSeconds + " ms");
 
-                    Log("**************RESET************");
-                    algorithm.Reset();
+                    //Log("**************RESET************");
+                    //algorithm.Reset();
                 }
             }
         }
 
-        private void linkLabel_deleteSelectedProblem_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LinkLabel_deleteSelectedProblem_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (listBox_problems.SelectedIndex != -1)
                 problems.RemoveAt(listBox_problems.SelectedIndex);
         }
 
-        private void button_addProblem_Click(object sender, EventArgs e)
+        private void Button_addProblem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            dialog.RestoreDirectory = true;
-            dialog.Multiselect = false;
-
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = true,
+                Multiselect = false
+            };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -139,15 +145,17 @@ namespace MPMFEVRP.Forms
             }
         }
 
-        private void button_viewProblem_Click(object sender, EventArgs e)
+        private void Button_viewProblem_Click(object sender, EventArgs e)
         {
             if (listBox_problems.SelectedIndex != -1)
                 new ProblemViewer((IProblem)listBox_problems.SelectedItem).ShowDialog();
         }
 
-        private void button_openDataManager_Click(object sender, EventArgs e)
+        private void Button_openDataManager_Click(object sender, EventArgs e)
         {
-            new DataManager().Show();
+            MessageBox.Show("This part is currently under development. It will eventually link to the Data Manager, which is a different project within this environment.");
+            //TODO: Fix the following line to the other project, not just a form within this project, and then uncomment it as well as eliminate the message box in the line above.
+            //new DataManager().Show();
         }
     }
 }

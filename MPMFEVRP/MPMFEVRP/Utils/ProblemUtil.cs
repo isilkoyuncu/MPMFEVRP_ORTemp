@@ -81,13 +81,7 @@ namespace MPMFEVRP.Utils
         // TODO this random problem needs to be changed
         public static IProblem CreateRandomProblem(int numberOfJobs, int dueDateLowerLimit, int dueDateUpperLimit, int processingTimeLowerLimit, int processingTimeUpperLimit)
         {
-            IProblem problem = new DefaultProblem();
-            Random r = new Random();
-            for (int i = 0; i < numberOfJobs; i++)
-            {
-                //problem.Jobs.Add(new Job(r.Next(processingTimeLowerLimit, processingTimeUpperLimit), r.Next(dueDateLowerLimit, dueDateUpperLimit), "Job " + i));
-            }
-            return problem;
+            throw new NotImplementedException();
         }
 
         public static IProblem CreateProblemByName(String problemName)

@@ -119,7 +119,7 @@
             this.button_openDataManager.TabIndex = 5;
             this.button_openDataManager.Text = "Open Data Manager";
             this.button_openDataManager.UseVisualStyleBackColor = true;
-            this.button_openDataManager.Click += new System.EventHandler(this.button_openDataManager_Click);
+            this.button_openDataManager.Click += new System.EventHandler(this.Button_openDataManager_Click);
             // 
             // groupBox1
             // 
@@ -148,7 +148,7 @@
             this.button_browseForFile.TabIndex = 0;
             this.button_browseForFile.Text = "Browse for File";
             this.button_browseForFile.UseVisualStyleBackColor = true;
-            this.button_browseForFile.Click += new System.EventHandler(this.button_browseForFile_Click);
+            this.button_browseForFile.Click += new System.EventHandler(this.Button_browseForFile_Click);
             // 
             // button_viewProblem
             // 
@@ -159,7 +159,7 @@
             this.button_viewProblem.TabIndex = 8;
             this.button_viewProblem.Text = "View Problem";
             this.button_viewProblem.UseVisualStyleBackColor = true;
-            this.button_viewProblem.Click += new System.EventHandler(this.button_viewProblem_Click);
+            this.button_viewProblem.Click += new System.EventHandler(this.Button_viewProblem_Click);
             // 
             // label_numberOfJobs
             // 
@@ -212,7 +212,7 @@
             this.button_run.TabIndex = 11;
             this.button_run.Text = "RUN";
             this.button_run.UseVisualStyleBackColor = true;
-            this.button_run.Click += new System.EventHandler(this.button_run_Click);
+            this.button_run.Click += new System.EventHandler(this.Button_run_Click);
             // 
             // panel_parameters
             // 
@@ -248,7 +248,7 @@
             this.button_viewSolution.TabIndex = 13;
             this.button_viewSolution.Text = "View Solution";
             this.button_viewSolution.UseVisualStyleBackColor = true;
-            this.button_viewSolution.Click += new System.EventHandler(this.button_viewSolution_Click);
+            this.button_viewSolution.Click += new System.EventHandler(this.Button_viewSolution_Click);
             // 
             // groupBox_status
             // 
