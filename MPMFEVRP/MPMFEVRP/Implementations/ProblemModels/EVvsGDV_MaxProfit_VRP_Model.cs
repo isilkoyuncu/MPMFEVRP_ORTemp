@@ -64,8 +64,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             compatibleSolutions = new List<Type>()
             {
-                typeof(CustomerClusteredSolution),
-                typeof(RouteBasedSolution)
+                typeof(RouteBasedSolution),
+                typeof(CustomerSetBasedSolution)
             };
         }
     }
