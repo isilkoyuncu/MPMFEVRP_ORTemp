@@ -201,7 +201,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\File Management\Instance Generation.csproj">
+      <Project>{72b5a283-6f39-4ae0-9349-32123d7bf2e2}</Project>
+      <Name>Instance Generation</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
       <Visible>False</Visible>

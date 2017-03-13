@@ -22,7 +22,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             status = RouteOptimizationStatus.NotYetOptimized;
         }
-        public RouteOptimizerOutput(bool feasible, double ofv, List<int> route, int vehicleIDnumber)
+        public RouteOptimizerOutput(bool[] feasible, double[] ofv, List<int> route, int vehicleIDnumber)
         {
             this.feasible = feasible;
             this.ofv = ofv;
@@ -40,11 +40,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
         }
 
-        public bool GetFeasible(int vehicleIDnumber)
+        public bool[] GetFeasible(int vehicleIDnumber)
         {
             return feasible;
         }
-        public double GetOFV(int vehicleIDnumber)
+        public double[] GetOFV(int vehicleIDnumber)
         {
             return ofv;
         }

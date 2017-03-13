@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Instance_Generation.Forms;
 
 namespace MPMFEVRP.Forms
 {
@@ -29,9 +30,7 @@ namespace MPMFEVRP.Forms
 
         private void Button_DataManager_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This part is currently under development. It will eventually link to the Data Manager, which is a different project within this environment.");
-            //TODO: Fix the following line to the other project, not just a form within this project, and then uncomment it as well as eliminate the message box in the line above.
-            //new DataManager().Show();
+            new TestInstanceGenerator().ShowDialog();
         }
     }
 }

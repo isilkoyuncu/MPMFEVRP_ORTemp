@@ -57,7 +57,6 @@ C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPM
 C:\Users\myavuz\Desktop\Ongoing Research\UnifiedGVRP\03-Code\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.pdb
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.csprojResolveAssemblyReference.cache
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.Dashboard.resources
-C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.DataManager.resources
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.MultipleProblemMultipleAlgorithm.resources
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.ProblemViewer.resources
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\obj\x64\Debug\MPMFEVRP.Forms.SingleProblemSingleAlgorithm.resources
@@ -71,7 +70,8 @@ C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\MPMFEV
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\MPMFEVRP.pdb
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\BestRandom.dll
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\GanttChart.dll
-C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.Concert.dll
-C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.CPLEX.dll
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.Concert.xml
 C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\ILOG.CPLEX.xml
+C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\File Management.exe
+C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\File Management.pdb
+C:\Users\ikoyuncu\Desktop\MPMFEVRP_ORTemp\MPMFEVRP\MPMFEVRP\bin\x64\Debug\File Management.exe.config

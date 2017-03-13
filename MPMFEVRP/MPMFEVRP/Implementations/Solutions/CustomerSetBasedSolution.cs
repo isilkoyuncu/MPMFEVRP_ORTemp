@@ -27,7 +27,7 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public override string GetName()
         {
-            throw new NotImplementedException();
+            return "Customer Set Based Solution";
         }
 
         public override void TriggerSpecification()
