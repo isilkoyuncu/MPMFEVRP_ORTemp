@@ -148,8 +148,14 @@ namespace MPMFEVRP.Forms
 
         private void Button_viewProblem_Click(object sender, EventArgs e)
         {
-            if (listBox_problems.SelectedIndex != -1)
-                new ProblemViewer((IProblem)listBox_problems.SelectedItem).ShowDialog();
+            if (problemModels != null)
+            {
+                MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
+                //TODO: Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
+                //new ProblemViewer(theProblem).Show();
+            }
+            else
+                MessageBox.Show("You should create a problem first!", "No problem!");
         }
 
         private void Button_openDataManager_Click(object sender, EventArgs e)

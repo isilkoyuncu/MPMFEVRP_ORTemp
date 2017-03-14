@@ -12,15 +12,15 @@ namespace MPMFEVRP.Implementations
 {
     public abstract class ProblemBase : IProblem
     {
-        protected ProblemDataPackage pf;
-        public ProblemDataPackage PF { get { return pf; } }
+        protected ProblemDataPackage pdp;
+        public ProblemDataPackage PDP { get { return pdp; } set { pdp = value; } }
         
         protected ObjectiveFunctionTypes objectiveFunctionType;
         public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; } }
 
         public ProblemBase()
         {
-            pf = new ProblemDataPackage();
+            pdp = new ProblemDataPackage();
         }
         public abstract string GetName();
 

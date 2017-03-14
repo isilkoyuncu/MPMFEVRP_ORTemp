@@ -12,7 +12,7 @@ namespace MPMFEVRP.Interfaces
     {
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
 
-        ProblemDataPackage PF { get; }
+        ProblemDataPackage PDP { get; }
 
         string GetName();
 

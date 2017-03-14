@@ -32,8 +32,6 @@ namespace MPMFEVRP.Utils
 
         public static IProblemModel CreateProblemModelByName(String problemModelName)
         {
-            List<String> result = new List<string>();
-
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
                 .Where(p => typeof(IProblemModel).IsAssignableFrom(p))
@@ -47,6 +45,28 @@ namespace MPMFEVRP.Utils
             {
                 createdProblemModel = (IProblemModel)Activator.CreateInstance(problemModel);
                 if (createdProblemModel.GetName() == problemModelName)
+                {
+                    return createdProblemModel;
+                }
+            }
+
+            return createdProblemModel;
+        }
+        public static IProblemModel CreateProblemModelByProblemName(String problemName)
+        {
+            var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => typeof(IProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(IProblemModel).IsAssignableFrom(type))
+                .Where(t => !t.IsAbstract)
+                .ToList();
+
+            IProblemModel createdProblemModel = (IProblemModel)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
+
+            foreach (var problemModel in allProblemModels)
+            {
+                createdProblemModel = (IProblemModel)Activator.CreateInstance(problemModel);
+                if (createdProblemModel.GetNameOfProblemOfModel() == problemName)
                 {
                     return createdProblemModel;
                 }

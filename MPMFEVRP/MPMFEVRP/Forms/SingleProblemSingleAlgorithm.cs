@@ -75,9 +75,9 @@ namespace MPMFEVRP.Forms
         {
             if (theProblem != null)
             {
-                MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
+                //MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
                 //TODO: Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
-                //new ProblemViewer(theProblem).Show();
+                new ProblemViewer(theProblem).Show();
             }
             else
                 MessageBox.Show("You should create a problem first!", "No problem!");
@@ -103,6 +103,7 @@ namespace MPMFEVRP.Forms
                 {
                     //String fileContents = File.ReadAllText(dialog.FileName);
                     theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileName);
+                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblemName(theProblem.GetName());
                     UpdateProblemLabels();
                     Log("Problem loaded from file.");
                 }

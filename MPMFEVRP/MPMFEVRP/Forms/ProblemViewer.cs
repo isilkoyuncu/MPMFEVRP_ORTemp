@@ -1,7 +1,7 @@
 ﻿using Braincase.GanttChart;
 using MPMFEVRP.Interfaces;
-using System;
 using System.Collections.Generic;
+using System;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -14,48 +14,58 @@ namespace MPMFEVRP.Forms
     public partial class ProblemViewer : Form
     {
         IProblem theProblem;
-
+        private float[] x;
+        private float[] y;
+        private int numNodes;
         public ProblemViewer(IProblem problem)
         {
             InitializeComponent();
-
             theProblem = problem;
-
-            var manager = new ProjectManager();
-
-            Random r = new Random();
-            //foreach (var job in theProblem.Jobs)
-            //{
-            //    var task = new ColoredTask()
-            //    {
-            //        Name = job.Description,
-            //        Color = Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256))
-            //    };
-            //    manager.Add(task);
-            //    manager.SetEnd(task, job.DueDate);
-            //    manager.SetDuration(task, job.ProcessingTime);
-            //    manager.SetStart(task, job.DueDate - job.ProcessingTime);
-            //}
-
-            var chart = new Chart();
-            chart.Init(manager);
-            chart.AllowTaskDragDrop = false;
-
-            this.Controls.Add(chart);
-
-            chart.PaintTask += (s, e) =>
+            numNodes = theProblem.PDP.SRD.NumCustomers;
+            x = new float[numNodes];
+            for (int i = 0; i < numNodes - 1; i++)
             {
-                ColoredTask ctask = e.Task as ColoredTask;
-                if (ctask != null)
-                {
-                    var format = new TaskFormat();
-                    format = e.Format;
-                    format.BackFill = new SolidBrush(ctask.Color);
-                    e.Format = format;
-                }
-            };
+                x[i] = (float)(10 * theProblem.PDP.SRD.SiteArray[i].X);
+            }
+            x[numNodes - 1] = x[0];
+            y = new float[numNodes];
+            for (int i = 0; i < numNodes - 1; i++)
+            {
+                y[i] = (float)(10 * theProblem.PDP.SRD.SiteArray[i].Y);
+            }
+            y[numNodes - 1] = y[0];
+
         }
+        private void panel_Paint(object sender, PaintEventArgs e)
+        {
+            Pen penG = new Pen(Color.Green, 3);
+            Pen penGL = new Pen(Color.LightGreen, 3);
+            Pen penGY = new Pen(Color.Aqua, 3);
+            Pen penB = new Pen(Color.Black, 3);
+            Pen penR = new Pen(Color.Red, 2);
+            Pen penEV = new Pen(Color.Green, 2);
+            Pen penDash = new Pen(Color.Yellow, 2) { DashPattern = new float[] { 5, 1.5f } };
+            SolidBrush sb = new SolidBrush(Color.Black);
+            Graphics g = panel_problemViewer.CreateGraphics();
+            FontFamily ff = new FontFamily("Arial");
+            System.Drawing.Font font = new System.Drawing.Font(ff, 10);
+            g.DrawEllipse(penB, x[0], y[0], 20, 20);
+            g.DrawString(0.ToString(), font, sb, x[0] + 3, y[0] + 3);
+            for (int i = 1; i < x.Length - 4; i++)
+            {
+                g.DrawEllipse(penG, x[i], y[i], 20, 20);
+                g.DrawString(i.ToString(), font, sb, x[i] + 3, y[i] + 3);
+            }
+            for (int i = x.Length - 4; i < x.Length - 1; i++)
+            {
+                g.DrawEllipse(penGY, x[i], y[i], 20, 20);
+                g.DrawString(i.ToString(), font, sb, x[i] + 3, y[i] + 3);
+            }
+        }
+        
     }
+
+    
 
     public class ColoredTask : Task
     {

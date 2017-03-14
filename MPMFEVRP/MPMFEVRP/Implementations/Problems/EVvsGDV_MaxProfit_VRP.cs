@@ -20,18 +20,19 @@ namespace MPMFEVRP.Implementations.Problems
 
         public EVvsGDV_MaxProfit_VRP() { }
 
-        public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PF)
+        public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP)
         {
+            base.PDP = new ProblemDataPackage(PDP);
             //The following are the problem characteristics. Each problem will have these fixed here, and they have nothing to do with data!
             objectiveFunctionType = Models.ObjectiveFunctionTypes.Maximize;
 
             //This code is extremely strict, for sake of simplicity!
             //First, we must be given exactly 2 vehicles
-            if (PF.VRD.VehicleArray.Length != 2)
+            if (PDP.VRD.VehicleArray.Length != 2)
                 throw new ArgumentException("Reader had the wrong number of vehicle categories!");
             //Then, the first (0) must be an EV, and the other (1) must be a GDV!
-            if ((PF.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
-                (PF.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
+            if ((PDP.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
+                (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
                 throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
 
             //numVehicles[0] = 6;

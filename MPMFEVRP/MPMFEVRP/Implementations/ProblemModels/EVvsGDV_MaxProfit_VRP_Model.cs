@@ -16,11 +16,15 @@ namespace MPMFEVRP.Implementations.ProblemModels
         string problemName;
         public EVvsGDV_MaxProfit_VRP_Model()
         {
-            Implementations.Problems.EVvsGDV_MaxProfit_VRP problem = new Problems.EVvsGDV_MaxProfit_VRP();
+            EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
             problemName = problem.GetName();
         }//empty constructor
-        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem, ProblemDataPackage pdp) //IProblem will come here
+        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem)
         {
+            pdp.InputFileName = problem.PDP.InputFileName;
+            pdp.SRD = new SiteRelatedData(problem.PDP.SRD);
+            pdp.VRD = new VehicleRelatedData(problem.PDP.VRD);
+            pdp.CRD = new ContextRelatedData(problem.PDP.CRD);
             problemName = problem.GetName();
         }
 

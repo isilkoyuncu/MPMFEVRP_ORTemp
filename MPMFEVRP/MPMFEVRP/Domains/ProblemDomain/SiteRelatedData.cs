@@ -36,15 +36,15 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.energyConsumption = energyConsumption;
         }
 
-        public SiteRelatedData(SiteRelatedData SRD)
+        public SiteRelatedData(SiteRelatedData twinSRD)
         {
-            numCustomers = SRD.NumCustomers;
-            numES = SRD.NumES;
-            numNodes = SRD.NumNodes;
-            siteArray = SRD.SiteArray; // TODO small or upper case?? CONFUSED
-            distance = SRD.Distance;
-            timeConsumption = SRD.TimeConsumption;
-            energyConsumption = SRD.EnergyConsumption;
+            numCustomers = twinSRD.NumCustomers;
+            numES = twinSRD.NumES;
+            numNodes = twinSRD.NumNodes;
+            siteArray = twinSRD.SiteArray;
+            distance = twinSRD.Distance;
+            timeConsumption = twinSRD.TimeConsumption;
+            energyConsumption = twinSRD.EnergyConsumption;
         }
     }
 }

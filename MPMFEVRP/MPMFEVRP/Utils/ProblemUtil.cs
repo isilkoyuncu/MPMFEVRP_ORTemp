@@ -86,8 +86,6 @@ namespace MPMFEVRP.Utils
 
         public static IProblem CreateProblemByName(String problemName)
         {
-            List<String> result = new List<string>();
-
             var allProblems = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
                 .Where(p => typeof(IProblem).IsAssignableFrom(p))

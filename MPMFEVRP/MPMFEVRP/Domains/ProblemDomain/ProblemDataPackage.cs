@@ -11,13 +11,13 @@ namespace MPMFEVRP.Domains.ProblemDomain
     public class ProblemDataPackage
     {
         string inputFileName;   //For record only
-        public string InputFileName { get { return inputFileName; } }
+        public string InputFileName { get { return inputFileName; } set { inputFileName = value; } }
         SiteRelatedData srd;
-        public SiteRelatedData SRD { get { return srd; } }
+        public SiteRelatedData SRD { get { return srd; } set { srd = value; } }
         VehicleRelatedData vrd;
-        public VehicleRelatedData VRD { get { return vrd; } }
+        public VehicleRelatedData VRD { get { return vrd; } set { vrd = value; } }
         ContextRelatedData crd;
-        public ContextRelatedData CRD { get { return crd; } }
+        public ContextRelatedData CRD { get { return crd; } set { crd = value; } }
 
         public ProblemDataPackage() { }
         public ProblemDataPackage(KoyuncuYavuzReader reader)
@@ -105,6 +105,14 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
             crd.Lambda = 2;//TODO We entered 2 for now; we'd love to experiment on it.
 
+        }
+        public ProblemDataPackage(ProblemDataPackage twinPDP)
+        {
+            inputFileName = twinPDP.InputFileName;
+
+            srd = new SiteRelatedData(twinPDP.SRD);
+            vrd = new VehicleRelatedData(twinPDP.VRD);
+            crd = new ContextRelatedData(twinPDP.CRD);
         }
     }
 }

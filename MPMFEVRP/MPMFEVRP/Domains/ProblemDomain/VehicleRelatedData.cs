@@ -24,11 +24,11 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.vehicleArray = vehicleArray; //TODO same as site array. Can we do it?
         }
 
-        public VehicleRelatedData(VehicleRelatedData VRD)
+        public VehicleRelatedData(VehicleRelatedData twinVRD)
         {
-            numVehicleCategories = VRD.NumVehicleCategories;
-            numVehicles = VRD.NumVehicles;
-            vehicleArray = VRD.VehicleArray; //TODO same as site array.
+            numVehicleCategories = twinVRD.NumVehicleCategories;
+            numVehicles = twinVRD.NumVehicles;
+            vehicleArray = twinVRD.VehicleArray;
         }
     }
 }
