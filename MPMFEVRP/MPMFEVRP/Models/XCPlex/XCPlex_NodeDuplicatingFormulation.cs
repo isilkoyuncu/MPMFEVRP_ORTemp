@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using ILOG.Concert;
 using ILOG.CPLEX;
+using MPMFEVRP.Implementations;
+using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Domains.AlgorithmDomain;
+
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -18,13 +22,13 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] delta;
         INumVar[] epsilon;
 
-        public XCPlex_NodeDuplicatingFormulation(ProblemToAlgorithm fromProblem, AlgorithmToXCPlex fromAlgorithm)
-            : base(fromProblem, fromAlgorithm)
+        public XCPlex_NodeDuplicatingFormulation(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
+            : base(problemModel, xCplexParam)
         {
         }
         protected override void DefineDecisionVariables()
         {
-            duplicateAndMapNodes();
+            DuplicateAndMapNodes();
             allVariables_list = new List<INumVar>();
             //X
             string[][][] X_name = new string[numNodes][][];
@@ -35,9 +39,9 @@ namespace MPMFEVRP.Models.XCPlex
                 X[i] = new INumVar[numNodes][];
                 for (int j = 0; j < numNodes; j++)
                 {
-                    X_name[i][j] = new string[problemModel.NumVehicleCategories];
-                    X[i][j] = new INumVar[problemModel.NumVehicleCategories];
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                    X_name[i][j] = new string[problemModel.VRD.NumVehicleCategories];
+                    X[i][j] = new INumVar[problemModel.VRD.NumVehicleCategories];
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     {
                         X_name[i][j][v] = "X_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
                         X[i][j][v] = NumVar(0, 1, variable_type, X_name[i][j][v]);
@@ -50,17 +54,17 @@ namespace MPMFEVRP.Models.XCPlex
             U = new INumVar[numNodes][];
             for (int j = 0; j < numNodes; j++)
             {
-                U_name[j] = new string[problemModel.NumVehicleCategories];
-                U[j] = new INumVar[problemModel.NumVehicleCategories];
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                U_name[j] = new string[problemModel.VRD.NumVehicleCategories];
+                U[j] = new INumVar[problemModel.VRD.NumVehicleCategories];
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                 {
                     U_name[j][v] = "U_(" + j.ToString() + "," + v.ToString() + ")";
-                    U[j][v] = NumVar(0, getUUpperBound(j, v), variable_type, U_name[j][v]);
+                    U[j][v] = NumVar(0, GetUpperBound(j, v), variable_type, U_name[j][v]);
                     allVariables_list.Add(U[j][v]);
                 }//for v
             }//for j
             //auxiliaries (T, delta, epsilon)
-            setMinAndMaxValuesOfAuxiliaryVariables();
+            SetMinAndMaxValuesOfAuxiliaryVariables();
             T = new INumVar[numNodes];
             string[] T_name = new string[numNodes];
             for (int j = 0; j < numNodes; j++)
@@ -88,19 +92,19 @@ namespace MPMFEVRP.Models.XCPlex
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
-            setUndesiredXVariablesTo0();
+            SetUndesiredXVariablesTo0();
         }
-        void duplicateAndMapNodes()
+        void DuplicateAndMapNodes()
         {
-            int numCustomers = problemModel.NumCustomers;
-            int numES = problemModel.Lambda * problemModel.NumVehicles[0] * problemModel.NumES;
+            int numCustomers = problemModel.SRD.NumCustomers;
+            int numES = problemModel.CRD.Lambda * problemModel.VRD.NumVehicles[0] * problemModel.SRD.NumES;
             numNodes = 1 + numCustomers + numES;
 
             nodeToOriginalSiteNumberMap = new int[numNodes];
             int nodeCounter = 0;
-            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SiteArray.Length; orgSiteIndex++)
+            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.SiteArray.Length; orgSiteIndex++)
             {
-                switch (problemModel.SiteArray[orgSiteIndex].SiteType)
+                switch (problemModel.SRD.SiteArray[orgSiteIndex].SiteType)
                 {
                     case SiteTypes.Depot:
                         nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
@@ -114,7 +118,7 @@ namespace MPMFEVRP.Models.XCPlex
                     case SiteTypes.ExternalStation:
                         if (firstESNodeIndex == 0)
                             firstESNodeIndex = nodeCounter;
-                        for (int i = 0; i < problemModel.Lambda * problemModel.NumVehicles[0]; i++)
+                        for (int i = 0; i < problemModel.CRD.Lambda * problemModel.VRD.NumVehicles[0]; i++)
                             nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
                         lastESNodeIndex = nodeCounter - 1;
                         break;
@@ -123,23 +127,23 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        int getUUpperBound(int j, int v)
+        int GetUpperBound(int j, int v)
         {
             if (j == 0)
-                return problemModel.NumVehicles[v];
+                return problemModel.VRD.NumVehicles[v];
             else
                 return 1;
         }
-        void setUndesiredXVariablesTo0()
+        void SetUndesiredXVariablesTo0()
         {
             //No arc from a node to itself
             for (int j = 0; j < numNodes; j++)
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     X[j][j][v].UB = 0.0;
             //No arc from one ES to another
             for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     {
                         X[i][j][v].UB = 0.0;
                     }
@@ -174,7 +178,7 @@ namespace MPMFEVRP.Models.XCPlex
                         }
             }
         }
-        void setMinAndMaxValuesOfAuxiliaryVariables()
+        void SetMinAndMaxValuesOfAuxiliaryVariables()
         {
             minValue_T = new double[numNodes];
             maxValue_T = new double[numNodes];
@@ -185,10 +189,10 @@ namespace MPMFEVRP.Models.XCPlex
 
             for (int j = 0; j < numNodes; j++)
             {
-                minValue_T[j] = problemModel.TimeConsumption[0, nodeToOriginalSiteNumberMap[j]];
-                maxValue_T[j] = problemModel.TMax - problemModel.TimeConsumption[nodeToOriginalSiteNumberMap[j], 0];
-                if (problemModel.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
-                    maxValue_T[j] -= problemModel.SiteArray[nodeToOriginalSiteNumberMap[j]].ServiceDuration;
+                minValue_T[j] = problemModel.SRD.TimeConsumption[0, nodeToOriginalSiteNumberMap[j]];
+                maxValue_T[j] = problemModel.CRD.TMax - problemModel.SRD.TimeConsumption[nodeToOriginalSiteNumberMap[j], 0];
+                if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
+                    maxValue_T[j] -= problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ServiceDuration;
 
                 //TODO Fine-tune the min and max values of delta
                 minValue_delta[j] = 0.0;
@@ -214,7 +218,6 @@ namespace MPMFEVRP.Models.XCPlex
                 + "then\n"
                 + "for (int j = 0; j < numNodes; j++)\nepsilon[j]\n";
         }
-
         protected override void AddTheObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();

@@ -8,7 +8,7 @@ using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Utils;
-using MPMFEVRP.
+using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
@@ -44,7 +44,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             return problemName;
         }
 
-        public  ISolution GetRandomSolution(int seed, Type solutionType)
+        public RouteOptimizerOutput SolveSingleVehicle () //TODO rename this method
         {
             throw new NotImplementedException();
         }

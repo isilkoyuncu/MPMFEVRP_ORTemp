@@ -78,6 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domains\AlgorithmDomain\AlgorithmEnums.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemDataPackage.cs" />
     <Compile Include="Domains\ProblemDomain\ChargingStation.cs" />
     <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />

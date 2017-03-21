@@ -14,6 +14,31 @@ namespace MPMFEVRP.Models.XCPlex
         protected ProblemModelBase problemModel;
         protected XCPlexParameters xCplexParam;
         protected NumVarType variable_type = NumVarType.Int;
+        protected List<INumVar> allVariables_list;
+        protected INumVar[] allVariables_array;
+        protected List<IRange> allConstraints_list;
+        protected IRange[] allConstraints_array;
+        protected XCPlexSolutionStatus solutionStatus;
+        protected bool optimalCompleteSolutionObtained;
+        protected bool variableValuesObtained;
+        protected bool reducedCostsObtained;
+        protected double lowerBound;
+        protected double upperBound;
+        protected double cpuTime;
+        public double[] AllValues { get { return GetValues(allVariables_array); } }
+        public double[] AllReducedCosts { get { return GetReducedCosts(allVariables_array); } }
+        public Cplex.BasisStatus[] AllVariableBasisStatuses { get { return GetBasisStatuses(allVariables_array); } }
+        public double[] AllSlacks { get { return GetSlacks(allConstraints_array); } }
+        public double[] AllShadowPrices { get { return GetDuals(allConstraints_array); } }
+        public Cplex.BasisStatus[] AllConstraintBasisStatuses { get { return GetBasisStatuses(allConstraints_array); } }
+        public XCPlexSolutionStatus SolutionStatus { get { return solutionStatus; } }
+        public bool OptimalCompleteSolutionObtained { get { return optimalCompleteSolutionObtained; } }
+        public bool VariableValuesObtained { get { return variableValuesObtained; } }
+        public bool ReducedCostsObtained { get { return reducedCostsObtained; } }
+        public double LowerBound_XCPlex { get { return lowerBound; } }
+        public double UpperBound_XCPlex { get { return upperBound; } }
+        public double CPUtime { get { return cpuTime; } }
+
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
         public XCPlexBase() { }
@@ -49,6 +74,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected abstract void DefineDecisionVariables();
         protected abstract void AddTheObjectiveFunction();
         protected abstract void AddAllConstraints();
+        public abstract string GetDescription_AllVariables_Array();
 
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1)
         {

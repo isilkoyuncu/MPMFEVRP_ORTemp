@@ -16,12 +16,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             algorithmParameters.Add(ParameterID.XCPLEX_FORMULATION, new Other.Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", XCPlex_Formulation.NodeDuplicating, new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.NodeDuplicating, ParameterType.ComboBox));
         }
 
-        public override CompleteSolution getBestSolutionFound()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string getName()
+        public override CompleteSolution GetBestSolutionFound()
         {
             throw new NotImplementedException();
         }
@@ -30,8 +25,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             throw new NotImplementedException();
         }
-
-        public override void initialize(ProblemToAlgorithm fromProblem)
+        public override void Initialize(ProblemToAlgorithm fromProblem)
         {
             base.fromProblem = fromProblem;
             status = AlgorithmSolutionStatus.NotYetSolved;
@@ -40,12 +34,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             toXCPlex = new CPlexExtenders.AlgorithmToXCPlex(new CPlexExtenders.XCPlexParameters(), stats.UpperBound);
         }
 
-        public override bool isSupportingStepwiseSolutionCreation()
+        public override bool IsSupportingStepwiseSolutionCreation()
         {
             return false;
         }
 
-        public override void run()
+        public override void Run()
         {
             AbstractXCPlexFormulation CPlexExtender = null;
             switch (algorithmParameters[ParameterID.XCPLEX_FORMULATION].getValue<XCPlex_Formulation>())
@@ -90,7 +84,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             throw new NotImplementedException();
         }
 
-        void decompressArcDuplicatingFormulationVariables(double[] allVariableValues)
+        void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)
         {
             double[][][] X_value;
             double[][][] Y_value;
@@ -148,24 +142,24 @@ namespace MPMFEVRP.Implementations.Algorithms
                 epsilon_value[j] = allVariableValues[counter++];
         }
         // TODO this does not belong to here
-        private void writeSolution(AbstractXCPlexFormulation CPlexExtender)
-        {
-            string status;
-            double objValue, CPUtime, optGap;
-            string path = "C:/Users/ikoyuncu/Desktop/MPMFEVRP/Version1.0/Version1.0/bin/x64/Debug/Our instances/Output/";
-            System.IO.StreamWriter sw;
-            sw = new System.IO.StreamWriter(path + fromProblem.NumCustomers + "C_4ES_"+fromProblem.NumVehicles[0]+"EV_Node_2.txt");
-            sw.WriteLine("Problem Characteristics");
-            sw.WriteLine("NumCustomers\tNumES\tNumNodes\tEV");
-            sw.WriteLine("{0}\t{1}\t{2}\t{3}", fromProblem.NumCustomers, fromProblem.NumES, (fromProblem.NumCustomers + fromProblem.NumES + 1), 1);
-            status = CPlexExtender.SolutionStatus.ToString();
-            objValue = CPlexExtender.BestObjValue;
-            optGap = CPlexExtender.MIPRelativeGap;
-            CPUtime = CPlexExtender.CPUtime;
-            sw.WriteLine("Solution Characteristics");
-            sw.WriteLine("Status\tObjective Value\tOptimality Gap\tCPU Time");
-            sw.WriteLine("{0}\t{1}\t{2}\t{3}", status, objValue, optGap, CPUtime);
-            sw.Close();
-        }
+        //private void writeSolution(AbstractXCPlexFormulation CPlexExtender)
+        //{
+        //    string status;
+        //    double objValue, CPUtime, optGap;
+        //    string path = "C:/Users/ikoyuncu/Desktop/MPMFEVRP/Version1.0/Version1.0/bin/x64/Debug/Our instances/Output/";
+        //    System.IO.StreamWriter sw;
+        //    sw = new System.IO.StreamWriter(path + fromProblem.NumCustomers + "C_4ES_"+fromProblem.NumVehicles[0]+"EV_Node_2.txt");
+        //    sw.WriteLine("Problem Characteristics");
+        //    sw.WriteLine("NumCustomers\tNumES\tNumNodes\tEV");
+        //    sw.WriteLine("{0}\t{1}\t{2}\t{3}", fromProblem.NumCustomers, fromProblem.NumES, (fromProblem.NumCustomers + fromProblem.NumES + 1), 1);
+        //    status = CPlexExtender.SolutionStatus.ToString();
+        //    objValue = CPlexExtender.BestObjValue;
+        //    optGap = CPlexExtender.MIPRelativeGap;
+        //    CPUtime = CPlexExtender.CPUtime;
+        //    sw.WriteLine("Solution Characteristics");
+        //    sw.WriteLine("Status\tObjective Value\tOptimality Gap\tCPU Time");
+        //    sw.WriteLine("{0}\t{1}\t{2}\t{3}", status, objValue, optGap, CPUtime);
+        //    sw.Close();
+        //}
     }
 }
