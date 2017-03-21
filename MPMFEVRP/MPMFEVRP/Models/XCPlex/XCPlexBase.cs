@@ -5,25 +5,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Implementations;
 
 namespace MPMFEVRP.Models.XCPlex
 {
     public abstract class XCPlexBase : Cplex
     {
+        protected ProblemModelBase problemModel;
+        protected XCPlexParameters xCplexParam;
+        protected NumVarType variable_type = NumVarType.Int;
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
         public XCPlexBase() { }
+        public XCPlexBase(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
+        {
+            this.problemModel = problemModel;
+            this.xCplexParam = xCplexParam;
+            if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming) //TODO after creating alg domain and enums this error will be resolved.
+                //||(fromAlgorithm.Parameters.Relaxation == XCPlexRelaxation.AssignmentProblem)
+                )
+                variable_type = NumVarType.Float;
+
+            //now we are ready to put the model together and then solve it
+            //Define the variables
+            DefineDecisionVariables();
+            //Objective function
+            AddTheObjectiveFunction();
+            //Constraints
+            AddAllConstraints();
+            //Cplex parameters
+            SetCplexParameters();
+            //output variables
+            initializeOutputVariables();
+        }
 
         protected void Initialize()
         {
             DefineDecisionVariables();
-            SetObjectiveFunction();
-            AddConstraints();
+            AddTheObjectiveFunction();
+            AddAllConstraints();
         }
 
         protected abstract void DefineDecisionVariables();
-        protected abstract void SetObjectiveFunction();
-        protected abstract void AddConstraints();
+        protected abstract void AddTheObjectiveFunction();
+        protected abstract void AddAllConstraints();
 
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1)
         {

@@ -8,6 +8,7 @@ using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Utils;
+using MPMFEVRP.
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
@@ -41,6 +42,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
         public override string GetNameOfProblemOfModel()
         {
             return problemName;
+        }
+
+        public  ISolution GetRandomSolution(int seed, Type solutionType)
+        {
+            throw new NotImplementedException();
         }
 
         public override ISolution GetRandomSolution(int seed, Type solutionType)

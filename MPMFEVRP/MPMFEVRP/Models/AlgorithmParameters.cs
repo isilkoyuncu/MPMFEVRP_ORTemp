@@ -20,6 +20,7 @@ namespace MPMFEVRP.Models
         SOLUTION_TYPES
     }
 
+
     public class AlgorithmParameters
     {
         Dictionary<ParameterID, Parameter> allParameters = new Dictionary<ParameterID, Parameter>();
