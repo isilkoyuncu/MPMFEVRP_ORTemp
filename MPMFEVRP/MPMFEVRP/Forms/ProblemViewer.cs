@@ -19,7 +19,7 @@ namespace MPMFEVRP.Forms
         private int numNodes;
         public ProblemViewer(IProblem problem)
         {
-            InitializeComponent();
+            
             theProblem = problem;
             numNodes = theProblem.PDP.SRD.NumCustomers;
             x = new float[numNodes];
@@ -35,6 +35,9 @@ namespace MPMFEVRP.Forms
             }
             y[numNodes - 1] = y[0];
 
+            InitializeComponent();
+            //panel_Paint(this, null);
+            //panel_problemViewer.Show();
         }
         private void panel_Paint(object sender, PaintEventArgs e)
         {
