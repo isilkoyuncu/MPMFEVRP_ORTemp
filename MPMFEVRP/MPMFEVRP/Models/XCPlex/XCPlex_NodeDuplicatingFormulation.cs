@@ -150,14 +150,14 @@ namespace MPMFEVRP.Models.XCPlex
             //No arc from a node to another if energy consumption is > 1
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                        if (problemModel.VehicleArray[v].Category == VehicleCategories.EV)
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
                         {
-                            if (problemModel.EnergyConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v] > 1)
+                            if (problemModel.SRD.EnergyConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v] > 1)
                                 X[i][j][v].UB = 0.0;
                         }
             //No arc from depot to its duplicate
-            for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+            for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
                     if (nodeToOriginalSiteNumberMap[j] == 1)
                     {
@@ -167,11 +167,11 @@ namespace MPMFEVRP.Models.XCPlex
             //No arc between a non-ES node and an ES node can be traversed by a GDV
             for (int i = 0; i < numNodes; i++)
             {
-                if (problemModel.SiteArray[nodeToOriginalSiteNumberMap[i]].SiteType == SiteTypes.ExternalStation)
+                if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].SiteType == SiteTypes.ExternalStation)
                     continue;
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                        if (problemModel.VehicleArray[v].Category == VehicleCategories.GDV)
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.GDV)
                         {
                             X[i][j][v].UB = 0.0;
                             X[j][i][v].UB = 0.0;
@@ -199,8 +199,8 @@ namespace MPMFEVRP.Models.XCPlex
                 maxValue_delta[j] = 1.0;
 
                 minValue_epsilon[j] = 0.0;
-                if (problemModel.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
-                    maxValue_epsilon[j] = Math.Min(1.0, problemModel.SiteArray[nodeToOriginalSiteNumberMap[j]].ServiceDuration * Math.Min(problemModel.SiteArray[nodeToOriginalSiteNumberMap[j]].RechargingRate,problemModel.VehicleArray[0].MaxChargingRate)/problemModel.VehicleArray[0].BatteryCapacity);
+                if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
+                    maxValue_epsilon[j] = Math.Min(1.0, problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ServiceDuration * Math.Min(problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].RechargingRate,problemModel.VRD.VehicleArray[0].MaxChargingRate)/problemModel.VRD.VehicleArray[0].BatteryCapacity);
                 else
                     maxValue_epsilon[j] = 1.0;
             }
@@ -223,17 +223,17 @@ namespace MPMFEVRP.Models.XCPlex
             ILinearNumExpr objFunction = LinearNumExpr();
             //First term: prize collection
             for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    objFunction.AddTerm(problemModel.SiteArray[nodeToOriginalSiteNumberMap[j]].Prize[v], U[j][v]);
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    objFunction.AddTerm(problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].Prize[v], U[j][v]);
             //Second term: distance-based costs
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                        objFunction.AddTerm(-1.0 * problemModel.VehicleArray[v].VariableCostPerMile * problemModel.Distance[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]], X[i][j][v]);
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        objFunction.AddTerm(-1.0 * problemModel.VRD.VehicleArray[v].VariableCostPerMile * problemModel.SRD.Distance[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]], X[i][j][v]);
             //Third term: vehicle fixed costs
             for (int j = 0; j < numNodes; j++)
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    objFunction.AddTerm(-1.0 * problemModel.VehicleArray[v].FixedCost, X[0][j][v]);
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    objFunction.AddTerm(-1.0 * problemModel.VRD.VehicleArray[v].FixedCost, X[0][j][v]);
             //Now adding the objective function to the model
             AddMaximize(objFunction);
         }
@@ -260,7 +260,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_IncomingXtoDepotTotalEqualsU()
         {
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                 {
                     ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
                     for (int i = 0; i < numNodes; i++)
@@ -272,7 +272,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_OutgoingXfromDepotTotalEqualsU()
         {
-            for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+            for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
             {
                 ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
                 for (int i = 0; i < numNodes; i++)
@@ -285,7 +285,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_IncomingXTotalEqualsU()
         {
             for(int j=1; j < numNodes; j++)
-                for(int v=0; v < problemModel.NumVehicleCategories; v++)
+                for(int v=0; v < problemModel.VRD.NumVehicleCategories; v++)
                 {
                     ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
                     for (int i = 0; i < numNodes; i++)
@@ -298,7 +298,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_OutgoingXTotalEqualsU()
         {
             for (int j = 1; j < numNodes; j++)
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                 {
                     ILinearNumExpr OutgoingXTotalMinusU = LinearNumExpr();
                     for (int k = 0; k < numNodes; k++)
@@ -313,7 +313,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j = 1; j < numNodes; j++)
             {
                 ILinearNumExpr NumberOfVehiclesVisitingTheNode = LinearNumExpr();
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     NumberOfVehiclesVisitingTheNode.AddTerm(1.0, U[j][v]);
                 string constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
@@ -324,8 +324,8 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    if (problemModel.VehicleArray[v].Category == VehicleCategories.GDV)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.GDV)
                         NumberOfGDVsVisitingTheNode.AddTerm(1.0, U[j][v]);
                 string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
@@ -333,13 +333,13 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MaxNumberOfVehiclesPerCategory()
         {
-            for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+            for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
             {
                 ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
                 for (int k = 0; k < numNodes; k++)
                     NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][k][v]);
-                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + problemModel.NumVehicles[v].ToString();
-                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, problemModel.NumVehicles[v], constraint_name));
+                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + problemModel.VRD.NumVehicles[v].ToString();
+                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, problemModel.VRD.NumVehicles[v], constraint_name));
             }
         }
         void AddConstraint_TimeRegulationFollowingACustomerVisit()
@@ -350,8 +350,8 @@ namespace MPMFEVRP.Models.XCPlex
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
                     TimeDifference.AddTerm(-1.0, T[i]);
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                        TimeDifference.AddTerm(-1.0 * (problemModel.SiteArray[nodeToOriginalSiteNumberMap[i]].ServiceDuration + problemModel.TimeConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]] + (maxValue_T[i] - minValue_T[j])), X[i][j][v]);
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        TimeDifference.AddTerm(-1.0 * (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].ServiceDuration + problemModel.SRD.TimeConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]] + (maxValue_T[i] - minValue_T[j])), X[i][j][v]);
                     string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                 }
@@ -364,9 +364,9 @@ namespace MPMFEVRP.Models.XCPlex
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
                     TimeDifference.AddTerm(-1.0, T[i]);
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                        TimeDifference.AddTerm(-1.0 * (problemModel.TimeConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]] + (maxValue_T[i] - minValue_T[j] + 1.0/problemModel.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate)), X[i][j][v]);
-                    TimeDifference.AddTerm(1.0 / problemModel.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate, delta[i]);
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        TimeDifference.AddTerm(-1.0 * (problemModel.SRD.TimeConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]] + (maxValue_T[i] - minValue_T[j] + 1.0/problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate)), X[i][j][v]);
+                    TimeDifference.AddTerm(1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate, delta[i]);
                     string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                 }
@@ -380,9 +380,9 @@ namespace MPMFEVRP.Models.XCPlex
                     SOCDifference.AddTerm(1.0, delta[j]);
                     SOCDifference.AddTerm(-1.0, delta[i]);
                     SOCDifference.AddTerm(-1.0, epsilon[i]);
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                        if (problemModel.VehicleArray[v].Category == VehicleCategories.EV)
-                            SOCDifference.AddTerm(problemModel.EnergyConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v] + maxValue_delta[j] - minValue_delta[i], X[i][j][v]);
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                            SOCDifference.AddTerm(problemModel.SRD.EnergyConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v] + maxValue_delta[j] - minValue_delta[i], X[i][j][v]);
                     string constraint_name = "SOC_Regulation_from_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddLe(SOCDifference, maxValue_delta[j] - minValue_delta[i], constraint_name));
                 }
@@ -393,9 +393,9 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, delta[j]);
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    if (problemModel.VehicleArray[v].Category == VehicleCategories.EV)
-                        SOCDifference.AddTerm(problemModel.EnergyConsumption[nodeToOriginalSiteNumberMap[0], nodeToOriginalSiteNumberMap[j], v], X[0][j][v]);
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                        SOCDifference.AddTerm(problemModel.SRD.EnergyConsumption[nodeToOriginalSiteNumberMap[0], nodeToOriginalSiteNumberMap[j], v], X[0][j][v]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, 1.0, constraint_name));
             }
@@ -406,8 +406,8 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 ILinearNumExpr RechargeAtCustomer = LinearNumExpr();
                 RechargeAtCustomer.AddTerm(1.0, epsilon[j]);
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    if (problemModel.VehicleArray[v].Category == VehicleCategories.EV)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
                         RechargeAtCustomer.AddTerm(-1.0 * maxValue_epsilon[j], U[j][v]);
                 string constraint_name = "Max_Recharge_At_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(RechargeAtCustomer, 0.0, constraint_name));
@@ -420,8 +420,8 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
                 DepartureSOCFromCustomer.AddTerm(1.0, delta[j]);
                 DepartureSOCFromCustomer.AddTerm(1.0, epsilon[j]);
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    if (problemModel.VehicleArray[v].Category == VehicleCategories.EV)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
                         DepartureSOCFromCustomer.AddTerm(-1.0, U[j][v]);
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, 0.0, constraint_name));
@@ -434,8 +434,8 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                 DepartureSOCFromES.AddTerm(1.0, delta[j]);
                 DepartureSOCFromES.AddTerm(1.0, epsilon[j]);
-                for (int v = 0; v < problemModel.NumVehicleCategories; v++)
-                    if (problemModel.VehicleArray[v].Category == VehicleCategories.EV)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
                         DepartureSOCFromES.AddTerm(-1.0 * maxValue_epsilon[j], U[j][v]);
                 string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
                 allConstraints_list.Add(AddEq(DepartureSOCFromES, 0.0, constraint_name));
@@ -450,25 +450,10 @@ namespace MPMFEVRP.Models.XCPlex
             List < Tuple <int, int, int>> outcome = new List<Tuple<int, int, int>>();
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)
-                    for (int v = 0; v < problemModel.NumVehicleCategories; v++)
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                         if (GetValue(X[i][j][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                             outcome.Add(new Tuple<int, int, int>(nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v));
             return outcome;
-        }
-
-        public override NewCompleteSolution GetCompleteSolution()
-        {
-            return new NewCompleteSolution(problemModel, GetXVariablesSetTo1());
-        }
-
-        protected override void AddTheObjectiveFunction()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void AddAllConstraints()
-        {
-            throw new NotImplementedException();
         }
     }
 }
