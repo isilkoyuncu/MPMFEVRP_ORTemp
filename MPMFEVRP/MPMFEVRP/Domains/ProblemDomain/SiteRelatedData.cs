@@ -30,7 +30,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.numCustomers = numCustomers;
             this.numES = numES;
             this.numNodes = numNodes;
-            this.siteArray = siteArray; // TODO ask if I can do it??!!!!
+            this.siteArray = siteArray;
             this.distance = distance;
             this.timeConsumption = timeConsumption;
             this.energyConsumption = energyConsumption;

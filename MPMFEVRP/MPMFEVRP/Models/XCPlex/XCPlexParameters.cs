@@ -21,7 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
             this.limitComputationTime = limitComputationTime;
             this.relaxation = relaxation;
             this.optionalCPlexParameters = optionalCPlexParameters;
-            if (optionalCPlexParameters == null) //TODO should it be != ??
+            if (optionalCPlexParameters == null)
                 this.optionalCPlexParameters = new Dictionary<ParameterID, Parameter>();
         }
     }
