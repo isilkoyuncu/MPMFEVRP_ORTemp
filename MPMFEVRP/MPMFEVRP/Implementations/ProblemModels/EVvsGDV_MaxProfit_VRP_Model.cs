@@ -9,6 +9,7 @@ using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Utils;
 using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Models.XCPlex; 
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
@@ -27,6 +28,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
             pdp.VRD = new VehicleRelatedData(problem.PDP.VRD);
             pdp.CRD = new ContextRelatedData(problem.PDP.CRD);
             problemName = problem.GetName();
+
+            EV_TSPSolver = new Models.XCPlex.XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            GDV_TSPSolver = new Models.XCPlex.XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
         }
 
         public override string GetDescription()
@@ -44,7 +48,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             return problemName;
         }
 
-        public RouteOptimizerOutput SolveSingleVehicle () //TODO rename this method
+        public RouteOptimizerOutput OptimizeForCustomerSet (CustomerSet CS) //TODO rename this method
         {
             throw new NotImplementedException();
         }

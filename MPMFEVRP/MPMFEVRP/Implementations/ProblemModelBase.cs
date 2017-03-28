@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Models.XCPlex;
 
 namespace MPMFEVRP.Implementations
 {
@@ -17,6 +18,9 @@ namespace MPMFEVRP.Implementations
         public SiteRelatedData SRD { get { return pdp.SRD; } }
         public VehicleRelatedData VRD { get { return pdp.VRD; } }
         public ContextRelatedData CRD { get { return pdp.CRD; } }
+
+        protected XCPlex_NodeDuplicatingFormulation EV_TSPSolver;
+        protected XCPlex_NodeDuplicatingFormulation GDV_TSPSolver;
 
         public abstract string GetName();
         public abstract string GetDescription();
