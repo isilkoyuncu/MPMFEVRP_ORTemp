@@ -5,6 +5,7 @@ using ILOG.CPLEX;
 using MPMFEVRP.Implementations;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Interfaces;
 
 
@@ -317,7 +318,14 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     NumberOfVehiclesVisitingTheNode.AddTerm(1.0, U[j][v]);
                 string constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
-                allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
+                if (xCplexParam.TSP && j >= firstCustomerNodeIndex && j <= lastCustomerNodeIndex)
+                {
+                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
+                }
+                else//VRP, not TSP OR not a customer
+                {
+                    allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
+                }
             }
         }
         void AddConstraint_NoGDVVisitToESNodes()
@@ -334,13 +342,32 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MaxNumberOfVehiclesPerCategory()
         {
+            int[] numVehicles;
+            if (xCplexParam.TSP)
+            {
+                switch (xCplexParam.VehCategory)
+                {
+                    case VehicleCategories.EV:
+                        numVehicles = new int[] { 1, 0 };
+                        break;
+                    case VehicleCategories.GDV:
+                        numVehicles = new int[] { 0, 1 };
+                        break;
+                    default:
+                        throw new System.Exception("Vehicle Category unrecognized!!!");
+                }
+            }
+            else//not TSP
+            {
+                numVehicles = problemModel.VRD.NumVehicles;
+            }
             for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
             {
                 ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
                 for (int k = 0; k < numNodes; k++)
                     NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][k][v]);
-                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + problemModel.VRD.NumVehicles[v].ToString();
-                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, problemModel.VRD.NumVehicles[v], constraint_name));
+                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[v].ToString();
+                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
             }
         }
         void AddConstraint_TimeRegulationFollowingACustomerVisit()
@@ -456,5 +483,21 @@ namespace MPMFEVRP.Models.XCPlex
                             outcome.Add(new Tuple<int, int, int>(nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v));
             return outcome;
         }
+
+        public void RefineDecisionVariables(CustomerSet CS)
+        {
+            int VCIndex = (int)xCplexParam.VehCategory;//TODO Check if this returns 0 for EV and 1 for GDV
+            for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)
+            {
+                if (CS.Customers.Contains(j.ToString()))
+                {
+                    U[j][VCIndex].LB = 1.0;
+                    U[j][VCIndex].UB = 1.0;
+                    U[j][1 - VCIndex].LB = 0.0;
+                    U[j][1 - VCIndex].UB = 0.0;
+                }
+            }
+        }
+
     }
 }

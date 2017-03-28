@@ -212,7 +212,7 @@ namespace MPMFEVRP.Models.XCPlex
             beginTime = DateTime.Now;
             Solve();
             endTime = DateTime.Now;
-            cpuTime = (endTime.Hour - beginTime.Hour) * 3600.0 + (endTime.Minute - beginTime.Minute) * 60.0 + (endTime.Second - beginTime.Second) + (endTime.Millisecond - beginTime.Millisecond) / 1000.0;
+            cpuTime = (endTime - beginTime).TotalSeconds;
             Status originalCplexStatus = GetStatus();
             string originalCplexStatus_string = originalCplexStatus.ToString();
             switch (originalCplexStatus_string)
