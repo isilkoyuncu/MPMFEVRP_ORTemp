@@ -7,6 +7,7 @@ using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Models;
 using MPMFEVRP.Utils;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {

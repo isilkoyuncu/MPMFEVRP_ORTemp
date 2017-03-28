@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations
 {
@@ -19,7 +20,8 @@ namespace MPMFEVRP.Implementations
 
         protected AlgorithmParameters algorithmParameters;
         public AlgorithmParameters AlgorithmParameters { get { return algorithmParameters; } }
-
+        protected AlgorithmSolutionStatus status;
+        protected AlgorithmStatistics stats = new AlgorithmStatistics();
         public AlgorithmBase()
         {
             algorithmParameters = new AlgorithmParameters();

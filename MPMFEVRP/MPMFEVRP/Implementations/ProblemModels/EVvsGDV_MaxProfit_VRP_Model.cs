@@ -100,5 +100,10 @@ namespace MPMFEVRP.Implementations.ProblemModels
                 typeof(CustomerSetBasedSolution)
             };
         }
+
+        public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

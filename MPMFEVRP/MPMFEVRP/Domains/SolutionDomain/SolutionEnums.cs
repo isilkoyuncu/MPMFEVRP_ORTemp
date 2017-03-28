@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
-        public enum RouteOptimizationStatus { NotYetOptimized, InfeasibleForBothGDVandEV, OptimizedForGDVOnly, InfeasibleForEVOnly, OptimizedForBothGDVandEV };
+    public enum RouteOptimizationStatus { NotYetOptimized, InfeasibleForBothGDVandEV, OptimizedForGDVOnly, InfeasibleForEVOnly, OptimizedForBothGDVandEV };
+
+    public enum PartialSolutionComparison { IncumbentDominates, IncumbentPreferable, ChallengerPreferable, ChallengerDominates };
+
 }

@@ -4,64 +4,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
+using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
     class Outsource2Cplex : AlgorithmBase
     {
-        AlgorithmToXCPlex toXCPlex;
+        XCPlexParameters XcplexParam;
 
         public Outsource2Cplex() : base() 
         {
-            algorithmParameters.Add(ParameterID.XCPLEX_FORMULATION, new Other.Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", XCPlex_Formulation.NodeDuplicating, new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.NodeDuplicating, ParameterType.ComboBox));
-        }
-
-        public override CompleteSolution GetBestSolutionFound()
-        {
-            throw new NotImplementedException();
+            algorithmParameters.AddParameter(new Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, ParameterType.ComboBox));
         }
 
         public override string GetName()
         {
-            throw new NotImplementedException();
+            return "Outsource to CPLEX";
         }
-        public override void Initialize(ProblemToAlgorithm fromProblem)
+        public void Initialize()
         {
-            base.fromProblem = fromProblem;
-            status = AlgorithmSolutionStatus.NotYetSolved;
-            stats.UpperBound = double.MaxValue;
-
-            toXCPlex = new CPlexExtenders.AlgorithmToXCPlex(new CPlexExtenders.XCPlexParameters(), stats.UpperBound);
+            
         }
 
-        public override bool IsSupportingStepwiseSolutionCreation()
+        public bool IsSupportingStepwiseSolutionCreation()
         {
             return false;
-        }
-
-        public override void Run()
-        {
-            AbstractXCPlexFormulation CPlexExtender = null;
-            switch (algorithmParameters[ParameterID.XCPLEX_FORMULATION].getValue<XCPlex_Formulation>())
-            {
-                case XCPlex_Formulation.NodeDuplicating:
-                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(fromProblem, toXCPlex);
-                    break;
-                case XCPlex_Formulation.ArcDuplicating:
-                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(fromProblem, toXCPlex);
-                    break;
-            }
-            CPlexExtender.ExportModel("model.lp");
-            CPlexExtender.Solve_and_PostProcess();
-            writeSolution(CPlexExtender);
-            //decompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
-
-            //Given that the model is solved, we need to update status and statistics from it
-
-            status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
-            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
-            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
-            NewCompleteSolution optimalSolution = CPlexExtender.GetCompleteSolution();
         }
 
         public override void SpecializedConclude()
@@ -69,9 +38,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             throw new NotImplementedException();
         }
 
-        public override void SpecializedInitialize(IProblemModel model)
+        public override void SpecializedInitialize(IProblemModel problemModel)
         {
-            throw new NotImplementedException();
+            base.model = problemModel;
+            status = AlgorithmSolutionStatus.NotYetSolved;
+            stats.UpperBound = double.MaxValue;
+            XcplexParam = new XCPlexParameters();
         }
 
         public override void SpecializedReset()
@@ -81,7 +53,25 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            throw new NotImplementedException();
+            XCPlexBase CPlexExtender = null;
+            switch (algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value)
+            {
+                case XCPlex_Formulation.NodeDuplicating:
+                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(model, XcplexParam);
+                    break;
+                case XCPlex_Formulation.ArcDuplicating:
+                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(model, XcplexParam);
+                    break;
+            }
+            CPlexExtender.ExportModel("model.lp");
+            CPlexExtender.Solve_and_PostProcess();
+            //decompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
+
+            //Given that the model is solved, we need to update status and statistics from it
+            status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
+            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
+            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
+            //NewCompleteSolution optimalSolution = CPlexExtender.GetCompleteSolution();
         }
 
         void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)
@@ -93,8 +83,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             double[] delta_value;
             double[] epsilon_value;
 
-            int numCustomers = fromProblem.NumCustomers;
-            int numES = fromProblem.NumES;
+            int numCustomers = model.SRD.NumCustomers;
+            int numES = model.SRD.NumES;
             int counter = 0;
             X_value = new double[numCustomers+1][][];
             for (int i = 0; i <= numCustomers; i++)
@@ -102,8 +92,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 X_value[i] = new double[numCustomers + 1][];
                 for (int j = 0; j <= numCustomers; j++)
                 {
-                    X_value[i][j] = new double[fromProblem.NumVehicleCategories];
-                    for (int v = 0; v < fromProblem.NumVehicleCategories; v++)
+                    X_value[i][j] = new double[model.VRD.NumVehicleCategories];
+                    for (int v = 0; v < model.VRD.NumVehicleCategories; v++)
                         X_value[i][j][v] = allVariableValues[counter++];
                 }
             }
@@ -123,8 +113,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             U_value = new double[numCustomers + 1][];
             for (int j = 0; j <= numCustomers; j++)
             {
-                U_value[j] = new double[fromProblem.NumVehicleCategories];
-                for (int v = 0; v < fromProblem.NumVehicleCategories; v++)
+                U_value[j] = new double[model.VRD.NumVehicleCategories];
+                for (int v = 0; v < model.VRD.NumVehicleCategories; v++)
 
                     U_value[j][v] = allVariableValues[counter++];
             }

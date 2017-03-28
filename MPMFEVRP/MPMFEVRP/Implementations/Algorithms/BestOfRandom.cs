@@ -8,6 +8,8 @@ using MPMFEVRP.Implementations.ProblemModels;
 using MPMFEVRP.Models;
 using MPMFEVRP.Implementations.Solutions;
 using BestRandom;
+using MPMFEVRP.Domains.AlgorithmDomain;
+
 
 namespace MPMFEVRP.Implementations.Algorithms
 {

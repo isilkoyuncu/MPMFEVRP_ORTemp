@@ -6,12 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Implementations;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Models.XCPlex
 {
     public abstract class XCPlexBase : Cplex
     {
-        protected ProblemModelBase problemModel;
+        protected IProblemModel problemModel;
         protected XCPlexParameters xCplexParam;
         protected NumVarType variable_type = NumVarType.Int;
         protected List<INumVar> allVariables_list;
@@ -42,12 +45,14 @@ namespace MPMFEVRP.Models.XCPlex
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
         public XCPlexBase() { }
-        public XCPlexBase(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
+        public XCPlexBase(IProblemModel problemModel, XCPlexParameters xCplexParam)
         {
             this.problemModel = problemModel;
             this.xCplexParam = xCplexParam;
-            if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming) //TODO after creating alg domain and enums this error will be resolved.
-                //||(fromAlgorithm.Parameters.Relaxation == XCPlexRelaxation.AssignmentProblem)
+            XCPlexRelaxation relaxation;
+            relaxation = xCplexParam.Relaxation;
+            if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+               //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
                 )
                 variable_type = NumVarType.Float;
 
@@ -158,6 +163,117 @@ namespace MPMFEVRP.Models.XCPlex
         protected INumVar[][] DV2D(String name)
         {
             return GetTwoDimensionalDecisionVariableValue(name);
+        }
+
+        protected void initializeOutputVariables()
+        {
+            //Initializing outputs
+            this.solutionStatus = XCPlexSolutionStatus.NotYetSolved;
+            this.optimalCompleteSolutionObtained = false;
+            this.variableValuesObtained = false;
+            this.reducedCostsObtained = false;
+            this.lowerBound = double.MinValue;
+            this.upperBound = double.MaxValue;
+        }
+        protected void RefineDecisionVariables(PartialSolution PS)
+        {
+            double[] allLB = PS.GetAllDecisionVariableLowerBounds();
+            double[] allUB = PS.GetAllDecisionVariableUpperBounds();
+            for (int dvIndex = 0; dvIndex < allVariables_array.Length; dvIndex++)
+            {
+                allVariables_array[dvIndex].LB = allLB[dvIndex];
+                allVariables_array[dvIndex].UB = allUB[dvIndex];
+            }
+        }
+        protected void SetCplexParameters()
+        {
+            //SetOut(null);
+            if (xCplexParam.LimitComputationTime)
+                SetParam(Cplex.DoubleParam.TiLim, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.RUNTIME_SECONDS].Value.ToString()));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_EMPHASIS))
+                SetParam(Cplex.Param.Emphasis.MIP, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_EMPHASIS].Value.ToString().Substring(1)));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_SEARCH))
+                SetParam(Cplex.Param.MIP.Strategy.Search, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_SEARCH].Value.ToString().Substring(1)));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.CUTS_FACTOR))
+                SetParam(Cplex.DoubleParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.CUTS_FACTOR].Value.ToString()));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.THREADS))
+                SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.THREADS].Value.ToString()));
+        }
+        public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
+        {
+            initializeOutputVariables();
+            if (specifiedSubproblemRoot != null)
+            {
+                RefineDecisionVariables(specifiedSubproblemRoot);
+            }
+            DateTime beginTime = new DateTime();
+            DateTime endTime = new DateTime();
+            SetParam(DoubleParam.TiLim, 1800);
+            beginTime = DateTime.Now;
+            Solve();
+            endTime = DateTime.Now;
+            cpuTime = (endTime.Hour - beginTime.Hour) * 3600.0 + (endTime.Minute - beginTime.Minute) * 60.0 + (endTime.Second - beginTime.Second) + (endTime.Millisecond - beginTime.Millisecond) / 1000.0;
+            Status originalCplexStatus = GetStatus();
+            string originalCplexStatus_string = originalCplexStatus.ToString();
+            switch (originalCplexStatus_string)
+            {
+                case "Infeasible":
+                    solutionStatus = XCPlexSolutionStatus.Infeasible;
+                    return;
+                //break;//unreachable because of the "return" in the previous line
+                case "Unknown":
+                    solutionStatus = XCPlexSolutionStatus.NoFeasibleSolutionFound;
+                    break;
+                case "Feasible":
+                    solutionStatus = XCPlexSolutionStatus.Feasible;
+                    break;
+                case "Optimal":
+                    solutionStatus = XCPlexSolutionStatus.Optimal;
+                    break;
+                default:
+                    System.Windows.Forms.MessageBox.Show("Cplex didn't throw an exception, but got an unrecognized status!");
+                    break;
+            }
+
+            if (xCplexParam.Relaxation == XCPlexRelaxation.None)
+            {
+                //Not relaxed, outcome can be Unknown, Feasible or Optimal (Can't be infeasible, if it was, it we wouldn't come this far)
+                //Obtain a lower bound
+                lowerBound = GetBestObjValue();
+                //if at least feasible, obtain an upper bound and complete solution giving the upper bound
+                if (solutionStatus > 0)
+                {
+                    //Obtain upper bound value
+                    upperBound = GetObjValue();
+                    //Obtain X and maybe Y values so a complete solution can be constructed from them 
+                    optimalCompleteSolutionObtained = (solutionStatus == XCPlexSolutionStatus.Optimal);
+                }
+            }//if not relaxed
+            else//relaxed
+            {
+                //If we're here we know we have an optimal solution
+                //Obtain a lower bound
+                upperBound = GetObjValue();
+                lowerBound = upperBound;//Because the solution is optimal
+                                        //Obtain X and maybe Y values so a complete solution can be constructed from them 
+                if (ValidateCompletenessOfRelaxedSolution())
+                    optimalCompleteSolutionObtained = true;
+            }//if relaxed
+        }
+        bool ValidateCompletenessOfRelaxedSolution()
+        {
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                return ValidateIntegralityOfLPRelaxation();
+            //We should never get here
+            return false;
+        }
+        bool ValidateIntegralityOfLPRelaxation()
+        {
+            double[] allValues = GetValues(allVariables_array);
+            for (int dvInd = 0; dvInd < allValues.Length; dvInd++)
+                if (Math.Min(Math.Abs(allVariables_array[dvInd].UB - allValues[dvInd]), Math.Abs(allValues[dvInd] - allVariables_array[dvInd].LB)) > xCplexParam.ErrorTolerance)
+                    return false;
+            return true;
         }
     }
 }

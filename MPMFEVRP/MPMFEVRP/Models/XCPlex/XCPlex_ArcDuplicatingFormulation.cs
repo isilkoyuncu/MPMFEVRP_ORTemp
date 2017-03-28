@@ -8,6 +8,7 @@ using ILOG.CPLEX;
 using MPMFEVRP.Implementations;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -25,7 +26,7 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] delta;
         INumVar[] epsilon;
 
-        public XCPlex_ArcDuplicatingFormulation(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
+        public XCPlex_ArcDuplicatingFormulation(IProblemModel problemModel, XCPlexParameters xCplexParam)
             : base(problemModel, xCplexParam)
         {
         }

@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domains\AlgorithmDomain\AlgorithmEnums.cs" />
+    <Compile Include="Domains\AlgorithmDomain\AlgorithmStatistics.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemDataPackage.cs" />
     <Compile Include="Domains\ProblemDomain\ChargingStation.cs" />
     <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Domains\ProblemDomain\Vehicle.cs" />
     <Compile Include="Domains\ProblemDomain\VehicleRelatedData.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
+    <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
     <Compile Include="Domains\SolutionDomain\Route.cs" />
     <Compile Include="Domains\SolutionDomain\RouteOptimizerOutput.cs" />
     <Compile Include="Domains\SolutionDomain\SolutionEnums.cs" />

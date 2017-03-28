@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlexParameters
     {
-        public enum XCPlexRelaxation { None, LinearProgramming };
         double errorTolerance; public double ErrorTolerance { get { return errorTolerance; } }
         bool limitComputationTime; public bool LimitComputationTime { get { return limitComputationTime; } }
         XCPlexRelaxation relaxation; public XCPlexRelaxation Relaxation { get { return relaxation; } }
@@ -21,7 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
             this.limitComputationTime = limitComputationTime;
             this.relaxation = relaxation;
             this.optionalCPlexParameters = optionalCPlexParameters;
-            if (optionalCPlexParameters == null)
+            if (optionalCPlexParameters == null) //TODO should it be != ??
                 this.optionalCPlexParameters = new Dictionary<ParameterID, Parameter>();
         }
     }
