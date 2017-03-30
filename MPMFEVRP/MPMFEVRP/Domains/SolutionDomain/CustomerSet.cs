@@ -15,7 +15,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         RouteOptimizerOutput routeOptimizerOutcome; //TODO customer set'in bir uyesi ancak hic kullanmiyoruz bi noktada cozdurdukten sonra bu update edilmeli bi method lazim
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome;} } // ya da buraya bir set lazim ama ayrica method daha iyi olabilir
 
-        public CustomerSet() { }
+        public CustomerSet() { customers = new List<string>(); }
         public CustomerSet(CustomerSet twinCS)
         {
             customers = new List<string>();
