@@ -80,6 +80,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected abstract void AddTheObjectiveFunction();
         protected abstract void AddAllConstraints();
         public abstract string GetDescription_AllVariables_Array();
+        public abstract NewCompleteSolution GetCompleteSolution();
 
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1)
         {

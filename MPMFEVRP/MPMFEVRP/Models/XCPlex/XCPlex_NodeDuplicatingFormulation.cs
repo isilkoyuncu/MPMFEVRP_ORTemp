@@ -498,6 +498,9 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-
+        public override NewCompleteSolution GetCompleteSolution()
+        {
+            return new NewCompleteSolution(problemModel, GetXVariablesSetTo1());
+        }
     }
 }

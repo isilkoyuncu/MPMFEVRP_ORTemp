@@ -9,6 +9,7 @@ using MPMFEVRP.Implementations;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Interfaces;
+using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -555,6 +556,19 @@ namespace MPMFEVRP.Models.XCPlex
                         if (GetValue(Y[i][r][j]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                             outcome.Add(new Tuple<int, int, int>(depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r], depotPlusCustomerSiteNodeIndices[j]));
             return outcome;
+        }
+        public override NewCompleteSolution GetCompleteSolution()
+        {
+            List<Tuple<int, int, int>> XVariablesSetTo1 = GetXVariablesSetTo1();
+            List<Tuple<int, int, int>> YVariablesSetTo1 = GetYVariablesSetTo1();
+            foreach (Tuple<int, int, int> t in YVariablesSetTo1)
+            {
+                //Here we assume there are 2 categories of vehicles and category 0 is always the EV
+                XVariablesSetTo1.Add(new Tuple<int, int, int>(t.Item1, t.Item2, 0));
+                XVariablesSetTo1.Add(new Tuple<int, int, int>(t.Item2, t.Item3, 0));
+            }
+
+            return new NewCompleteSolution(problemModel, XVariablesSetTo1);
         }
     }
 }

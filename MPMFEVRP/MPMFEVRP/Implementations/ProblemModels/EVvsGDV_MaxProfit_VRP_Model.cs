@@ -7,9 +7,9 @@ using MPMFEVRP.Implementations.Problems;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
-using MPMFEVRP.Utils;
 using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Models.XCPlex; 
+using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
@@ -37,20 +37,66 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             throw new NotImplementedException();
         }
-
         public override string GetName()
         {
             return "EV vs GDV Profit Maximization Problem's Model";
         }
-
         public override string GetNameOfProblemOfModel()
         {
             return problemName;
         }
-
-        public RouteOptimizerOutput OptimizeForCustomerSet (CustomerSet CS) //TODO rename this method
+        
+        public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
-            throw new NotImplementedException();
+            XCPlexSolutionStatus[] status = new XCPlexSolutionStatus[2];
+            bool[] isFeasible;
+            RouteOptimizerOutput ROOtoReturn = new RouteOptimizerOutput();
+            NewCompleteSolution[] optimalSolutions = new NewCompleteSolution[2];
+
+            //GDV First: if it is infeasible, no need to check EV
+            GDV_TSPSolver.RefineDecisionVariables(CS);
+            GDV_TSPSolver.Solve_and_PostProcess();
+            status[1] = GDV_TSPSolver.SolutionStatus;
+            if (status[1] == XCPlexSolutionStatus.Infeasible)
+            {
+                isFeasible = new bool[]{ false, false };
+                ROOtoReturn.SetFeasible(isFeasible);
+                ROOtoReturn.SetOFV(null);
+                ROOtoReturn.SetOptimizedRoute(null);
+            } //if GDV infeasible, no need to check EV, stop
+            else if(status[1] == XCPlexSolutionStatus.Optimal) // TODO : Ask if optimal or feasible or should consider both?
+            {
+                optimalSolutions[1]=GDV_TSPSolver.GetCompleteSolution();
+                //EV Second:
+                EV_TSPSolver.RefineDecisionVariables(CS);
+                EV_TSPSolver.Solve_and_PostProcess();
+                status[0] = EV_TSPSolver.SolutionStatus;
+                if(status[0] == XCPlexSolutionStatus.Infeasible)
+                {
+                    isFeasible = new bool[] { true, false };
+                    ROOtoReturn.SetFeasible(isFeasible);
+                    ROOtoReturn.SetOFV(new double[] { double.MinValue, GDV_TSPSolver.GetBestObjValue() });
+                    ROOtoReturn.SetOptimizedRoute(optimalSolutions); 
+                }//if EV infeasible, stop
+                else if (status[0] == XCPlexSolutionStatus.Optimal)
+                {
+                    optimalSolutions[0] = EV_TSPSolver.GetCompleteSolution();
+                    isFeasible = new bool[] { true, true };
+                    ROOtoReturn.SetFeasible(isFeasible);
+                    ROOtoReturn.SetOFV(new double[] { EV_TSPSolver.GetBestObjValue(), GDV_TSPSolver.GetBestObjValue() });
+                    ROOtoReturn.SetOptimizedRoute(optimalSolutions);
+                }//if EV feasible, stop
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
+                }
+            }//if GDV feasible, check EV
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("GDV_TSPSolver status is other than Infeasible or Optimal!");
+            }
+
+            return ROOtoReturn;
         }
 
         public override ISolution GetRandomSolution(int seed, Type solutionType)
@@ -105,9 +151,6 @@ namespace MPMFEVRP.Implementations.ProblemModels
             };
         }
 
-        public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }
