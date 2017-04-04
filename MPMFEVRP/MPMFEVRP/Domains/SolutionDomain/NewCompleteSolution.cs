@@ -11,6 +11,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
     public class NewCompleteSolution
     {
         List<AssignedRoute> routes;
+        public List<AssignedRoute> Routes { get { return routes; } }
 
         public NewCompleteSolution()
         {

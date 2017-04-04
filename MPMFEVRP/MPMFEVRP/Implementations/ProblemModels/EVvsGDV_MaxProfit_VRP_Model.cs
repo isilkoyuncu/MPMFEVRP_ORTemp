@@ -45,58 +45,69 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             return problemName;
         }
-        
+
+        /// <summary>
+        /// EVvsGDV_MaxProfit_VRP_Model.OptimizeForSingleVehicle can only be called from CustomerSet, which requests to be optimized and passes itself hereinto
+        /// </summary>
+        /// <param name="CS"></param>
+        /// <returns></returns>
         public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
-            XCPlexSolutionStatus[] status = new XCPlexSolutionStatus[2];
-            bool[] isFeasible;
-            RouteOptimizerOutput ROOtoReturn = new RouteOptimizerOutput();
-            NewCompleteSolution[] optimalSolutions = new NewCompleteSolution[2];
+            double worstCaseOFV = double.MinValue; //Revert this when working with a minimization problem
+
+            AssignedRoute[] assignedRoutes = new AssignedRoute[2];
+            double[] ofv = new double[] { worstCaseOFV, worstCaseOFV };
 
             //GDV First: if it is infeasible, no need to check EV
             GDV_TSPSolver.RefineDecisionVariables(CS);
-            GDV_TSPSolver.Solve_and_PostProcess();
-            status[1] = GDV_TSPSolver.SolutionStatus;
-            if (status[1] == XCPlexSolutionStatus.Infeasible)
+            GDV_TSPSolver.Solve_and_PostProcess();        
+            if (GDV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if GDV infeasible, no need to check EV, stop
             {
-                isFeasible = new bool[]{ false, false };
-                ROOtoReturn.SetFeasible(isFeasible);
-                ROOtoReturn.SetOFV(null);
-                ROOtoReturn.SetOptimizedRoute(null);
-            } //if GDV infeasible, no need to check EV, stop
-            else if(status[1] == XCPlexSolutionStatus.Optimal) // TODO : Ask if optimal or feasible or should consider both?
+                return new RouteOptimizerOutput(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+            }
+            else//GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
             {
-                optimalSolutions[1]=GDV_TSPSolver.GetCompleteSolution();
-                //EV Second:
+                if(GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
+                {
+                    //TODO Figure out clearly and get rid of both or at least one
+                    System.Windows.Forms.MessageBox.Show("GDV_TSPSolver status is other than Infeasible or Optimal!");
+                    throw new Exception ("GDV_TSPSolver status is other than Infeasible or Optimal!");
+                }
+                //If we're here, we know GDV route has been successfully optimized
+                assignedRoutes[1] = extractTheSingleRouteFromSolution(GDV_TSPSolver.GetCompleteSolution());
+                ofv[1] = GDV_TSPSolver.GetBestObjValue();
+                //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
                 EV_TSPSolver.RefineDecisionVariables(CS);
                 EV_TSPSolver.Solve_and_PostProcess();
-                status[0] = EV_TSPSolver.SolutionStatus;
-                if(status[0] == XCPlexSolutionStatus.Infeasible)
+                if(EV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if EV infeasible, return only GDV 
                 {
-                    isFeasible = new bool[] { true, false };
-                    ROOtoReturn.SetFeasible(isFeasible);
-                    ROOtoReturn.SetOFV(new double[] { double.MinValue, GDV_TSPSolver.GetBestObjValue() });
-                    ROOtoReturn.SetOptimizedRoute(optimalSolutions); 
-                }//if EV infeasible, stop
-                else if (status[0] == XCPlexSolutionStatus.Optimal)
-                {
-                    optimalSolutions[0] = EV_TSPSolver.GetCompleteSolution();
-                    isFeasible = new bool[] { true, true };
-                    ROOtoReturn.SetFeasible(isFeasible);
-                    ROOtoReturn.SetOFV(new double[] { EV_TSPSolver.GetBestObjValue(), GDV_TSPSolver.GetBestObjValue() });
-                    ROOtoReturn.SetOptimizedRoute(optimalSolutions);
-                }//if EV feasible, stop
-                else
-                {
-                    System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
+                    return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, ofv: ofv, optimizedRoute: assignedRoutes);
                 }
-            }//if GDV feasible, check EV
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("GDV_TSPSolver status is other than Infeasible or Optimal!");
+                else//EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
+                {
+                    if (EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
+                    {
+                        //TODO Figure out clearly and get rid of both or at least one
+                        System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
+                        throw new Exception("GDV_TSPSolver status is other than Infeasible or Optimal!");
+                    }
+                    //If we're here, we know GDV route has been successfully optimized
+                    assignedRoutes[0] = extractTheSingleRouteFromSolution(EV_TSPSolver.GetCompleteSolution());
+                    ofv[0] = EV_TSPSolver.GetBestObjValue();
+                    return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                }
             }
+        }
 
-            return ROOtoReturn;
+        AssignedRoute extractTheSingleRouteFromSolution(NewCompleteSolution ncs)
+        {
+            if (ncs.Routes.Count != 1)
+            {
+                //This is a problem!
+                System.Windows.Forms.MessageBox.Show("Single vehicle optimization resulted in none or multiple AssignedRoute in a Solution!");
+                throw new Exception("Single vehicle optimization resulted in none or multiple AssignedRoute in a Solution!");
+            }
+            return ncs.Routes[0];
         }
 
         public override ISolution GetRandomSolution(int seed, Type solutionType)

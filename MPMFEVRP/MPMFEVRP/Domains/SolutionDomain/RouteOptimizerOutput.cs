@@ -12,18 +12,18 @@ namespace MPMFEVRP.Domains.SolutionDomain
         RouteOptimizationStatus status;
         bool[] feasible = new bool[2];
         double[] ofv = new double[2];
-        Route[] optimizedRoute = new Route[2];
+        AssignedRoute[] optimizedRoute = new AssignedRoute[2];
         public RouteOptimizationStatus Status { get { return status; } }
         public bool[] Feasible { get{ return feasible; } }
         public double [] OFV { get{ return ofv; } }
-        public Route[] OptimizedRoute { get { return optimizedRoute; } }
+        public AssignedRoute[] OptimizedRoute { get { return optimizedRoute; } }
         
         public RouteOptimizerOutput()
         {
             status = RouteOptimizationStatus.NotYetOptimized;
         }
 
-        public RouteOptimizerOutput(RouteOptimizationStatus status, double[] ofv = null, Route[] optimizedRoute = null)
+        public RouteOptimizerOutput(RouteOptimizationStatus status, double[] ofv = null, AssignedRoute[] optimizedRoute = null)
         {
             this.status = status;
             switch (status)
@@ -73,12 +73,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             //Any final adjustments?
         }
 
-        //public RouteOptimizerOutput(RouteOptimizationStatus status, bool[] feasible, double[] ofv)
-        //{
-        //    this.status = status;
-        //    this.feasible = feasible;
-        //    this.ofv = ofv;
-        //}
         public void SetFeasible(bool[] feasible)
         {
             if (feasible != null)
