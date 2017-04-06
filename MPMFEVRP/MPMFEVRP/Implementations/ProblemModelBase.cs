@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models.XCPlex;
 
 namespace MPMFEVRP.Implementations
@@ -21,6 +22,8 @@ namespace MPMFEVRP.Implementations
 
         protected XCPlex_NodeDuplicatingFormulation EV_TSPSolver;
         protected XCPlex_NodeDuplicatingFormulation GDV_TSPSolver;
+        protected bool archiveAllCustomerSets;
+        protected CustomerSetList customerSetArchive;
 
         public abstract string GetName();
         public abstract string GetDescription();

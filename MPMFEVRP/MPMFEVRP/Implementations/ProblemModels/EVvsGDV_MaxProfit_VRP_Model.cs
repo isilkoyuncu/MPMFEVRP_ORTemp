@@ -20,6 +20,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
             problemName = problem.GetName();
+
+            PopulateCompatibleSolutionTypes();
+            CreateCustomerSetArchive();
         }//empty constructor
         public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem)
         {
@@ -31,6 +34,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
             EV_TSPSolver = new Models.XCPlex.XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
             GDV_TSPSolver = new Models.XCPlex.XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+
+            PopulateCompatibleSolutionTypes();
+            CreateCustomerSetArchive();
         }
 
         public override string GetDescription()
@@ -53,6 +59,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
         /// <returns></returns>
         public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
+            if (archiveAllCustomerSets)
+                if (customerSetArchive.Includes(CS))
+                    return new RouteOptimizerOutput(RouteOptimizationStatus.WontOptimize_Duplicate);
+            customerSetArchive.Add(CS);
+
             double worstCaseOFV = double.MinValue; //Revert this when working with a minimization problem
 
             AssignedRoute[] assignedRoutes = new AssignedRoute[2];
@@ -160,6 +171,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
                 typeof(RouteBasedSolution),
                 typeof(CustomerSetBasedSolution)
             };
+        }
+        void CreateCustomerSetArchive()
+        {
+            archiveAllCustomerSets = true;
+            customerSetArchive = new CustomerSetList();
         }
 
         
