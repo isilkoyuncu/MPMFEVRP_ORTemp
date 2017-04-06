@@ -25,10 +25,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
         }
 
+        public bool IsIdentical(CustomerSet otherCS)
+        {
+            if (customers.Count != otherCS.NumberOfCustomers)
+                return false;
+            for (int i = 0; i < customers.Count; i++)
+                if (customers[i] != otherCS.Customers[i])
+                    return false;//This works because the customers list is ordered
+            //If no difference is found, we'll have to return true, concluding that the two sets are identical
+            return true;
+        }
+
         public void Extend(string customer)
         {
             if (!customers.Contains(customer))
+            {
                 customers.Add(customer);
+                customers.Sort();//TODO Write a unit test to see if this really works as intended
+            }
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
