@@ -131,17 +131,17 @@
     <Compile Include="Forms\DefaultSolutionViewer.Designer.cs">
       <DependentUpon>DefaultSolutionViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="Implementations\AlgorithmBase.cs" />
+    <Compile Include="Interfaces\AlgorithmBase.cs" />
     <Compile Include="Implementations\Algorithms\BestOfRandom.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
     <Compile Include="Implementations\Algorithms\Greedy.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
-    <Compile Include="Implementations\ProblemBase.cs" />
-    <Compile Include="Implementations\ProblemModelBase.cs" />
+    <Compile Include="Interfaces\ProblemBase.cs" />
+    <Compile Include="Interfaces\ProblemModelBase.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
     <Compile Include="Implementations\Problems\Readers\KoyuncuYavuzReader.cs" />
-    <Compile Include="Implementations\SolutionBase.cs" />
+    <Compile Include="Interfaces\SolutionBase.cs" />
     <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Implementations\Solutions\CustomerSetBasedSolution.cs" />
     <Compile Include="Interfaces\IAlgorithm.cs" />
@@ -158,6 +158,7 @@
     <Compile Include="Models\XCPlex\XCPlexParameters.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_SetCovering_wCustomerSets.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\AlgorithmUtil.cs" />

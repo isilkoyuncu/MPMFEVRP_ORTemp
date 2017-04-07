@@ -26,7 +26,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         }
 
-        public override void SpecializedInitialize(IProblemModel model)
+        public override void SpecializedInitialize(ProblemModelBase model)
         {
             unexploredList = new SolutionList();
 

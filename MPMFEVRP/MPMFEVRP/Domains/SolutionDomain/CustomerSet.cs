@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
+    /// <summary>
+    /// CustomerSet is created from customers specified in SRD
+    /// More specifically, the string identifying a customer is its ID in SRD
+    /// </summary>
     public class CustomerSet
     {
-        List<string> customers = new List<string>();
+        List<string> customers = new List<string>();//TODO Should this really be a string? Ordering is an issue (1, 10, 2, .., 9)
         public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return customers.Count; } }
 

@@ -8,6 +8,7 @@ using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
 using MPMFEVRP.Domains.AlgorithmDomain;
 
@@ -16,6 +17,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
         string problemName;
+
         public EVvsGDV_MaxProfit_VRP_Model()
         {
             EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
@@ -62,7 +64,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             if (archiveAllCustomerSets)
                 if (customerSetArchive.Includes(CS))
                     return new RouteOptimizerOutput(RouteOptimizationStatus.WontOptimize_Duplicate);
-            customerSetArchive.Add(CS);
+            customerSetArchive.Add(CS);//
 
             double worstCaseOFV = double.MinValue; //Revert this when working with a minimization problem
 
