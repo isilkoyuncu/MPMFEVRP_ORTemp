@@ -65,7 +65,7 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public override string GetName()
         {
-            throw new NotImplementedException();
+            return "Route Based Solution";
         }
 
         public override ISolution GenerateRandom()
