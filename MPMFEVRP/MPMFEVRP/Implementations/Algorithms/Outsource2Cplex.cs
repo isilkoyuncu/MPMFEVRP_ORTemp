@@ -39,7 +39,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             throw new NotImplementedException();
         }
 
-        public override void SpecializedInitialize(ProblemModelBase problemModel)
+        public override void SpecializedInitialize(IProblemModel problemModel)
         {
             base.model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;

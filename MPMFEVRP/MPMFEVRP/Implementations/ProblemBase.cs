@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Implementations.ProblemModels;
 
-namespace MPMFEVRP.Interfaces
+namespace MPMFEVRP.Implementations
 {
     public abstract class ProblemBase : IProblem
     {

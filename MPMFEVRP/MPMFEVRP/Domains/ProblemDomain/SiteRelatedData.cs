@@ -46,14 +46,5 @@ namespace MPMFEVRP.Domains.ProblemDomain
             timeConsumption = twinSRD.TimeConsumption;
             energyConsumption = twinSRD.EnergyConsumption;
         }
-
-        public List<string> GetCustomerIDs()
-        {
-            List<string> outcome = new List<string>();
-            foreach (Site s in siteArray)
-                if (s.SiteType == SiteTypes.Customer)
-                    outcome.Add(s.ID);
-            return outcome;
-        }
     }
 }

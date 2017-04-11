@@ -15,7 +15,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     public class BestOfRandom : AlgorithmBase
     {
-        ProblemModelBase problemData;
+        IProblemModel problemData;
 
         int poolSize = 20;
 
@@ -30,7 +30,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             return "Best of N Randoms";
         }
 
-        public override void SpecializedInitialize(ProblemModelBase model)
+        public override void SpecializedInitialize(IProblemModel model)
         {
             problemData = model;
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();

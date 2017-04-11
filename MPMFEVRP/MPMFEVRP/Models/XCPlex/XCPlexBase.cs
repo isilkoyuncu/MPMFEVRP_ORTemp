@@ -14,7 +14,7 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public abstract class XCPlexBase : Cplex
     {
-        protected ProblemModelBase problemModel;
+        protected IProblemModel problemModel;
         protected XCPlexParameters xCplexParam;
         protected NumVarType variable_type = NumVarType.Int;
         protected List<INumVar> allVariables_list;
@@ -45,7 +45,7 @@ namespace MPMFEVRP.Models.XCPlex
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
         public XCPlexBase() { }
-        public XCPlexBase(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
+        public XCPlexBase(IProblemModel problemModel, XCPlexParameters xCplexParam)
         {
             this.problemModel = problemModel;
             this.xCplexParam = xCplexParam;

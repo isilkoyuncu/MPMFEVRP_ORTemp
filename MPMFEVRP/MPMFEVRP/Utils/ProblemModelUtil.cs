@@ -16,8 +16,8 @@ namespace MPMFEVRP.Utils
 
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(IProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(IProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
@@ -30,20 +30,20 @@ namespace MPMFEVRP.Utils
             return result;
         }
 
-        public static ProblemModelBase CreateProblemModelByName(String problemModelName)
+        public static IProblemModel CreateProblemModelByName(String problemModelName)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(IProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(IProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ProblemModelBase createdProblemModel = (ProblemModelBase)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
+            IProblemModel createdProblemModel = (IProblemModel)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
 
             foreach (var problemModel in allProblemModels)
             {
-                createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel);
+                createdProblemModel = (IProblemModel)Activator.CreateInstance(problemModel);
                 if (createdProblemModel.GetName() == problemModelName)
                 {
                     return createdProblemModel;
@@ -52,20 +52,20 @@ namespace MPMFEVRP.Utils
 
             return createdProblemModel;
         }
-        public static ProblemModelBase CreateProblemModelByProblemName(String problemName)
+        public static IProblemModel CreateProblemModelByProblemName(String problemName)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(IProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(IProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ProblemModelBase createdProblemModel = (ProblemModelBase)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
+            IProblemModel createdProblemModel = (IProblemModel)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
 
             foreach (var problemModel in allProblemModels)
             {
-                createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel);
+                createdProblemModel = (IProblemModel)Activator.CreateInstance(problemModel);
                 if (createdProblemModel.GetNameOfProblemOfModel() == problemName)
                 {
                     return createdProblemModel;

@@ -9,7 +9,7 @@ namespace MPMFEVRP.Interfaces
 {
     public interface IAlgorithm
     {
-        void Initialize(ProblemModelBase model);
+        void Initialize(IProblemModel model);
         void Run();
         void Conclude();
 
