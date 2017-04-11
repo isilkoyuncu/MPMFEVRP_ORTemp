@@ -32,6 +32,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     {
                         break;
                     }
+                case RouteOptimizationStatus.WontOptimize_Duplicate:
+                    {
+                        break;
+                    }
                 case RouteOptimizationStatus.InfeasibleForBothGDVandEV://This is when we know the GDV TSP is infeasible
                     {
                         feasible = new bool[] { false, false };

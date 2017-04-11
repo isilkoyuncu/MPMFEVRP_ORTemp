@@ -5,9 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.Models;
 
-namespace MPMFEVRP.Implementations
+namespace MPMFEVRP.Interfaces
 {
     public abstract class ProblemModelBase : IProblemModel
     {
@@ -21,6 +23,8 @@ namespace MPMFEVRP.Implementations
 
         protected XCPlex_NodeDuplicatingFormulation EV_TSPSolver;
         protected XCPlex_NodeDuplicatingFormulation GDV_TSPSolver;
+        protected bool archiveAllCustomerSets; public bool ArchiveAllCustomerSets { get { return archiveAllCustomerSets; } }
+        protected CustomerSetList customerSetArchive; public CustomerSetList CustomerSetArchive { get { return customerSetArchive; } }
 
         public abstract string GetName();
         public abstract string GetDescription();
