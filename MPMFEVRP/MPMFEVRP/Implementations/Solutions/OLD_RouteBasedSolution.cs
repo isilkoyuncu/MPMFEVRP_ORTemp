@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
+using BestRandom;
+using MPMFEVRP.Forms;
+using MPMFEVRP.Implementations.ProblemModels;
+using MPMFEVRP.Utils;
 
-namespace MPMFEVRP.Domains.SolutionDomain
+namespace MPMFEVRP.Implementations.Solutions
 {
-    public class NewCompleteSolution
+    public class OLD_RouteBasedSolution: SolutionBase
     {
         List<AssignedRoute> routes;
-        public List<AssignedRoute> Routes { get { return routes; } }
 
-        public NewCompleteSolution()
+        public OLD_RouteBasedSolution()
         {
 
         }
-        public NewCompleteSolution(IProblemModel problemModel, List<Tuple<int,int,int>> XSetTo1)
+        public OLD_RouteBasedSolution(EVvsGDV_MaxProfit_VRP_Model fromProblem, List<Tuple<int,int,int>> XSetTo1)
         {
             routes = new List<AssignedRoute>();
             //first determining the number of routes
@@ -25,7 +27,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             foreach (Tuple<int,int,int> x in XSetTo1)
                 if (x.Item1 == 0)
                 {
-                    routes.Add(new AssignedRoute(problemModel, x.Item3));
+                    routes.Add(new AssignedRoute(fromProblem, x.Item3));
                     routes.Last().Extend(x.Item2);
                     tobeRemoved.Add(x);
                 }
@@ -60,6 +62,36 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (XSetTo1.Count > 0)
                 throw new Exception("Infeasible complete solution due to subtours or routes that don't start/end at the depot");
 
+        }
+
+        public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ISolution GenerateRandom()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override List<ISolution> GetAllChildren()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetName()
+        {
+            return "Mixed Fleet VRP Solution (vehicle based routes)";
+        }
+
+        public override void TriggerSpecification()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void View(IProblem problem)
+        {
+            throw new NotImplementedException();
         }
     }
 }

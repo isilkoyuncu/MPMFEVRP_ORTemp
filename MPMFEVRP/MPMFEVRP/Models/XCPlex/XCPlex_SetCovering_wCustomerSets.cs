@@ -21,8 +21,10 @@ namespace MPMFEVRP.Models.XCPlex
         }
 
 
-        public override NewCompleteSolution GetCompleteSolution()
+        public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
+            if (SolutionType != typeof(MPMFEVRP.Implementations.Solutions.CustomerSetBasedSolution))
+                throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
             throw new NotImplementedException();
         }
 

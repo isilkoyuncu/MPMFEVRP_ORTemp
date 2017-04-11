@@ -7,7 +7,7 @@ using MPMFEVRP.Interfaces;
 using MPMFEVRP.Models.XCPlex;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Models;
-using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Implementations.Solutions;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -72,7 +72,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
             stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
-            NewCompleteSolution optimalSolution = CPlexExtender.GetCompleteSolution();
+            NEW_RouteBasedSolution optimalSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
         }
 
         void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)

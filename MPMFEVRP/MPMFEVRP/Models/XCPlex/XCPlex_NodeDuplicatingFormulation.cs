@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ILOG.Concert;
 using ILOG.CPLEX;
-using MPMFEVRP.Implementations;
+using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
@@ -498,9 +498,9 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        public override NewCompleteSolution GetCompleteSolution()
+        public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
-            return new NewCompleteSolution(problemModel, GetXVariablesSetTo1());
+            return new NEW_RouteBasedSolution(problemModel, GetXVariablesSetTo1());
         }
     }
 }
