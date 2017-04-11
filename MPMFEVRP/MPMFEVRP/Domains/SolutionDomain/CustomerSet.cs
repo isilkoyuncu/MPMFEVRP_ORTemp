@@ -14,7 +14,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
     {
         List<string> customers = new List<string>();//TODO Should this really be a string? Ordering is an issue (1, 10, 2, .., 9)
         public List<string> Customers { get { return customers; } }
-        public int NumberOfCustomers { get { return customers.Count; } }
+        public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
 
         RouteOptimizerOutput routeOptimizerOutcome; //TODO customer set'in bir uyesi ancak hic kullanmiyoruz bi noktada cozdurdukten sonra bu update edilmeli bi method lazim
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome;} } // ya da buraya bir set lazim ama ayrica method daha iyi olabilir
