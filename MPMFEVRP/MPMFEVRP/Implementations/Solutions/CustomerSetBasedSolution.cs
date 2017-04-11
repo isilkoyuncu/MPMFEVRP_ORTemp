@@ -27,7 +27,7 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public override string GetName()
         {
-            return "Customer Set Based Solution";
+            return "Customer Set Based";
         }
 
         public override void TriggerSpecification()

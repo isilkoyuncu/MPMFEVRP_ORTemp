@@ -557,7 +557,7 @@ namespace MPMFEVRP.Models.XCPlex
                             outcome.Add(new Tuple<int, int, int>(depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r], depotPlusCustomerSiteNodeIndices[j]));
             return outcome;
         }
-        public override NewCompleteSolution GetCompleteSolution()
+        public override RouteBasedSolution GetCompleteSolution()
         {
             List<Tuple<int, int, int>> XVariablesSetTo1 = GetXVariablesSetTo1();
             List<Tuple<int, int, int>> YVariablesSetTo1 = GetYVariablesSetTo1();
@@ -568,7 +568,7 @@ namespace MPMFEVRP.Models.XCPlex
                 XVariablesSetTo1.Add(new Tuple<int, int, int>(t.Item2, t.Item3, 0));
             }
 
-            return new NewCompleteSolution(problemModel, XVariablesSetTo1);
+            return new RouteBasedSolution(problemModel, XVariablesSetTo1);
         }
     }
 }

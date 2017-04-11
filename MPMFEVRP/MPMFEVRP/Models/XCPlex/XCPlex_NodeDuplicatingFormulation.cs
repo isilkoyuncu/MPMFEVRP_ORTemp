@@ -498,9 +498,9 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        public override NewCompleteSolution GetCompleteSolution()
+        public override RouteBasedSolution GetCompleteSolution()
         {
-            return new NewCompleteSolution(problemModel, GetXVariablesSetTo1());
+            return new RouteBasedSolution(problemModel, GetXVariablesSetTo1());
         }
     }
 }

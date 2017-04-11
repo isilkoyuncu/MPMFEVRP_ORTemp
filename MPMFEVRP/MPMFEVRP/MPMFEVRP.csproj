@@ -90,7 +90,6 @@
     <Compile Include="Domains\ProblemDomain\VehicleRelatedData.cs" />
     <Compile Include="Domains\SolutionDomain\AssignedRoute.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
-    <Compile Include="Domains\SolutionDomain\NewCompleteSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
     <Compile Include="Domains\SolutionDomain\RouteOptimizerOutput.cs" />
     <Compile Include="Domains\SolutionDomain\SolutionEnums.cs" />
@@ -141,8 +140,8 @@
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
     <Compile Include="Implementations\Problems\Readers\KoyuncuYavuzReader.cs" />
     <Compile Include="Implementations\SolutionBase.cs" />
-    <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Implementations\Solutions\CustomerSetBasedSolution.cs" />
+    <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Interfaces\IAlgorithm.cs" />
     <Compile Include="Interfaces\IProblem.cs" />
     <Compile Include="Interfaces\IProblemModel.cs" />

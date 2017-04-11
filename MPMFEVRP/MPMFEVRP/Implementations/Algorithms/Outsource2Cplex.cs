@@ -72,7 +72,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
             stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
-            NewCompleteSolution optimalSolution = CPlexExtender.GetCompleteSolution();
+            RouteBasedSolution optimalSolution = CPlexExtender.GetCompleteSolution();
         }
 
         void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)

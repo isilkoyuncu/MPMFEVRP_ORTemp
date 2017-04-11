@@ -83,7 +83,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (ofv != null)
                 this.ofv = ofv;
         }
-        public void SetOptimizedRoute(NewCompleteSolution[] solutions)
+        public void SetOptimizedRoute(RouteBasedSolution[] solutions)
         {
             throw new NotImplementedException(); // TODO get routes from NewSolution
         }

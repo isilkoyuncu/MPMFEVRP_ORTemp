@@ -99,7 +99,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             }
         }
 
-        AssignedRoute extractTheSingleRouteFromSolution(NewCompleteSolution ncs)
+        AssignedRoute extractTheSingleRouteFromSolution(RouteBasedSolution ncs)
         {
             if (ncs.Routes.Count != 1)
             {
