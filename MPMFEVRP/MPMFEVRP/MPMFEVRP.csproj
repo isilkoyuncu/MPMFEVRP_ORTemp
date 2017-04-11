@@ -91,6 +91,7 @@
     <Compile Include="Domains\SolutionDomain\AssignedRoute.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
+    <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Solutions\NEW_RouteBasedSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
     <Compile Include="Domains\SolutionDomain\RouteOptimizerOutput.cs" />
