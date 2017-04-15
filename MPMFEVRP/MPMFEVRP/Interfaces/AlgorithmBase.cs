@@ -9,14 +9,14 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.AlgorithmDomain;
 
-namespace MPMFEVRP.Implementations
+namespace MPMFEVRP.Interfaces
 {
     public abstract class AlgorithmBase : IAlgorithm
     {
         protected ISolution bestSolutionFound;
         public ISolution Solution { get { return bestSolutionFound; } }
 
-        protected IProblemModel model;
+        protected ProblemModelBase model;
 
         protected AlgorithmParameters algorithmParameters;
         public AlgorithmParameters AlgorithmParameters { get { return algorithmParameters; } }
@@ -43,7 +43,7 @@ namespace MPMFEVRP.Implementations
                     ParameterType.ComboBox));
         }
 
-        public void Initialize(IProblemModel model)
+        public void Initialize(ProblemModelBase model)
         {
             // common initialize for all algorithms
             this.model = model;
@@ -51,7 +51,7 @@ namespace MPMFEVRP.Implementations
             SpecializedInitialize(model);
         }
 
-        public abstract void SpecializedInitialize(IProblemModel model);
+        public abstract void SpecializedInitialize(ProblemModelBase model);
 
         public void Run()
         {

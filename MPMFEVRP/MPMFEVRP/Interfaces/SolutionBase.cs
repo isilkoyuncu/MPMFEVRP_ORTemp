@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BestRandom;
 
-namespace MPMFEVRP.Implementations
+namespace MPMFEVRP.Interfaces
 {
     public abstract class SolutionBase : ISolution
     {
