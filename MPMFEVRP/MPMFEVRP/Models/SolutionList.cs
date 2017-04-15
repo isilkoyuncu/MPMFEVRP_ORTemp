@@ -11,7 +11,7 @@ namespace MPMFEVRP.Models
 
     public class SolutionList : List<ISolution>
     {
-        public int Cut(double upperbound)
+        public int Cut(double upperbound)//TODO: Adapt this to the Max-Profit objective
         {
             return this.RemoveAll(item => item.LowerBound >= upperbound);
         }
@@ -27,7 +27,7 @@ namespace MPMFEVRP.Models
                     case PopStrategy.Random:
                         resultIndex = new Random(DateTime.Now.Ticks.GetHashCode()).Next(Count);
                         break;
-                    case PopStrategy.LowestLowerBound:
+                    case PopStrategy.LowestLowerBound://TODO: Adapt this to the Max-Profit objective
                         var minLB = Double.MaxValue;
                         var maxIDCount = int.MinValue;
                         for (int i = 0; i < Count; i++)

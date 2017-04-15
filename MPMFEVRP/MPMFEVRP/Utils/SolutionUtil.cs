@@ -16,8 +16,8 @@ namespace MPMFEVRP.Utils
 
             var allSolutions = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ISolution).IsAssignableFrom(p))
-                .Where(type => typeof(ISolution).IsAssignableFrom(type))
+                .Where(p => typeof(SolutionBase).IsAssignableFrom(p))
+                .Where(type => typeof(SolutionBase).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
@@ -29,12 +29,12 @@ namespace MPMFEVRP.Utils
             return result;
         }
 
-        public static ISolution CreateSolutionByName(String solutionName, IProblemModel problemData)
+        public static ISolution CreateSolutionByName(String solutionName, ProblemModelBase problemData)
         {
             var allSolutions = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ISolution).IsAssignableFrom(p))
-                .Where(type => typeof(ISolution).IsAssignableFrom(type))
+                .Where(p => typeof(SolutionBase).IsAssignableFrom(p))
+                .Where(type => typeof(SolutionBase).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 

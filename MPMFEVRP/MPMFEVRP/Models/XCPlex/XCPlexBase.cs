@@ -80,7 +80,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected abstract void AddTheObjectiveFunction();
         protected abstract void AddAllConstraints();
         public abstract string GetDescription_AllVariables_Array();
-        public abstract RouteBasedSolution GetCompleteSolution();
+        public abstract SolutionBase GetCompleteSolution(Type SolutionType);//TODO Figure out how to make this work with a run-time-selected Solution type
 
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1)
         {

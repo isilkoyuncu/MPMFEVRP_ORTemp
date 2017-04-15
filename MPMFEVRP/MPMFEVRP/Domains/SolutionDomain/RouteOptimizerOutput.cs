@@ -76,20 +76,5 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             //Any final adjustments?
         }
-
-        public void SetFeasible(bool[] feasible)
-        {
-            if (feasible != null)
-                this.feasible = feasible;
-        }
-        public void SetOFV(double[] ofv)
-        {
-            if (ofv != null)
-                this.ofv = ofv;
-        }
-        public void SetOptimizedRoute(RouteBasedSolution[] solutions)
-        {
-            throw new NotImplementedException(); // TODO get routes from NewSolution
-        }
     }
 }

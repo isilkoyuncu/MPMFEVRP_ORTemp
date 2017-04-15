@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MPMFEVRP.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,12 +15,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
     {
         List<string> customers = new List<string>();//TODO Should this really be a string? Ordering is an issue (1, 10, 2, .., 9)
         public List<string> Customers { get { return customers; } }
-        public int NumberOfCustomers { get { return customers.Count; } }
+        public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
 
-        RouteOptimizerOutput routeOptimizerOutcome; //TODO customer set'in bir uyesi ancak hic kullanmiyoruz bi noktada cozdurdukten sonra bu update edilmeli bi method lazim
-        public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome;} } // ya da buraya bir set lazim ama ayrica method daha iyi olabilir
+        RouteOptimizerOutput routeOptimizerOutcome; 
+        public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
 
         public CustomerSet() { customers = new List<string>(); }
+        public CustomerSet(string customerID, ProblemModelBase problemModelBase) { customers = new List<string>(); customers.Add(customerID); routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this); }
         public CustomerSet(CustomerSet twinCS)
         {
             customers = new List<string>();
@@ -27,6 +29,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(c);
             }
+            //TODO: Add a deep copy method for RouteOptimizerOutput and then call it here, much better than re-optimizing the same route
         }
 
         public bool IsIdentical(CustomerSet otherCS)
@@ -40,12 +43,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return true;
         }
 
-        public void Extend(string customer)
+        public void Extend(string customer, ProblemModelBase problemModelBase)
         {
             if (!customers.Contains(customer))
             {
                 customers.Add(customer);
                 customers.Sort();//TODO Write a unit test to see if this really works as intended
+                routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
             }
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
@@ -66,23 +70,23 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new Exception("Cannot remove customer at a position that doesn't exist!");
         }
 
-        public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2)
+        public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2, ProblemModelBase problemModelBase)
         {
             string c1, c2;
             c1 = CS1.customers[position1];
             c2 = CS2.customers[position2];
             CS1.RemoveAt(position1);
             CS2.RemoveAt(position2);
-            CS2.Extend(c1);
-            CS1.Extend(c2);
+            CS2.Extend(c1, problemModelBase);
+            CS1.Extend(c2, problemModelBase);
         }
-        public static void Swap(CustomerSet CS1, string customer1, CustomerSet CS2, string customer2)
+        public static void Swap(CustomerSet CS1, string customer1, CustomerSet CS2, string customer2, ProblemModelBase problemModelBase)
         {
             CS1.Remove(customer1);
             CS2.Remove(customer2);
 
-            CS2.Extend(customer1);
-            CS1.Extend(customer2);
+            CS2.Extend(customer1, problemModelBase);
+            CS1.Extend(customer2, problemModelBase);
         }
 
     }

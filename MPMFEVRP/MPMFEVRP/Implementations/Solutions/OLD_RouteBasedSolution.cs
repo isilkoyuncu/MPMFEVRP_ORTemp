@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BestRandom;
-using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Interfaces;
+using BestRandom;
+using MPMFEVRP.Forms;
+using MPMFEVRP.Implementations.ProblemModels;
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
-    public class RouteBasedSolution : SolutionBase
+    public class OLD_RouteBasedSolution: SolutionBase
     {
         List<AssignedRoute> routes;
-        public List<AssignedRoute> Routes { get { return routes; } }
 
-        public RouteBasedSolution()
+        public OLD_RouteBasedSolution()
         {
 
         }
-        public RouteBasedSolution(IProblemModel problemModel, List<Tuple<int,int,int>> XSetTo1)
+        public OLD_RouteBasedSolution(EVvsGDV_MaxProfit_VRP_Model fromProblem, List<Tuple<int,int,int>> XSetTo1)
         {
             routes = new List<AssignedRoute>();
             //first determining the number of routes
@@ -26,7 +27,7 @@ namespace MPMFEVRP.Implementations.Solutions
             foreach (Tuple<int,int,int> x in XSetTo1)
                 if (x.Item1 == 0)
                 {
-                    routes.Add(new AssignedRoute(problemModel, x.Item3));
+                    routes.Add(new AssignedRoute(fromProblem, x.Item3));
                     routes.Last().Extend(x.Item2);
                     tobeRemoved.Add(x);
                 }
@@ -63,22 +64,12 @@ namespace MPMFEVRP.Implementations.Solutions
 
         }
 
-        public override string GetName()
-        {
-            return "Route Based";
-        }
-
-        public override ISolution GenerateRandom()
-        {
-            throw new NotImplementedException();
-        }
-
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {
             throw new NotImplementedException();
         }
 
-        public override void View(IProblem problem)
+        public override ISolution GenerateRandom()
         {
             throw new NotImplementedException();
         }
@@ -88,7 +79,17 @@ namespace MPMFEVRP.Implementations.Solutions
             throw new NotImplementedException();
         }
 
+        public override string GetName()
+        {
+            return "Mixed Fleet VRP Solution (vehicle based routes)";
+        }
+
         public override void TriggerSpecification()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void View(IProblem problem)
         {
             throw new NotImplementedException();
         }

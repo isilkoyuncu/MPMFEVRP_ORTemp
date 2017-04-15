@@ -5,11 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using ILOG.Concert;
 using ILOG.CPLEX;
-using MPMFEVRP.Implementations;
+using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Interfaces;
-using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -557,7 +556,7 @@ namespace MPMFEVRP.Models.XCPlex
                             outcome.Add(new Tuple<int, int, int>(depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r], depotPlusCustomerSiteNodeIndices[j]));
             return outcome;
         }
-        public override RouteBasedSolution GetCompleteSolution()
+        public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             List<Tuple<int, int, int>> XVariablesSetTo1 = GetXVariablesSetTo1();
             List<Tuple<int, int, int>> YVariablesSetTo1 = GetYVariablesSetTo1();
@@ -568,7 +567,7 @@ namespace MPMFEVRP.Models.XCPlex
                 XVariablesSetTo1.Add(new Tuple<int, int, int>(t.Item2, t.Item3, 0));
             }
 
-            return new RouteBasedSolution(problemModel, XVariablesSetTo1);
+            return new NEW_RouteBasedSolution(problemModel, XVariablesSetTo1);
         }
     }
 }
