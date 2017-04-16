@@ -31,6 +31,8 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
         SET_COVER
 
     }
+    public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection };
+
     public enum XCPlexSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };
     //enum values:
     //Unsolved until Solve() is tried, the other four are the same as AlgorithmSolutionStatus

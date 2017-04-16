@@ -11,7 +11,7 @@ using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
-    public class OLD_RouteBasedSolution: SolutionBase
+    public class OLD_RouteBasedSolution : SolutionBase
     {
         List<AssignedRoute> routes;
 
@@ -19,12 +19,12 @@ namespace MPMFEVRP.Implementations.Solutions
         {
 
         }
-        public OLD_RouteBasedSolution(EVvsGDV_MaxProfit_VRP_Model fromProblem, List<Tuple<int,int,int>> XSetTo1)
+        public OLD_RouteBasedSolution(EVvsGDV_MaxProfit_VRP_Model fromProblem, List<Tuple<int, int, int>> XSetTo1)
         {
             routes = new List<AssignedRoute>();
             //first determining the number of routes
             List<Tuple<int, int, int>> tobeRemoved = new List<Tuple<int, int, int>>();
-            foreach (Tuple<int,int,int> x in XSetTo1)
+            foreach (Tuple<int, int, int> x in XSetTo1)
                 if (x.Item1 == 0)
                 {
                     routes.Add(new AssignedRoute(fromProblem, x.Item3));
@@ -45,7 +45,7 @@ namespace MPMFEVRP.Implementations.Solutions
                 {
                     lastSite = r.LastVisitedSite;
                     extensionDetected = false;
-                    foreach(Tuple<int, int, int> x in XSetTo1)
+                    foreach (Tuple<int, int, int> x in XSetTo1)
                     {
                         if (x.Item1 == lastSite)
                         {
