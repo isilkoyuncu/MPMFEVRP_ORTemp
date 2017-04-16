@@ -34,8 +34,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
             pdp.CRD = new ContextRelatedData(problem.PDP.CRD);
             problemName = problem.GetName();
 
-            EV_TSPSolver = new Models.XCPlex.XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            GDV_TSPSolver = new Models.XCPlex.XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
@@ -69,11 +69,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
                 CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)solution;
                 return CheckFeasibilityOfSolution(csbs);
             }
-            //else if (solutionType == typeof(RouteBasedSolution))
-            //{
-            //    RouteBasedSolution rbs = (RouteBasedSolution)solution;
-            //    return CheckFeasibilityOfSolution(rbs);
-            //}
+            else if (solutionType == typeof(NEW_RouteBasedSolution))
+            {
+                NEW_RouteBasedSolution rbs = (NEW_RouteBasedSolution)solution;
+                return CheckFeasibilityOfSolution(rbs);
+            }
             else
             {
                 System.Windows.Forms.MessageBox.Show("solution plugged into EVvsGDV_MaxProfit_VRP_Model.CheckFeasibilityOfSolution is incompatible!");

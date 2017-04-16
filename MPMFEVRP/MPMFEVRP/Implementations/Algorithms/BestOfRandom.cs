@@ -9,6 +9,7 @@ using MPMFEVRP.Models;
 using MPMFEVRP.Implementations.Solutions;
 using BestRandom;
 using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Utils;
 
 
 namespace MPMFEVRP.Implementations.Algorithms
@@ -18,6 +19,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         ProblemModelBase problemData;
 
         int poolSize = 20;
+
 
         public BestOfRandom()
         {
@@ -39,8 +41,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
             int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
             Random random = new Random(randomSeed);
-            //TODO write new default solution
-            //bestSolutionFound = new DefaultSolution(model, random);
+            bestSolutionFound = SolutionUtil.CreateSolutionByName(AlgorithmParameters.GetParameter(ParameterID.SOLUTION_TYPES).GetStringValue(), model);
         }
 
         public override void SpecializedRun()

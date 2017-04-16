@@ -10,6 +10,19 @@ namespace MPMFEVRP.Implementations.Solutions
 {
     public class CustomerSetBasedSolution : SolutionBase
     {
+        private ProblemModelBase model;
+        private Random random;
+
+        public CustomerSetBasedSolution()
+        {
+        }
+        // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing)
+        public CustomerSetBasedSolution(ProblemModelBase model, Random random)
+        {
+            this.model = model;
+            this.random = random;
+        }
+
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {
             throw new NotImplementedException();
