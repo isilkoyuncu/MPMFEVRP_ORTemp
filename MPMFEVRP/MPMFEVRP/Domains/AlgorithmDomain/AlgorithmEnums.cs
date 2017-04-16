@@ -24,7 +24,12 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
         CUTS_FACTOR,
         THREADS,
         RELAXATION,
-        XCPLEX_FORMULATION
+        XCPLEX_FORMULATION,
+        SELECTION_CRITERIA,
+        TOP_SELECTION_PERCENTAGE,
+        RECOVERY_OPTION,
+        SET_COVER
+
     }
     public enum XCPlexSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };
     //enum values:
