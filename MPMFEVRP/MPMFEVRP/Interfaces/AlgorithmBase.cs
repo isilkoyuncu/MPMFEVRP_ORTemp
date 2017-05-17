@@ -47,7 +47,8 @@ namespace MPMFEVRP.Interfaces
         {
             // common initialize for all algorithms
             this.model = model;
-            this.bestSolutionFound = SolutionUtil.CreateSolutionByName(algorithmParameters.GetParameter(ParameterID.SOLUTION_TYPES).GetStringValue(), model);
+            //TODO is this necessary?
+            //this.bestSolutionFound = SolutionUtil.CreateSolutionByName(algorithmParameters.GetParameter(ParameterID.SOLUTION_TYPES).GetStringValue(), model);
             SpecializedInitialize(model);
         }
 

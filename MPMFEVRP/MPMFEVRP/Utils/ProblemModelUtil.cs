@@ -74,5 +74,31 @@ namespace MPMFEVRP.Utils
 
             return createdProblemModel;
         }
+
+        public static ProblemModelBase CreateProblemModelByProblem(IProblem problem)
+        {
+            var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
+                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(t => !t.IsAbstract)
+                .ToList();
+
+            ProblemModelBase createdProblemModel = (ProblemModelBase)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model),problem);
+
+            foreach (var problemModel in allProblemModels)
+            {
+                createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel,problem);
+                if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
+                {
+                    return createdProblemModel;
+                }
+            }
+
+            return createdProblemModel;
+        }
+
+
+
     }
 }

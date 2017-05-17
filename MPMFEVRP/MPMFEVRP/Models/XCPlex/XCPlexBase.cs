@@ -209,7 +209,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             DateTime beginTime = new DateTime();
             DateTime endTime = new DateTime();
-            SetParam(DoubleParam.TiLim, 1800);
+            SetParam(DoubleParam.TiLim, 10);
             beginTime = DateTime.Now;
             Solve();
             endTime = DateTime.Now;

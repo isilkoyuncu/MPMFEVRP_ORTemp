@@ -136,7 +136,7 @@
     <Compile Include="Interfaces\AlgorithmBase.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedGreedy_MY.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
-    <Compile Include="Implementations\Algorithms\Greedy.cs" />
+    <Compile Include="Implementations\Algorithms\RandomizedGreedy.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
     <Compile Include="Interfaces\ProblemBase.cs" />
     <Compile Include="Interfaces\ProblemModelBase.cs" />

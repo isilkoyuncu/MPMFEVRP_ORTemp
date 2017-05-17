@@ -16,8 +16,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
-        string problemName;
-
+        string problemName;   
+           
         public EVvsGDV_MaxProfit_VRP_Model()
         {
             EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
@@ -28,10 +28,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
         }//empty constructor
         public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem)
         {
-            pdp.InputFileName = problem.PDP.InputFileName;
-            pdp.SRD = new SiteRelatedData(problem.PDP.SRD);
-            pdp.VRD = new VehicleRelatedData(problem.PDP.VRD);
-            pdp.CRD = new ContextRelatedData(problem.PDP.CRD);
+            pdp = new ProblemDataPackage(problem.PDP);
             problemName = problem.GetName();
 
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
