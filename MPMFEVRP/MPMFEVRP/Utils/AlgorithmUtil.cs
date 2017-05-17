@@ -20,7 +20,7 @@ namespace MPMFEVRP.Utils
                 .ToList();
 
 
-            IAlgorithm createdAlgorithm = (IAlgorithm)Activator.CreateInstance(typeof(BestOfRandom));
+            IAlgorithm createdAlgorithm = (IAlgorithm)Activator.CreateInstance(typeof(RandomizedGreedy_MY));
 
             foreach (var algorithm in allAlgorithms)
             {

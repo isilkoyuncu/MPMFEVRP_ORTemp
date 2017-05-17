@@ -14,14 +14,14 @@ using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
-    public class BestOfRandom : AlgorithmBase
+    public class RandomizedGreedy_MY : AlgorithmBase
     {
         ProblemModelBase problemData;
 
         int poolSize = 20;
 
 
-        public BestOfRandom()
+        public RandomizedGreedy_MY()
         {
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "20"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
@@ -32,7 +32,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string GetName()
         {
-            return "Best of N Randoms";
+            return "Randomized Greedy";
         }
 
         public override void SpecializedInitialize(ProblemModelBase model)
@@ -41,7 +41,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
             int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
             Random random = new Random(randomSeed);
-            bestSolutionFound = SolutionUtil.CreateSolutionByName(AlgorithmParameters.GetParameter(ParameterID.SOLUTION_TYPES).GetStringValue(), model);
         }
 
         public override void SpecializedRun()
