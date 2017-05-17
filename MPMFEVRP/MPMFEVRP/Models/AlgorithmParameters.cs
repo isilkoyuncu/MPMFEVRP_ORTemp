@@ -19,6 +19,19 @@ namespace MPMFEVRP.Models
             return allParameters;
         }
 
+        public Dictionary<ParameterID, Parameter> GetIntersectingParameters(List<ParameterID> TheOtherList)
+        {
+            Dictionary<ParameterID, Parameter> outcome = new Dictionary<ParameterID, Parameter>();
+            foreach (KeyValuePair<ParameterID,Parameter> entry in allParameters)
+            {
+                if (TheOtherList.Contains(entry.Key))
+                {
+                    outcome.Add(entry.Key, entry.Value);
+                }
+            }
+            return outcome;
+        }
+
         public Parameter GetParameter(ParameterID id)
         {
             return allParameters[id];

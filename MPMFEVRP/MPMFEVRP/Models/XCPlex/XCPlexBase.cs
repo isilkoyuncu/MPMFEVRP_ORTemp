@@ -190,7 +190,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             //SetOut(null);
             if (xCplexParam.LimitComputationTime)
-                SetParam(Cplex.DoubleParam.TiLim, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.RUNTIME_SECONDS].Value.ToString()));
+                SetParam(Cplex.DoubleParam.TiLim, xCplexParam.RuntimeLimit_Seconds);
             if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_EMPHASIS))
                 SetParam(Cplex.Param.Emphasis.MIP, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_EMPHASIS].Value.ToString().Substring(1)));
             if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_SEARCH))
@@ -209,7 +209,6 @@ namespace MPMFEVRP.Models.XCPlex
             }
             DateTime beginTime = new DateTime();
             DateTime endTime = new DateTime();
-            SetParam(DoubleParam.TiLim, 10);
             beginTime = DateTime.Now;
             Solve();
             endTime = DateTime.Now;

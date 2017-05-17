@@ -7,8 +7,11 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlexParameters
     {
+        public static List<ParameterID> recognizedOptionalCplexParameters = new List<ParameterID> (){ ParameterID.CUTS_FACTOR, ParameterID.MIP_EMPHASIS, ParameterID.MIP_SEARCH, ParameterID.THREADS };
+
         double errorTolerance; public double ErrorTolerance { get { return errorTolerance; } }
         bool limitComputationTime; public bool LimitComputationTime { get { return limitComputationTime; } }
+        double runtimeLimit_Seconds; public double RuntimeLimit_Seconds { get { return runtimeLimit_Seconds; } }
         XCPlexRelaxation relaxation; public XCPlexRelaxation Relaxation { get { return relaxation; } }
         bool tSP; public bool TSP { get { return tSP; } }
         VehicleCategories vehCategory; public VehicleCategories VehCategory { get { return vehCategory; } }
@@ -18,6 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlexParameters(
             double errorTolerance = 0.00001,
             bool limitComputationTime = false,
+            double runtimeLimit_Seconds = 10.0,
             XCPlexRelaxation relaxation = XCPlexRelaxation.None,
             bool tSP = false,
             VehicleCategories vehCategory = VehicleCategories.GDV,
@@ -26,12 +30,19 @@ namespace MPMFEVRP.Models.XCPlex
         {
             this.errorTolerance = errorTolerance;
             this.limitComputationTime = limitComputationTime;
+            this.runtimeLimit_Seconds = runtimeLimit_Seconds;
             this.relaxation = relaxation;
             this.optionalCPlexParameters = optionalCPlexParameters;
             this.tSP = tSP;
             this.vehCategory = vehCategory;
             if (optionalCPlexParameters == null)
                 this.optionalCPlexParameters = new Dictionary<ParameterID, Parameter>();
+        }
+
+        public void UpdateForDirectAlgorithmUse(AlgorithmParameters algParams)//This is used when all parameters of an algorithm are set directly by the user, not in a depp level automatically as part of a bigger task. Some of them may need to be passed to CPlex.
+        {
+            //We assume runtime seconds exists because that's a default parameter. The user, however, has a choice to enter a big-M for it!
+            runtimeLimit_Seconds = algParams.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();
         }
     }
 }

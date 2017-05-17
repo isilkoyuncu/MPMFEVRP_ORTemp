@@ -8,7 +8,7 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
 {
     public enum ParameterType { CheckBox, ComboBox, Slider, TextBox }
 
-    public enum ParameterID
+    public enum ParameterID//When adding a new optional Cplex parameter, make sure to add ity to the public static list in the XCplexParameters class and make a note next to it so we can double-check!
     {
         RUNTIME_SECONDS,
         DUMMY_CHECKBOX,
@@ -19,18 +19,18 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
         RANDOM_SEED,
         SOLUTION_TYPES,
         ERROR_TOLERANCE,
-        MIP_EMPHASIS,
-        MIP_SEARCH,
-        CUTS_FACTOR,
-        THREADS,
+        MIP_EMPHASIS,//This is an optional Cplex parameter
+        MIP_SEARCH,//This is an optional Cplex parameter
+        CUTS_FACTOR,//This is an optional Cplex parameter
+        THREADS,//This is an optional Cplex parameter
         RELAXATION,
         XCPLEX_FORMULATION,
         SELECTION_CRITERIA,
         TOP_SELECTION_PERCENTAGE,
         RECOVERY_OPTION,
         SET_COVER
-
     }
+
     public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection };
 
     public enum XCPlexSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };

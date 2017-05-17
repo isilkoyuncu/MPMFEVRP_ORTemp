@@ -14,10 +14,13 @@ namespace MPMFEVRP.Implementations.Algorithms
     class Outsource2Cplex : AlgorithmBase
     {
         XCPlexParameters XcplexParam;
+        XCPlexBase CPlexExtender = null;
 
         public Outsource2Cplex() : base() 
         {
             algorithmParameters.AddParameter(new Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, ParameterType.ComboBox));
+            //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
+            //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads",new List<object>() { 0, 1 },0,ParameterType.ComboBox));
         }
 
         public override string GetName()
@@ -44,7 +47,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             base.model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
-            XcplexParam = new XCPlexParameters();
+            
+            XcplexParam = new XCPlexParameters(
+                limitComputationTime: true, 
+                runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue(),
+                optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters));
         }
 
         public override void SpecializedReset()
@@ -54,7 +61,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            XCPlexBase CPlexExtender = null;
             switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value)
             {
                 case XCPlex_Formulation.NodeDuplicating:

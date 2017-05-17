@@ -32,7 +32,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string GetName()
         {
-            return "Randomized Greedy";
+            return "Randomized Greedy MY";
         }
 
         public override void SpecializedInitialize(ProblemModelBase model)
