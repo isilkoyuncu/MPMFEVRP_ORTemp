@@ -66,7 +66,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
             CPlexExtender.ExportModel("model.lp");
             CPlexExtender.Solve_and_PostProcess();
-            //decompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
+            if(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
+                DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
 
             //Given that the model is solved, we need to update status and statistics from it
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);

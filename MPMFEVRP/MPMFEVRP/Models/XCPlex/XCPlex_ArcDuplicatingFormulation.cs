@@ -534,8 +534,9 @@ namespace MPMFEVRP.Models.XCPlex
 
         public List<Tuple<int, int, int>> GetXVariablesSetTo1()
         {
-            if (solutionStatus != XCPlexSolutionStatus.Optimal)
-                return null;
+            // TODO how about partial solutions?
+            //if (solutionStatus != XCPlexSolutionStatus.Optimal)
+            //    return null;
             List<Tuple<int, int, int>> outcome = new List<Tuple<int, int, int>>();
             for (int i = 0; i <= numCustomers; i++)
                 for (int j = 0; j <= numCustomers; j++)
@@ -546,8 +547,8 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public List<Tuple<int, int, int>> GetYVariablesSetTo1()
         {
-            if (solutionStatus != XCPlexSolutionStatus.Optimal)
-                return null;
+            //if (solutionStatus != XCPlexSolutionStatus.Optimal)
+            //    return null;
             List<Tuple<int, int, int>> outcome = new List<Tuple<int, int, int>>();
             for (int i = 0; i <= numCustomers; i++)
                 for (int r = 0; r < numES; r++)

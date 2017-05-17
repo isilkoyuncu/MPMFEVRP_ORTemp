@@ -103,7 +103,9 @@ namespace MPMFEVRP.Forms
                 {
                     //String fileContents = File.ReadAllText(dialog.FileName);
                     theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileName);
-                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblemName(theProblem.GetName());
+                    //theProblemModel = ProblemModelUtil.CreateProblemModelByProblemName(theProblem.GetName());
+                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblem);
+
                     UpdateProblemLabels();
                     Log("Problem loaded from file.");
                 }
