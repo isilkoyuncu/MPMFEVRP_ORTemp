@@ -4,67 +4,58 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
-using MPMFEVRP.Implementations.Solutions;
+using MPMFEVRP.Implementations.ProblemModels;
 using MPMFEVRP.Models;
+using MPMFEVRP.Implementations.Solutions;
+using BestRandom;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Utils;
+
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
     public class RandomizedGreedy : AlgorithmBase
     {
-        SolutionList unexploredList;
-        double lowerBound;
+        ProblemModelBase problemData;
+
+        int poolSize = 20;
+
+
+        public RandomizedGreedy()
+        {
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "20"));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, ParameterType.ComboBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_OPTION, "Recovery", new List<object>() { true, false }, true, ParameterType.CheckBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, false, ParameterType.CheckBox));
+        }
 
         public override string GetName()
         {
-            return "Randomized Greedy";
-        }
-
-        public override void SpecializedConclude()
-        {
-
+            return "Randomized Greedy MY";
         }
 
         public override void SpecializedInitialize(ProblemModelBase model)
         {
-            //TODO uncomment this afer writing new default solution
-
-
-            //unexploredList = new SolutionList();
-
-            //// Step 0: Create root and add it to unexploredList
-
-            //ISolution root = new DefaultSolution(model);
-            //unexploredList.Add(root);
-
-            //lowerBound = root.LowerBound;
-        }
-
-        public override void SpecializedReset()
-        {
-
+            problemData = model;
+            poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
+            int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
+            Random random = new Random(randomSeed);
         }
 
         public override void SpecializedRun()
         {
-            while (unexploredList.Count > 0)
-            {
-                // Node selection step
-                ISolution current = unexploredList.Pop(); // TODO get parameter from algo
+            bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
+        }
 
-                // Specify current
-                current.TriggerSpecification();
+        public override void SpecializedConclude()
+        {
+            //throw new NotImplementedException();
+        }
 
-                if (current.IsComplete)
-                {
-                    bestSolutionFound = current;
-                }
-                else // if (!current.IsComplete)
-                {
-                    List<ISolution> childrenOfCurrent = current.GetAllChildren();
-                    childrenOfCurrent.Sort();//TODO Checkout the default comparer and replace if necessary
-                    unexploredList.Add(childrenOfCurrent[0]);
-                }
-            } // while (unexploredList.Count > 0)
+        public override void SpecializedReset()
+        {
+            //throw new NotImplementedException();
         }
     }
 }

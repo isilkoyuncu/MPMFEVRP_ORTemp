@@ -21,6 +21,9 @@ namespace MPMFEVRP.Forms
         BindingList<IProblem> problems;
         BindingList<IProblemModel> problemModels;
 
+        IProblem theProblem;
+        ProblemModelBase theProblemModel;
+        IAlgorithm theAlgorithm;
 
         public MultipleProblemMultipleAlgorithm()
         {
@@ -134,9 +137,14 @@ namespace MPMFEVRP.Forms
             {
                 try
                 {
-                    String fileContents = File.ReadAllText(dialog.FileName);
-                    IProblem theProblem = ProblemUtil.CreateProblemByRawData(fileContents);
+                    theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileName);
+                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblem);
+                    
                     problems.Add(theProblem);
+
+                    problemModels = new BindingList<IProblemModel>();
+                    problemModels.Add(theProblemModel);
+
                     Log("Problem loaded from file.");
                 }
                 catch (Exception)

@@ -39,7 +39,40 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedConclude()
         {
-            throw new NotImplementedException();
+            //Given that the model is solved, we need to update status and statistics from it
+            status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
+            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
+            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
+
+            switch (status)
+            {
+                case AlgorithmSolutionStatus.NotYetSolved:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Infeasible:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Feasible:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Optimal:
+                    {
+                        break;
+                    }
+            }
+
+            if (((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
+                DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
+
+            
+            NEW_RouteBasedSolution optimalSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
         }
 
         public override void SpecializedInitialize(ProblemModelBase problemModel)
@@ -72,15 +105,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
             CPlexExtender.ExportModel("model.lp");
             CPlexExtender.Solve_and_PostProcess();
-            if(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
-                DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
-
-            //Given that the model is solved, we need to update status and statistics from it
-            status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
-            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
-            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
-            NEW_RouteBasedSolution optimalSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
-        }
+            }
 
         void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)
         {

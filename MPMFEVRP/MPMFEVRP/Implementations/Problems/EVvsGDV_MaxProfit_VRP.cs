@@ -48,9 +48,9 @@ namespace MPMFEVRP.Implementations.Problems
         //{
         //    return new EVvsGDV_MaxProfit_VRP_Model( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
         //}
-        public override string ToString()
-        {
-            throw new NotImplementedException();
-        }
+        //public override string ToString()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

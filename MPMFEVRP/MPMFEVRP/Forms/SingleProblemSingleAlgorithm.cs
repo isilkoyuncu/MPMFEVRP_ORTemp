@@ -15,13 +15,13 @@ using Instance_Generation.Forms;
 
 namespace MPMFEVRP.Forms
 {
-    public partial class SingleProblemSingleAlgorithm : Form
+    public partial class MultipleProblemSingleAlgorithm : Form
     {
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
 
-        public SingleProblemSingleAlgorithm()
+        public MultipleProblemSingleAlgorithm()
         {
             InitializeComponent();
 
@@ -94,7 +94,7 @@ namespace MPMFEVRP.Forms
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 RestoreDirectory = true,
-                Multiselect = false
+                Multiselect = true
             };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
