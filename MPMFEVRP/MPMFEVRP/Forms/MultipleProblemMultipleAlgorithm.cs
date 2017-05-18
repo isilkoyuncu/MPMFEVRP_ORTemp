@@ -31,6 +31,7 @@ namespace MPMFEVRP.Forms
 
             problems = new BindingList<IProblem>();
             listBox_problems.DataSource = problems;
+            problemModels = new BindingList<IProblemModel>();
 
             algorithms = new BindingList<IAlgorithm>();
             listBox_algorithms.DataSource = algorithms;
@@ -68,6 +69,9 @@ namespace MPMFEVRP.Forms
             IAlgorithm algorithm = AlgorithmUtil.CreateAlgorithmByName(comboBox_algorithms.SelectedItem.ToString());
             algorithms.Add(algorithm);
             new AlgorithmViewer(algorithm).ShowDialog();
+            listBox_algorithms.DataSource = null;
+            listBox_algorithms.DataSource = algorithms;
+            algorithms.ResetBindings();
         }
 
         private void LinkLabel_deleteSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -131,21 +135,22 @@ namespace MPMFEVRP.Forms
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 RestoreDirectory = true,
-                Multiselect = false
+                Multiselect = true
             };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileName);
-                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblem);
-                    
-                    problems.Add(theProblem);
+                    for (int i = 0; i < dialog.FileNames.Length; i++)
+                    {
+                        theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileNames[i]);
+                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblem);
 
-                    problemModels = new BindingList<IProblemModel>();
-                    problemModels.Add(theProblemModel);
+                        problems.Add(theProblem);
+                        problemModels.Add(theProblemModel);
 
-                    Log("Problem loaded from file.");
+                        Log("Problem loaded from file "+theProblem.PDP.InputFileName);
+                    }
                 }
                 catch (Exception)
                 {

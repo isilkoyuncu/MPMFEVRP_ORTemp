@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button_openDataManager = new System.Windows.Forms.Button();
             this.button_addProblem = new System.Windows.Forms.Button();
             this.button_viewProblem = new System.Windows.Forms.Button();
             this.linkLabel_deleteSelectedProblem = new System.Windows.Forms.LinkLabel();
@@ -44,7 +45,6 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button_report = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.button_openDataManager = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -63,6 +63,16 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Problems";
+            // 
+            // button_openDataManager
+            // 
+            this.button_openDataManager.Location = new System.Drawing.Point(6, 48);
+            this.button_openDataManager.Name = "button_openDataManager";
+            this.button_openDataManager.Size = new System.Drawing.Size(180, 23);
+            this.button_openDataManager.TabIndex = 6;
+            this.button_openDataManager.Text = "Open Data Manager";
+            this.button_openDataManager.UseVisualStyleBackColor = true;
+            this.button_openDataManager.Click += new System.EventHandler(this.Button_openDataManager_Click);
             // 
             // button_addProblem
             // 
@@ -199,16 +209,6 @@
             this.button_report.UseVisualStyleBackColor = true;
             this.button_report.Click += new System.EventHandler(this.Button_report_click);
             // 
-            // button_openDataManager
-            // 
-            this.button_openDataManager.Location = new System.Drawing.Point(6, 48);
-            this.button_openDataManager.Name = "button_openDataManager";
-            this.button_openDataManager.Size = new System.Drawing.Size(180, 23);
-            this.button_openDataManager.TabIndex = 6;
-            this.button_openDataManager.Text = "Open Data Manager";
-            this.button_openDataManager.UseVisualStyleBackColor = true;
-            this.button_openDataManager.Click += new System.EventHandler(this.Button_openDataManager_Click);
-            // 
             // MultipleProblemMultipleAlgorithm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -221,7 +221,7 @@
             this.MaximizeBox = false;
             this.Name = "MultipleProblemMultipleAlgorithm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Multiple Instance Multiple Algorithm";
+            this.Text = "Multiple Instances Using the same Model, by Multiple Algorithm";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);

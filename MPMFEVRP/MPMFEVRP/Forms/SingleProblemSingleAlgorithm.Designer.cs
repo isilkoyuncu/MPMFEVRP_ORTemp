@@ -1,6 +1,6 @@
 ﻿namespace MPMFEVRP.Forms
 {
-    partial class MultipleProblemSingleAlgorithm
+    partial class SingleProblemSingleAlgorithm
     {
         /// <summary>
         /// Required designer variable.

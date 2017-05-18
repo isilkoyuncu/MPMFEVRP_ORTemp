@@ -20,7 +20,7 @@ namespace MPMFEVRP.Forms
 
         private void Button_single_Click(object sender, EventArgs e)
         {
-            new MultipleProblemSingleAlgorithm().ShowDialog();
+            new SingleProblemSingleAlgorithm().ShowDialog();
         }
 
         private void Button_multiple_Click(object sender, EventArgs e)

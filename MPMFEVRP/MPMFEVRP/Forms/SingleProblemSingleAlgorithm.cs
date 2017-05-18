@@ -15,13 +15,13 @@ using Instance_Generation.Forms;
 
 namespace MPMFEVRP.Forms
 {
-    public partial class MultipleProblemSingleAlgorithm : Form
+    public partial class SingleProblemSingleAlgorithm : Form
     {
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
 
-        public MultipleProblemSingleAlgorithm()
+        public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();
 
