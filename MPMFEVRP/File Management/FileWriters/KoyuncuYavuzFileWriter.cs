@@ -76,11 +76,11 @@ namespace Instance_Generation.FileWriters
             this.Distance = Distance;
             //TODO Make sure everything is passed into this constructor and used appropriately
             //verify input
-            verify();
+            Verify();
             //process
             sw = new System.IO.StreamWriter(this.filename);
         }
-        void verify()
+        void Verify()
         {
             //TODO Turn this back on and check
             //int nSites = nCustomers + nNonDepotExternalStations + 1;

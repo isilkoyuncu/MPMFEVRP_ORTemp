@@ -20,7 +20,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             algorithmParameters.AddParameter(new Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, ParameterType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
-            //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads",new List<object>() { 0, 1 },0,ParameterType.ComboBox));
+            algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,ParameterType.ComboBox));
         }
 
         public override string GetName()
@@ -43,36 +43,40 @@ namespace MPMFEVRP.Implementations.Algorithms
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
             stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
+            if (((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
+                DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
 
             switch (status)
             {
                 case AlgorithmSolutionStatus.NotYetSolved:
                     {
+                        //Actual Run Time:N/A, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
                         break;
                     }
-                case AlgorithmSolutionStatus.Infeasible:
+                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
                     {
+                        //Actual Run Time:Report, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
                         break;
                     }
                 case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
                     {
+                        //Actual Run Time=Limit:Report, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
+
                         break;
                     }
                 case AlgorithmSolutionStatus.Feasible:
                     {
+                        //Actual Run Time=Limit:Report, Complete Solution-LB:Report, Best Solution-UB:Report, Best Solution Found:Report
+                        NEW_RouteBasedSolution feasibleSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
                         break;
                     }
                 case AlgorithmSolutionStatus.Optimal:
                     {
+                        //Actual Run Time:Report<Limit, Complete Solution-LB = Best Solution-UB:Report, Best Solution Found:Report
+                        NEW_RouteBasedSolution optimalSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
                         break;
                     }
             }
-
-            if (((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
-                DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
-
-            
-            NEW_RouteBasedSolution optimalSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
         }
 
         public override void SpecializedInitialize(ProblemModelBase problemModel)
@@ -106,6 +110,18 @@ namespace MPMFEVRP.Implementations.Algorithms
             CPlexExtender.ExportModel("model.lp");
             CPlexExtender.Solve_and_PostProcess();
             }
+
+        List<object> listPossibleNumOfThreads()
+        {
+            int tCount = Environment.ProcessorCount;
+            List<object> noThreads = new List<object>();
+            for (int t = 0; t <= tCount; t++)
+            {
+                noThreads.Add(t);
+            }
+            return noThreads;
+        }
+
 
         void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)
         {

@@ -133,11 +133,13 @@
     <Compile Include="Forms\DefaultSolutionViewer.Designer.cs">
       <DependentUpon>DefaultSolutionViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Implementations\Solutions\Writers\IndividualSolutionWriter.cs" />
     <Compile Include="Interfaces\AlgorithmBase.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedGreedy.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
     <Compile Include="Implementations\Algorithms\Greedy.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
+    <Compile Include="Interfaces\IWriter.cs" />
     <Compile Include="Interfaces\ProblemBase.cs" />
     <Compile Include="Interfaces\ProblemModelBase.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs" />

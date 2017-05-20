@@ -51,7 +51,7 @@ namespace MPMFEVRP.Implementations.Problems
 
         public override string ToString()
         {
-            return "ev vs gdv";
+            return PDP.InputFileName;
         }
     }
 }
