@@ -96,6 +96,7 @@ namespace MPMFEVRP.Implementations.Solutions
                 //"Solution Status: " + status,
                 //"UB: " + upperBound,
                 //"LB: " + lowerBound,
+                "Optimality Gap: " + (Math.Abs(upperBound-lowerBound)/(upperBound+0.0000000000001))
             };
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();

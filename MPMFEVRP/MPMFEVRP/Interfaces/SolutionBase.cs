@@ -22,10 +22,10 @@ namespace MPMFEVRP.Interfaces
         public double ObjectiveFunctionValue { get { return objectiveFunctionValue; } }
 
         protected double lowerBound;
-        public double LowerBound { get { return lowerBound; } }
+        public double LowerBound { get { return lowerBound; } set { lowerBound = value; } }
 
         protected double upperBound;
-        public double UpperBound { get { return upperBound; } }
+        public double UpperBound { get { return upperBound; } set { upperBound = value; } }
 
         protected List<AssignedRoute> routes;
         public List<AssignedRoute> Routes { get { return routes; } }

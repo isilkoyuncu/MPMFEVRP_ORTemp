@@ -20,8 +20,8 @@ namespace MPMFEVRP.Interfaces
         double ObjectiveFunctionValue { get; }
         List<ISolution> GetAllChildren();
         List<AssignedRoute> Routes { get; }
-        double LowerBound { get; }
-        double UpperBound { get; }
+        double LowerBound { get; set; }
+        double UpperBound { get; set; }
         AlgorithmSolutionStatus Status { get; set; }
         string GetName();
         string[] GetOutputSummary();

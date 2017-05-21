@@ -473,8 +473,8 @@ namespace MPMFEVRP.Models.XCPlex
 
         public List<Tuple<int,int,int>> GetXVariablesSetTo1()
         {
-            if (solutionStatus != XCPlexSolutionStatus.Optimal)
-                return null;
+            //if (solutionStatus != XCPlexSolutionStatus.Optimal)
+            //    return null;
             List < Tuple <int, int, int>> outcome = new List<Tuple<int, int, int>>();
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)

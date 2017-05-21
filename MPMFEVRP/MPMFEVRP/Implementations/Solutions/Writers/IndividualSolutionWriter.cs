@@ -12,11 +12,11 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
     {
         System.IO.StreamWriter sw;
 
-        private ISolution theSolution;
         private string inputFileName;
         private string[] algorithmOutputSummary;
         private string[] solutionOutputSummary;
         private string[] writableSolution;
+        string outputFileName;
 
         public IndividualSolutionWriter()
         {
@@ -29,11 +29,21 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
             this.solutionOutputSummary = solutionOutputSummary;
             this.writableSolution = writableSolution;
 
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+
+            string runtimeLimit = "";
+            runtimeLimit = algorithmOutputSummary[1].Remove(0, algorithmOutputSummary[1].IndexOf("-") + 1);
+
+            string algorithmName = "";
+            algorithmName = algorithmOutputSummary[0].Remove(0, algorithmOutputSummary[0].IndexOf(":") + 1);
+
+            outputFileName = fileName+algorithmName+" Runtime Limit-"+runtimeLimit+".txt";
             //TODO Make sure everything is passed into this constructor and used appropriately
             //verify input
             //Verify();
             //process
-            sw = new System.IO.StreamWriter(inputFileName);
+            sw = new System.IO.StreamWriter(outputFileName);
         }
 
         void Verify()
@@ -49,7 +59,7 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
         }
         private void WriteStatistics()
         {
-            sw.WriteLine("Instance Name\t{0}", inputFileName);
+            sw.WriteLine("Instance Name:\t{0}", inputFileName);
             for (int i = 0; i < algorithmOutputSummary.Length; i++)
                 sw.WriteLine(algorithmOutputSummary[i]);
             for (int i = 0; i < solutionOutputSummary.Length; i++)

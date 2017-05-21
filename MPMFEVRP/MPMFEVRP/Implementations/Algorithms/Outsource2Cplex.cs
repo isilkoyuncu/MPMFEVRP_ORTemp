@@ -78,6 +78,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                     break;
             }
             bestSolutionFound.Status = status;
+            bestSolutionFound.UpperBound = CPlexExtender.UpperBound_XCPlex;
+            bestSolutionFound.LowerBound = CPlexExtender.LowerBound_XCPlex;
         }
         public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
@@ -179,11 +181,18 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             List<string> list = new List<string>
             {
-                "Algorithm Name: " + GetName(), //Algorithm Name
+                 //Algorithm Name has to be the first entry for output file name purposes
+                "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
+                //Run time limit has to be the second entry for output file name purposes
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Value.ToString(),
+                
+                //Optional
                 "Parameter: " + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
                 //algorithmParameters.GetAllParameters();
                 //var asString = string.Join(";", algorithmParameters.GetAllParameters());
                 //list.Add(asString);
+                
+                //Necessary statistics
                 "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
                 "UB(Best Int): " + stats.UpperBound.ToString(),
                 "LB(Relaxed): " + stats.LowerBound.ToString(),
@@ -193,6 +202,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             toReturn = list.ToArray();
             return toReturn;
         }
+
         // TODO this does not belong to here
         //private void writeSolution(AbstractXCPlexFormulation CPlexExtender)
         //{
