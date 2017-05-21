@@ -66,9 +66,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
                 CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)solution;
                 return CheckFeasibilityOfSolution(csbs);
             }
-            else if (solutionType == typeof(NEW_RouteBasedSolution))
+            else if (solutionType == typeof(RouteBasedSolution))
             {
-                NEW_RouteBasedSolution rbs = (NEW_RouteBasedSolution)solution;
+                RouteBasedSolution rbs = (RouteBasedSolution)solution;
                 return CheckFeasibilityOfSolution(rbs);
             }
             else
@@ -99,7 +99,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             compatibleSolutions = new List<Type>()
             {
-                typeof(OLD_RouteBasedSolution),
+                typeof(RouteBasedSolution),
                 typeof(CustomerSetBasedSolution)
             };
         }

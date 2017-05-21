@@ -20,8 +20,13 @@ namespace MPMFEVRP.Interfaces
 
         protected AlgorithmParameters algorithmParameters;
         public AlgorithmParameters AlgorithmParameters { get { return algorithmParameters; } }
+
         protected AlgorithmSolutionStatus status;
+        public AlgorithmSolutionStatus Status { get { return status; } }
+
         protected AlgorithmStatistics stats = new AlgorithmStatistics();
+        public AlgorithmStatistics Stats { get { return stats; } }
+
         public AlgorithmBase()
         {
             algorithmParameters = new AlgorithmParameters();
@@ -86,5 +91,7 @@ namespace MPMFEVRP.Interfaces
                 algorithmParameters.GetAllParameters()
                     .Select(p => p.Key.GetDescription() + ": " + p.Value.GetValue<object>().ToString()).ToList()) + ")";
         }
+
+        public abstract string[] GetOutputSummary();
     }
 }

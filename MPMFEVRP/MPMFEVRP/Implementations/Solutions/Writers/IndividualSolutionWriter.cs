@@ -4,73 +4,43 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
+using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Implementations.Solutions.Writers
 {
     public class IndividualSolutionWriter : IWriter
     {
-        string filename;
-        string solutionStatus;
-        double actualRunTime;
-        double relaxedSolnObj_LB;
-        double bestSoln_UB;
-        double optimalityGap;
-
-        //Solution organized in columns
-        List<List<int>> routes;
-        List<string> vehicles;
-        List<double> prizeCollected;
-        List<double> costIncurred;
-        List<double> profit;
-        List<double> timeToReturnDepot;
-
         System.IO.StreamWriter sw;
+
+        private ISolution theSolution;
+        private string inputFileName;
+        private string[] algorithmOutputSummary;
+        private string[] solutionOutputSummary;
+        private string[] writableSolution;
 
         public IndividualSolutionWriter()
         {
             //Empty constructor
         }
-        public IndividualSolutionWriter(string filename,
-        string solutionStatus,
-        double actualRunTime,
-        double relaxedSolnObj_LB,
-        double bestSoln_UB,
-        double optimalityGap,
-
-        List<List<int>> routes,
-        List<string> vehicles,
-        List<double> prizeCollected,
-        List<double> costIncurred,
-        List<double> profit,
-        List<double> timeToReturnDepot)
+        public IndividualSolutionWriter(string inputFileName, string[] algorithmOutputSummary, string[] solutionOutputSummary, string[] writableSolution)
         {
-            //Take all input
-            this.filename=filename;
-            this.solutionStatus=solutionStatus;
-            this.actualRunTime= actualRunTime;
-            this.relaxedSolnObj_LB= relaxedSolnObj_LB;
-            this.bestSoln_UB= bestSoln_UB;
-            this.optimalityGap= optimalityGap;
-
-            this.routes=routes;
-            this.vehicles= vehicles;
-            this.prizeCollected= prizeCollected;
-            this.costIncurred= costIncurred;
-            this.profit= profit;
-            this.timeToReturnDepot= timeToReturnDepot;
+            this.inputFileName = inputFileName;
+            this.algorithmOutputSummary = algorithmOutputSummary;
+            this.solutionOutputSummary = solutionOutputSummary;
+            this.writableSolution = writableSolution;
 
             //TODO Make sure everything is passed into this constructor and used appropriately
             //verify input
             //Verify();
-            
-            //Process
-            sw = new System.IO.StreamWriter(this.filename);
+            //process
+            sw = new System.IO.StreamWriter(inputFileName);
         }
+
         void Verify()
         {
             throw new NotImplementedException();
         }
-            public void Write()
+        public void Write()
         {
             WriteStatistics();
             WriteSolution();
@@ -79,20 +49,17 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
         }
         private void WriteStatistics()
         {
-            sw.WriteLine("Instance Name\t{0}", filename);
-            sw.WriteLine("Solution Status\t{0}", solutionStatus);
-            sw.WriteLine("Relaxed Soln Obj(LB)\t{0}", relaxedSolnObj_LB);
-            sw.WriteLine("Best Soln(UB)\t{0}", bestSoln_UB);
-            sw.WriteLine("Optimality Gap\t{0}", optimalityGap);
+            sw.WriteLine("Instance Name\t{0}", inputFileName);
+            for (int i = 0; i < algorithmOutputSummary.Length; i++)
+                sw.WriteLine(algorithmOutputSummary[i]);
+            for (int i = 0; i < solutionOutputSummary.Length; i++)
+                sw.WriteLine(solutionOutputSummary[i]);
             sw.WriteLine();
         }
         private void WriteSolution()
         {
-            sw.WriteLine("Route\tVehicle\tPrizeCollected\tCostIncurred\tProfit\tTimeToReturnDepot");
-            for (int i = 0; i < routes.Count; i++)
-            {
-                sw.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}", routes[i], vehicles[i], prizeCollected[i], costIncurred[i], profit[i], timeToReturnDepot[i]);
-            }
+            for (int i = 0; i < writableSolution.Length; i++)
+                sw.WriteLine(writableSolution[i]);
             sw.WriteLine();
         }
 

@@ -43,6 +43,16 @@ namespace MPMFEVRP.Implementations.Solutions
             return "Customer Set Based";
         }
 
+        public override string[] GetOutputSummary()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string[] GetWritableSolution()
+        {
+            throw new NotImplementedException();
+        }
+
         public override void TriggerSpecification()
         {
             throw new NotImplementedException();

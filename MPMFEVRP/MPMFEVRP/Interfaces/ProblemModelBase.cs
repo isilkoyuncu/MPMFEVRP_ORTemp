@@ -58,7 +58,7 @@ namespace MPMFEVRP.Interfaces
                     throw new Exception("GDV_TSPSolver status is other than Infeasible or Optimal!");
                 }
                 //If we're here, we know GDV route has been successfully optimized
-                assignedRoutes[1] = extractTheSingleRouteFromSolution((NEW_RouteBasedSolution)GDV_TSPSolver.GetCompleteSolution(typeof(NEW_RouteBasedSolution)));
+                assignedRoutes[1] = extractTheSingleRouteFromSolution((RouteBasedSolution)GDV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
                 ofv[1] = GDV_TSPSolver.GetBestObjValue();
                 //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
                 EV_TSPSolver.RefineDecisionVariables(CS);
@@ -76,14 +76,14 @@ namespace MPMFEVRP.Interfaces
                         throw new Exception("GDV_TSPSolver status is other than Infeasible or Optimal!");
                     }
                     //If we're here, we know GDV route has been successfully optimized
-                    assignedRoutes[0] = extractTheSingleRouteFromSolution((NEW_RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(NEW_RouteBasedSolution)));
+                    assignedRoutes[0] = extractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
                     ofv[0] = EV_TSPSolver.GetBestObjValue();
                     return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
                 }
             }
         }
 
-        AssignedRoute extractTheSingleRouteFromSolution(NEW_RouteBasedSolution ncs)
+        AssignedRoute extractTheSingleRouteFromSolution(RouteBasedSolution ncs)
         {
             if (ncs.Routes.Count != 1)
             {

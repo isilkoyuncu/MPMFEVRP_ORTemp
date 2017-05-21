@@ -38,7 +38,7 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ISolution createdSolution = (ISolution)Activator.CreateInstance(typeof(NEW_RouteBasedSolution));
+            ISolution createdSolution = (ISolution)Activator.CreateInstance(typeof(RouteBasedSolution));
 
             foreach (var solution in allSolutions)
             {

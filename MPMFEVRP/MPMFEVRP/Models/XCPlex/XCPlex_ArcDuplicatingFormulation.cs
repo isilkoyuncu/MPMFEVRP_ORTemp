@@ -568,7 +568,7 @@ namespace MPMFEVRP.Models.XCPlex
                 XVariablesSetTo1.Add(new Tuple<int, int, int>(t.Item2, t.Item3, 0));
             }
 
-            return new NEW_RouteBasedSolution(problemModel, XVariablesSetTo1);
+            return new RouteBasedSolution(problemModel, XVariablesSetTo1);
         }
     }
 }

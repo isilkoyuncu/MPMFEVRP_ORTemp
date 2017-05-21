@@ -500,7 +500,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
-            return new NEW_RouteBasedSolution(problemModel, GetXVariablesSetTo1());
+            return new RouteBasedSolution(problemModel, GetXVariablesSetTo1());
         }
     }
 }

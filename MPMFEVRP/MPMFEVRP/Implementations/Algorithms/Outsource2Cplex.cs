@@ -15,14 +15,12 @@ namespace MPMFEVRP.Implementations.Algorithms
     {
         XCPlexParameters XcplexParam;
         XCPlexBase CPlexExtender = null;
-
         public Outsource2Cplex() : base() 
         {
             algorithmParameters.AddParameter(new Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, ParameterType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
-            algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,ParameterType.ComboBox));
+            //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,ParameterType.ComboBox));
         }
-
         public override string GetName()
         {
             return "Outsource to CPLEX";
@@ -31,21 +29,21 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             
         }
-
         public bool IsSupportingStepwiseSolutionCreation()
         {
             return false;
         }
-
         public override void SpecializedConclude()
         {
             //Given that the model is solved, we need to update status and statistics from it
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
+            stats.RunTimeMilliSeconds = (long)CPlexExtender.CPUtime;
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
             stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
             if (((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
                 DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
-
+            GetOutputSummary();
+            //Create solution based on status: Not yet solved, infeasible, no feasible soln found, feasible, optimal
             switch (status)
             {
                 case AlgorithmSolutionStatus.NotYetSolved:
@@ -67,18 +65,20 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case AlgorithmSolutionStatus.Feasible:
                     {
                         //Actual Run Time=Limit:Report, Complete Solution-LB:Report, Best Solution-UB:Report, Best Solution Found:Report
-                        NEW_RouteBasedSolution feasibleSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
+                        bestSolutionFound = (RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(RouteBasedSolution));
                         break;
                     }
                 case AlgorithmSolutionStatus.Optimal:
                     {
                         //Actual Run Time:Report<Limit, Complete Solution-LB = Best Solution-UB:Report, Best Solution Found:Report
-                        NEW_RouteBasedSolution optimalSolution = (NEW_RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(NEW_RouteBasedSolution));
+                        bestSolutionFound = (RouteBasedSolution)CPlexExtender.GetCompleteSolution(typeof(RouteBasedSolution));
                         break;
                     }
+                default:
+                    break;
             }
+            bestSolutionFound.Status = status;
         }
-
         public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
             base.model = problemModel;
@@ -90,12 +90,9 @@ namespace MPMFEVRP.Implementations.Algorithms
                 runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue(),
                 optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters));
         }
-
         public override void SpecializedReset()
         {
-            throw new NotImplementedException();
         }
-
         public override void SpecializedRun()
         {
             switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value)
@@ -107,11 +104,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                     CPlexExtender = new XCPlex_ArcDuplicatingFormulation(model, XcplexParam);
                     break;
             }
-            CPlexExtender.ExportModel("model.lp");
+            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
             }
-
-        List<object> listPossibleNumOfThreads()
+        List<object> ListPossibleNumOfThreads()
         {
             int tCount = Environment.ProcessorCount;
             List<object> noThreads = new List<object>();
@@ -121,8 +117,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
             return noThreads;
         }
-
-
         void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)
         {
             double[][][] X_value;
@@ -179,6 +173,25 @@ namespace MPMFEVRP.Implementations.Algorithms
             epsilon_value = new double[numCustomers + 1];
             for (int j = 0; j <= numCustomers; j++)
                 epsilon_value[j] = allVariableValues[counter++];
+        }
+
+        public override string[] GetOutputSummary()
+        {
+            List<string> list = new List<string>
+            {
+                "Algorithm Name: " + GetName(), //Algorithm Name
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
+                //algorithmParameters.GetAllParameters();
+                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
+                //list.Add(asString);
+                "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
+                "UB(Best Int): " + stats.UpperBound.ToString(),
+                "LB(Relaxed): " + stats.LowerBound.ToString(),
+                "Solution Status: " + status.ToString()
+            };
+            string[] toReturn = new string[list.Count];
+            toReturn = list.ToArray();
+            return toReturn;
         }
         // TODO this does not belong to here
         //private void writeSolution(AbstractXCPlexFormulation CPlexExtender)

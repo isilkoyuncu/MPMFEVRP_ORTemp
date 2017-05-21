@@ -37,22 +37,22 @@ namespace MPMFEVRP.Forms
             int cumulTime = 0;
             int maxLateness = int.MinValue;
             int lateness = 0;
-            foreach (var jobID in theSolution.IDs)
-            {
-                var task = new ColoredTask()
-                {
-                    //Name = solutionSortedJobs[jobID].Description,
-                    Color = Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256)),
-                };
-                manager.Add(task);
-                manager.SetStart(task, cumulTime);
-                //manager.SetDuration(task, solutionSortedJobs[jobID].ProcessingTime);
-                //manager.SetEnd(task, cumulTime += solutionSortedJobs[jobID].ProcessingTime);
-                //lateness = cumulTime - solutionSortedJobs[jobID].DueDate;
-                task.Name += " (late by " + lateness.ToString() + ")";
-                if (maxLateness < lateness)
-                    maxLateness = lateness;
-            }
+            //foreach (var jobID in theSolution.IDs)
+            //{
+            //    var task = new ColoredTask()
+            //    {
+            //        //Name = solutionSortedJobs[jobID].Description,
+            //        Color = Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256)),
+            //    };
+            //    manager.Add(task);
+            //    manager.SetStart(task, cumulTime);
+            //    //manager.SetDuration(task, solutionSortedJobs[jobID].ProcessingTime);
+            //    //manager.SetEnd(task, cumulTime += solutionSortedJobs[jobID].ProcessingTime);
+            //    //lateness = cumulTime - solutionSortedJobs[jobID].DueDate;
+            //    task.Name += " (late by " + lateness.ToString() + ")";
+            //    if (maxLateness < lateness)
+            //        maxLateness = lateness;
+            //}
             var ghostSummaryTask = new ColoredTask()
             {
                 Name = "Max. Lateness = " + maxLateness.ToString(),

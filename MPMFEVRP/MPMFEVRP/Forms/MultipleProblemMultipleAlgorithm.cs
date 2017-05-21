@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Instance_Generation.Forms;
+using MPMFEVRP.Implementations.Solutions.Writers;
+
 
 namespace MPMFEVRP.Forms
 {
@@ -19,11 +21,15 @@ namespace MPMFEVRP.Forms
     {
         BindingList<IAlgorithm> algorithms;
         BindingList<IProblem> problems;
-        BindingList<IProblemModel> problemModels;
+        BindingList<ProblemModelBase> problemModels;
+        BindingList<ISolution> solutions; 
 
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
+        ISolution theSolution;
+        IWriter writer;
+
 
         public MultipleProblemMultipleAlgorithm()
         {
@@ -31,7 +37,7 @@ namespace MPMFEVRP.Forms
 
             problems = new BindingList<IProblem>();
             listBox_problems.DataSource = problems;
-            problemModels = new BindingList<IProblemModel>();
+            problemModels = new BindingList<ProblemModelBase>();
 
             algorithms = new BindingList<IAlgorithm>();
             listBox_algorithms.DataSource = algorithms;
@@ -66,9 +72,9 @@ namespace MPMFEVRP.Forms
 
         private void Button_addAlgo_Click(object sender, EventArgs e)
         {
-            IAlgorithm algorithm = AlgorithmUtil.CreateAlgorithmByName(comboBox_algorithms.SelectedItem.ToString());
-            algorithms.Add(algorithm);
-            new AlgorithmViewer(algorithm).ShowDialog();
+            theAlgorithm = AlgorithmUtil.CreateAlgorithmByName(comboBox_algorithms.SelectedItem.ToString());
+            algorithms.Add(theAlgorithm);
+            new AlgorithmViewer(theAlgorithm).ShowDialog();
             listBox_algorithms.DataSource = null;
             listBox_algorithms.DataSource = algorithms;
             algorithms.ResetBindings();
@@ -95,30 +101,37 @@ namespace MPMFEVRP.Forms
 
         private void Button_run_Click(object sender, EventArgs e)
         {
+            solutions = new BindingList<ISolution>();
             foreach (var algorithm in algorithms)
             {
-                foreach (var problem in problems)
+                foreach (var problemModel in problemModels)
                 {
-                    // TODO The following line is from the template, which simply assumes that each problem can be worked using onyl a single model, and there is exactly one problem (type) in nthe entire project.
-                    // Now that we have enriched the project, the line below must be corrected to handle differnet problem models for different problems 
-                    throw new NotImplementedException();
-                    //IProblemModel model = new DefaultProblemModel(problem);
+                    //TODO The following line is from the template, which simply assumes that each problem can be worked using onyl a single model, and there is exactly one problem(type) in nthe entire project.
+                    //Now that we have enriched the project, the line below must be corrected to handle differnet problem models for different problems
 
-                    //algorithm.Initialize(model);
-                    //Log("Algorithm " + algorithm.ToString() + " is initialized.");
+                    if (problemModel == null)
+                    {
+                        MessageBox.Show("Please load a problem first!", "No problem!");
+                    }
+                    else
+                    {
+                        algorithm.Initialize(problemModel);
+                        Log("Algorithm " + algorithm.ToString() + " is initialized.");
 
-                    //Log("Algorithm " + algorithm.ToString() + " started running.");
-                    //algorithm.Run();
+                        Log("Algorithm " + algorithm.ToString() + " started running.");
+                        algorithm.Run();
 
-                    //Log("Algorithm " + algorithm.ToString() + " finished.");
-                    //Log("================");
-                    //// TODO algorithm statistics
-                    ////log("Solution status: " + algorithm.Solution.Status);
-                    ////log("Total cost: " + algorithm.Solution.TotalCost);
-                    ////log("Run time: " + algorithm.AlgorithmStatistics.RunTimeMilliSeconds + " ms");
-
-                    //Log("**************RESET************");
-                    //algorithm.Reset();
+                        Log("Algorithm " + algorithm.ToString() + " finished.");
+                        Log("================");
+                        algorithm.Conclude();
+                        theSolution = algorithm.Solution;
+                        solutions.Add(theSolution);
+                        Log("Solution " + theSolution.ToString() + " started writing.");
+                        writer = new IndividualSolutionWriter(theProblem.PDP.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
+                        writer.Write();
+                        Log("**************RESET************");
+                        algorithm.Reset();
+                    }
                 }
             }
         }
@@ -163,6 +176,7 @@ namespace MPMFEVRP.Forms
         {
             if (problemModels != null)
             {
+                //TODO here select the problem from listbox first! theProblem is the last problem selected from computer if you want to see any problem from the list box then change this code
                 MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
                 //TODO: Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
                 //new ProblemViewer(theProblem).Show();

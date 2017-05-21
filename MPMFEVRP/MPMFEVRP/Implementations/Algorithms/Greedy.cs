@@ -66,5 +66,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }
             } // while (unexploredList.Count > 0)
         }
+
+        public override string[] GetOutputSummary()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

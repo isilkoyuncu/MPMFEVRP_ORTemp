@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Interfaces
 {
@@ -17,9 +19,12 @@ namespace MPMFEVRP.Interfaces
         bool IsComplete { get; }
         double ObjectiveFunctionValue { get; }
         List<ISolution> GetAllChildren();
-
+        List<AssignedRoute> Routes { get; }
         double LowerBound { get; }
-
+        double UpperBound { get; }
+        AlgorithmSolutionStatus Status { get; set; }
         string GetName();
+        string[] GetOutputSummary();
+        string[] GetWritableSolution();
     }
 }

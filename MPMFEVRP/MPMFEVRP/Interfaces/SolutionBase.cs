@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BestRandom;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Interfaces
 {
@@ -22,6 +24,15 @@ namespace MPMFEVRP.Interfaces
         protected double lowerBound;
         public double LowerBound { get { return lowerBound; } }
 
+        protected double upperBound;
+        public double UpperBound { get { return upperBound; } }
+
+        protected List<AssignedRoute> routes;
+        public List<AssignedRoute> Routes { get { return routes; } }
+
+        protected AlgorithmSolutionStatus status;
+        public AlgorithmSolutionStatus Status { get { return status; } set { status = value; } }
+
         public SolutionBase()
         {
             ids = new List<string>();
@@ -33,5 +44,7 @@ namespace MPMFEVRP.Interfaces
         public abstract void View(IProblem problem);
         public abstract List<ISolution> GetAllChildren();
         public abstract void TriggerSpecification();
+        public abstract string[] GetOutputSummary();
+        public abstract string[] GetWritableSolution();
     }
 }

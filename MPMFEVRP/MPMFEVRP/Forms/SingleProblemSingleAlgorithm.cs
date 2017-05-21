@@ -20,6 +20,7 @@ namespace MPMFEVRP.Forms
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
+        ISolution theSolution;
 
         public SingleProblemSingleAlgorithm()
         {
@@ -94,7 +95,7 @@ namespace MPMFEVRP.Forms
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 RestoreDirectory = true,
-                Multiselect = true
+                Multiselect = false
             };
             if (dialog.ShowDialog() == DialogResult.OK)
             {

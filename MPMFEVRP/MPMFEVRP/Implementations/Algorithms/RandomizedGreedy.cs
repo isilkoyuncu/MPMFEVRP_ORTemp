@@ -57,5 +57,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             //throw new NotImplementedException();
         }
+
+        public override string[] GetOutputSummary()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

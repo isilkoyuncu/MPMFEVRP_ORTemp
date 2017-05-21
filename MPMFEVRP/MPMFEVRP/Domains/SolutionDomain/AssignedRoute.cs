@@ -16,19 +16,41 @@ namespace MPMFEVRP.Domains.SolutionDomain
         // Input related fields
         IProblemModel problemModel;
         int vehicleCategory;
-
+        public int VehicleCategory { get { return vehicleCategory; } }
         // Output related fields
         List<int> sitesVisited;
+        public List<int> SitesVisited { get { return sitesVisited; } }
+
         double totalDistance;
+        public double TotalDistance { get { return totalDistance; } }
+
         double totalCollectedPrize;
+        public double TotalCollectedPrize { get { return totalCollectedPrize; } }
+
         double totalFixedCost;
+        public double TotalFixedCost { get { return totalFixedCost; } }
+
         double totalVariableTravelCost;
+        public double TotalVariableTravelCost { get { return totalVariableTravelCost; } }
+
         double totalProfit;
+        public double TotalProfit { get { return totalProfit; } }
+
         List<double> arrivalTime;
+        public List<double> ArrivalTime { get { return arrivalTime; } }
+
         List<double> departureTime;
+        public List<double> DepartureTime { get { return departureTime; } }
+
         List<double> arrivalSOC;
+        public List<double> ArrivalSOC { get { return arrivalSOC; } }
+
+
         List<double> departureSOC;
+        public List<double> DepartureSOC { get { return departureSOC; } }
+
         List<bool> feasible;//[numVehicleCategories]
+        public List<bool> Feasible { get { return feasible; } }
 
         // Intermediate steps and validity
         public int LastVisitedSite { get { return sitesVisited.Last(); } }

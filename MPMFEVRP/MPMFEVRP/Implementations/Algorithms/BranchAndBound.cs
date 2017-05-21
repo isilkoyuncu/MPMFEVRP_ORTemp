@@ -96,5 +96,10 @@ namespace MPMFEVRP.Implementations.Algorithms
             unexploredList.Cut(upperBound);
             // TODO stats update
         }
+
+        public override string[] GetOutputSummary()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
