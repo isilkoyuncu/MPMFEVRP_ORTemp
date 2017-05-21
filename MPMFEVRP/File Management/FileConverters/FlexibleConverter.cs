@@ -264,7 +264,8 @@ namespace Instance_Generation.FileConverters
                         prize[1, i] += TGPData.TripChargeDollar * Calculators.EuclideanDistance(x[0], x[i], y[0], y[i]);
                         break;
                 }
-                if (i <= TGPData.NEVPremPayCustomers)
+
+                if (i < TGPData.NESS + 1 + TGPData.NEVPremPayCustomers)
                     prize[0, i] = prize[1, i] * TGPData.EVPrizeCoefficient;
                 else
                     prize[0, i] = prize[1, i];
