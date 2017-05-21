@@ -29,6 +29,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
         public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem)
         {
             pdp = new ProblemDataPackage(problem.PDP);
+            inputFileName = problem.PDP.InputFileName;
             problemName = problem.GetName();
 
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));

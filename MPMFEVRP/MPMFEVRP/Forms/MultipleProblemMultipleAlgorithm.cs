@@ -127,7 +127,7 @@ namespace MPMFEVRP.Forms
                         theSolution = algorithm.Solution;
                         solutions.Add(theSolution);
                         Log("Solution " + theSolution.ToString() + " started writing.");
-                        writer = new IndividualSolutionWriter(theProblem.PDP.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
+                        writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
                         writer.Write();
                         Log("**************RESET************");
                         algorithm.Reset();
