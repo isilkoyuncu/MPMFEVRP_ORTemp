@@ -36,7 +36,7 @@ namespace MPMFEVRP.Implementations.Problems
                 throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
 
             PDP.VRD.NumVehicles[0] = 3;
-            PDP.VRD.NumVehicles[1] = PDP.SRD.NumCustomers;
+            PDP.VRD.NumVehicles[1] = 3;
         }
 
         public override string GetName()
