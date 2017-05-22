@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BestRandom;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Interfaces;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
@@ -96,8 +97,12 @@ namespace MPMFEVRP.Implementations.Solutions
                 //"Solution Status: " + status,
                 //"UB: " + upperBound,
                 //"LB: " + lowerBound,
-                "Optimality Gap: " + (Math.Abs(upperBound-lowerBound)/(upperBound+0.0000000000001))
             };
+            if (status == AlgorithmSolutionStatus.Feasible || status == AlgorithmSolutionStatus.Optimal)
+            {
+                list.Add("Optimality Gap: " + (Math.Abs(upperBound - lowerBound) / (upperBound + 0.0000000000001)));
+            }
+
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();
             return toReturn;
@@ -109,9 +114,12 @@ namespace MPMFEVRP.Implementations.Solutions
             {
                 "Route\tVehicle\tPrizeCollected\tCostIncurred\tProfit\tTime2ReturnDepot",
             };
-            for(int r=0; r<Routes.Count; r++)
+            if (status == AlgorithmSolutionStatus.Feasible || status == AlgorithmSolutionStatus.Optimal)
             {
-                list.Add(String.Join("-", Routes[r].SitesVisited) +"\t"+ Routes[r].VehicleCategory.ToString()+ "\t"+ Routes[r].TotalCollectedPrize + "\t" + (Routes[r].TotalFixedCost+ Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit+"\t"+ Routes[r].DepartureTime.Last().ToString());
+                for (int r = 0; r < Routes.Count; r++)
+                {
+                    list.Add(String.Join("-", Routes[r].SitesVisited) + "\t" + Routes[r].VehicleCategory.ToString() + "\t" + Routes[r].TotalCollectedPrize + "\t" + (Routes[r].TotalFixedCost + Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit + "\t" + Routes[r].DepartureTime.Last().ToString());
+                }
             }
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();

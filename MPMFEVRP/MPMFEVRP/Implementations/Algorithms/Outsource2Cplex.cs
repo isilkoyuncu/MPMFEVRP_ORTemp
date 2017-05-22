@@ -49,17 +49,19 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case AlgorithmSolutionStatus.NotYetSolved:
                     {
                         //Actual Run Time:N/A, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
+                        bestSolutionFound = new RouteBasedSolution();
                         break;
                     }
                 case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
                     {
                         //Actual Run Time:Report, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
+                        bestSolutionFound = new RouteBasedSolution();
                         break;
                     }
                 case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
                     {
                         //Actual Run Time=Limit:Report, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
-
+                        bestSolutionFound = new RouteBasedSolution();
                         break;
                     }
                 case AlgorithmSolutionStatus.Feasible:
@@ -179,8 +181,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string[] GetOutputSummary()
         {
-            List<string> list = new List<string>
-            {
+            List<string> list = new List<string>{
                  //Algorithm Name has to be the first entry for output file name purposes
                 "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
                 //Run time limit has to be the second entry for output file name purposes
@@ -194,10 +195,29 @@ namespace MPMFEVRP.Implementations.Algorithms
                 
                 //Necessary statistics
                 "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
-                "UB(Best Int): " + stats.UpperBound.ToString(),
-                "LB(Relaxed): " + stats.LowerBound.ToString(),
                 "Solution Status: " + status.ToString()
             };
+            switch (status)
+            {
+                case AlgorithmSolutionStatus.NotYetSolved:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        list.Add("UB(Best Int): " + stats.UpperBound.ToString());
+                        list.Add("LB(Relaxed): " + stats.LowerBound.ToString());
+                        break;
+                    }
+            }           
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();
             return toReturn;

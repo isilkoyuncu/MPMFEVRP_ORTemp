@@ -35,8 +35,8 @@ namespace MPMFEVRP.Implementations.Problems
                 (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
                 throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
 
-            PDP.VRD.NumVehicles[0] = 1;
-            PDP.VRD.NumVehicles[1] = 1;//PDP.SRD.NumCustomers;
+            PDP.VRD.NumVehicles[0] = 3;
+            PDP.VRD.NumVehicles[1] = PDP.SRD.NumCustomers;
         }
 
         public override string GetName()
