@@ -146,7 +146,7 @@
             this.textBox_nESS.Name = "textBox_nESS";
             this.textBox_nESS.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS.TabIndex = 8;
-            this.textBox_nESS.Text = "21";
+            this.textBox_nESS.Text = "0";
             // 
             // label_nESS
             // 
@@ -525,7 +525,7 @@
             this.textBox_nISS_L2.Name = "textBox_nISS_L2";
             this.textBox_nISS_L2.Size = new System.Drawing.Size(21, 20);
             this.textBox_nISS_L2.TabIndex = 55;
-            this.textBox_nISS_L2.Text = "2";
+            this.textBox_nISS_L2.Text = "3";
             this.textBox_nISS_L2.TextChanged += new System.EventHandler(this.textBox_nISS_L2_TextChanged);
             // 
             // label_L2
@@ -543,7 +543,7 @@
             this.textBox_nISS_L3.Name = "textBox_nISS_L3";
             this.textBox_nISS_L3.Size = new System.Drawing.Size(21, 20);
             this.textBox_nISS_L3.TabIndex = 57;
-            this.textBox_nISS_L3.Text = "3";
+            this.textBox_nISS_L3.Text = "2";
             this.textBox_nISS_L3.TextChanged += new System.EventHandler(this.textBox_nISS_L3_TextChanged);
             // 
             // label_L3
@@ -610,7 +610,7 @@
             this.textBox_nESS_L3.Name = "textBox_nESS_L3";
             this.textBox_nESS_L3.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS_L3.TabIndex = 68;
-            this.textBox_nESS_L3.Text = "1";
+            this.textBox_nESS_L3.Text = "2";
             this.textBox_nESS_L3.TextChanged += new System.EventHandler(this.textBox_nESS_L3_TextChanged);
             // 
             // textBox_nESS_L2
@@ -619,7 +619,7 @@
             this.textBox_nESS_L2.Name = "textBox_nESS_L2";
             this.textBox_nESS_L2.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS_L2.TabIndex = 66;
-            this.textBox_nESS_L2.Text = "1";
+            this.textBox_nESS_L2.Text = "2";
             this.textBox_nESS_L2.TextChanged += new System.EventHandler(this.textBox_nESS_L2_TextChanged);
             // 
             // textBox_nESS_L1
@@ -628,7 +628,7 @@
             this.textBox_nESS_L1.Name = "textBox_nESS_L1";
             this.textBox_nESS_L1.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS_L1.TabIndex = 64;
-            this.textBox_nESS_L1.Text = "1";
+            this.textBox_nESS_L1.Text = "0";
             this.textBox_nESS_L1.TextChanged += new System.EventHandler(this.textBox_nESS_L1_TextChanged);
             // 
             // label_ChargingLevelAtDepot
