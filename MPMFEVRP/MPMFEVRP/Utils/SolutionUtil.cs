@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Implementations.Solutions.Readers;
 
 namespace MPMFEVRP.Utils
 {
@@ -28,7 +29,14 @@ namespace MPMFEVRP.Utils
 
             return result;
         }
-
+        public static string[] ReadSolutionByFileName(String fullFileName)
+        {
+            string[] solutionSummary;
+            KoyuncuYavuzSolutionReader KYSolnReader = new KoyuncuYavuzSolutionReader(fullFileName);
+            KYSolnReader.Read();
+            solutionSummary = KYSolnReader.InstanceSolutionSummary;
+            return solutionSummary;
+        }
         public static ISolution CreateSolutionByName(String solutionName, ProblemModelBase problemData)
         {
             var allSolutions = AppDomain.CurrentDomain.GetAssemblies()

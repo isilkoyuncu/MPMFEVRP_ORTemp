@@ -610,7 +610,7 @@
             this.textBox_nESS_L3.Name = "textBox_nESS_L3";
             this.textBox_nESS_L3.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS_L3.TabIndex = 68;
-            this.textBox_nESS_L3.Text = "2";
+            this.textBox_nESS_L3.Text = "0";
             this.textBox_nESS_L3.TextChanged += new System.EventHandler(this.textBox_nESS_L3_TextChanged);
             // 
             // textBox_nESS_L2
@@ -619,7 +619,7 @@
             this.textBox_nESS_L2.Name = "textBox_nESS_L2";
             this.textBox_nESS_L2.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS_L2.TabIndex = 66;
-            this.textBox_nESS_L2.Text = "2";
+            this.textBox_nESS_L2.Text = "4";
             this.textBox_nESS_L2.TextChanged += new System.EventHandler(this.textBox_nESS_L2_TextChanged);
             // 
             // textBox_nESS_L1

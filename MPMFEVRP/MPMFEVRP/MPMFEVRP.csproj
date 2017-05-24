@@ -93,6 +93,7 @@
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
+    <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
     <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
     <Compile Include="Domains\SolutionDomain\RouteOptimizerOutput.cs" />
@@ -134,6 +135,7 @@
       <DependentUpon>DefaultSolutionViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="Implementations\Solutions\Writers\IndividualSolutionWriter.cs" />
+    <Compile Include="Implementations\Solutions\Writers\KoyuncuYavuzSummaryWriter.cs" />
     <Compile Include="Interfaces\AlgorithmBase.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedGreedy.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />

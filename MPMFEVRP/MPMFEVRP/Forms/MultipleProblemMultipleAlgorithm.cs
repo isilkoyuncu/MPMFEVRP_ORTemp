@@ -30,7 +30,8 @@ namespace MPMFEVRP.Forms
         ISolution theSolution;
         IWriter writer;
 
-
+        List<string[]> solutionSummaryList;
+        string[] solutionSummary;
         public MultipleProblemMultipleAlgorithm()
         {
             InitializeComponent();
@@ -96,7 +97,35 @@ namespace MPMFEVRP.Forms
 
         private void Button_report_click(object sender, EventArgs e)
         {
-            MessageBox.Show("This feature is coming...", "Coming...");
+            //MessageBox.Show("This feature is coming...", "Coming...");
+            // Koyuncu Yavuz solution reader
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = true,
+                Multiselect = true
+            };
+            solutionSummaryList = new List<string[]>();
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    for (int i = 0; i < dialog.FileNames.Length; i++)
+                    {
+                        solutionSummary = SolutionUtil.ReadSolutionByFileName(dialog.FileNames[i]);
+                        solutionSummaryList.Add(solutionSummary);
+                    }
+
+                    writer = new KoyuncuYavuzSummaryWriter(dialog.FileNames[0], solutionSummaryList);
+                    writer.Write();
+                    Log("Solution summary is written!");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("There is something wrong while parsing the file!", "File parse error!");
+                }
+            }
+            // Koyuncu Yavuz summary writer
         }
 
         private void Button_run_Click(object sender, EventArgs e)
