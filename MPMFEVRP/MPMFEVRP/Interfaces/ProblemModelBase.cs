@@ -83,6 +83,15 @@ namespace MPMFEVRP.Interfaces
             }
         }
 
+        public List<string> GetAllCustomerIDs()
+        {
+            List<string> outcome = new List<string>();
+            foreach (Site s in SRD.SiteArray)
+                if (s.SiteType == SiteTypes.Customer)
+                    outcome.Add(s.ID);
+            return outcome;
+        }
+
         AssignedRoute ExtractTheSingleRouteFromSolution(RouteBasedSolution ncs)
         {
             if (ncs.Routes.Count != 1)

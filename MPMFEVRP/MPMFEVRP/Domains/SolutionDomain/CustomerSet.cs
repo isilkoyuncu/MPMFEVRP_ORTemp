@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Domains.AlgorithmDomain;
+
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -17,7 +19,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
 
-        RouteOptimizerOutput routeOptimizerOutcome; 
+        RouteOptimizerOutput routeOptimizerOutcome;
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
 
         public CustomerSet() { customers = new List<string>(); }
@@ -25,7 +27,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public CustomerSet(CustomerSet twinCS)
         {
             customers = new List<string>();
-            foreach(string c in twinCS.Customers)
+            foreach (string c in twinCS.Customers)
             {
                 customers.Add(c);
             }

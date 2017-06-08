@@ -8,17 +8,16 @@ using MPMFEVRP.Models;
 using BestRandom;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Models.XCPlex;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
     public class RandomizedGreedy : AlgorithmBase
     {
-        ProblemModelBase problemData;
-
         int poolSize = 20;
         Random random;
 
-        Selection_Criteria selectedCriterion;
+        Selection_Criteria sc;
         double closestPercentSelect;
         bool recoveryOption;
         bool setCoverOption;
@@ -38,19 +37,19 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string GetName()
         {
-            return "Randomized Greedy MY";
+            return "Randomized Greedy";
         }
 
-        public override void SpecializedInitialize(ProblemModelBase model)
+        public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
-            problemData = model;
+            model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
 
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
             int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
             random = new Random(randomSeed);
-            selectedCriterion =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
+            sc =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             recoveryOption = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTION).GetBoolValue();
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
@@ -61,25 +60,140 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
+            List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
+            int numberOfEVs = 0;//TODO: Get this number correctly
+            //This is MY understanding of the randomized greedy:
+            for(int trial = 0; trial<poolSize; trial++)
+            {
+                Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
+                //solution blank olarak uretildi ve icinde hicbir customerSet yok
+                List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
+                bool csSuccessfullyAdded = false;
+                do
+                {
+                    CustomerSet currentCS = new CustomerSet();
+                    bool csSuccessfullyUpdated = false;
+                    do
+                    {
+                        string customerToAdd = selectACustomer(visitableCustomers, "Depot");//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
+                        CustomerSet extendedCS = new CustomerSet(currentCS);
+                        extendedCS.Extend(customerToAdd, model);
+                        //Is this optimized? If not, optimize it here!
+                        csSuccessfullyUpdated = false;
+                        if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibilioty of the customerSet
+                        {
+                            //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
+                            if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's EV-feasible
+                                csSuccessfullyUpdated = true;
+                            //if(extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate)
+                            //How in the world do we get that info here and use it now?  
+                        }
+                        else//we need to check for GDV-feasibility!
+                        {
+                            //This block is parallel to the one above (for EV)
+                        }
+                        //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
+                        if (csSuccessfullyUpdated)
+                        {
+                            visitableCustomers.Remove(customerToAdd);
+                            currentCS = extendedCS;
+                        }
+                    } while (csSuccessfullyUpdated);
+
+                    //add the customerSet to the solution //TODO: How do you do this?
+                } while (csSuccessfullyAdded);
+                //if(recovery)
+                    //solve the linear optimization problem to recover from bad cs creation
+                    //This gives you the new trialSolution
+                //else: do nothing (don't have an else!)
+
+                allSolutions.Add(trialSolution);
+            }//for(int trial = 0; trial<poolSize; trial++)
+            //if(useSetCovering)
+                //solve the set cover formulation, construct a solution from it, and return that!
+            //else
+                //TODO: return the best of allSolutions
+
+
             //TODO I'm not sure how is this going to work with a complex solution structure
-            bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
+            //bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
 
             // TODO This is my understanding of randomized greedy
-            CS.Extend(problemData.SRD.SiteArray[(int)(random.NextDouble())].ID, problemData); //TODO should I record IDs?
-            for (int i = 0; i < poolSize; i++)
-            {
-                switch ((Selection_Criteria)AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value)
-                {
-                    case Selection_Criteria.CompleteUniform:
-                        break;
-                    case Selection_Criteria.UniformAmongTheBestPercentage:
-                        break;
-                    case Selection_Criteria.WeightedNormalizedProbSelection:
-                        break;
-                }
-
-            }
+            //CS.Extend(model.SRD.SiteArray[(int)(random.NextDouble())].ID, model); //TODO should I record IDs?
         }
+        /// <summary>
+        /// This method tries to extend the customer set only once 
+        /// </summary>
+        /// <param name="VisitableCustomers"></param>
+        /// <param name="sc"></param>
+        /// <param name="problemModelBase"></param>
+        /// <returns></returns>
+        CustomerSet ExtendCurrentCustomerSet(CustomerSet currentCS, List<string> VisitableCustomers)
+        {
+            if (VisitableCustomers.Count == 0)
+                return null;
+
+            //Preliminary: make a copy of the current customer set
+            CustomerSet outcome = new CustomerSet(currentCS);
+
+            //We first must choose which of the visitable customers to add to the set
+            string customerToAdd = VisitableCustomers[0];
+            switch (sc)
+            {
+                case Selection_Criteria.CompleteUniform:
+                    //Here goes the specialized selection code
+                    break;
+                case Selection_Criteria.UniformAmongTheBestPercentage:
+                    //Here goes the specialized selection code
+                    break;
+                case Selection_Criteria.WeightedNormalizedProbSelection:
+                    //Here goes the specialized selection code
+                    break;
+                default:
+                    throw new Exception("The selection criterion sent to CustomerSet.Extend was not defined before!");
+            }
+            //In each case within this block we must identify a customer to add to the list
+
+            //Now that we have a customer to add to the list, we'll request to make the extension
+            outcome.Extend(customerToAdd, model);
+
+            //Now return
+            return outcome;
+        }
+
+        string selectACustomer(List<string> VisitableCustomers, string currentCustomerID)
+        {
+            string customerToAdd = VisitableCustomers[0];
+            switch (sc)
+            {
+                case Selection_Criteria.CompleteUniform:
+                    return (VisitableCustomers[random.Next(VisitableCustomers.Count)]);
+                case Selection_Criteria.UniformAmongTheBestPercentage:
+                    //Here goes the specialized selection code
+                    List<string> theBestTopXPercent = new List<string>();
+                    //TODO: populate this list
+                    return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
+                case Selection_Criteria.WeightedNormalizedProbSelection:
+                    //Here goes the specialized selection code
+                    //We assume probabilities are proportional inverse distances
+                    double[] prob = new double[VisitableCustomers.Count];
+                    double probSum = 0.0;
+                    for(int c=0; c< VisitableCustomers.Count; c++)
+                    {
+                        prob[c] = 1.0;// /distance(currentCustomerID,VisitableCustomers[c]); //TODO: Code that little method that reurns the distance of two site IDs
+                        prob[c] = Math.Pow(prob[c], 1.0); //TODO: Replace the 1.0 power here with the power parameter
+                        probSum += prob[c];
+                    }
+                    for (int c = 0; c < VisitableCustomers.Count; c++)
+                        prob[c] /= probSum;
+                    return VisitableCustomers[Utils.RandomArrayOperations.Select(random.NextDouble(), prob)];
+                default:
+                    throw new Exception("The selection criterion sent to CustomerSet.Extend was not defined before!");
+            }
+
+        }
+
+
         public override void SpecializedConclude()
         {
             //throw new NotImplementedException();

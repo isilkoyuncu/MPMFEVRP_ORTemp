@@ -85,7 +85,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
-            base.model = problemModel;
+            model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
             
