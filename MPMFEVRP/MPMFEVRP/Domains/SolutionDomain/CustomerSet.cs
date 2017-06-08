@@ -29,7 +29,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(c);
             }
-            //TODO: Add a deep copy method for RouteOptimizerOutput and then call it here, much better than re-optimizing the same route
+            // TODO check if this works as intended
+            routeOptimizerOutcome = new RouteOptimizerOutput(twinCS.RouteOptimizerOutcome);
         }
 
         public bool IsIdentical(CustomerSet otherCS)

@@ -23,6 +23,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
             status = RouteOptimizationStatus.NotYetOptimized;
         }
 
+        public RouteOptimizerOutput(RouteOptimizerOutput twinRouteOptimizerOutput)
+        {
+            status = twinRouteOptimizerOutput.Status;
+            feasible = (bool[])twinRouteOptimizerOutput.Feasible.Clone();
+            ofv = (double[])twinRouteOptimizerOutput.OFV.Clone();
+            optimizedRoute = (AssignedRoute[])twinRouteOptimizerOutput.OptimizedRoute.Clone();
+        }
+
         public RouteOptimizerOutput(RouteOptimizationStatus status, double[] ofv = null, AssignedRoute[] optimizedRoute = null)
         {
             this.status = status;
