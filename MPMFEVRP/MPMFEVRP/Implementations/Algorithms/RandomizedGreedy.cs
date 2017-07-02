@@ -9,6 +9,7 @@ using BestRandom;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -61,9 +62,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
-            int numberOfEVs = 0;//TODO: Get this number correctly
+            int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
             //This is MY understanding of the randomized greedy:
-            for(int trial = 0; trial<poolSize; trial++)
+            for (int trial = 0; trial<poolSize; trial++)
             {
                 Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
                 //solution blank olarak uretildi ve icinde hicbir customerSet yok
@@ -73,12 +74,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                 {
                     CustomerSet currentCS = new CustomerSet();
                     bool csSuccessfullyUpdated = false;
+                    string customerToAdd = "Depot"; //Since we start the day from the depot
                     do
                     {
-                        string customerToAdd = selectACustomer(visitableCustomers, "Depot");//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
+                        customerToAdd = SelectACustomer(visitableCustomers, customerToAdd);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
                         CustomerSet extendedCS = new CustomerSet(currentCS);
-                        extendedCS.Extend(customerToAdd, model);
-                        //Is this optimized? If not, optimize it here!
+                        extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
+                        //Is this optimized? -YES.(IK) If not, optimize it here!
                         csSuccessfullyUpdated = false;
                         if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibilioty of the customerSet
                         {
@@ -117,9 +119,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             //TODO I'm not sure how is this going to work with a complex solution structure
             //bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
-
-            // TODO This is my understanding of randomized greedy
-            //CS.Extend(model.SRD.SiteArray[(int)(random.NextDouble())].ID, model); //TODO should I record IDs?
         }
         /// <summary>
         /// This method tries to extend the customer set only once 
@@ -161,7 +160,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             return outcome;
         }
 
-        string selectACustomer(List<string> VisitableCustomers, string currentCustomerID)
+        string SelectACustomer(List<string> VisitableCustomers, string currentCustomerID)
         {
             string customerToAdd = VisitableCustomers[0];
             switch (sc)
@@ -180,7 +179,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     double probSum = 0.0;
                     for(int c=0; c< VisitableCustomers.Count; c++)
                     {
-                        prob[c] = 1.0;// /distance(currentCustomerID,VisitableCustomers[c]); //TODO: Code that little method that reurns the distance of two site IDs
+                        prob[c] = Distance(currentCustomerID,VisitableCustomers[c]); //TODO: DONE! > Code that little method that reurns the distance of two site IDs
                         prob[c] = Math.Pow(prob[c], 1.0); //TODO: Replace the 1.0 power here with the power parameter
                         probSum += prob[c];
                     }
@@ -193,7 +192,26 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         }
 
+        double Distance(string currentNode, string nextNode) //TODO this might be generalized more??
+        {
+            int currentIndex = 0, nextIndex = 0;
+            double distance = 0.0;
 
+            if (currentNode == "Depot")
+                currentIndex = 0; //Since the depot has index 0 in our site related data!
+
+            for(int i=0; i<model.SRD.SiteArray.Length; i++)
+            {
+                if (model.SRD.SiteArray[i].ID == currentNode)
+                    currentIndex = i;
+                if(model.SRD.SiteArray[i].ID == nextNode)
+                    nextIndex = i;
+            }
+
+            distance = model.SRD.Distance[currentIndex, nextIndex];
+
+            return distance;
+        }
         public override void SpecializedConclude()
         {
             //throw new NotImplementedException();
