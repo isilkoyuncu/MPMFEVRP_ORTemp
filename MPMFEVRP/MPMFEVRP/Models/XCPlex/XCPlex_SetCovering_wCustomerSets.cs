@@ -14,7 +14,7 @@ namespace MPMFEVRP.Models.XCPlex
     class XCPlex_SetCovering_wCustomerSets : XCPlexBase
     {
         INumVar[][] y;//[customerSet][2: 0 of EV, 1 for GDV]
-        ILinearNumExpr obj;//Because of the enumetative and space consuming nature of the problem with 2 vehicle categories, it's more practical to create the obj expression beforehand and only add it later
+        ILinearNumExpr obj;//Because of the enumerative and space consuming nature of the problem with 2 vehicle categories, it's more practical to create the obj expression beforehand and only add it later
 
         public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam) : base(problemModel, xCplexParam)
         {

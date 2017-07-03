@@ -10,6 +10,8 @@ using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models.XCPlex;
 using MPMFEVRP.Domains.ProblemDomain;
+using System.Windows.Forms;
+
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -25,6 +27,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         
         CustomerSet CS;
         List<CustomerSet> CS_List;
+
+        XCPlexBase CPlexExtender = null;
+        XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for assigment problem? No time limit?
 
         public RandomizedGreedy()
         {
@@ -64,7 +69,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
             //This is MY understanding of the randomized greedy:
-            for (int trial = 0; trial<poolSize; trial++)
+            for (int trial = 0; trial < poolSize; trial++)
             {
                 Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
                 //solution blank olarak uretildi ve icinde hicbir customerSet yok
@@ -82,17 +87,36 @@ namespace MPMFEVRP.Implementations.Algorithms
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
                         //Is this optimized? -YES.(IK) If not, optimize it here!
                         csSuccessfullyUpdated = false;
-                        if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibilioty of the customerSet
+                        if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
                         {
                             //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
                             if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's EV-feasible
                                 csSuccessfullyUpdated = true;
+                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
+                                csSuccessfullyUpdated = false;
+                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Although optimized for GDV it is infeasible for EV, discard the extendedCS
+                                csSuccessfullyUpdated = false;
+                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.NotYetOptimized) //It should be optimized during extension trial, we need to catch this error
+                                MessageBox.Show("RandomizedGreedy Extend function also optimizes the extended customer set however we get not yet optimized here");
                             //if(extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate)
-                            //How in the world do we get that info here and use it now?  
+                            // TODO: if you correct this, correct the one for the GDV as well
+                            //How in the world do we get that info here and use it now?
                         }
                         else//we need to check for GDV-feasibility!
                         {
                             //This block is parallel to the one above (for EV)
+                            //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
+                            if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's GDV-feasible
+                                csSuccessfullyUpdated = true;
+                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Optimized for GDV only
+                                csSuccessfullyUpdated = true;
+                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
+                                csSuccessfullyUpdated = false;
+                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.NotYetOptimized) //It should be optimized during extension trial, we need to catch this error
+                                MessageBox.Show("RandomizedGreedy Extend function also optimizes the extended customer set however we get not yet optimized here");
+                            //if(extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate)
+                            // TODO: if you correct this, correct the one for the EV as well
+                            //How in the world do we get that info here and use it now?
                         }
                         //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
                         if (csSuccessfullyUpdated)
@@ -103,18 +127,23 @@ namespace MPMFEVRP.Implementations.Algorithms
                     } while (csSuccessfullyUpdated);
 
                     //add the customerSet to the solution //TODO: How do you do this?
+                    trialSolution.AddCustomerSet(currentCS);
                 } while (csSuccessfullyAdded);
-                //if(recovery)
+                if (recoveryOption)
+                {
                     //solve the linear optimization problem to recover from bad cs creation
+                    CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
+                    bestSolutionFound = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
                     //This gives you the new trialSolution
+                }
                 //else: do nothing (don't have an else!)
 
                 allSolutions.Add(trialSolution);
             }//for(int trial = 0; trial<poolSize; trial++)
-            //if(useSetCovering)
-                //solve the set cover formulation, construct a solution from it, and return that!
-            //else
-                //TODO: return the best of allSolutions
+             //if(useSetCovering)
+             //solve the set cover formulation, construct a solution from it, and return that!
+             //else
+             //TODO: return the best of allSolutions
 
 
             //TODO I'm not sure how is this going to work with a complex solution structure
