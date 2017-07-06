@@ -15,6 +15,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
     /// </summary>
     public class CustomerSet
     {
+        int assignedVehicle = -1; public int AssignedVehicle {get{return assignedVehicle;} } // TODO check if this belongs to here: -1:not assigned, 0:EV, 1:GDV
+
         List<string> customers = new List<string>();//TODO Should this really be a string? Ordering is an issue (1, 10, 2, .., 9)
         public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
@@ -26,6 +28,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public CustomerSet(string customerID, ProblemModelBase problemModelBase) { customers = new List<string>(); customers.Add(customerID); routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this); }
         public CustomerSet(CustomerSet twinCS)
         {
+            assignedVehicle = twinCS.AssignedVehicle;
             customers = new List<string>();
             foreach (string c in twinCS.Customers)
             {

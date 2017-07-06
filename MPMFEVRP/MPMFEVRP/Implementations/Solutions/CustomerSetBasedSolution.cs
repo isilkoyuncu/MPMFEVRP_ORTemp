@@ -9,18 +9,33 @@ using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
-    public class CustomerSetBasedSolution : SolutionBase
+    public class CustomerSetBasedSolution : SolutionBase 
     {
         private ProblemModelBase model;
         private Random random;
         List<CustomerSet> cs_List;
+        List<RouteOptimizerOutput> roo_List;
         private int[,] ZSetTo1;
 
         public List<CustomerSet> CS_List { get { return cs_List; } }
+        public List<RouteOptimizerOutput> ROO_List { get { return roo_List; } }
+
+        public CustomerSetBasedSolution(ProblemModelBase model, List<CustomerSet> cs_List)
+        {
+            this.model = model;
+            this.cs_List = cs_List;//TODO pirimitive olmayan seyleri de boyle kopyalayabiliyor muyuz test et.
+            lowerBound = 0.0;
+            for(int cs=0;cs<cs_List.Count; cs++)
+            {
+                lowerBound += cs_List[cs].RouteOptimizerOutcome.OFV;
+            }
+
+        }
 
         public CustomerSetBasedSolution()
         {
         }
+
 
         public CustomerSetBasedSolution(CustomerSetBasedSolution twinCSBasedSolution)
         {
@@ -48,7 +63,13 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             this.model = model;
             this.ZSetTo1 = ZSetTo1;
-            
+            cs_List = trialSolution.cs_List;
+            for(int i =0; i<trialSolution.routes.Count; i++)
+            {
+                routes[i] = trialSolution.routes[i];
+                for (int j = 0; j < 2; j++) { } //TODO parametrize for the num of veh categories (2 for now)
+                //if(ZSetTo1[i,j]==1)
+            }
         }
 
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
