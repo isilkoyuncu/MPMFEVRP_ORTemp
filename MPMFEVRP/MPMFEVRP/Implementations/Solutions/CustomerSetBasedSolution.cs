@@ -17,7 +17,7 @@ namespace MPMFEVRP.Implementations.Solutions
         List<CustomerSet> cs_List;
         public List<CustomerSet> CS_List { get { return cs_List; } }
 
-        private int[,] ZSetTo1;
+        private int[,] zSetTo1;
 
         public CustomerSetBasedSolution(ProblemModelBase model, List<CustomerSet> cs_List)
         {
@@ -61,7 +61,7 @@ namespace MPMFEVRP.Implementations.Solutions
         public CustomerSetBasedSolution(ProblemModelBase model, int[,] ZSetTo1, CustomerSetBasedSolution trialSolution)
         {
             this.model = model;
-            this.ZSetTo1 = ZSetTo1;
+            this.zSetTo1 = ZSetTo1;
             cs_List = trialSolution.cs_List;
             for(int i =0; i<trialSolution.routes.Count; i++)
             {

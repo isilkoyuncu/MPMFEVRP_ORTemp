@@ -487,9 +487,10 @@ namespace MPMFEVRP.Models.XCPlex
         public void RefineDecisionVariables(CustomerSet CS)
         {
             int VCIndex = (int)xCplexParam.VehCategory;//TODO Check if this returns 0 for EV and 1 for GDV
-            for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)
+            for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)// TODO: This needs to be changed because CS IDs are all C1, C2,.. C10.
             {
-                if (CS.Customers.Contains(j.ToString()))
+                //if (CS.Customers.Contains(j.ToString()))
+                if(CS.Customers.Contains(problemModel.SRD.SiteArray[j].ID)) //TODO: or simply change this ID to site array elements, i.e. int index
                 {
                     U[j][VCIndex].LB = 1.0;
                     U[j][VCIndex].UB = 1.0;

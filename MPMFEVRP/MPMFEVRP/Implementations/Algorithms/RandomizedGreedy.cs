@@ -85,7 +85,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         customerToAdd = SelectACustomer(visitableCustomers, customerToAdd);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
-                        //Is this optimized? -YES.(IK) If not, optimize it here!
+                        //Is this optimized? If not, optimize it here! -YES it is optimized.(IK)
                         csSuccessfullyUpdated = false;
                         if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
                         {
