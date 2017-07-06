@@ -13,12 +13,11 @@ namespace MPMFEVRP.Implementations.Solutions
     {
         private ProblemModelBase model;
         private Random random;
-        List<CustomerSet> cs_List;
-        List<RouteOptimizerOutput> roo_List;
-        private int[,] ZSetTo1;
 
+        List<CustomerSet> cs_List;
         public List<CustomerSet> CS_List { get { return cs_List; } }
-        public List<RouteOptimizerOutput> ROO_List { get { return roo_List; } }
+
+        private int[,] ZSetTo1;
 
         public CustomerSetBasedSolution(ProblemModelBase model, List<CustomerSet> cs_List)
         {

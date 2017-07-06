@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Implementations.ProblemModels;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Utils
 {
@@ -98,7 +99,36 @@ namespace MPMFEVRP.Utils
             return createdProblemModel;
         }
 
+        public static void ArrangeNodesIntoLists(ProblemModelBase problemModel, 
+            out int numCustomers, out int numES, 
+            out List<int> customerSiteNodeIndices, out List<int> depotPlusCustomerSiteNodeIndices, out List<int> ESSiteNodeIndices)
+        {
+            numCustomers = problemModel.SRD.NumCustomers;
+            numES = problemModel.SRD.NumES;
 
+            customerSiteNodeIndices = new List<int>();
+            depotPlusCustomerSiteNodeIndices = new List<int>();
+            ESSiteNodeIndices = new List<int>();
+
+            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.SiteArray.Length; orgSiteIndex++)
+            {
+                switch (problemModel.SRD.SiteArray[orgSiteIndex].SiteType)
+                {
+                    case SiteTypes.Depot:
+                        depotPlusCustomerSiteNodeIndices.Add(orgSiteIndex);
+                        break;
+                    case SiteTypes.Customer:
+                        customerSiteNodeIndices.Add(orgSiteIndex);
+                        depotPlusCustomerSiteNodeIndices.Add(orgSiteIndex);
+                        break;
+                    case SiteTypes.ExternalStation:
+                        ESSiteNodeIndices.Add(orgSiteIndex);
+                        break;
+                    default:
+                        throw new System.Exception("Site type incompatible!");
+                }
+            }
+        }
 
     }
 }

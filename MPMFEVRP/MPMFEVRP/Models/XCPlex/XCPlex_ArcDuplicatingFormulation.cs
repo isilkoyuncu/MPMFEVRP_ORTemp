@@ -9,6 +9,7 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Interfaces;
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -32,7 +33,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected override void DefineDecisionVariables()
         {
-            ArrangeNodesIntoLists();
+            ProblemModelUtil.ArrangeNodesIntoLists(problemModel, out numCustomers, out numES,out customerSiteNodeIndices, out depotPlusCustomerSiteNodeIndices, out ESSiteNodeIndices);
             allVariables_list = new List<INumVar>();
             //X
             string[][][] X_name = new string[numCustomers+1][][];
@@ -118,34 +119,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
         }
-        void ArrangeNodesIntoLists()
-        {
-            numCustomers = problemModel.SRD.NumCustomers;
-            numES = problemModel.SRD.NumES;
-
-            customerSiteNodeIndices = new List<int>();
-            depotPlusCustomerSiteNodeIndices = new List<int>();
-            ESSiteNodeIndices = new List<int>();
-
-            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.SiteArray.Length; orgSiteIndex++)
-            {
-                switch (problemModel.SRD.SiteArray[orgSiteIndex].SiteType)
-                {
-                    case SiteTypes.Depot:
-                        depotPlusCustomerSiteNodeIndices.Add(orgSiteIndex);
-                        break;
-                    case SiteTypes.Customer:
-                        customerSiteNodeIndices.Add(orgSiteIndex);
-                        depotPlusCustomerSiteNodeIndices.Add(orgSiteIndex);
-                        break;
-                    case SiteTypes.ExternalStation:
-                        ESSiteNodeIndices.Add(orgSiteIndex);
-                        break;
-                    default:
-                        throw new System.Exception("Site type incompatible!");
-                }
-            }
-        }
+        
         int GetUpperBound(int j, int v)
         {
             if (j == 0)
