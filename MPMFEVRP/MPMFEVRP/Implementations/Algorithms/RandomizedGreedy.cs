@@ -216,7 +216,13 @@ namespace MPMFEVRP.Implementations.Algorithms
             //Now return
             return outcome;
         }
-
+        
+        /// <summary>
+        /// This method selects the next customer to be added in the currect customer set
+        /// </summary>
+        /// <param name="VisitableCustomers"></param>
+        /// <param name="currentCustomerID"></param>
+        /// <returns></returns>
         string SelectACustomer(List<string> VisitableCustomers, string currentCustomerID)
         {
             string customerToAdd = VisitableCustomers[0];
@@ -227,7 +233,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case Selection_Criteria.UniformAmongTheBestPercentage:
                     //Here goes the specialized selection code
                     List<string> theBestTopXPercent = new List<string>();
-                    //TODO: populate this list
+                    //Populate this list
                     return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
                 case Selection_Criteria.WeightedNormalizedProbSelection:
                     //Here goes the specialized selection code
@@ -236,7 +242,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     double probSum = 0.0;
                     for(int c=0; c< VisitableCustomers.Count; c++)
                     {
-                        prob[c] = Distance(currentCustomerID,VisitableCustomers[c]); //TODO: DONE! > Code that little method that reurns the distance of two site IDs
+                        prob[c] = Distance(currentCustomerID,VisitableCustomers[c]); //DONE! > Code that little method that reurns the distance of two site IDs
                         prob[c] = Math.Pow(prob[c], 1.0); //TODO: Replace the 1.0 power here with the power parameter
                         probSum += prob[c];
                     }
