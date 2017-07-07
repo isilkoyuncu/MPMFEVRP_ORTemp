@@ -28,7 +28,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         CustomerSet CS;
         List<CustomerSet> CS_List;
 
-        XCPlexBase CPlexExtender = null;
+        XCPlex_Assignment_RecoveryForRandGreedy CPlexExtender = null;
         XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for assigment problem? No time limit?
 
         public RandomizedGreedy()
@@ -133,6 +133,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 {
                     //solve the linear optimization problem to recover from bad cs creation
                     CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
+                    CPlexExtender.GetCSList2bRecovered(trialSolution);
                     bestSolutionFound = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
                     //This gives you the new trialSolution
                 }
