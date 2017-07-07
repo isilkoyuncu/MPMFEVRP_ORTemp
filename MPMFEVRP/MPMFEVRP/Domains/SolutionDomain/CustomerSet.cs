@@ -15,7 +15,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
     /// </summary>
     public class CustomerSet
     {
-        int assignedVehicle = -1; public int AssignedVehicle {get{return assignedVehicle;} } // TODO check if this belongs to here: -1:not assigned, 0:EV, 1:GDV
+        int assignedVehicle = -1; public int AssignedVehicle {get{return assignedVehicle;}set { assignedVehicle = value; } } // TODO check if this belongs to here: -1:not assigned, 0:EV, 1:GDV
 
         List<string> customers = new List<string>();//TODO Should this really be a string? Ordering is an issue (1, 10, 2, .., 9)
         public List<string> Customers { get { return customers; } }

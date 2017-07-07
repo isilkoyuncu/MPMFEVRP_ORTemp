@@ -26,7 +26,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         bool setCoverOption;
         
         CustomerSet CS;
-        List<CustomerSet> CS_List;
 
         XCPlex_Assignment_RecoveryForRandGreedy CPlexExtender = null;
         XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for assigment problem? No time limit?
@@ -61,7 +60,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
 
             CS = new CustomerSet();
-            CS_List = new List<CustomerSet>();
         }
 
         public override void SpecializedRun()
@@ -71,6 +69,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             //This is MY understanding of the randomized greedy:
             for (int trial = 0; trial < poolSize; trial++)
             {
+                List<CustomerSet> currentCS_List = new List<CustomerSet>();
                 Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
                 //solution blank olarak uretildi ve icinde hicbir customerSet yok
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
@@ -88,10 +87,15 @@ namespace MPMFEVRP.Implementations.Algorithms
                         //Is this optimized? If not, optimize it here! -YES it is optimized.(IK)
                         csSuccessfullyUpdated = false;
                         if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
+                                                                     //TODO: this can give us an error ie trialSolution.Routes is null so count is not defined!! 
+                                                                     //Maybe the empty constructor of the solution should declare an empty route list
                         {
                             //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
                             if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's EV-feasible
+                            {
+                                extendedCS.AssignedVehicle = 0; //EV=0
                                 csSuccessfullyUpdated = true;
+                            }
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
                                 csSuccessfullyUpdated = false;
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Although optimized for GDV it is infeasible for EV, discard the extendedCS
@@ -107,9 +111,15 @@ namespace MPMFEVRP.Implementations.Algorithms
                             //This block is parallel to the one above (for EV)
                             //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
                             if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's GDV-feasible
+                            {
+                                extendedCS.AssignedVehicle = 1; //GDV=1
                                 csSuccessfullyUpdated = true;
+                            }
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Optimized for GDV only
+                            {
+                                extendedCS.AssignedVehicle = 1; //GDV=1
                                 csSuccessfullyUpdated = true;
+                            }
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
                                 csSuccessfullyUpdated = false;
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.NotYetOptimized) //It should be optimized during extension trial, we need to catch this error

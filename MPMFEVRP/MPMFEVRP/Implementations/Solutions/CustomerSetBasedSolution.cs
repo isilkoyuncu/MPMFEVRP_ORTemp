@@ -21,14 +21,16 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public CustomerSetBasedSolution(ProblemModelBase model, List<CustomerSet> cs_List)
         {
+            routes = new List<AssignedRoute>();
+
             this.model = model;
             this.cs_List = cs_List;//TODO pirimitive olmayan seyleri de boyle kopyalayabiliyor muyuz test et.
             lowerBound = 0.0;
             for(int cs=0;cs<cs_List.Count; cs++)
             {
-                lowerBound += cs_List[cs].RouteOptimizerOutcome.OFV;
+                lowerBound += cs_List[cs].RouteOptimizerOutcome.OFV[cs_List[cs].AssignedVehicle];
+                routes.Add(cs_List[cs].RouteOptimizerOutcome.OptimizedRoute[cs_List[cs].AssignedVehicle]);
             }
-
         }
 
         public CustomerSetBasedSolution()
@@ -58,16 +60,21 @@ namespace MPMFEVRP.Implementations.Solutions
             this.random = random;
         }
 
-        public CustomerSetBasedSolution(ProblemModelBase model, int[,] ZSetTo1, CustomerSetBasedSolution trialSolution)
+        public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSetBasedSolution trialSolution)
         {
             this.model = model;
-            this.zSetTo1 = ZSetTo1;
-            cs_List = trialSolution.cs_List;
-            for(int i =0; i<trialSolution.routes.Count; i++)
+            this.zSetTo1 = zSetTo1;
+            cs_List = trialSolution.CS_List;
+            for (int i = 0; i < cs_List.Count; i++)
             {
-                routes[i] = trialSolution.routes[i];
-                for (int j = 0; j < 2; j++) { } //TODO parametrize for the num of veh categories (2 for now)
-                //if(ZSetTo1[i,j]==1)
+                for (int j = 0; j < 2; j++)//TODO parametrize for the num of veh categories (2 for now)
+                {
+                    if (zSetTo1[i, j] == 1)
+                    {
+                        lowerBound += cs_List[i].RouteOptimizerOutcome.OFV[j];
+                        routes.Add(cs_List[i].RouteOptimizerOutcome.OptimizedRoute[j]);
+                    }
+                }
             }
         }
 
