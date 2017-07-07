@@ -65,6 +65,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
+            int bestSolnIndex = -1;
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
             //This is MY understanding of the randomized greedy:
             for (int trial = 0; trial < poolSize; trial++)
@@ -144,20 +145,36 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //solve the linear optimization problem to recover from bad cs creation
                     CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
                     CPlexExtender.GetCSList2bRecovered(trialSolution);
-                    bestSolutionFound = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
+                    trialSolution = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
                     //This gives you the new trialSolution
                 }
                 //else: do nothing (don't have an else!)
 
                 allSolutions.Add(trialSolution);
             }//for(int trial = 0; trial<poolSize; trial++)
-             //if(useSetCovering)
-             //solve the set cover formulation, construct a solution from it, and return that!
-             //else
-             //TODO: return the best of allSolutions
+            if (setCoverOption)
+            {
+                //TODO solve the set cover formulation, construct a solution from it, and return that!
+            }
+            else
+            {
+                double objValue = Double.MinValue;
+                bestSolnIndex = -1;
+                int counter = -1;
+                foreach (Solutions.CustomerSetBasedSolution CSBS in allSolutions)
+                {
+                    counter++;
+                    if (CSBS.ObjectiveFunctionValue > objValue)
+                    {
+                        objValue = CSBS.ObjectiveFunctionValue;
+                        bestSolnIndex = counter;
+                    }
+                }
+            }
+            //Return the best of allSolutions
+            bestSolutionFound = allSolutions[bestSolnIndex];
 
-
-            //TODO I'm not sure how is this going to work with a complex solution structure
+            //The following is best of random and I'm not sure how is this going to work with a complex solution structure
             //bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
         }
         /// <summary>
