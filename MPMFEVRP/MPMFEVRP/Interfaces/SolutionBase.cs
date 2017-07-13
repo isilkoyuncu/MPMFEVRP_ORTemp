@@ -27,9 +27,6 @@ namespace MPMFEVRP.Interfaces
         protected double upperBound;
         public double UpperBound { get { return upperBound; } set { upperBound = value; } }
 
-        protected List<AssignedRoute> routes;
-        public List<AssignedRoute> Routes { get { return routes; } }
-
         protected AlgorithmSolutionStatus status;
         public AlgorithmSolutionStatus Status { get { return status; } set { status = value; } }
 

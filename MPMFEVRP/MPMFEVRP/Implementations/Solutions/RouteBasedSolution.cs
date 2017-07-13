@@ -12,6 +12,8 @@ namespace MPMFEVRP.Implementations.Solutions
 {
     public class RouteBasedSolution : SolutionBase
     {
+        List<AssignedRoute> routes;
+        public List<AssignedRoute> Routes { get { return routes; } }
         public RouteBasedSolution()
         {
         }

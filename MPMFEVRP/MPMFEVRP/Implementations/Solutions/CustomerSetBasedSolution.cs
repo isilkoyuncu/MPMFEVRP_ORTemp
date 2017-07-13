@@ -33,24 +33,22 @@ namespace MPMFEVRP.Implementations.Solutions
             }
         }
 
-        public CustomerSetBasedSolution()
+        public CustomerSetBasedSolution()// TODO do initialization 
         {
         }
 
 
         public CustomerSetBasedSolution(CustomerSetBasedSolution twinCSBasedSolution)
         {
-            // TODO check if this copies everything from the twin CS based solution
             model = twinCSBasedSolution.model;
             random = twinCSBasedSolution.random;
-            ids = twinCSBasedSolution.ids;
+            ids = twinCSBasedSolution.ids; // TODO convert this to deep copy
             isComplete = twinCSBasedSolution.isComplete;
             lowerBound = twinCSBasedSolution.lowerBound;
             objectiveFunctionValue = twinCSBasedSolution.objectiveFunctionValue;
-            routes = twinCSBasedSolution.routes;
             status = twinCSBasedSolution.status;
             upperBound = twinCSBasedSolution.upperBound;
-            cs_List = twinCSBasedSolution.cs_List;
+            cs_List = twinCSBasedSolution.cs_List;// TODO convert this to deep copy
         }
 
         // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing)

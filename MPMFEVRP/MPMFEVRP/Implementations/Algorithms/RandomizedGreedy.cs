@@ -25,8 +25,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         bool recoveryOption;
         bool setCoverOption;
         
-        CustomerSet CS;
-
         XCPlex_Assignment_RecoveryForRandGreedy CPlexExtender = null;
         XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for assigment problem? No time limit?
 
@@ -59,7 +57,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             recoveryOption = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTION).GetBoolValue();
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
 
-            CS = new CustomerSet();
         }
 
         public override void SpecializedRun()
@@ -233,7 +230,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case Selection_Criteria.UniformAmongTheBestPercentage:
                     //Here goes the specialized selection code
                     List<string> theBestTopXPercent = new List<string>();
-                    //Populate this list
+                    //TODO Populate this list
                     return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
                 case Selection_Criteria.WeightedNormalizedProbSelection:
                     //Here goes the specialized selection code
@@ -255,7 +252,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         }
 
-        double Distance(string currentNode, string nextNode) //TODO this might be generalized more??
+        double Distance(string currentNode, string nextNode) //TODO this should go somewhere else
         {
             int currentIndex = 0, nextIndex = 0;
             double distance = 0.0;
