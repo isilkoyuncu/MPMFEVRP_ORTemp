@@ -318,14 +318,7 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     NumberOfVehiclesVisitingTheNode.AddTerm(1.0, U[j][v]);
                 string constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
-                if (xCplexParam.TSP && j >= firstCustomerNodeIndex && j <= lastCustomerNodeIndex)
-                {
-                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
-                }
-                else//VRP, not TSP OR not a customer
-                {
-                    allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
-                }
+                allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
             }
         }
         void AddConstraint_NoGDVVisitToESNodes()

@@ -40,6 +40,8 @@ private int[,] zSetTo1;
 
         public CustomerSetBasedSolution()// TODO do initialization 
         {
+
+            cs_List = new List<CustomerSet>();
             CustomerSetVehicleAssignment csVehAssignment = new CustomerSetVehicleAssignment();
         }
 

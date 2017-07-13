@@ -89,7 +89,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
                         csSuccessfullyUpdated = false;
                         if (csVehAssignments.Assigned2EV.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
-                                                                             //TODO: this can give us an error if csVehAssignments.Assigned2EV is null so count is not defined!! 
                         {
                             //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
                             if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's EV-feasible
