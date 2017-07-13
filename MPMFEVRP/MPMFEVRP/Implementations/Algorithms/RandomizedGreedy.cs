@@ -19,6 +19,7 @@ namespace MPMFEVRP.Implementations.Algorithms
     {
         int poolSize = 20;
         Random random;
+        double power;
 
         Selection_Criteria sc;
         double closestPercentSelect;
@@ -35,8 +36,10 @@ namespace MPMFEVRP.Implementations.Algorithms
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, ParameterType.ComboBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 25, 50, 100 }, 25, ParameterType.ComboBox)); //TODO find a way to get data from problem, i.e. number of customers or make this percentage
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PROB_SELECTION_POWER, "Power", "1.0"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_OPTION, "Recovery", new List<object>() { true, false }, true, ParameterType.CheckBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, false, ParameterType.CheckBox));
+
         }
 
         public override string GetName()
@@ -55,6 +58,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             random = new Random(randomSeed);
             sc =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
+            power = AlgorithmParameters.GetParameter(ParameterID.PROB_SELECTION_POWER).GetDoubleValue();
             recoveryOption = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTION).GetBoolValue();
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
 
@@ -65,6 +69,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
             int bestSolnIndex = -1;
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
+            string DepotID = model.SRD.GetSingleDepotID();
             //This is MY understanding of the randomized greedy:
             for (int trial = 0; trial < poolSize; trial++)
             {
@@ -78,10 +83,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                 {
                     CustomerSet currentCS = new CustomerSet();
                     bool csSuccessfullyUpdated = false;
-                    string customerToAdd = "Depot"; //Since we start the day from the depot
+                    string customerToAdd = DepotID; //Since we start the day from the depot
                     do
                     {
-                        customerToAdd = SelectACustomer(visitableCustomers, customerToAdd);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
+                        customerToAdd = SelectACustomer(visitableCustomers, currentCS);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
                         //Is this optimized? If not, optimize it here! -YES it is optimized.(IK)
@@ -142,7 +147,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 {
                     switch (rc)
                     {
-                        case Recovery_Contractor.Outsource2CPLEX:
+                        case Recovery_Contractor.AssignmentProbByCPLEX:
                             {
                                 //solve the linear optimization problem to recover from bad cs creation
                                 CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
@@ -151,7 +156,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                             }
                         case Recovery_Contractor.AnalyticallySolve:
                             {
-                                RecoveryForRandomizedGreedy recovery = new RecoveryForRandomizedGreedy();
                                 //TODO code the analytical recovery algorithm
                                 break;
                             }
@@ -160,7 +164,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     trialSolution = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
                     //This gives you the new trialSolution
                 }
-                //else: do nothing (don't have an else!)
+                //else: do nothing (don't have an else!)ShortestDistanceOfCandidateToCurrentCustomerSet
 
                 allSolutions.Add(trialSolution);
             }//for(int trial = 0; trial<poolSize; trial++)
@@ -235,7 +239,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         /// <param name="VisitableCustomers"></param>
         /// <param name="currentCustomerID"></param>
         /// <returns></returns>
-        string SelectACustomer(List<string> VisitableCustomers, string currentCustomerID)
+        string SelectACustomer(List<string> VisitableCustomers, CustomerSet currentCS)
         {
             string customerToAdd = VisitableCustomers[0];
             switch (sc)
@@ -246,7 +250,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Here goes the specialized selection code
                     List<string> theBestTopXPercent = new List<string>();
                     //TODO Populate this list
-
+                    theBestTopXPercent=PopulateTheBestTopXPercentCustomersList(currentCS, VisitableCustomers, closestPercentSelect);
                     return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
                 case Selection_Criteria.WeightedNormalizedProbSelection:
                     //Here goes the specialized selection code
@@ -255,8 +259,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                     double probSum = 0.0;
                     for(int c=0; c< VisitableCustomers.Count; c++)
                     {
-                        prob[c] = model.SRD.GetDistance(currentCustomerID,VisitableCustomers[c]); //DONE! > Code that little method that reurns the distance of two site IDs
-                        prob[c] = Math.Pow(prob[c], 1.0); //TODO: Replace the 1.0 power here with the power parameter
+                        prob[c] = 1.0/Math.Max(0.1,ShortestDistanceOfCandidateToCurrentCustomerSet(currentCS,VisitableCustomers[c]));//Math.max used to eliminate the div by 0 error
+                        prob[c] = Math.Pow(prob[c], power);
                         probSum += prob[c];
                     }
                     for (int c = 0; c < VisitableCustomers.Count; c++)
@@ -267,17 +271,43 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
 
         }
-        List<string> PopulateTheBestTopXPercentCustomersList(CustomerSet cs, List<string> VisitableCustomers, double closestPercentSelect)
+        List<string> PopulateTheBestTopXPercentCustomersList(CustomerSet CS, List<string> VisitableCustomers, double closestPercentSelect)
         {
-            List<string> toReturn = new List<string>();
-            for (int i = 0; i < cs.NumberOfCustomers; i++)
+            string[] customers = VisitableCustomers.ToArray();
+            int nCustomers = customers.Length;
+            double[] shortestDistancesToCS = new double[nCustomers];
+            for(int i = 0; i < nCustomers; i++)
             {
-                for (int j = 0; j < VisitableCustomers.Count; j++)
-                {
-                    model.SRD.GetDistance(cs.Customers[i], VisitableCustomers[j]);
-                }
+                shortestDistancesToCS[i] = ShortestDistanceOfCandidateToCurrentCustomerSet(CS, customers[i]);
             }
-            return toReturn;
+            Array.Sort(shortestDistancesToCS, customers);
+
+            List<string> outcome = new List<string>();
+            int numberToReturn = (int)Math.Ceiling(closestPercentSelect * nCustomers/100.0);
+            for (int i= 0; i < numberToReturn; i++)
+            {
+                outcome.Add(customers[i]);
+            }
+
+            return outcome;
+        }
+        double ShortestDistanceOfCandidateToCurrentCustomerSet(CustomerSet CS, string candidate)
+        {
+            if (CS.NumberOfCustomers == 0)
+                return model.SRD.GetDistance(candidate, model.SRD.GetSingleDepotID());
+            else
+            {
+                double outcome = double.MaxValue;
+                foreach (string customer in CS.Customers)
+                {
+                    double distance = model.SRD.GetDistance(candidate, customer);
+                    if (outcome > distance)
+                    {
+                        outcome = distance;
+                    }
+                }
+                return outcome;
+            }
         }
         
         public override void SpecializedConclude()

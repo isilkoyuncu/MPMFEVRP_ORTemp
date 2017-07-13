@@ -55,6 +55,15 @@ namespace MPMFEVRP.Domains.ProblemDomain
                     outcome.Add(s.ID);
             return outcome;
         }
+        public string GetSingleDepotID()
+        {
+            foreach (Site s in siteArray)
+                if (s.SiteType == SiteTypes.Depot)
+                {
+                    return s.ID;
+                }
+            throw new Exception("No depot found!");
+        }
         public List<string> GetClosenessOrder(string nodeID)
         {
             Dictionary<double, string> preOrder = new Dictionary<double, string>();
@@ -64,8 +73,8 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 preOrder.Add(GetDistance(nodeID, s.ID), s.ID);
                 toReturn.Add(s.ID);
             }
-            toReturn.OrderBy(preOrder.Keys); //TODO order by how do you do it?
-                return toReturn;
+            var sortedDict = from entry in preOrder orderby entry.Key ascending select entry;
+            return toReturn;
         }
 
         public double GetDistance(string currentNode, string nextNode)

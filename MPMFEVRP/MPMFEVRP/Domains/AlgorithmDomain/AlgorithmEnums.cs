@@ -30,10 +30,11 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
         TOP_SELECTION_PERCENTAGE,
         RECOVERY_OPTION,
         SET_COVER,
-        RECOVERY_CONTRACTOR
+        RECOVERY_CONTRACTOR,
+        PROB_SELECTION_POWER
     }
 
-    public enum Recovery_Contractor { Outsource2CPLEX, AnalyticallySolve}
+    public enum Recovery_Contractor { AssignmentProbByCPLEX, AnalyticallySolve}
 
     public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection };
 

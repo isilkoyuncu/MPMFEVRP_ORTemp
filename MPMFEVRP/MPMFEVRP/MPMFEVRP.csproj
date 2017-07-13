@@ -92,7 +92,6 @@
     <Compile Include="Domains\SolutionDomain\CustomerSetVehicleAssignment.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
-    <Compile Include="Implementations\Algorithms\RecoveryForRandomizedGreedy.cs" />
     <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
     <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
