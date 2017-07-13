@@ -19,6 +19,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     return true;
             return false;
         }
+        public RouteOptimizerOutput Retrieve(CustomerSet candidate)
+        {
+            for (int i = 0; i < this.Count; i++)
+                if (this[i].IsIdentical(candidate))
+                    return this[i].RouteOptimizerOutcome;
+            return null;
+        }
 
         public CustomerSet Pop(CustomerListPopStrategy strategy)
         {
@@ -54,7 +61,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             for (int i = 0; i < Count; i++)
             {
                 if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
-                    this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate ||
                     this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                     continue;
                 if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV==0))
@@ -82,7 +88,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             for (int i = 0; i < Count; i++)
             {
                 if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
-                    this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate ||
                     this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                     continue;
 

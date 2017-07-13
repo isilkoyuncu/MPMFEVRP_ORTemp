@@ -87,47 +87,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
-                        csSuccessfullyUpdated = false;
-                        if (csVehAssignments.Assigned2EV.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
-                        {
-                            //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
-                            if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's EV-feasible
-                            {
-                                csVehAssignments.Assigned2EV.Add(extendedCS);
-                                csSuccessfullyUpdated = true;
-                            }
-                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
-                                csSuccessfullyUpdated = false;
-                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Although optimized for GDV it is infeasible for EV, discard the extendedCS
-                                csSuccessfullyUpdated = false;
-                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.NotYetOptimized) //It should be optimized during extension trial, we need to catch this error
-                                MessageBox.Show("RandomizedGreedy Extend function also optimizes the extended customer set however we get not yet optimized here");
-                            //if(extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate)
-                            // TODO: if you correct this, correct the one for the GDV as well
-                            //How in the world do we get that info here and use it now?
-                        }
-                        else//we need to check for GDV-feasibility!
-                        {
-                            //This block is parallel to the one above (for EV)
-                            //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
-                            if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's GDV-feasible
-                            {
-                                csVehAssignments.Assigned2GDV.Add(extendedCS);
-                                csSuccessfullyUpdated = true;
-                            }
-                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Optimized for GDV only
-                            {
-                                csVehAssignments.Assigned2GDV.Add(extendedCS);
-                                csSuccessfullyUpdated = true;
-                            }
-                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
-                                csSuccessfullyUpdated = false;
-                            if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.NotYetOptimized) //It should be optimized during extension trial, we need to catch this error
-                                MessageBox.Show("RandomizedGreedy Extend function also optimizes the extended customer set however we get not yet optimized here");
-                            //if(extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.WontOptimize_Duplicate)
-                            // TODO: if you correct this, correct the one for the EV as well
-                            //How in the world do we get that info here and use it now?
-                        }
+                        csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (csVehAssignments.Assigned2EV.Count < numberOfEVs));
                         //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
                         if (csSuccessfullyUpdated)
                         {
@@ -303,6 +263,22 @@ namespace MPMFEVRP.Implementations.Algorithms
                     }
                 }
                 return outcome;
+            }
+        }
+        bool ExtendedCSIsFeasibleForDesiredVehicleCategory(CustomerSet CS, bool consideringForEV)
+        {
+            switch (CS.RouteOptimizerOutcome.Status)
+            {
+                case RouteOptimizationStatus.OptimizedForBothGDVandEV:
+                    return true;
+                case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
+                    return false;
+                case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
+                    return (!consideringForEV);
+                case RouteOptimizationStatus.NotYetOptimized:
+                    throw new Exception("RandomizedGreedy Extend function also optimizes the extended customer set however we get not yet optimized here");
+                default:
+                    throw new Exception("ExtendedCSIsFeasibleForDesiredVehicleCategory ran into an undefined case of RouteOptimizationStatus!");
             }
         }
         

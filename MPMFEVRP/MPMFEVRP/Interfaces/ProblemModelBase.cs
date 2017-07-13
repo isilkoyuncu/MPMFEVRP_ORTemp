@@ -33,9 +33,12 @@ namespace MPMFEVRP.Interfaces
         public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
             if (archiveAllCustomerSets)
-                if (customerSetArchive.Includes(CS))
-                    return new RouteOptimizerOutput(RouteOptimizationStatus.WontOptimize_Duplicate);
-            customerSetArchive.Add(CS);//
+            {
+                RouteOptimizerOutput ROO = customerSetArchive.Retrieve(CS);
+                if (ROO != null)
+                    return new RouteOptimizerOutput(true, ROO);
+            }
+            customerSetArchive.Add(CS);
 
             double worstCaseOFV = double.MinValue; //TODO: Revert this when working with a minimization problem
 

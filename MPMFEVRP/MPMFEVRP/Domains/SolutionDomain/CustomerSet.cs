@@ -39,7 +39,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 customers.Add(c);
             }
             // TODO check if this works as intended
-            routeOptimizerOutcome = new RouteOptimizerOutput(twinCS.RouteOptimizerOutcome);
+            routeOptimizerOutcome = new RouteOptimizerOutput(false, twinCS.RouteOptimizerOutcome);
         }
 
         public bool IsIdentical(CustomerSet otherCS)

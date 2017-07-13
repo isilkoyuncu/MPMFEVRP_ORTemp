@@ -9,10 +9,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class RouteOptimizerOutput
     {
+        bool retrievedFromArchive;
         RouteOptimizationStatus status;
         bool[] feasible = new bool[2];
         double[] ofv = new double[2];
         AssignedRoute[] optimizedRoute = new AssignedRoute[2];
+
+        public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
         public RouteOptimizationStatus Status { get { return status; } }
         public bool[] Feasible { get{ return feasible; } }
         public double [] OFV { get{ return ofv; } }
@@ -20,27 +23,31 @@ namespace MPMFEVRP.Domains.SolutionDomain
         
         public RouteOptimizerOutput()
         {
+            retrievedFromArchive = false;
             status = RouteOptimizationStatus.NotYetOptimized;
         }
 
-        public RouteOptimizerOutput(RouteOptimizerOutput twinRouteOptimizerOutput)
+
+        public RouteOptimizerOutput(bool retrievedFromArchive, RouteOptimizerOutput twinRouteOptimizerOutput)
         {
+            if (retrievedFromArchive)
+                this.retrievedFromArchive = true;
+            else
+                this.retrievedFromArchive = twinRouteOptimizerOutput.retrievedFromArchive;
             status = twinRouteOptimizerOutput.Status;
             feasible = (bool[])twinRouteOptimizerOutput.Feasible.Clone();
             ofv = (double[])twinRouteOptimizerOutput.OFV.Clone();
             optimizedRoute = (AssignedRoute[])twinRouteOptimizerOutput.OptimizedRoute.Clone();
         }
 
+
         public RouteOptimizerOutput(RouteOptimizationStatus status, double[] ofv = null, AssignedRoute[] optimizedRoute = null)
         {
+            retrievedFromArchive = false;
             this.status = status;
             switch (status)
             {
                 case RouteOptimizationStatus.NotYetOptimized://This is the default at the beginning, with us having no idea before solving any TSP
-                    {
-                        break;
-                    }
-                case RouteOptimizationStatus.WontOptimize_Duplicate:
                     {
                         break;
                     }
