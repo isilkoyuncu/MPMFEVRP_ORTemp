@@ -490,10 +490,17 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)// TODO: This needs to be changed because CS IDs are all C1, C2,.. C10.
             {
                 //if (CS.Customers.Contains(j.ToString()))
-                if(CS.Customers.Contains(problemModel.SRD.SiteArray[j].ID)) //TODO: or simply change this ID to site array elements, i.e. int index
+                if(CS.Customers.Contains(problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ID)) //TODO: or simply change this ID to site array elements, i.e. int index
                 {
                     U[j][VCIndex].LB = 1.0;
                     U[j][VCIndex].UB = 1.0;
+                    U[j][1 - VCIndex].LB = 0.0;
+                    U[j][1 - VCIndex].UB = 0.0;
+                }
+                else
+                {
+                    U[j][VCIndex].LB = 0.0;
+                    U[j][VCIndex].UB = 0.0;
                     U[j][1 - VCIndex].LB = 0.0;
                     U[j][1 - VCIndex].UB = 0.0;
                 }

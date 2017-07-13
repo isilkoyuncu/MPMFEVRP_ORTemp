@@ -69,7 +69,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
             int bestSolnIndex = -1;
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
-            string DepotID = model.SRD.GetSingleDepotID();
             //This is MY understanding of the randomized greedy:
             for (int trial = 0; trial < poolSize; trial++)
             {
@@ -83,13 +82,11 @@ namespace MPMFEVRP.Implementations.Algorithms
                 {
                     CustomerSet currentCS = new CustomerSet();
                     bool csSuccessfullyUpdated = false;
-                    string customerToAdd = DepotID; //Since we start the day from the depot
                     do
                     {
-                        customerToAdd = SelectACustomer(visitableCustomers, currentCS);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
+                        string customerToAdd = SelectACustomer(visitableCustomers, currentCS);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
-                        //Is this optimized? If not, optimize it here! -YES it is optimized.(IK)
                         csSuccessfullyUpdated = false;
                         if (csVehAssignments.Assigned2EV.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
                                                                              //TODO: this can give us an error if csVehAssignments.Assigned2EV is null so count is not defined!! 

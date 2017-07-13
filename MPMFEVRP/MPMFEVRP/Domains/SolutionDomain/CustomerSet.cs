@@ -24,7 +24,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
         RouteOptimizerOutput routeOptimizerOutcome;
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
 
-        public CustomerSet() { customers = new List<string>(); }
+        public CustomerSet()
+        {
+            customers = new List<string>();
+            routeOptimizerOutcome = new RouteOptimizerOutput();
+        }
         public CustomerSet(string customerID, ProblemModelBase problemModelBase) { customers = new List<string>(); customers.Add(customerID); routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this); }
         public CustomerSet(CustomerSet twinCS)
         {
