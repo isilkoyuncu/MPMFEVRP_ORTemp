@@ -55,5 +55,35 @@ namespace MPMFEVRP.Domains.ProblemDomain
                     outcome.Add(s.ID);
             return outcome;
         }
+        public List<string> GetClosenessOrder(string nodeID)
+        {
+            Dictionary<double, string> preOrder = new Dictionary<double, string>();
+            List<string> toReturn = new List<string>();
+            foreach (Site s in siteArray)
+            {
+                preOrder.Add(GetDistance(nodeID, s.ID), s.ID);
+                toReturn.Add(s.ID);
+            }
+            toReturn.OrderBy(preOrder.Keys); //TODO order by how do you do it?
+                return toReturn;
+        }
+
+        public double GetDistance(string currentNode, string nextNode)
+        {
+            int currentIndex = 0, nextIndex = 0;
+            double distance = 0.0;
+
+            for (int i = 0; i < siteArray.Length; i++)
+            {
+                if (siteArray[i].ID == currentNode)
+                    currentIndex = i;
+                if (siteArray[i].ID == nextNode)
+                    nextIndex = i;
+            }
+
+            distance = Distance[currentIndex, nextIndex];
+
+            return distance;
+        }
     }
 }

@@ -29,8 +29,11 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
         PERCENTAGE_OF_CUSTOMERS_2SELECT,
         TOP_SELECTION_PERCENTAGE,
         RECOVERY_OPTION,
-        SET_COVER
+        SET_COVER,
+        RECOVERY_CONTRACTOR
     }
+
+    public enum Recovery_Contractor { Outsource2CPLEX, AnalyticallySolve}
 
     public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection };
 

@@ -32,10 +32,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
                         resultIndex = new Random(DateTime.Now.Ticks.GetHashCode()).Next(Count);
                         break;
                     case CustomerListPopStrategy.MinOFVforMostAdvancedVehicle:
-                        resultIndex = getIndexOfBestOFVforMostAdvancedVehicleCustomerSet(false);
+                        resultIndex = GetIndexOfBestOFVforMostAdvancedVehicleCustomerSet(false);
                         break;
                     case CustomerListPopStrategy.MaxOFVforMostAdvancedVehicle:
-                        resultIndex = getIndexOfBestOFVforMostAdvancedVehicleCustomerSet(true);
+                        resultIndex = GetIndexOfBestOFVforMostAdvancedVehicleCustomerSet(true);
                         break;
                 }
                 outcome = this[resultIndex];
@@ -43,7 +43,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             return outcome;
         }
-        int getIndexOfBestOFVforMostAdvancedVehicleCustomerSet(bool maximizationTypeOF = false)
+        int GetIndexOfBestOFVforMostAdvancedVehicleCustomerSet(bool maximizationTypeOF = false)
         {
             int outcome = -1;
 
@@ -72,7 +72,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             return outcome;
         }
-        int getIndexOfBestOFVforAnyVehicleCustomerSet(bool maximizationTypeOF = false)
+        int GetIndexOfBestOFVforAnyVehicleCustomerSet(bool maximizationTypeOF = false)
         {
             int outcome = -1;
 

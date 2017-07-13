@@ -129,6 +129,24 @@ namespace MPMFEVRP.Utils
                 }
             }
         }
+        //public static double Distance(ProblemModelBase model, string currentNode, string nextNode) //TODO this went here, check if it is ok?
+        //{
+        //    int currentIndex = 0, nextIndex = 0;
+        //    double distance = 0.0;
 
+        //    for (int i = 0; i < model.SRD.SiteArray.Length; i++)
+        //    {
+        //        if (model.SRD.SiteArray[i].ID == currentNode)
+        //            currentIndex = i;
+        //        if (model.SRD.SiteArray[i].ID == nextNode)
+        //            nextIndex = i;
+        //    }
+
+        //    distance = model.SRD.Distance[currentIndex, nextIndex];
+
+        //    return distance;
+        //}
+
+        
     }
 }

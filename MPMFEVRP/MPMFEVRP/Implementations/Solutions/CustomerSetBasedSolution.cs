@@ -17,24 +17,30 @@ namespace MPMFEVRP.Implementations.Solutions
         List<CustomerSet> cs_List;
         public List<CustomerSet> CS_List { get { return cs_List; } }
 
-        private int[,] zSetTo1;
+        CustomerSetVehicleAssignment csVehAssignment;
+        public CustomerSetVehicleAssignment CSVehAssignment{ get { return csVehAssignment; }}
 
-        public CustomerSetBasedSolution(ProblemModelBase model, List<CustomerSet> cs_List)
+
+private int[,] zSetTo1;
+
+        public CustomerSetBasedSolution(ProblemModelBase model, CustomerSetVehicleAssignment csVehAssignment)
         {
-            routes = new List<AssignedRoute>();
-
             this.model = model;
-            this.cs_List = cs_List;//TODO pirimitive olmayan seyleri de boyle kopyalayabiliyor muyuz test et.
+            this.csVehAssignment = csVehAssignment;//TODO pirimitive olmayan seyleri de boyle kopyalayabiliyor muyuz test et.
             lowerBound = 0.0;
-            for(int cs=0;cs<cs_List.Count; cs++)
+            for(int cs=0;cs< csVehAssignment.Assigned2EV.Count; cs++)
             {
-                lowerBound += cs_List[cs].RouteOptimizerOutcome.OFV[cs_List[cs].AssignedVehicle];
-                routes.Add(cs_List[cs].RouteOptimizerOutcome.OptimizedRoute[cs_List[cs].AssignedVehicle]);
+                lowerBound += csVehAssignment.Assigned2EV[cs].RouteOptimizerOutcome.OFV[0];
+            }
+            for (int cs = 0; cs < csVehAssignment.Assigned2GDV.Count; cs++)
+            {
+                lowerBound += csVehAssignment.Assigned2GDV[cs].RouteOptimizerOutcome.OFV[1];
             }
         }
 
         public CustomerSetBasedSolution()// TODO do initialization 
         {
+            CustomerSetVehicleAssignment csVehAssignment = new CustomerSetVehicleAssignment();
         }
 
 
@@ -62,7 +68,7 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             this.model = model;
             this.zSetTo1 = zSetTo1;
-            cs_List = trialSolution.CS_List;
+            cs_List = trialSolution.CS_List; // TODO if there wont be a seperate cs list than assigned vehicles then change this method as well
             for (int i = 0; i < cs_List.Count; i++)
             {
                 for (int j = 0; j < 2; j++)//TODO parametrize for the num of veh categories (2 for now)
@@ -70,7 +76,6 @@ namespace MPMFEVRP.Implementations.Solutions
                     if (zSetTo1[i, j] == 1)
                     {
                         lowerBound += cs_List[i].RouteOptimizerOutcome.OFV[j];
-                        routes.Add(cs_List[i].RouteOptimizerOutcome.OptimizedRoute[j]);
                     }
                 }
             }

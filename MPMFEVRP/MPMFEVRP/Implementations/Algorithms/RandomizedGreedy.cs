@@ -9,7 +9,7 @@ using BestRandom;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models.XCPlex;
-using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Utils;
 using System.Windows.Forms;
 
 
@@ -23,6 +23,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         Selection_Criteria sc;
         double closestPercentSelect;
         bool recoveryOption;
+        Recovery_Contractor rc;
         bool setCoverOption;
         
         XCPlex_Assignment_RecoveryForRandGreedy CPlexExtender = null;
@@ -68,6 +69,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int trial = 0; trial < poolSize; trial++)
             {
                 List<CustomerSet> currentCS_List = new List<CustomerSet>();
+                CustomerSetVehicleAssignment csVehAssignments = new CustomerSetVehicleAssignment();//Empty constructor of CustomerSetVehicleAssignment declares 2 empty lists: for EV and GDV assigned CSs
                 Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
                 //solution blank olarak uretildi ve icinde hicbir customerSet yok
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
@@ -84,14 +86,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
                         //Is this optimized? If not, optimize it here! -YES it is optimized.(IK)
                         csSuccessfullyUpdated = false;
-                        if (trialSolution.Routes.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
-                                                                     //TODO: this can give us an error ie trialSolution.Routes is null so count is not defined!! 
-                                                                     //Maybe the empty constructor of the solution should declare an empty route list
+                        if (csVehAssignments.Assigned2EV.Count < numberOfEVs)//I'm looking for EV-feasibility of the customerSet
+                                                                             //TODO: this can give us an error if csVehAssignments.Assigned2EV is null so count is not defined!! 
                         {
                             //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
                             if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's EV-feasible
                             {
-                                extendedCS.AssignedVehicle = 0; //EV=0
+                                csVehAssignments.Assigned2EV.Add(extendedCS);
                                 csSuccessfullyUpdated = true;
                             }
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
@@ -110,12 +111,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                             //csSuccessfullyUpdated = ??? //TODO: Based on the route optimizer status, knowing that we're interested in EV feasibility, decide whether the extendedCS is good to keep or needs to be discarded!
                             if (extendedCS.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)//Now I know it's GDV-feasible
                             {
-                                extendedCS.AssignedVehicle = 1; //GDV=1
+                                csVehAssignments.Assigned2GDV.Add(extendedCS);
                                 csSuccessfullyUpdated = true;
                             }
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)//Optimized for GDV only
                             {
-                                extendedCS.AssignedVehicle = 1; //GDV=1
+                                csVehAssignments.Assigned2GDV.Add(extendedCS);
                                 csSuccessfullyUpdated = true;
                             }
                             if ((extendedCS.RouteOptimizerOutcome.Status) == RouteOptimizationStatus.InfeasibleForBothGDVandEV)//Both EV and GDV infeasible, discard the extendedCS
@@ -134,14 +135,28 @@ namespace MPMFEVRP.Implementations.Algorithms
                         }
                     } while (csSuccessfullyUpdated);
 
-                    //add the customerSet to the solution //TODO: How do you do this?
+                    //add the customerSet to the solution
                     trialSolution.AddCustomerSet(currentCS);
                 } while (csSuccessfullyAdded);
                 if (recoveryOption)
                 {
-                    //solve the linear optimization problem to recover from bad cs creation
-                    CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
-                    CPlexExtender.GetCSList2bRecovered(trialSolution);
+                    switch (rc)
+                    {
+                        case Recovery_Contractor.Outsource2CPLEX:
+                            {
+                                //solve the linear optimization problem to recover from bad cs creation
+                                CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
+                                CPlexExtender.GetCSList2bRecovered(trialSolution);
+                                break;
+                            }
+                        case Recovery_Contractor.AnalyticallySolve:
+                            {
+                                RecoveryForRandomizedGreedy recovery = new RecoveryForRandomizedGreedy();
+                                //TODO code the analytical recovery algorithm
+                                break;
+                            }
+                    }
+                    
                     trialSolution = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
                     //This gives you the new trialSolution
                 }
@@ -231,6 +246,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Here goes the specialized selection code
                     List<string> theBestTopXPercent = new List<string>();
                     //TODO Populate this list
+
                     return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
                 case Selection_Criteria.WeightedNormalizedProbSelection:
                     //Here goes the specialized selection code
@@ -239,7 +255,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     double probSum = 0.0;
                     for(int c=0; c< VisitableCustomers.Count; c++)
                     {
-                        prob[c] = Distance(currentCustomerID,VisitableCustomers[c]); //DONE! > Code that little method that reurns the distance of two site IDs
+                        prob[c] = model.SRD.GetDistance(currentCustomerID,VisitableCustomers[c]); //DONE! > Code that little method that reurns the distance of two site IDs
                         prob[c] = Math.Pow(prob[c], 1.0); //TODO: Replace the 1.0 power here with the power parameter
                         probSum += prob[c];
                     }
@@ -251,27 +267,19 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
 
         }
-
-        double Distance(string currentNode, string nextNode) //TODO this should go somewhere else
+        List<string> PopulateTheBestTopXPercentCustomersList(CustomerSet cs, List<string> VisitableCustomers, double closestPercentSelect)
         {
-            int currentIndex = 0, nextIndex = 0;
-            double distance = 0.0;
-
-            if (currentNode == "Depot")
-                currentIndex = 0; //Since the depot has index 0 in our site related data!
-
-            for(int i=0; i<model.SRD.SiteArray.Length; i++)
+            List<string> toReturn = new List<string>();
+            for (int i = 0; i < cs.NumberOfCustomers; i++)
             {
-                if (model.SRD.SiteArray[i].ID == currentNode)
-                    currentIndex = i;
-                if(model.SRD.SiteArray[i].ID == nextNode)
-                    nextIndex = i;
+                for (int j = 0; j < VisitableCustomers.Count; j++)
+                {
+                    model.SRD.GetDistance(cs.Customers[i], VisitableCustomers[j]);
+                }
             }
-
-            distance = model.SRD.Distance[currentIndex, nextIndex];
-
-            return distance;
+            return toReturn;
         }
+        
         public override void SpecializedConclude()
         {
             //throw new NotImplementedException();

@@ -19,7 +19,6 @@ namespace MPMFEVRP.Interfaces
         bool IsComplete { get; }
         double ObjectiveFunctionValue { get; }
         List<ISolution> GetAllChildren();
-        List<AssignedRoute> Routes { get; }
         double LowerBound { get; set; }
         double UpperBound { get; set; }
         AlgorithmSolutionStatus Status { get; set; }
