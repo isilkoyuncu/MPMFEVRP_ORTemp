@@ -14,8 +14,8 @@ namespace MPMFEVRP.Implementations.Solutions
         private ProblemModelBase model;
         private Random random;
 
-        List<CustomerSet> cs_List;
-        public List<CustomerSet> CS_List { get { return cs_List; } }
+        //List<CustomerSet> cs_List;
+        //public List<CustomerSet> CS_List { get { return cs_List; } }
 
         CustomerSetVehicleAssignment csVehAssignment;
         public CustomerSetVehicleAssignment CSVehAssignment{ get { return csVehAssignment; }}

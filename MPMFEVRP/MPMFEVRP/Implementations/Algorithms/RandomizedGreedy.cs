@@ -81,13 +81,14 @@ namespace MPMFEVRP.Implementations.Algorithms
                 do
                 {
                     CustomerSet currentCS = new CustomerSet();
+                    bool consideringCSForEV = (csVehAssignments.Assigned2EV.Count < numberOfEVs);
                     bool csSuccessfullyUpdated = false;
                     do
                     {
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
-                        csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (csVehAssignments.Assigned2EV.Count < numberOfEVs));
+                        csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, consideringCSForEV);
                         //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
                         if (csSuccessfullyUpdated)
                         {
@@ -97,33 +98,19 @@ namespace MPMFEVRP.Implementations.Algorithms
                     } while (csSuccessfullyUpdated);
 
                     //add the customerSet to the solution
-                    trialSolution.AddCustomerSet(currentCS);
+                    trialSolution.AddCustomerSet(currentCS);//TODO: Make sure that the new structure with separate lists for the two vehicle types is used in this assignment
                 } while (csSuccessfullyAdded);
+
+                //Phase 2:
                 if (recoveryOption)
                 {
-                    switch (rc)
-                    {
-                        case Recovery_Contractor.AssignmentProbByCPLEX:
-                            {
-                                //solve the linear optimization problem to recover from bad cs creation
-                                CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
-                                CPlexExtender.GetCSList2bRecovered(trialSolution);
-                                break;
-                            }
-                        case Recovery_Contractor.AnalyticallySolve:
-                            {
-                                //TODO code the analytical recovery algorithm
-                                break;
-                            }
-                    }
-                    
-                    trialSolution = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
-                    //This gives you the new trialSolution
+                    trialSolution = RecoverFromPoorAssignments(trialSolution);
                 }
-                //else: do nothing (don't have an else!)ShortestDistanceOfCandidateToCurrentCustomerSet
-
+                //else: do nothing (don't have an else!)
                 allSolutions.Add(trialSolution);
             }//for(int trial = 0; trial<poolSize; trial++)
+
+            //Phase 3:
             if (setCoverOption)
             {
                 //TODO solve the set cover formulation, construct a solution from it, and return that!
@@ -280,6 +267,37 @@ namespace MPMFEVRP.Implementations.Algorithms
                 default:
                     throw new Exception("ExtendedCSIsFeasibleForDesiredVehicleCategory ran into an undefined case of RouteOptimizationStatus!");
             }
+        }
+
+        Solutions.CustomerSetBasedSolution RecoverFromPoorAssignments(Solutions.CustomerSetBasedSolution incumbent)
+        {
+            Solutions.CustomerSetBasedSolution challenger = new Solutions.CustomerSetBasedSolution();
+
+            switch (rc)
+            {
+                case Recovery_Contractor.AssignmentProbByCPLEX:
+                    {
+                        //solve the linear optimization problem to recover from bad cs creation
+                        CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
+                        CPlexExtender.GetCSList2bRecovered(incumbent);
+                        challenger = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
+                        break;
+                    }
+                case Recovery_Contractor.AnalyticallySolve:
+                    {
+                        //TODO code the analytical recovery algorithm
+
+                        int nCS = incumbent.NumberOfCustomerSets;
+
+
+                        break;
+                    }
+            }
+
+            //This gives you the new trialSolution
+
+
+            return challenger;
         }
         
         public override void SpecializedConclude()
