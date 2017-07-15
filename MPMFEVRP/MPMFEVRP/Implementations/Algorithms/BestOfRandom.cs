@@ -9,14 +9,14 @@ using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
-    public class Greedy : AlgorithmBase
+    public class BestOfRandom : AlgorithmBase
     {
         SolutionList unexploredList;
         double lowerBound;
 
         public override string GetName()
         {
-            return "Randomized Greedy";
+            return "Best of Random";
         }
 
         public override void SpecializedConclude()

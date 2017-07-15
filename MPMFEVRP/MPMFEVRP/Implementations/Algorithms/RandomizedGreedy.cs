@@ -23,23 +23,23 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         Selection_Criteria sc;
         double closestPercentSelect;
-        bool recoveryOption;
-        Recovery_Contractor rc;
+        bool isRecoveryNeeded;
+        Recovery_Options selectedRecoveryOpt;
         bool setCoverOption;
         
         XCPlex_Assignment_RecoveryForRandGreedy CPlexExtender = null;
-        XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for assigment problem? No time limit?
+        XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
 
         public RandomizedGreedy()
         {
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "20"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, ParameterType.ComboBox));
-            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 25, 50, 100 }, 25, ParameterType.ComboBox)); //TODO find a way to get data from problem, i.e. number of customers or make this percentage
-            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PROB_SELECTION_POWER, "Power", "1.0"));
-            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_OPTION, "Recovery", new List<object>() { true, false }, true, ParameterType.CheckBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 25, 50, 100 }, 25, ParameterType.ComboBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PROB_SELECTION_POWER, "Power", "2.0"));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_NEEDED, "Recovery", new List<object>() { true, false }, true, ParameterType.CheckBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_OPTIONS, "Recovery Options", new List<object>() { Recovery_Options.AssignmentProbByCPLEX, Recovery_Options.AnalyticallySolve }, Recovery_Options.AssignmentProbByCPLEX, ParameterType.ComboBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, false, ParameterType.CheckBox));
-
         }
 
         public override string GetName()
@@ -59,9 +59,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             sc =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.PROB_SELECTION_POWER).GetDoubleValue();
-            recoveryOption = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTION).GetBoolValue();
+            isRecoveryNeeded = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_NEEDED).GetBoolValue();
+            selectedRecoveryOpt = (Recovery_Options)AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTIONS).Value;
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
-
         }
 
         public override void SpecializedRun()
@@ -73,7 +73,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int trial = 0; trial < poolSize; trial++)
             {
                 List<CustomerSet> currentCS_List = new List<CustomerSet>();
-                CustomerSetVehicleAssignment csVehAssignments = new CustomerSetVehicleAssignment();//Empty constructor of CustomerSetVehicleAssignment declares 2 empty lists: for EV and GDV assigned CSs
                 Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
                 //solution blank olarak uretildi ve icinde hicbir customerSet yok
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
@@ -84,10 +83,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                     bool csSuccessfullyUpdated = false;
                     do
                     {
-                        string customerToAdd = SelectACustomer(visitableCustomers, currentCS);//TODO:Depot is not a customer set! So, find a way to tie these methods to work with the initial blank customerSet, that'll need to calculate the distances from the depot as if the depot was a customer site!
+                        string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
-                        csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (csVehAssignments.Assigned2EV.Count < numberOfEVs));
+                        csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (trialSolution.NumCS_assigned2EV < numberOfEVs));
                         //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
                         if (csSuccessfullyUpdated)
                         {
@@ -97,20 +96,19 @@ namespace MPMFEVRP.Implementations.Algorithms
                     } while (csSuccessfullyUpdated);
 
                     //add the customerSet to the solution
-                    trialSolution.AddCustomerSet(currentCS);
+                    trialSolution.AddCustomerSet2EVList(currentCS);
                 } while (csSuccessfullyAdded);
-                if (recoveryOption)
+                if (isRecoveryNeeded)
                 {
-                    switch (rc)
+                    switch (selectedRecoveryOpt)
                     {
-                        case Recovery_Contractor.AssignmentProbByCPLEX:
+                        case Recovery_Options.AssignmentProbByCPLEX:
                             {
                                 //solve the linear optimization problem to recover from bad cs creation
-                                CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam);
-                                CPlexExtender.GetCSList2bRecovered(trialSolution);
+                                CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam,trialSolution);
                                 break;
                             }
-                        case Recovery_Contractor.AnalyticallySolve:
+                        case Recovery_Options.AnalyticallySolve:
                             {
                                 //TODO code the analytical recovery algorithm
                                 break;
@@ -205,7 +203,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case Selection_Criteria.UniformAmongTheBestPercentage:
                     //Here goes the specialized selection code
                     List<string> theBestTopXPercent = new List<string>();
-                    //TODO Populate this list
                     theBestTopXPercent=PopulateTheBestTopXPercentCustomersList(currentCS, VisitableCustomers, closestPercentSelect);
                     return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
                 case Selection_Criteria.WeightedNormalizedProbSelection:
@@ -215,7 +212,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     double probSum = 0.0;
                     for(int c=0; c< VisitableCustomers.Count; c++)
                     {
-                        prob[c] = 1.0/Math.Max(0.1,ShortestDistanceOfCandidateToCurrentCustomerSet(currentCS,VisitableCustomers[c]));//Math.max used to eliminate the div by 0 error
+                        prob[c] = 1.0/Math.Max(0.00001,ShortestDistanceOfCandidateToCurrentCustomerSet(currentCS,VisitableCustomers[c]));//Math.max used to eliminate the div by 0 error
                         prob[c] = Math.Pow(prob[c], power);
                         probSum += prob[c];
                     }
@@ -284,12 +281,12 @@ namespace MPMFEVRP.Implementations.Algorithms
         
         public override void SpecializedConclude()
         {
-            //throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override void SpecializedReset()
         {
-            //throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override string[] GetOutputSummary()

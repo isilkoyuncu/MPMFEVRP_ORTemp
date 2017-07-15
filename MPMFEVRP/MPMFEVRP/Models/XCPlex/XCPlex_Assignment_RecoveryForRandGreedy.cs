@@ -15,21 +15,18 @@ namespace MPMFEVRP.Models.XCPlex
     class XCPlex_Assignment_RecoveryForRandGreedy : XCPlexBase
     {
         INumVar[][] z;//[customerSet][2: 0 of EV, 1 for GDV]
-        ILinearNumExpr obj;//Because of the enumerative and space consuming nature of the problem with 2 vehicle categories, it's more practical to create the obj expression beforehand and only add it later
+        ILinearNumExpr obj;
 
         CustomerSetBasedSolution trialSolution;
 
-        public XCPlex_Assignment_RecoveryForRandGreedy(ProblemModelBase problemModel, XCPlexParameters xCplexParam) : base(problemModel, xCplexParam)
-        {
-        }
-        public void GetCSList2bRecovered(CustomerSetBasedSolution trialSolution)
+        public XCPlex_Assignment_RecoveryForRandGreedy(ProblemModelBase problemModel, XCPlexParameters xCplexParam, CustomerSetBasedSolution trialSolution) : base(problemModel, xCplexParam)
         {
             this.trialSolution = new CustomerSetBasedSolution(trialSolution);
         }
 
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
-            if (SolutionType != typeof(MPMFEVRP.Implementations.Solutions.CustomerSetBasedSolution))
+            if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_Assignment_RecoveryForRandGreedy prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
             return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1(), trialSolution);
@@ -52,10 +49,9 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddCustomerCoverageConstraints()
         {
-            List<CustomerSet> CS_List = trialSolution.CS_List;
             //CustomerCoverageConstraint_EachCustomerMustBeCovered assignmentConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;//TODO Make this parametric and pass it through since wherever it may originate
 
-            for (int i= 0; i < CS_List.Count; i++)
+            for (int i= 0; i < trialSolution.NumCS_total; i++)
             {
                 ILinearNumExpr numTimesCustomerServed = LinearNumExpr();
                 numTimesCustomerServed.AddTerm(1.0, z[i][0]);
@@ -80,9 +76,8 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddMaxNumberOfEVsConstraint()
         {
-            List<CustomerSet> CS_List = trialSolution.CS_List;
             ILinearNumExpr numTimesEVsUsed = LinearNumExpr();
-            for (int i = 0; i < CS_List.Count; i++)
+            for (int i = 0; i < trialSolution.NumCS_total; i++)
             {
                 numTimesEVsUsed.AddTerm(1.0, z[i][0]);
             }
@@ -93,7 +88,8 @@ namespace MPMFEVRP.Models.XCPlex
         {
             //created already in DefineDecisionVariables()
             //add (Maximize or Minimize depends on the problem)
-            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType;
+            //TODO maybe the model should know the obj value type??
+            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType; 
             if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
                 AddMaximize(obj);
             else
@@ -105,7 +101,7 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_list = new List<INumVar>();
             obj = LinearNumExpr();
 
-            int nCustomerSets = trialSolution.CS_List.Count;
+            int nCustomerSets = trialSolution.NumCS_total;
             string[][] z_name = new string[nCustomerSets][];
             z = new INumVar[nCustomerSets][];
             for (int i = 0; i < nCustomerSets; i++)
@@ -116,9 +112,10 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
                     z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
-                    obj.AddTerm(trialSolution.CS_List[i].RouteOptimizerOutcome.OFV[v], z[i][v]);
                     allVariables_list.Add(z[i][v]);
                 }
+                obj.AddTerm(trialSolution.Assigned2EV[i].RouteOptimizerOutcome.OFV[0], z[i][0]);
+                obj.AddTerm(trialSolution.Assigned2GDV[i].RouteOptimizerOutcome.OFV[1], z[i][1]);
             }
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
@@ -126,8 +123,8 @@ namespace MPMFEVRP.Models.XCPlex
 
         public int[,] GetZVariablesSetTo1()
         {
-            int[,] outcome = new int[trialSolution.CS_List.Count, problemModel.VRD.NumVehicleCategories];
-            for (int cs = 0; cs < trialSolution.CS_List.Count; cs++)
+            int[,] outcome = new int[trialSolution.NumCS_total, problemModel.VRD.NumVehicleCategories];
+            for (int cs = 0; cs < trialSolution.NumCS_total; cs++)
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     if (GetValue(z[cs][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                         outcome[cs,v] = 1;
