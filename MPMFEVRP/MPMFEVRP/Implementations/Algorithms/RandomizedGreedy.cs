@@ -5,12 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Models;
-using BestRandom;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models.XCPlex;
-using MPMFEVRP.Utils;
-using System.Windows.Forms;
+using MPMFEVRP.Implementations.Solutions;
 
 
 namespace MPMFEVRP.Implementations.Algorithms
@@ -21,7 +19,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         Random random;
         double power;
 
-        Selection_Criteria sc;
+        Selection_Criteria selectedCriterion;
         double closestPercentSelect;
         bool isRecoveryNeeded;
         Recovery_Options selectedRecoveryOpt;
@@ -56,7 +54,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
             int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
             random = new Random(randomSeed);
-            sc =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
+            selectedCriterion =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.PROB_SELECTION_POWER).GetDoubleValue();
             isRecoveryNeeded = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_NEEDED).GetBoolValue();
@@ -100,22 +98,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 } while (csSuccessfullyAdded);
                 if (isRecoveryNeeded)
                 {
-                    switch (selectedRecoveryOpt)
-                    {
-                        case Recovery_Options.AssignmentProbByCPLEX:
-                            {
-                                //solve the linear optimization problem to recover from bad cs creation
-                                CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam,trialSolution);
-                                break;
-                            }
-                        case Recovery_Options.AnalyticallySolve:
-                            {
-                                //TODO code the analytical recovery algorithm
-                                break;
-                            }
-                    }
+                    trialSolution = Recover(trialSolution);
                     
-                    trialSolution = (Solutions.CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(Solutions.CustomerSetBasedSolution));
                     //This gives you the new trialSolution
                 }
                 //else: do nothing (don't have an else!)ShortestDistanceOfCandidateToCurrentCustomerSet
@@ -131,7 +115,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 double objValue = Double.MinValue;
                 bestSolnIndex = -1;
                 int counter = -1;
-                foreach (Solutions.CustomerSetBasedSolution CSBS in allSolutions)
+                foreach (CustomerSetBasedSolution CSBS in allSolutions)
                 {
                     counter++;
                     if (CSBS.ObjectiveFunctionValue > objValue)
@@ -147,46 +131,22 @@ namespace MPMFEVRP.Implementations.Algorithms
             //The following is best of random and I'm not sure how is this going to work with a complex solution structure
             //bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
         }
-        /// <summary>
-        /// This method tries to extend the customer set only once 
-        /// </summary>
-        /// <param name="VisitableCustomers"></param>
-        /// <param name="sc"></param>
-        /// <param name="problemModelBase"></param>
-        /// <returns></returns>
-        CustomerSet ExtendCurrentCustomerSet(CustomerSet currentCS, List<string> VisitableCustomers)
+
+        public override void SpecializedConclude()
         {
-            if (VisitableCustomers.Count == 0)
-                return null;
-
-            //Preliminary: make a copy of the current customer set
-            CustomerSet outcome = new CustomerSet(currentCS);
-
-            //We first must choose which of the visitable customers to add to the set
-            string customerToAdd = VisitableCustomers[0];
-            switch (sc)
-            {
-                case Selection_Criteria.CompleteUniform:
-                    //Here goes the specialized selection code
-                    break;
-                case Selection_Criteria.UniformAmongTheBestPercentage:
-                    //Here goes the specialized selection code
-                    break;
-                case Selection_Criteria.WeightedNormalizedProbSelection:
-                    //Here goes the specialized selection code
-                    break;
-                default:
-                    throw new Exception("The selection criterion sent to CustomerSet.Extend was not defined before!");
-            }
-            //In each case within this block we must identify a customer to add to the list
-
-            //Now that we have a customer to add to the list, we'll request to make the extension
-            outcome.Extend(customerToAdd, model);
-
-            //Now return
-            return outcome;
+            throw new NotImplementedException();
         }
-        
+
+        public override void SpecializedReset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string[] GetOutputSummary()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// This method selects the next customer to be added in the currect customer set
         /// </summary>
@@ -196,17 +156,17 @@ namespace MPMFEVRP.Implementations.Algorithms
         string SelectACustomer(List<string> VisitableCustomers, CustomerSet currentCS)
         {
             string customerToAdd = VisitableCustomers[0];
-            switch (sc)
+            switch (selectedCriterion)
             {
                 case Selection_Criteria.CompleteUniform:
                     return (VisitableCustomers[random.Next(VisitableCustomers.Count)]);
+
                 case Selection_Criteria.UniformAmongTheBestPercentage:
-                    //Here goes the specialized selection code
                     List<string> theBestTopXPercent = new List<string>();
                     theBestTopXPercent=PopulateTheBestTopXPercentCustomersList(currentCS, VisitableCustomers, closestPercentSelect);
                     return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
+
                 case Selection_Criteria.WeightedNormalizedProbSelection:
-                    //Here goes the specialized selection code
                     //We assume probabilities are proportional inverse distances
                     double[] prob = new double[VisitableCustomers.Count];
                     double probSum = 0.0;
@@ -219,6 +179,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     for (int c = 0; c < VisitableCustomers.Count; c++)
                         prob[c] /= probSum;
                     return VisitableCustomers[Utils.RandomArrayOperations.Select(random.NextDouble(), prob)];
+
                 default:
                     throw new Exception("The selection criterion sent to CustomerSet.Extend was not defined before!");
             }
@@ -278,20 +239,26 @@ namespace MPMFEVRP.Implementations.Algorithms
                     throw new Exception("ExtendedCSIsFeasibleForDesiredVehicleCategory ran into an undefined case of RouteOptimizationStatus!");
             }
         }
+        CustomerSetBasedSolution Recover (CustomerSetBasedSolution oldTrialSolution)
+        {
+            CustomerSetBasedSolution outcome = new CustomerSetBasedSolution(oldTrialSolution);
+            switch (selectedRecoveryOpt)
+            {
+                case Recovery_Options.AssignmentProbByCPLEX:
+                    {
+                        //solve the linear optimization problem to recover from bad cs creation
+                        CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam, oldTrialSolution);
+                        outcome = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+                        break;
+                    }
+                case Recovery_Options.AnalyticallySolve:
+                    {
+                        //TODO code the analytical recovery algorithm
+                        break;
+                    }
+            }
+            return outcome;
+        }
         
-        public override void SpecializedConclude()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SpecializedReset()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string[] GetOutputSummary()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

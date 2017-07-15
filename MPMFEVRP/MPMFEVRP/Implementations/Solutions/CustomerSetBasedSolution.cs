@@ -21,7 +21,6 @@ namespace MPMFEVRP.Implementations.Solutions
         public int NumCS_assigned2GDV { get { return (assigned2GDV == null) ? 0 : assigned2GDV.Count; } }
         public int NumCS_total { get { return (assigned2EV == null && assigned2GDV == null) ? 0 : (assigned2EV.Count + assigned2GDV.Count); } }
 
-
         private int[,] zSetTo1;
 
         public CustomerSetBasedSolution() 
@@ -128,7 +127,5 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             throw new NotImplementedException();
         }
-
-        
     }
 }
