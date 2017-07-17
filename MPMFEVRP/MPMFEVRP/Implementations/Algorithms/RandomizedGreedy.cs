@@ -64,14 +64,13 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            List<Solutions.CustomerSetBasedSolution> allSolutions = new List<Solutions.CustomerSetBasedSolution>();
+            List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
             int bestSolnIndex = -1;
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
             //This is MY understanding of the randomized greedy:
             for (int trial = 0; trial < poolSize; trial++)
             {
-                List<CustomerSet> currentCS_List = new List<CustomerSet>();
-                Solutions.CustomerSetBasedSolution trialSolution = new Solutions.CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
+                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
                 //solution blank olarak uretildi ve icinde hicbir customerSet yok
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
                 bool csSuccessfullyAdded = false;
