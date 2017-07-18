@@ -32,6 +32,8 @@ namespace MPMFEVRP.Implementations.Solutions
         public CustomerSetBasedSolution(ProblemModelBase model)
         {
             this.model = model; //TODO pirimitive olmayan seyleri de boyle kopyalayabiliyor muyuz test et.
+            assigned2EV = new CustomerSetList();
+            assigned2GDV = new CustomerSetList();
             //lowerBound = 0.0;
             //for(int cs=0;cs< assigned2EV.Count; cs++)
             //{
@@ -47,6 +49,8 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             model = twinCSBasedSolution.model;
             random = twinCSBasedSolution.random;
+            assigned2EV = twinCSBasedSolution.assigned2EV; //TODO deep copy these
+            assigned2GDV = twinCSBasedSolution.assigned2GDV; //TODO deep copy these
             isComplete = twinCSBasedSolution.isComplete;
             lowerBound = twinCSBasedSolution.lowerBound;
             objectiveFunctionValue = twinCSBasedSolution.objectiveFunctionValue;
@@ -59,23 +63,38 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             this.model = model;
             this.random = random;
+            assigned2EV = new CustomerSetList();
+            assigned2GDV = new CustomerSetList();
         }
 
         public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSetBasedSolution trialSolution)
         {
             this.model = model;
             this.zSetTo1 = zSetTo1;
-            //cs_List = trialSolution.CS_List; // TODO if there wont be a seperate cs list than assigned vehicles then change this method as well
-            //for (int i = 0; i < cs_List.Count; i++)
-            //{
-            //    for (int j = 0; j < 2; j++)//TODO parametrize for the num of veh categories (2 for now)
-            //    {
-            //        if (zSetTo1[i, j] == 1)
-            //        {
-            //            lowerBound += cs_List[i].RouteOptimizerOutcome.OFV[j];
-            //        }
-            //    }
-            //}
+            assigned2EV = new CustomerSetList();
+            assigned2GDV = new CustomerSetList();
+            for (int i = 0; i < trialSolution.NumCS_assigned2EV; i++)
+            {
+                if (zSetTo1[i, 0] == 1)
+                {
+                    AddCustomerSet2EVList(trialSolution.assigned2EV[i]);
+                }
+                else if (zSetTo1[i, 1] == 1)
+                {
+                    AddCustomerSet2GDVList(trialSolution.assigned2EV[i]);
+                }
+            }
+            for (int i = trialSolution.NumCS_assigned2EV; i < trialSolution.NumCS_total; i++)
+            {
+                if (zSetTo1[i, 0] == 1)
+                {
+                    AddCustomerSet2EVList(trialSolution.assigned2GDV[i]);
+                }
+                else if (zSetTo1[i, 1] == 1)
+                {
+                    AddCustomerSet2GDVList(trialSolution.assigned2GDV[i]);
+                }
+            }
         }
 
         public void AddCustomerSet2EVList(CustomerSet currentCS)

@@ -89,11 +89,16 @@ namespace MPMFEVRP.Implementations.Algorithms
                         {
                             visitableCustomers.Remove(customerToAdd);
                             currentCS = extendedCS;
+                            if (visitableCustomers.Count == 0)
+                                csSuccessfullyUpdated = false;
                         }
                     } while (csSuccessfullyUpdated);
 
                     //add the customerSet to the solution
-                    trialSolution.AddCustomerSet2EVList(currentCS);
+                    trialSolution.AddCustomerSet2GDVList(currentCS);
+                    csSuccessfullyAdded = true;
+                    if (visitableCustomers.Count==0)
+                        csSuccessfullyAdded = false;
                 } while (csSuccessfullyAdded);
                 if (isRecoveryNeeded)
                 {
@@ -246,7 +251,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case Recovery_Options.AssignmentProbByCPLEX:
                     {
                         //solve the linear optimization problem to recover from bad cs creation
-                        CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam, oldTrialSolution);
+                        CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam, outcome);
+                        CPlexExtender.Solve_and_PostProcess();
                         outcome = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
                         break;
                     }

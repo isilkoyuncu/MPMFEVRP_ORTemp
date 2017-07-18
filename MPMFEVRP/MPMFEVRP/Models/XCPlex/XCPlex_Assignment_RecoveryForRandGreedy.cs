@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
-using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Interfaces;
 using ILOG.Concert;
 using ILOG.CPLEX;
@@ -19,9 +19,29 @@ namespace MPMFEVRP.Models.XCPlex
 
         CustomerSetBasedSolution trialSolution;
 
-        public XCPlex_Assignment_RecoveryForRandGreedy(ProblemModelBase problemModel, XCPlexParameters xCplexParam, CustomerSetBasedSolution trialSolution) : base(problemModel, xCplexParam)
+        public XCPlex_Assignment_RecoveryForRandGreedy(ProblemModelBase problemModel, XCPlexParameters xCplexParam, CustomerSetBasedSolution trialSolution) 
         {
+            this.problemModel = problemModel;
+            this.xCplexParam = xCplexParam;
             this.trialSolution = new CustomerSetBasedSolution(trialSolution);
+            XCPlexRelaxation relaxation;
+            relaxation = xCplexParam.Relaxation;
+            if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
+                )
+                variable_type = NumVarType.Float;
+
+            //now we are ready to put the model together and then solve it
+            //Define the variables
+            DefineDecisionVariables();
+            //Objective function
+            AddTheObjectiveFunction();
+            //Constraints
+            AddAllConstraints();
+            //Cplex parameters
+            SetCplexParameters();
+            //output variables
+            initializeOutputVariables();
         }
 
         public override SolutionBase GetCompleteSolution(Type SolutionType)
@@ -89,7 +109,8 @@ namespace MPMFEVRP.Models.XCPlex
             //created already in DefineDecisionVariables()
             //add (Maximize or Minimize depends on the problem)
             //TODO maybe the model should know the obj value type??
-            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType; 
+            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType;
+            objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
             if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
                 AddMaximize(obj);
             else
@@ -114,9 +135,18 @@ namespace MPMFEVRP.Models.XCPlex
                     z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
                     allVariables_list.Add(z[i][v]);
                 }
+            }
+            for (int i = 0; i < trialSolution.NumCS_assigned2EV; i++) //First customer sets assigned to EV
+            {
                 obj.AddTerm(trialSolution.Assigned2EV[i].RouteOptimizerOutcome.OFV[0], z[i][0]);
+                obj.AddTerm(trialSolution.Assigned2EV[i].RouteOptimizerOutcome.OFV[1], z[i][1]);
+            }
+            for (int i = 0; i < trialSolution.NumCS_assigned2GDV; i++) //Then customer sets assigned to GDV
+            {
+                obj.AddTerm(trialSolution.Assigned2GDV[i].RouteOptimizerOutcome.OFV[0], z[i][0]);
                 obj.AddTerm(trialSolution.Assigned2GDV[i].RouteOptimizerOutcome.OFV[1], z[i][1]);
             }
+            
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
         }
