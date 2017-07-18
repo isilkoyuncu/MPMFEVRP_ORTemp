@@ -93,12 +93,9 @@ namespace MPMFEVRP.Implementations.Algorithms
                     } while (csSuccessfullyUpdated && visitableCustomers.Count > 0);
 
                     //add the customerSet to the solution
-                    if ((trialSolution.NumCS_assigned2EV < numberOfEVs))
-                        trialSolution.AddCustomerSet2EVList(currentCS);
-                    else
-                        trialSolution.AddCustomerSet2GDVList(currentCS);
-                    csSuccessfullyAdded = true;
-                } while (csSuccessfullyAdded && visitableCustomers.Count > 0);
+                    csSuccessfullyAdded = AddCustomerSet2Soln(trialSolution, currentCS);
+
+                } while (visitableCustomers.Count > 0);
                 if (isRecoveryNeeded)
                 {
                     //This gives you the new trialSolution
@@ -275,7 +272,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                             cs_List.Add(cs_Array[count]);
                             count++;
                         }
-                        dP = cs_List.GetDeltaProfit().ToArray();
+                        dP = cs_List.GetDeltaProfit().ToArray(); //TODO GetDeltaProfit change to compatible with array not list
                         Array.Sort(dP, cs_Array);
                         for (int i = cs_Array.Length-1; i >=0; i--)
                         {
@@ -292,6 +289,18 @@ namespace MPMFEVRP.Implementations.Algorithms
                     }
             }
             return outcome;
+        }
+        bool AddCustomerSet2Soln(CustomerSetBasedSolution solution, CustomerSet CS)
+        {
+            if ((CS.RouteOptimizerOutcome.OFV[0] <= 0) && (CS.RouteOptimizerOutcome.OFV[1] <= 0))//The route is a negaive profit for either vehicle category!
+                return false;
+
+            //If we're here, we know at least one of the profits is a positive! And that's all we need, if this is a sub-optimal decision, we can still recover from it later, no worries.
+            if ((solution.NumCS_assigned2EV < model.VRD.NumVehicles[0]))
+                solution.AddCustomerSet2EVList(CS);
+            else
+                solution.AddCustomerSet2GDVList(CS);
+            return true;
         }
         
     }
