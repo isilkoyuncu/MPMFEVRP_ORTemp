@@ -49,8 +49,10 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             model = twinCSBasedSolution.model;
             random = twinCSBasedSolution.random;
-            assigned2EV = twinCSBasedSolution.assigned2EV; //TODO deep copy these
-            assigned2GDV = twinCSBasedSolution.assigned2GDV; //TODO deep copy these
+            assigned2EV = new CustomerSetList();
+            assigned2GDV = new CustomerSetList();
+            twinCSBasedSolution.assigned2EV.ForEach((item) => { AddCustomerSet2EVList(new CustomerSet(item)); });
+            twinCSBasedSolution.assigned2GDV.ForEach((item) => { AddCustomerSet2GDVList(new CustomerSet(item)); });
             isComplete = twinCSBasedSolution.isComplete;
             lowerBound = twinCSBasedSolution.lowerBound;
             objectiveFunctionValue = twinCSBasedSolution.objectiveFunctionValue;

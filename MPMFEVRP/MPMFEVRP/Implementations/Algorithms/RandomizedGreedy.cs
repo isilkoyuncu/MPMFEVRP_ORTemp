@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         Recovery_Options selectedRecoveryOpt;
         bool setCoverOption;
         
-        XCPlex_Assignment_RecoveryForRandGreedy CPlexExtender = null;
+        XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
 
         public RandomizedGreedy()
@@ -89,30 +89,31 @@ namespace MPMFEVRP.Implementations.Algorithms
                         {
                             visitableCustomers.Remove(customerToAdd);
                             currentCS = extendedCS;
-                            if (visitableCustomers.Count == 0)
-                                csSuccessfullyUpdated = false;
                         }
-                    } while (csSuccessfullyUpdated);
+                    } while (csSuccessfullyUpdated && visitableCustomers.Count > 0);
 
                     //add the customerSet to the solution
-                    trialSolution.AddCustomerSet2GDVList(currentCS);
+                    if ((trialSolution.NumCS_assigned2EV < numberOfEVs))
+                        trialSolution.AddCustomerSet2EVList(currentCS);
+                    else
+                        trialSolution.AddCustomerSet2GDVList(currentCS);
                     csSuccessfullyAdded = true;
-                    if (visitableCustomers.Count==0)
-                        csSuccessfullyAdded = false;
-                } while (csSuccessfullyAdded);
+                } while (csSuccessfullyAdded && visitableCustomers.Count > 0);
                 if (isRecoveryNeeded)
                 {
-                    trialSolution = Recover(trialSolution);
-                    
                     //This gives you the new trialSolution
+                    trialSolution = Recover(trialSolution);
                 }
-                //else: do nothing (don't have an else!)ShortestDistanceOfCandidateToCurrentCustomerSet
+                //else: do nothing (don't have an else!)
 
                 allSolutions.Add(trialSolution);
             }//for(int trial = 0; trial<poolSize; trial++)
             if (setCoverOption)
             {
                 //TODO solve the set cover formulation, construct a solution from it, and return that!
+                CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
+                CPlexExtender.Solve_and_PostProcess();
+                bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             }
             else
             {
@@ -131,9 +132,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
             //Return the best of allSolutions
             bestSolutionFound = allSolutions[bestSolnIndex];
-
-            //The following is best of random and I'm not sure how is this going to work with a complex solution structure
-            //bestSolutionFound = BestRandom<ISolution>.Find(poolSize, bestSolutionFound, bestSolutionFound.CompareTwoSolutions);
         }
 
         public override void SpecializedConclude()
@@ -258,7 +256,38 @@ namespace MPMFEVRP.Implementations.Algorithms
                     }
                 case Recovery_Options.AnalyticallySolve:
                     {
+                        outcome.Assigned2EV.Clear(); //TODO instead of removing there should be a new constructor where you do not copy assignments of the old solution
+                        outcome.Assigned2GDV.Clear();
                         //TODO code the analytical recovery algorithm
+                        CustomerSet[] cs_Array = new CustomerSet[oldTrialSolution.NumCS_total];
+                        double[] dP = new double[oldTrialSolution.NumCS_total];
+                        CustomerSetList cs_List = new CustomerSetList();
+                        int count = 0;
+                        for (int i = 0; i < oldTrialSolution.NumCS_assigned2EV; i++)
+                        {
+                            cs_Array[count] = oldTrialSolution.Assigned2EV[i];
+                            cs_List.Add(cs_Array[count]);
+                            count++;
+                        }
+                        for (int i =0; i < oldTrialSolution.NumCS_assigned2GDV; i++)
+                        {
+                            cs_Array[count] = oldTrialSolution.Assigned2GDV[i];
+                            cs_List.Add(cs_Array[count]);
+                            count++;
+                        }
+                        dP = cs_List.GetDeltaProfit().ToArray();
+                        Array.Sort(dP, cs_Array);
+                        for (int i = cs_Array.Length-1; i >=0; i--)
+                        {
+                            if (dP[i] > 0 && cs_Array[i].RouteOptimizerOutcome.OFV[0] > 0 && outcome.NumCS_assigned2EV < model.VRD.NumVehicles[0])
+                            {
+                                outcome.AddCustomerSet2EVList(cs_Array[i]);
+                            }
+                            else if (cs_Array[i].RouteOptimizerOutcome.OFV[1] > 0)
+                            {
+                                outcome.AddCustomerSet2GDVList(cs_Array[i]);
+                            }
+                        }
                         break;
                     }
             }
