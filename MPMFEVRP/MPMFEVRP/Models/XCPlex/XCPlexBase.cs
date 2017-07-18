@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MPMFEVRP.Implementations;
+using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Interfaces;
@@ -68,7 +68,7 @@ namespace MPMFEVRP.Models.XCPlex
             //output variables
             initializeOutputVariables();
         }
-
+        
         protected void Initialize()
         {
             DefineDecisionVariables();

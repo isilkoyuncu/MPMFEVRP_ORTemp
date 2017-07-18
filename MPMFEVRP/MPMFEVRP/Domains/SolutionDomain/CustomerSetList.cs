@@ -102,5 +102,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             return outcome;
         }
+
+        public List<double> GetDeltaProfit()
+        {
+            List<double> outcome = new List<double>();
+            foreach (CustomerSet cs in this)
+                outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1],0));
+            return outcome;
+        }
     }
 }

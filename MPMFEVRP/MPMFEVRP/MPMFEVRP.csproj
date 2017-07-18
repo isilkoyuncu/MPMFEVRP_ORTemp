@@ -89,7 +89,6 @@
     <Compile Include="Domains\SolutionDomain\AssignedRoute.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
-    <Compile Include="Domains\SolutionDomain\CustomerSetVehicleAssignment.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
@@ -138,7 +137,7 @@
     <Compile Include="Interfaces\AlgorithmBase.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedGreedy.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
-    <Compile Include="Implementations\Algorithms\Greedy.cs" />
+    <Compile Include="Implementations\Algorithms\BestOfRandom.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
     <Compile Include="Interfaces\IWriter.cs" />
     <Compile Include="Interfaces\ProblemBase.cs" />
@@ -169,7 +168,6 @@
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />
     <Compile Include="Utils\DeepCopier.cs" />
-    <Compile Include="Utils\AssignedRoute.cs" />
     <Compile Include="Utils\Calculators.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
     <Compile Include="Utils\ProblemModelUtil.cs" />
