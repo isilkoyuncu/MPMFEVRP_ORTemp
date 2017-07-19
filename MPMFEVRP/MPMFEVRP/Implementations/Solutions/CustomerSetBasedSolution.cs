@@ -31,18 +31,9 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public CustomerSetBasedSolution(ProblemModelBase model)
         {
-            this.model = model; //TODO pirimitive olmayan seyleri de boyle kopyalayabiliyor muyuz test et.
+            this.model = model;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
-            //lowerBound = 0.0;
-            //for(int cs=0;cs< assigned2EV.Count; cs++)
-            //{
-            //    lowerBound += assigned2EV[cs].RouteOptimizerOutcome.OFV[0];
-            //}
-            //for (int cs = 0; cs < assigned2GDV.Count; cs++)
-            //{
-            //    lowerBound += assigned2GDV[cs].RouteOptimizerOutcome.OFV[1];
-            //}
         }
 
         public CustomerSetBasedSolution(CustomerSetBasedSolution twinCSBasedSolution)
@@ -60,6 +51,25 @@ namespace MPMFEVRP.Implementations.Solutions
             upperBound = twinCSBasedSolution.upperBound;
         }
 
+        public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSet[] customerSetArray)
+        {
+            this.model = model;
+            this.zSetTo1 = zSetTo1;
+            assigned2EV = new CustomerSetList();
+            assigned2GDV = new CustomerSetList();
+            for (int i = 0; i < customerSetArray.Length; i++)
+            {
+                if (zSetTo1[i, 0] == 1)
+                {
+                    AddCustomerSet2EVList(customerSetArray[i]);
+                }
+                else if (zSetTo1[i, 1] == 1)
+                {
+                    AddCustomerSet2GDVList(customerSetArray[i]);
+                }
+            }
+        }
+        
         // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing)
         public CustomerSetBasedSolution(ProblemModelBase model, Random random)
         {
@@ -69,64 +79,35 @@ namespace MPMFEVRP.Implementations.Solutions
             assigned2GDV = new CustomerSetList();
         }
 
-        public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSetBasedSolution trialSolution)
-        {
-            //    this.model = model;
-            //    this.zSetTo1 = zSetTo1;
-            //    assigned2EV = new CustomerSetList();
-            //    assigned2GDV = new CustomerSetList();
-            //    for (int i = 0; i < trialSolution.NumCS_assigned2EV; i++)
-            //    {
-            //        if (zSetTo1[i, 0] == 1)
-            //        {
-            //            AddCustomerSet2EVList(trialSolution.assigned2EV[i]);
-            //        }
-            //        else if (zSetTo1[i, 1] == 1)
-            //        {
-            //            AddCustomerSet2GDVList(trialSolution.assigned2EV[i]);
-            //        }
-            //    }
-            //    for (int i = trialSolution.NumCS_assigned2EV; i < trialSolution.NumCS_total; i++)
-            //    {
-            //        if (zSetTo1[i, 0] == 1)
-            //        {
-            //            AddCustomerSet2EVList(trialSolution.assigned2GDV[i]);
-            //        }
-            //        else if (zSetTo1[i, 1] == 1)
-            //        {
-            //            AddCustomerSet2GDVList(trialSolution.assigned2GDV[i]);
-            //        }
-            //    }
-        }
-        public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1)
-        {
-            this.model = model;
-            this.zSetTo1 = zSetTo1;
-            assigned2EV = new CustomerSetList();
-            assigned2GDV = new CustomerSetList();
-            //for (int i = 0; i < trialSolution.NumCS_assigned2EV; i++)
-            //{
-            //    if (zSetTo1[i, 0] == 1)
-            //    {
-            //        AddCustomerSet2EVList(trialSolution.assigned2EV[i]);
-            //    }
-            //    else if (zSetTo1[i, 1] == 1)
-            //    {
-            //        AddCustomerSet2GDVList(trialSolution.assigned2EV[i]);
-            //    }
-            //}
-            //for (int i = trialSolution.NumCS_assigned2EV; i < trialSolution.NumCS_total; i++)
-            //{
-            //    if (zSetTo1[i, 0] == 1)
-            //    {
-            //        AddCustomerSet2EVList(trialSolution.assigned2GDV[i]);
-            //    }
-            //    else if (zSetTo1[i, 1] == 1)
-            //    {
-            //        AddCustomerSet2GDVList(trialSolution.assigned2GDV[i]);
-            //    }
-            //}
-        }
+        //public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSetBasedSolution trialSolution)
+        //{
+        //    this.model = model;
+        //    this.zSetTo1 = zSetTo1;
+        //    assigned2EV = new CustomerSetList();
+        //    assigned2GDV = new CustomerSetList();
+        //    for (int i = 0; i < trialSolution.NumCS_assigned2EV; i++)
+        //    {
+        //        if (zSetTo1[i, 0] == 1)
+        //        {
+        //            AddCustomerSet2EVList(trialSolution.assigned2EV[i]);
+        //        }
+        //        else if (zSetTo1[i, 1] == 1)
+        //        {
+        //            AddCustomerSet2GDVList(trialSolution.assigned2EV[i]);
+        //        }
+        //    }
+        //    for (int i = trialSolution.NumCS_assigned2EV; i < trialSolution.NumCS_total; i++)
+        //    {
+        //        if (zSetTo1[i, 0] == 1)
+        //        {
+        //            AddCustomerSet2EVList(trialSolution.assigned2GDV[i]);
+        //        }
+        //        else if (zSetTo1[i, 1] == 1)
+        //        {
+        //            AddCustomerSet2GDVList(trialSolution.assigned2GDV[i]);
+        //        }
+        //    }
+        //}
 
         public void AddCustomerSet2EVList(CustomerSet currentCS)
         {

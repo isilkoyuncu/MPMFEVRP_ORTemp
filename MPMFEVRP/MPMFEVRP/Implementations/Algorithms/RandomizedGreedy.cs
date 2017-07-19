@@ -45,6 +45,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             return "Randomized Greedy";
         }
 
+        public void Initialize() { }
+
         public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
             model = problemModel;
@@ -65,13 +67,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
-            int bestSolnIndex = -1;
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
-            //This is MY understanding of the randomized greedy:
             for (int trial = 0; trial < poolSize; trial++)
             {
-                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();//Bunun ne olacagini bilmiyorum, belki de butun CS'leri urettikten sonra onlarin tamamini iceren bir solution olarak bir seferde uretmeliyiz
-                //solution blank olarak uretildi ve icinde hicbir customerSet yok
+                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
                 bool csSuccessfullyAdded = false;
                 do
@@ -92,49 +91,29 @@ namespace MPMFEVRP.Implementations.Algorithms
                         }
                     } while (csSuccessfullyUpdated && visitableCustomers.Count > 0);
 
-                    //add the customerSet to the solution
-                    csSuccessfullyAdded = AddCustomerSet2Soln(trialSolution, currentCS);
+                    csSuccessfullyAdded = AddCustomerSet2Soln(trialSolution, currentCS); //return true if the customerSet is successfully added to the solution; return false if it is skipped  
 
                 } while (visitableCustomers.Count > 0);
-                if (isRecoveryNeeded)
-                {
-                    //This gives you the new trialSolution
-                    trialSolution = Recover(trialSolution);
-                }
-                //else: do nothing (don't have an else!)
+
+                if (isRecoveryNeeded) { trialSolution = Recover(trialSolution); }//This gives you the new trialSolution
 
                 allSolutions.Add(trialSolution);
-
             }//for(int trial = 0; trial<poolSize; trial++)
-            if (setCoverOption)
-            {
-                //TODO solve the set cover formulation, construct a solution from it, and return that!
-                CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
-                CPlexExtender.Solve_and_PostProcess();
-                bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
-            }
-            else
-            {
-                double objValue = Double.MinValue;
-                bestSolnIndex = -1;
-                int counter = -1;
-                foreach (CustomerSetBasedSolution CSBS in allSolutions)
-                {
-                    counter++;
-                    if (CSBS.ObjectiveFunctionValue > objValue)
-                    {
-                        objValue = CSBS.ObjectiveFunctionValue;
-                        bestSolnIndex = counter;
-                    }
-                }
-            }
-            //Return the best of allSolutions
-            bestSolutionFound = allSolutions[bestSolnIndex];
+
+            if (setCoverOption) { RunSetCover(); }
+            else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }            
         }
 
         public override void SpecializedConclude()
         {
-            throw new NotImplementedException();
+            //Given that the instance is solved, we need to update status and statistics from it
+
+            // TODO finish this part but first check if we need to treat cplex and analytical solutions differently!!
+
+            if (bestSolutionFound != null)
+            {
+                bestSolutionFound.Status = AlgorithmSolutionStatus.Feasible;
+            }
         }
 
         public override void SpecializedReset()
@@ -145,6 +124,11 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override string[] GetOutputSummary()
         {
             throw new NotImplementedException();
+        }
+
+        public bool IsSupportingStepwiseSolutionCreation()
+        {
+            return true;
         }
 
         /// <summary>
@@ -265,24 +249,21 @@ namespace MPMFEVRP.Implementations.Algorithms
                     {
                         outcome.Assigned2EV.Clear();
                         outcome.Assigned2GDV.Clear();
-                        //TODO finish the analytical recovery algorithm
                         CustomerSet[] cs_Array = new CustomerSet[oldTrialSolution.NumCS_total];
                         double[] dP = new double[oldTrialSolution.NumCS_total];
-                        CustomerSetList cs_List = new CustomerSetList();
                         int count = 0;
                         for (int i = 0; i < oldTrialSolution.NumCS_assigned2EV; i++)
                         {
                             cs_Array[count] = oldTrialSolution.Assigned2EV[i];
-                            cs_List.Add(cs_Array[count]);
+                            dP[count] = cs_Array[count].RouteOptimizerOutcome.OFV[0] - cs_Array[count].RouteOptimizerOutcome.OFV[1];
                             count++;
                         }
                         for (int i =0; i < oldTrialSolution.NumCS_assigned2GDV; i++)
                         {
                             cs_Array[count] = oldTrialSolution.Assigned2GDV[i];
-                            cs_List.Add(cs_Array[count]);
+                            dP[count] = cs_Array[count].RouteOptimizerOutcome.OFV[0] - cs_Array[count].RouteOptimizerOutcome.OFV[1];
                             count++;
                         }
-                        dP = cs_List.GetDeltaProfit().ToArray(); //TODO GetDeltaProfit change to compatible with array not list
                         Array.Sort(dP, cs_Array);
                         for (int i = cs_Array.Length-1; i >=0; i--)
                         {
@@ -312,6 +293,29 @@ namespace MPMFEVRP.Implementations.Algorithms
                 solution.AddCustomerSet2GDVList(CS);
             return true;
         }
-        
+        void RunSetCover()
+        {
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
+            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
+            CPlexExtender.Solve_and_PostProcess();
+            bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+        }
+        int GetBestSolnIndex(List<CustomerSetBasedSolution> allSolutions)
+        {
+            int bestSolnIndex = -1;
+            double objValue = Double.MinValue;
+            bestSolnIndex = -1;
+            int counter = -1;
+            foreach (CustomerSetBasedSolution CSBS in allSolutions)
+            {
+                counter++;
+                if (CSBS.ObjectiveFunctionValue > objValue)
+                {
+                    objValue = CSBS.ObjectiveFunctionValue;
+                    bestSolnIndex = counter;
+                }
+            }
+            return bestSolnIndex;
+        }
     }
 }

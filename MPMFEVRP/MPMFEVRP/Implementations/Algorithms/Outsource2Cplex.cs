@@ -15,27 +15,51 @@ namespace MPMFEVRP.Implementations.Algorithms
     {
         XCPlexParameters XcplexParam;
         XCPlexBase CPlexExtender = null;
+
         public Outsource2Cplex() : base() 
         {
             algorithmParameters.AddParameter(new Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, ParameterType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,ParameterType.ComboBox));
         }
+
         public override string GetName()
         {
             return "Outsource to CPLEX";
         }
-        public void Initialize()
+
+        public void Initialize(){}
+
+        public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
+            model = problemModel;
+            status = AlgorithmSolutionStatus.NotYetSolved;
+            stats.UpperBound = double.MaxValue;
             
+            XcplexParam = new XCPlexParameters(
+                limitComputationTime: true, 
+                runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue(),
+                optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters));
         }
-        public bool IsSupportingStepwiseSolutionCreation()
+
+        public override void SpecializedRun()
         {
-            return false;
+            switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value)
+            {
+                case XCPlex_Formulation.NodeDuplicating:
+                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(model, XcplexParam);
+                    break;
+                case XCPlex_Formulation.ArcDuplicating:
+                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(model, XcplexParam);
+                    break;
+            }
+            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
+            CPlexExtender.Solve_and_PostProcess();
         }
+
         public override void SpecializedConclude()
         {
-            //Given that the model is solved, we need to update status and statistics from it
+            //Given that the instance is solved, we need to update status and statistics from it
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
             stats.RunTimeMilliSeconds = (long)CPlexExtender.CPUtime;
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
@@ -83,34 +107,60 @@ namespace MPMFEVRP.Implementations.Algorithms
             bestSolutionFound.UpperBound = CPlexExtender.UpperBound_XCPlex;
             bestSolutionFound.LowerBound = CPlexExtender.LowerBound_XCPlex;
         }
-        public override void SpecializedInitialize(ProblemModelBase problemModel)
-        {
-            model = problemModel;
-            status = AlgorithmSolutionStatus.NotYetSolved;
-            stats.UpperBound = double.MaxValue;
-            
-            XcplexParam = new XCPlexParameters(
-                limitComputationTime: true, 
-                runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue(),
-                optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters));
-        }
+
         public override void SpecializedReset()
         {
         }
-        public override void SpecializedRun()
+
+        public override string[] GetOutputSummary()
         {
-            switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value)
+            List<string> list = new List<string>{
+                 //Algorithm Name has to be the first entry for output file name purposes
+                "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
+                //Run time limit has to be the second entry for output file name purposes
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Value.ToString(),
+                
+                //Optional
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
+                //algorithmParameters.GetAllParameters();
+                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
+                //list.Add(asString);
+                
+                //Necessary statistics
+                "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
+                "Solution Status: " + status.ToString()
+            };
+            switch (status)
             {
-                case XCPlex_Formulation.NodeDuplicating:
-                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(model, XcplexParam);
-                    break;
-                case XCPlex_Formulation.ArcDuplicating:
-                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(model, XcplexParam);
-                    break;
+                case AlgorithmSolutionStatus.NotYetSolved:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        list.Add("UB(Best Int): " + stats.UpperBound.ToString());
+                        list.Add("LB(Relaxed): " + stats.LowerBound.ToString());
+                        break;
+                    }
             }
-            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
-            CPlexExtender.Solve_and_PostProcess();
-            }
+            string[] toReturn = new string[list.Count];
+            toReturn = list.ToArray();
+            return toReturn;
+        }
+
+        public bool IsSupportingStepwiseSolutionCreation()
+        {
+            return false;
+        }
+
         List<object> ListPossibleNumOfThreads()
         {
             int tCount = Environment.ProcessorCount;
@@ -178,70 +228,5 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int j = 0; j <= numCustomers; j++)
                 epsilon_value[j] = allVariableValues[counter++];
         }
-
-        public override string[] GetOutputSummary()
-        {
-            List<string> list = new List<string>{
-                 //Algorithm Name has to be the first entry for output file name purposes
-                "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
-                //Run time limit has to be the second entry for output file name purposes
-                "Parameter: " + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Value.ToString(),
-                
-                //Optional
-                "Parameter: " + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
-                //algorithmParameters.GetAllParameters();
-                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
-                //list.Add(asString);
-                
-                //Necessary statistics
-                "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
-                "Solution Status: " + status.ToString()
-            };
-            switch (status)
-            {
-                case AlgorithmSolutionStatus.NotYetSolved:
-                    {
-                        break;
-                    }
-                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
-                    {
-                        break;
-                    }
-                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
-                    {
-                        break;
-                    }
-                default:
-                    {
-                        list.Add("UB(Best Int): " + stats.UpperBound.ToString());
-                        list.Add("LB(Relaxed): " + stats.LowerBound.ToString());
-                        break;
-                    }
-            }           
-            string[] toReturn = new string[list.Count];
-            toReturn = list.ToArray();
-            return toReturn;
-        }
-
-        // TODO this does not belong to here
-        //private void writeSolution(AbstractXCPlexFormulation CPlexExtender)
-        //{
-        //    string status;
-        //    double objValue, CPUtime, optGap;
-        //    string path = "C:/Users/ikoyuncu/Desktop/MPMFEVRP/Version1.0/Version1.0/bin/x64/Debug/Our instances/Output/";
-        //    System.IO.StreamWriter sw;
-        //    sw = new System.IO.StreamWriter(path + fromProblem.NumCustomers + "C_4ES_"+fromProblem.NumVehicles[0]+"EV_Node_2.txt");
-        //    sw.WriteLine("Problem Characteristics");
-        //    sw.WriteLine("NumCustomers\tNumES\tNumNodes\tEV");
-        //    sw.WriteLine("{0}\t{1}\t{2}\t{3}", fromProblem.NumCustomers, fromProblem.NumES, (fromProblem.NumCustomers + fromProblem.NumES + 1), 1);
-        //    status = CPlexExtender.SolutionStatus.ToString();
-        //    objValue = CPlexExtender.BestObjValue;
-        //    optGap = CPlexExtender.MIPRelativeGap;
-        //    CPUtime = CPlexExtender.CPUtime;
-        //    sw.WriteLine("Solution Characteristics");
-        //    sw.WriteLine("Status\tObjective Value\tOptimality Gap\tCPU Time");
-        //    sw.WriteLine("{0}\t{1}\t{2}\t{3}", status, objValue, optGap, CPUtime);
-        //    sw.Close();
-        //}
     }
 }

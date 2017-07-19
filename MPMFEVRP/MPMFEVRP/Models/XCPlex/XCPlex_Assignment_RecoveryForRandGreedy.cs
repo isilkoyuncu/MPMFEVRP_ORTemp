@@ -49,7 +49,7 @@ namespace MPMFEVRP.Models.XCPlex
             if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_Assignment_RecoveryForRandGreedy prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
-            return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1(), trialSolution);
+            throw new NotImplementedException();
         }
 
         public override string GetDescription_AllVariables_Array()

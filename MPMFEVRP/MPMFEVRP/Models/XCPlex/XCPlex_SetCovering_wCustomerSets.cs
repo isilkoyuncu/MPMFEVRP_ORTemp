@@ -21,7 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
         int nCustomerSets;
         CustomerSet[] customerSetArray;
 
-        public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
+        //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
 
         public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
         {
@@ -71,7 +71,7 @@ namespace MPMFEVRP.Models.XCPlex
             if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
-            return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1());
+            return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1(), customerSetArray);
         }
 
         public override string GetDescription_AllVariables_Array()
