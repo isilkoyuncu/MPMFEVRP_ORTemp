@@ -112,11 +112,13 @@ namespace MPMFEVRP.Implementations.Solutions
         public void AddCustomerSet2EVList(CustomerSet currentCS)
         {
             assigned2EV.Add(currentCS);
+            objectiveFunctionValue += currentCS.RouteOptimizerOutcome.OFV[0];
         }
 
         public void AddCustomerSet2GDVList(CustomerSet currentCS)
         {
             assigned2GDV.Add(currentCS);
+            objectiveFunctionValue += currentCS.RouteOptimizerOutcome.OFV[1];
         }
 
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)

@@ -28,6 +28,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
 
+        double extensionCompTime;
+        double reassignmentCompTime;
+        double wholeCompTime;
+
         public RandomizedGreedy()
         {
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "20"));
@@ -66,6 +70,12 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
+            extensionCompTime = 0.0;
+            reassignmentCompTime = 0.0;
+            wholeCompTime = 0.0;
+            DateTime globalStartTime = DateTime.Now;
+            DateTime localStartTime;
+
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
             for (int trial = 0; trial < poolSize; trial++)
@@ -80,8 +90,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                     do
                     {
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
+
+                        localStartTime = DateTime.Now;
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
+                        extensionCompTime += (DateTime.Now - localStartTime).TotalMilliseconds;
+
                         csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (trialSolution.NumCS_assigned2EV < numberOfEVs));
                         //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
                         if (csSuccessfullyUpdated)
@@ -95,10 +109,17 @@ namespace MPMFEVRP.Implementations.Algorithms
 
                 } while (visitableCustomers.Count > 0);
 
-                if (isRecoveryNeeded) { trialSolution = Recover(trialSolution); }//This gives you the new trialSolution
+                if (isRecoveryNeeded)
+                {
+                    localStartTime = DateTime.Now;
+                    trialSolution = Recover(trialSolution);
+                    reassignmentCompTime += (DateTime.Now - localStartTime).TotalMilliseconds;
+                }//This gives you the new trialSolution
 
                 allSolutions.Add(trialSolution);
             }//for(int trial = 0; trial<poolSize; trial++)
+
+            wholeCompTime = (DateTime.Now - globalStartTime).TotalMilliseconds;
 
             if (setCoverOption) { RunSetCover(); }
             else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }            
@@ -225,7 +246,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         CustomerSetBasedSolution Recover (CustomerSetBasedSolution oldTrialSolution)
         {
-            CustomerSetBasedSolution outcome = new CustomerSetBasedSolution(oldTrialSolution);
+            CustomerSetBasedSolution outcome = new CustomerSetBasedSolution();
             switch (selectedRecoveryOpt)
             {
                 case Recovery_Options.AssignmentProbByCPLEX:
@@ -247,8 +268,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                     }
                 case Recovery_Options.AnalyticallySolve:
                     {
-                        outcome.Assigned2EV.Clear();
-                        outcome.Assigned2GDV.Clear();
                         CustomerSet[] cs_Array = new CustomerSet[oldTrialSolution.NumCS_total];
                         double[] dP = new double[oldTrialSolution.NumCS_total];
                         int count = 0;
