@@ -104,6 +104,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //else: do nothing (don't have an else!)
 
                 allSolutions.Add(trialSolution);
+
             }//for(int trial = 0; trial<poolSize; trial++)
             if (setCoverOption)
             {
@@ -245,17 +246,26 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 case Recovery_Options.AssignmentProbByCPLEX:
                     {
+                        CustomerSetList cs_List = new CustomerSetList();
+                        for (int i = 0; i < oldTrialSolution.NumCS_assigned2EV; i++)
+                        {
+                            cs_List.Add(oldTrialSolution.Assigned2EV[i]);
+                        }
+                        for (int i = 0; i < oldTrialSolution.NumCS_assigned2GDV; i++)
+                        {
+                            cs_List.Add(oldTrialSolution.Assigned2GDV[i]);
+                        }
                         //solve the linear optimization problem to recover from bad cs creation
-                        CPlexExtender = new XCPlex_Assignment_RecoveryForRandGreedy(model, XcplexParam, outcome);
+                        CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam, cs_List);
                         CPlexExtender.Solve_and_PostProcess();
                         outcome = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
                         break;
                     }
                 case Recovery_Options.AnalyticallySolve:
                     {
-                        outcome.Assigned2EV.Clear(); //TODO instead of removing there should be a new constructor where you do not copy assignments of the old solution
+                        outcome.Assigned2EV.Clear();
                         outcome.Assigned2GDV.Clear();
-                        //TODO code the analytical recovery algorithm
+                        //TODO finish the analytical recovery algorithm
                         CustomerSet[] cs_Array = new CustomerSet[oldTrialSolution.NumCS_total];
                         double[] dP = new double[oldTrialSolution.NumCS_total];
                         CustomerSetList cs_List = new CustomerSetList();
