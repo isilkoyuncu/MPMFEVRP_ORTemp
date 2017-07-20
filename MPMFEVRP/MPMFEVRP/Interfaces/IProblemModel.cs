@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Interfaces
 {
     public interface IProblemModel
     {
         string InputFileName { get; }
+
+        ObjectiveFunctionTypes ObjectiveFunctionType { get; }
 
         //Individual Data Fields
         SiteRelatedData SRD { get; }

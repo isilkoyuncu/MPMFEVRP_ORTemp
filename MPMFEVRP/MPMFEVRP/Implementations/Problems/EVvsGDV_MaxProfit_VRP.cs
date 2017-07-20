@@ -17,6 +17,8 @@ namespace MPMFEVRP.Implementations.Problems
          * Uncapacitated problem: customer demands are all 0, vehicle capacities are undefined
          * No time windows
          * */
+        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get
+            { return CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce; } }
 
         public EVvsGDV_MaxProfit_VRP() { }
 

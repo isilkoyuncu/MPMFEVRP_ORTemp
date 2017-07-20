@@ -18,6 +18,9 @@ namespace MPMFEVRP.Interfaces
         protected string inputFileName; // This is not for reading but just for record keeping and reporting 
         public string InputFileName { get { return inputFileName; } set { inputFileName=value; } }
 
+        protected ObjectiveFunctionTypes objectiveFunctionType;
+        public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; } }
+
         protected ProblemDataPackage pdp;
         public SiteRelatedData SRD { get { return pdp.SRD; } }
         public VehicleRelatedData VRD { get { return pdp.VRD; } }

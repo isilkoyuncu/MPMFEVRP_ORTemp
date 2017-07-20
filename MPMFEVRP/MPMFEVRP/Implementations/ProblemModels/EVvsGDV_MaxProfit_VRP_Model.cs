@@ -16,12 +16,16 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
-        string problemName;   
-           
+        string problemName;
+        CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType;
+        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get { return coverConstraintType; } set { coverConstraintType=value; } }
+
         public EVvsGDV_MaxProfit_VRP_Model()
         {
             EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
             problemName = problem.GetName();
+            objectiveFunctionType = problem.ObjectiveFunctionType;
+            coverConstraintType = problem.CoverConstraintType;
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
@@ -31,6 +35,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
             pdp = new ProblemDataPackage(problem.PDP);
             inputFileName = problem.PDP.InputFileName;
             problemName = problem.GetName();
+            objectiveFunctionType = problem.ObjectiveFunctionType;
+            coverConstraintType = problem.CoverConstraintType;
 
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
             GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
@@ -51,7 +57,6 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             return problemName;
         }
-
 
         public override ISolution GetRandomSolution(int seed, Type solutionType)
         {
