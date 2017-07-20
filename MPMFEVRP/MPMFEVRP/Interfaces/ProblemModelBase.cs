@@ -32,7 +32,7 @@ namespace MPMFEVRP.Interfaces
         double retrieve_CompTime = 0.0;
         double GDV_TSP_CompTime = 0.0;
         double EV_TSP_CompTime = 0.0;
-        
+
         /// <summary>
         /// EVvsGDV_MaxProfit_VRP_Model.OptimizeForSingleVehicle can only be called from CustomerSet, which requests to be optimized and passes itself hereinto
         /// </summary>
@@ -40,13 +40,18 @@ namespace MPMFEVRP.Interfaces
         /// <returns></returns>
         public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
+            // TODO you can delete this after the debugging
+            RouteOptimizerOutput outcome = new RouteOptimizerOutput(RouteOptimizationStatus.NotYetOptimized);
             if (archiveAllCustomerSets)
             {
                 DateTime startTime = DateTime.Now;
                 RouteOptimizerOutput ROO = customerSetArchive.Retrieve(CS);
                 retrieve_CompTime += (DateTime.Now - startTime).TotalMilliseconds;
                 if (ROO != null)
-                    return new RouteOptimizerOutput(true, ROO);
+                {
+                    outcome = new RouteOptimizerOutput(true, ROO);
+                    return outcome;
+                }
             }
             customerSetArchive.Add(CS);
 
@@ -64,7 +69,8 @@ namespace MPMFEVRP.Interfaces
 
             if (GDV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if GDV infeasible, no need to check EV, stop
             {
-                return new RouteOptimizerOutput(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+                outcome = new RouteOptimizerOutput(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+                return outcome;
             }
             else//GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
             {
@@ -106,37 +112,39 @@ namespace MPMFEVRP.Interfaces
                         if (CS.Customers[1] == "C4")
                             System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
 
-                    DateTime startTime_ev = DateTime.Now;
-                    EV_TSPSolver.RefineDecisionVariables(CS);
-                EV_TSPSolver.ExportModel("EV_TSP_model.lp");
-                    EV_TSPSolver.Solve_and_PostProcess();
-                    EV_TSP_CompTime += (DateTime.Now - startTime_ev).TotalMilliseconds;
+                DateTime startTime_ev = DateTime.Now;
+                EV_TSPSolver.RefineDecisionVariables(CS);
+                //EV_TSPSolver.ExportModel("EV_TSP_model.lp");
+                EV_TSPSolver.Solve_and_PostProcess();
+                EV_TSP_CompTime += (DateTime.Now - startTime_ev).TotalMilliseconds;
 
-                    if (EV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if EV infeasible, return only GDV 
+                if (EV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if EV infeasible, return only GDV 
+                {
+                    outcome = new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                    return outcome;
+                }
+                else//EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
+                {
+                    if (EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
                     {
-                        return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                        //TODO Figure out clearly and get rid of both or at least one
+                        System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
+                        throw new Exception("GDV_TSPSolver status is other than Infeasible or Optimal!");
                     }
-                    else//EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
-                    {
-                        if (EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
-                        {
-                            //TODO Figure out clearly and get rid of both or at least one
-                            System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
-                            throw new Exception("GDV_TSPSolver status is other than Infeasible or Optimal!");
-                        }
-                        //If we're here, we know GDV route has been successfully optimized
-                        assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
-                        ofv[0] = EV_TSPSolver.GetBestObjValue();
+                    //If we're here, we know GDV route has been successfully optimized
+                    assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
+                    ofv[0] = EV_TSPSolver.GetBestObjValue();
 
                     if (GDVOptimalRouteFeasibleForEV)
                     {
                         //We'll compare the two EV  routes
-                        if ((!newAR.IsSame(assignedRoutes[0])) || (Math.Abs(newOFV - ofv[0])>0.00001))
+                        if ((!newAR.IsSame(assignedRoutes[0])) || (Math.Abs(newOFV - ofv[0]) > 0.00001))
                             System.Windows.Forms.MessageBox.Show("The GDV-optimal route that happens to be EV-feasible somehow is not the same as the EV-optimal obtained independently!");
                     }
 
-                        return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
-                    }
+                    outcome = new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                    return outcome;
+                }
                 //}
             }
         }

@@ -91,6 +91,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                     {
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
 
+                        //TODO follwing is to check the suspicious instance, delete after debugging
+                        if (currentCS.NumberOfCustomers > 0)
+                            if (currentCS.Contains("C15")) //currentCS.Contains("C4") ||
+                                if (customerToAdd=="C4") //customerToAdd == "C15"|| 
+                                    System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
+
                         localStartTime = DateTime.Now;
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
