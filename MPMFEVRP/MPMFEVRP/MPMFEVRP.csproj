@@ -91,6 +91,7 @@
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
+    <Compile Include="Implementations\Problems\EVvsGDV_MinCost_VRP.cs" />
     <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
     <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
@@ -139,6 +140,7 @@
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
     <Compile Include="Implementations\Algorithms\BestOfRandom.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
+    <Compile Include="Interfaces\EVvsGDV_Problem.cs" />
     <Compile Include="Interfaces\IWriter.cs" />
     <Compile Include="Interfaces\ProblemBase.cs" />
     <Compile Include="Interfaces\ProblemModelBase.cs" />

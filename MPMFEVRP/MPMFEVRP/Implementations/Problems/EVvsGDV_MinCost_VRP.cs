@@ -5,33 +5,33 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Domains.ProblemDomain;
-using MPMFEVRP.Models;
 
 
 namespace MPMFEVRP.Implementations.Problems
 {
-    public class EVvsGDV_MaxProfit_VRP: EVvsGDV_Problem
+    class EVvsGDV_MinCost_VRP:EVvsGDV_Problem
     {
         /* This problem is a heteregoneus VRP which allows any number of vehicle types, but they belong to two categories: EV and GDV
-         * The objective is to maximize profit = revenue - cost (fixed per day & variable per mile)
+         * The objective is to minimize cost = cost (fixed per day & variable per mile)
          * Uncapacitated problem: customer demands are all 0, vehicle capacities are undefined
          * No time windows
-         * Each customer must be visited at most once
+         * Each customer must be visited exactly once
          * */
-        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get
-            { return CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce; } }
+        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType
+        {
+            get
+            { return CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce; }
+        }
 
-        public ObjectiveFunctionTypes ObjectiveFunctionType { get { return ObjectiveFunctionTypes.Maximize; } }
+        public EVvsGDV_MinCost_VRP() { }
 
-        public EVvsGDV_MaxProfit_VRP() { }
-
-        public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP) : base(PDP)
+        public EVvsGDV_MinCost_VRP(ProblemDataPackage PDP) : base(PDP)
         {
         }
 
         public override string GetName()
         {
-            return "EV vs GDV Maximum Profit VRP";
+            return "EV vs GDV Minimum Cost VRP";
         }
 
         //public new EVvsGDV_MaxProfit_VRP_Model GetProblemModel()
