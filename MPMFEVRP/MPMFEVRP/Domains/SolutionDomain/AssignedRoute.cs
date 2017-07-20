@@ -56,7 +56,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public int LastVisitedSite { get { return sitesVisited.Last(); } }
         public bool Complete { get { return sitesVisited.Last() == 0; } }
 
-        public AssignedRoute(){} //An empty constructor
+        public AssignedRoute() { } //An empty constructor
 
         public AssignedRoute(IProblemModel problemModel, int vehicleCategory)
         {
@@ -67,7 +67,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             totalCollectedPrize = 0.0;
             totalFixedCost = problemModel.VRD.VehicleArray[vehicleCategory].FixedCost;
             totalVariableTravelCost = 0.0;
-            totalProfit = - totalFixedCost;
+            totalProfit = -totalFixedCost;
             arrivalTime = new List<double>(); arrivalTime.Add(0.0);//Starting at the depot at time 0
             departureTime = new List<double>(); departureTime.Add(0.0);//Starting at the depot at time 0
             arrivalSOC = new List<double>(); arrivalSOC.Add(1.0);//Starting at the depot with full charge
@@ -119,6 +119,36 @@ namespace MPMFEVRP.Domains.SolutionDomain
             arrivalSOC.Add(nextArrivalSOC);
             departureSOC.Add(nextDepartureSOC);
             feasible.Add(nextFeasible);
+        }
+
+        public bool IsSame(AssignedRoute otherAR)
+        {
+            if (Math.Abs(totalDistance - otherAR.TotalDistance)>0.00001)
+                return false;
+            if (Math.Abs(totalCollectedPrize -otherAR.TotalCollectedPrize)>0.00001)
+                return false;
+            if (totalFixedCost != otherAR.TotalFixedCost)
+                return false;
+            if (Math.Abs(totalVariableTravelCost - otherAR.TotalVariableTravelCost) > 0.00001)
+                return false;
+            if (Math.Abs(totalProfit - otherAR.TotalProfit) > 0.00001)
+                return false;
+
+            int nSites = sitesVisited.Count;
+            if (Math.Abs(arrivalTime[nSites - 1] - otherAR.ArrivalTime[nSites - 1])>0.00001)
+                return false;
+
+            if (otherAR.SitesVisited.Count != nSites)
+                return false;
+            for (int i = 0; i < nSites; i++)
+            {
+                if ((sitesVisited[i] != otherAR.SitesVisited[i]) && (sitesVisited[i] != otherAR.SitesVisited[nSites - 1 - i]))
+                    return false;
+                if (feasible[i] != otherAR.Feasible[i])
+                    return false;
+            }
+
+            return true;
         }
     }
 }
