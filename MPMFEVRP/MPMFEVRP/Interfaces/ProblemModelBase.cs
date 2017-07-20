@@ -21,6 +21,9 @@ namespace MPMFEVRP.Interfaces
         protected ObjectiveFunctionTypes objectiveFunctionType;
         public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; } }
 
+        protected CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType;
+        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get { return coverConstraintType; }set { coverConstraintType = value; } }
+
         protected ProblemDataPackage pdp;
         public SiteRelatedData SRD { get { return pdp.SRD; } }
         public VehicleRelatedData VRD { get { return pdp.VRD; } }

@@ -16,7 +16,7 @@ namespace MPMFEVRP.Interfaces
         public ProblemDataPackage PDP { get { return pdp; } set { pdp = value; } }
         
         protected ObjectiveFunctionTypes objectiveFunctionType;
-        public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; } }
+        public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; }set { objectiveFunctionType = value; } }
 
         public ProblemBase()
         {

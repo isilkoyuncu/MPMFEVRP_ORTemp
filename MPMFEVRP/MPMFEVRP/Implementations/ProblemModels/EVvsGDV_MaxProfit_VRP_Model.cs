@@ -17,9 +17,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
     public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
     {
         string problemName;
-        CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType;
-        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get { return coverConstraintType; } set { coverConstraintType=value; } }
-
+        
         public EVvsGDV_MaxProfit_VRP_Model()
         {
             EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();

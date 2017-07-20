@@ -92,7 +92,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             List<string> customerIDs = problemModel.SRD.GetCustomerIDs();
             int nCustomers = customerIDs.Count;
-            CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;//TODO Make this parametric and pass it through since wherever it may originate
+            CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType = problemModel.CoverConstraintType;
 
             foreach (string customerID in customerIDs)
             {
@@ -128,8 +128,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             //created already in DefineDecisionVariables()
             //add (Maximize or Minimize depends on the problem)
-            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType;
-            objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            ObjectiveFunctionTypes objectiveFunctionType = problemModel.ObjectiveFunctionType;
             if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
                 AddMaximize(obj);
             else
