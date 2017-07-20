@@ -9,7 +9,7 @@ using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Implementations.Problems
 {
-    class EVvsGDV_MinCost_VRP:EVvsGDV_Problem
+    public class EVvsGDV_MinCost_VRP:EVvsGDV_Problem
     {
         /* This problem is a heteregoneus VRP which allows any number of vehicle types, but they belong to two categories: EV and GDV
          * The objective is to minimize cost = cost (fixed per day & variable per mile)
