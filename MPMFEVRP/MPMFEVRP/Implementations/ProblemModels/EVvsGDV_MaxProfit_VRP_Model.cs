@@ -41,6 +41,66 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
+
+            // TODO delete these as soon as debugging finishes
+            //ExportDistancesAsTxt();
+            //ExportTravelDurationAsTxt();
+            //ExportEnergyConsumpionAsTxt();
+        }
+
+        void ExportDistancesAsTxt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_distances.txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("Instance Name", inputFileName);
+            for (int i = 0; i < pdp.SRD.NumNodes; i++)
+            {
+                sw.WriteLine();
+                for (int j = 0; j < pdp.SRD.NumNodes; j++)
+                {
+                    sw.Write(pdp.SRD.Distance[i, j] + " ");
+                }
+            }
+            sw.Close();
+        }
+        void ExportTravelDurationAsTxt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_travelDurations.txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("Instance Name", inputFileName);
+            for (int i = 0; i < pdp.SRD.NumNodes; i++)
+            {
+                sw.WriteLine();
+                for (int j = 0; j < pdp.SRD.NumNodes; j++)
+                {
+                    sw.Write(pdp.SRD.TimeConsumption[i, j] + " ");
+                }
+            }
+            sw.Close();
+        }
+        void ExportEnergyConsumpionAsTxt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_energies.txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("Instance Name", inputFileName);
+            for (int i = 0; i < pdp.SRD.NumNodes; i++)
+            {
+                sw.WriteLine();
+                for (int j = 0; j < pdp.SRD.NumNodes; j++)
+                {
+                    sw.Write(pdp.SRD.EnergyConsumption[i, j,0] + " ");
+                }
+            }
+            sw.Close();
         }
 
         public override string GetDescription()
