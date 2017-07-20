@@ -498,6 +498,8 @@ namespace MPMFEVRP.Models.XCPlex
                     U[j][1 - VCIndex].UB = 0.0;
                 }
             }
+            for (int k = firstESNodeIndex; k <= lastESNodeIndex; k++)//TODO: This rigs the CPlex solution, must remove ASAP
+                U[k][0].UB = 0.0;
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {

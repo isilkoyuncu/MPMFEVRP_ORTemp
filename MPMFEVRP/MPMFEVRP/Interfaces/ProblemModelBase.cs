@@ -81,23 +81,34 @@ namespace MPMFEVRP.Interfaces
 
                 // TODO first check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
                 bool GDVOptimalRouteFeasibleForEV = true;
-                assignedRoutes[0] = new AssignedRoute(this, 0);
-                for(int siteIndex = 1; ((siteIndex<assignedRoutes[1].SitesVisited.Count)&&(GDVOptimalRouteFeasibleForEV)); siteIndex++)
+                //                assignedRoutes[0] = new AssignedRoute(this, 0);
+                AssignedRoute newAR = new AssignedRoute(this, 0);
+                for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
                 {
-                    assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
-                    GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
+                    //                    assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
+                    //                    GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
+                    newAR.Extend(assignedRoutes[1].SitesVisited[siteIndex]);
+                    GDVOptimalRouteFeasibleForEV = newAR.Feasible.Last();
                 }
+                double newOFV = newAR.TotalProfit;
 
-                if (GDVOptimalRouteFeasibleForEV)
-                {
-                    //seems like this is all taken care of by cloning the DGV optimal route for EV in a step-by-step manner
-                    ofv[0] = assignedRoutes[0].TotalProfit;
-                    return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
-                }
-                else
-                {
+                //if (GDVOptimalRouteFeasibleForEV)
+                //{
+                //    //seems like this is all taken care of by cloning the DGV optimal route for EV in a step-by-step manner
+                //    ofv[0] = assignedRoutes[0].TotalProfit;
+                //    return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                //}
+                //else
+                //{
+
+                if (CS.NumberOfCustomers == 2)
+                    if (CS.Customers[0] == "C15")
+                        if (CS.Customers[1] == "C4")
+                            System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
+
                     DateTime startTime_ev = DateTime.Now;
                     EV_TSPSolver.RefineDecisionVariables(CS);
+                EV_TSPSolver.ExportModel("EV_TSP_model.lp");
                     EV_TSPSolver.Solve_and_PostProcess();
                     EV_TSP_CompTime += (DateTime.Now - startTime_ev).TotalMilliseconds;
 
@@ -117,9 +128,16 @@ namespace MPMFEVRP.Interfaces
                         assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
                         ofv[0] = EV_TSPSolver.GetBestObjValue();
 
+                    if (GDVOptimalRouteFeasibleForEV)
+                    {
+                        //We'll compare the two EV  routes
+                        if ((!newAR.IsSame(assignedRoutes[0])) || (Math.Abs(newOFV - ofv[0])>0.00001))
+                            System.Windows.Forms.MessageBox.Show("The GDV-optimal route that happens to be EV-feasible somehow is not the same as the EV-optimal obtained independently!");
+                    }
+
                         return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
                     }
-                }
+                //}
             }
         }
 
