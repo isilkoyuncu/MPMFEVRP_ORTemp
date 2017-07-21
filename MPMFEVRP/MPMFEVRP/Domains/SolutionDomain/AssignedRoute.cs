@@ -90,6 +90,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             nextArrivalTime = departureTime.Last() + problemModel.SRD.TimeConsumption[lastSite, nextSite];
             nextArrivalSOC = departureSOC.Last() - problemModel.SRD.EnergyConsumption[lastSite, nextSite, vehicleCategory];
+            double batteryCapacity = problemModel.VRD.VehicleArray[vehicleCategory].BatteryCapacity;
+            double rechargingRate = problemModel.SRD.SiteArray[nextSite].RechargingRate;
+            double serviceDuration = problemModel.SRD.SiteArray[nextSite].ServiceDuration;
             switch (problemModel.SRD.SiteArray[nextSite].SiteType)
             {
                 case SiteTypes.Depot:
@@ -98,7 +101,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     break;
                 case SiteTypes.Customer:
                     nextDepartureTime = nextArrivalTime + problemModel.SRD.SiteArray[nextSite].ServiceDuration;
-                    nextDepartureSOC = Math.Min(1.0, nextArrivalSOC + problemModel.SRD.SiteArray[nextSite].RechargingRate * problemModel.SRD.SiteArray[nextSite].ServiceDuration);
+                    if (batteryCapacity != 0)
+                        nextDepartureSOC = Math.Min(1, nextArrivalSOC + serviceDuration * rechargingRate / batteryCapacity);//Math.Min(1.0, nextArrivalSOC + problemModel.SRD.SiteArray[nextSite].RechargingRate * problemModel.SRD.SiteArray[nextSite].ServiceDuration);
+                    else
+                        nextDepartureSOC = 1.0;
                     break;
                 case SiteTypes.ExternalStation:
                     nextDepartureTime = nextArrivalTime + ((1.0 - nextArrivalSOC) / problemModel.SRD.SiteArray[nextSite].RechargingRate);
