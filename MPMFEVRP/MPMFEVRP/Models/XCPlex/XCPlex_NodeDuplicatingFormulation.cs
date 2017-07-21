@@ -489,6 +489,15 @@ namespace MPMFEVRP.Models.XCPlex
                             outcome.Add(new Tuple<int, int, int>(nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v));
             return outcome;
         }
+        public List<double> GetDeltaVariables()
+        {
+            //if (solutionStatus != XCPlexSolutionStatus.Optimal)
+            //    return null;
+            List<double> outcome = new List<double>();
+            for (int i = 0; i < numNodes; i++)
+                            outcome.Add(GetValue(delta[i]));
+            return outcome;
+        }
 
         public void RefineDecisionVariables(CustomerSet CS)
         {
@@ -530,7 +539,7 @@ namespace MPMFEVRP.Models.XCPlex
             //    U[k][0].UB = 0.0;
 
             // TODO delete this asap
-            ExportNodeToOriginalIndexMap2txt();
+            //ExportNodeToOriginalIndexMap2txt();
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
