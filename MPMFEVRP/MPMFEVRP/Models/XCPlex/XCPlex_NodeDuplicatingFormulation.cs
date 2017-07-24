@@ -463,20 +463,6 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
-        // TODO delete this after you figure out debugging
-        void ExportNodeToOriginalIndexMap2txt()
-        {
-            System.IO.StreamWriter sw;
-            String fileName = problemModel.InputFileName;
-            fileName = fileName.Replace(".txt", "");
-            string outputFileName = fileName + "_Node2OriginalIndex.txt";
-            sw = new System.IO.StreamWriter(outputFileName);
-            for (int i = 0; i < nodeToOriginalSiteNumberMap.Length; i++)
-            {
-                    sw.WriteLine(nodeToOriginalSiteNumberMap[i]);
-            }
-            sw.Close();
-        }
         public List<Tuple<int,int,int>> GetXVariablesSetTo1()
         {
             //if (solutionStatus != XCPlexSolutionStatus.Optimal)
@@ -491,36 +477,21 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public List<double> GetDeltaVariables()
         {
-            //if (solutionStatus != XCPlexSolutionStatus.Optimal)
-            //    return null;
+            if (solutionStatus != XCPlexSolutionStatus.Optimal)
+                return null;
             List<double> outcome = new List<double>();
             for (int i = 0; i < numNodes; i++)
-                            outcome.Add(GetValue(delta[i]));
+                outcome.Add(GetValue(delta[i]));
             return outcome;
         }
 
         public void RefineDecisionVariables(CustomerSet CS)
         {
-            int VCIndex = (int)xCplexParam.VehCategory;//TODO The following is written to check if this returns 0 for EV and 1 for GDV, delete after you make sure
-            if (xCplexParam.VehCategory == VehicleCategories.EV)
+            int VCIndex = (int)xCplexParam.VehCategory;
+            
+            for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)
             {
-                if (VCIndex != 0)
-                    System.Windows.Forms.MessageBox.Show("Veh Category is EV but index is not 0");
-            }
-            else if (xCplexParam.VehCategory == VehicleCategories.GDV)
-            {
-                if (VCIndex != 1)
-                    System.Windows.Forms.MessageBox.Show("Veh Category is GDV but index is not 1");
-            }
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("Veh Category is other than EV or GDV");
-            }
-
-            for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)// TODO: This needs to be changed because CS IDs are all C1, C2,.. C10.
-            {
-                //if (CS.Customers.Contains(j.ToString()))
-                if(CS.Customers.Contains(problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ID)) //TODO: or simply change this ID to site array elements, i.e. int index
+                if(CS.Customers.Contains(problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ID))
                 {
                     U[j][VCIndex].LB = 1.0;
                     U[j][VCIndex].UB = 1.0;
@@ -535,11 +506,6 @@ namespace MPMFEVRP.Models.XCPlex
                     U[j][1 - VCIndex].UB = 0.0;
                 }
             }
-            //for (int k = firstESNodeIndex; k <= lastESNodeIndex; k++)//TODO: This rigs the CPlex solution, must remove ASAP
-            //    U[k][0].UB = 0.0;
-
-            // TODO delete this asap
-            //ExportNodeToOriginalIndexMap2txt();
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {

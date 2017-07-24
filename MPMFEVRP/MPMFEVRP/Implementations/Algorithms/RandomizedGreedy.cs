@@ -90,26 +90,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                     do
                     {
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
-
-                        //TODO follwing is to check the suspicious instance, delete after debugging
-                        //if (currentCS.NumberOfCustomers > 0)
-                        //{
-                        //    if (currentCS.Contains("C4") && currentCS.Contains("C12"))
-                        //    {
-                        //        if (customerToAdd == "C6")
-                        //            System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
-                        //    }
-                        //    else if (currentCS.Contains("C4") && currentCS.Contains("C6"))
-                        //    {
-                        //        if (customerToAdd == "C12")
-                        //            System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
-                        //    }
-                        //    else if (currentCS.Contains("C12") && currentCS.Contains("C6"))
-                        //    {
-                        //        if (customerToAdd == "C4")
-                        //            System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
-                        //    }
-                        //}
                         localStartTime = DateTime.Now;
                         CustomerSet extendedCS = new CustomerSet(currentCS);
                         extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
@@ -142,8 +122,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             if (setCoverOption) { RunSetCover(); }
             else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }
-            //TODO delete the following after debugging
-            model.ExportCustomerSetArchive2txt();
         }
 
         public override void SpecializedConclude()
@@ -335,21 +313,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void RunSetCover()
         {
-            // TODO delete this: for debugging
-            CustomerSetList cs_List = new CustomerSetList(model.CustomerSetArchive);
-            for(int i=0; i<cs_List.Count; i++)
-            {
-                if (cs_List[i].RouteOptimizerOutcome.OptimizedRoute[0] == null && cs_List[i].RouteOptimizerOutcome.OptimizedRoute[1] == null)
-                {
-                    cs_List.Remove(cs_List[i]);
-                }
-                else if(cs_List[i].RouteOptimizerOutcome.OptimizedRoute[0] == null)
-                {
-                    cs_List[i].RouteOptimizerOutcome.OFV[0] = double.MinValue;
-                }
-            }            // TODO until here delete this: for debugging
-
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam, cs_List);
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
             //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));

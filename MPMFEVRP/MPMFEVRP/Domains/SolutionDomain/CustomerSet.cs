@@ -98,7 +98,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             CS2.Extend(customer1, problemModelBase);
             CS1.Extend(customer2, problemModelBase);
         }
-        // TODO this is for debugging, can stay or go
+        
         public bool Contains(string customerID)
         {
             for (int i = 0; i < Customers.Count; i++)

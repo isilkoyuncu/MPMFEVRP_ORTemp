@@ -21,7 +21,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         {
             this.numVehicleCategories = numVehicleCategories;
             this.numVehicles = numVehicles;
-            this.vehicleArray = vehicleArray; //TODO same as site array. Can we do it?
+            this.vehicleArray = vehicleArray;
         }
 
         public VehicleRelatedData(VehicleRelatedData twinVRD)

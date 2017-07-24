@@ -79,36 +79,6 @@ namespace MPMFEVRP.Implementations.Solutions
             assigned2GDV = new CustomerSetList();
         }
 
-        //public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSetBasedSolution trialSolution)
-        //{
-        //    this.model = model;
-        //    this.zSetTo1 = zSetTo1;
-        //    assigned2EV = new CustomerSetList();
-        //    assigned2GDV = new CustomerSetList();
-        //    for (int i = 0; i < trialSolution.NumCS_assigned2EV; i++)
-        //    {
-        //        if (zSetTo1[i, 0] == 1)
-        //        {
-        //            AddCustomerSet2EVList(trialSolution.assigned2EV[i]);
-        //        }
-        //        else if (zSetTo1[i, 1] == 1)
-        //        {
-        //            AddCustomerSet2GDVList(trialSolution.assigned2EV[i]);
-        //        }
-        //    }
-        //    for (int i = trialSolution.NumCS_assigned2EV; i < trialSolution.NumCS_total; i++)
-        //    {
-        //        if (zSetTo1[i, 0] == 1)
-        //        {
-        //            AddCustomerSet2EVList(trialSolution.assigned2GDV[i]);
-        //        }
-        //        else if (zSetTo1[i, 1] == 1)
-        //        {
-        //            AddCustomerSet2GDVList(trialSolution.assigned2GDV[i]);
-        //        }
-        //    }
-        //}
-
         public void AddCustomerSet2EVList(CustomerSet currentCS)
         {
             assigned2EV.Add(currentCS);
