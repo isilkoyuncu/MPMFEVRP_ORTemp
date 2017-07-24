@@ -20,7 +20,6 @@ namespace MPMFEVRP.Models.XCPlex
         ILinearNumExpr obj;//Because of the enumerative and space consuming nature of the problem with 2 vehicle categories, it's more practical to create the obj expression beforehand and only add it later
         int nCustomerSets;
         CustomerSet[] customerSetArray;
-
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
 
         public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
@@ -62,78 +61,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Cplex parameters
             SetCplexParameters();
             //output variables
-            initializeOutputVariables();
-        }
-
-
-        public override SolutionBase GetCompleteSolution(Type SolutionType)
-        {
-            if (SolutionType != typeof(CustomerSetBasedSolution))
-                throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
-
-            return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1(), customerSetArray);
-        }
-
-        public override string GetDescription_AllVariables_Array()
-        {
-            return
-                "for (int i = 0; i < nCustomerSets; i++)\nfor (int v = 0; v < 2; v++)\ny[i][v]";
-        }
-
-        protected override void AddAllConstraints()
-        {
-            allConstraints_list = new List<IRange>();
-            //Now adding the constraints one (family) at a time
-            AddCustomerCoverageConstraints();
-            //All constraints added
-            allConstraints_array = allConstraints_list.ToArray();
-        }
-        void AddCustomerCoverageConstraints()
-        {
-            List<string> customerIDs = problemModel.SRD.GetCustomerIDs();
-            int nCustomers = customerIDs.Count;
-            CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;//TODO Make this parametric and pass it through since wherever it may originate
-
-            foreach (string customerID in customerIDs)
-            {
-                ILinearNumExpr numTimesCustomerServed = LinearNumExpr();
-                for (int i = 0; i < nCustomerSets; i++)
-                {
-                    if (customerSetArray[i].Customers.Contains(customerID))
-                    {
-                        numTimesCustomerServed.AddTerm(1.0, z[i][0]);
-                        numTimesCustomerServed.AddTerm(1.0, z[i][1]);
-                    }
-                }//for i
-                string constraint_name = "Customer " + customerID;
-                switch (coverConstraintType)
-                {
-                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce:
-                        constraint_name += " at most once";
-                        allConstraints_list.Add(AddLe(numTimesCustomerServed, 1.0, constraint_name));
-                        break;
-                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce:
-                        constraint_name += " exactly once";
-                        allConstraints_list.Add(AddEq(numTimesCustomerServed, 1.0, constraint_name));
-                        break;
-                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce:
-                        constraint_name += " at least once";
-                        allConstraints_list.Add(AddGe(numTimesCustomerServed, 1.0, constraint_name));
-                        break;
-                }
-            }//foreach customerID
-        }
-
-        protected override void AddTheObjectiveFunction()
-        {
-            //created already in DefineDecisionVariables()
-            //add (Maximize or Minimize depends on the problem)
-            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType;
-            objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
-            if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
-                AddMaximize(obj);
-            else
-                AddMinimize(obj);
+            InitializeOutputVariables();
         }
 
         protected override void DefineDecisionVariables()
@@ -157,6 +85,80 @@ namespace MPMFEVRP.Models.XCPlex
             }
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
+        }
+        protected override void AddTheObjectiveFunction()
+        {
+            //created already in DefineDecisionVariables()
+            //TODO add (Maximize or Minimize depends on the problem)
+            ObjectiveFunctionTypes objectiveFunctionType = Utils.ProblemUtil.CreateProblemByName(problemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType;
+            objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
+                AddMaximize(obj);
+            else
+                AddMinimize(obj);
+        }
+        protected override void AddAllConstraints()
+        {
+            allConstraints_list = new List<IRange>();
+            //Now adding the constraints one (family) at a time
+            AddCustomerCoverageConstraints();
+            //All constraints added
+            allConstraints_array = allConstraints_list.ToArray();
+        }
+        void AddCustomerCoverageConstraints()
+        {
+            List<string> customerIDs = problemModel.SRD.GetCustomerIDs();
+            int nCustomers = customerIDs.Count;
+            CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;//TODO Make this parametric and pass it through since wherever it may originate
+
+            foreach (string customerID in customerIDs)
+            {
+                ILinearNumExpr numTimesCustomerServed = LinearNumExpr();
+                for (int i = 0; i < nCustomerSets; i++)
+                {
+                    if (customerSetArray[i].Customers.Contains(customerID))
+                    {
+                        if (customerSetArray[i].RouteOptimizerOutcome.Feasible[0])
+                        {
+                            numTimesCustomerServed.AddTerm(1.0, z[i][0]);
+                            numTimesCustomerServed.AddTerm(1.0, z[i][1]);
+                        }
+                        else if(customerSetArray[i].RouteOptimizerOutcome.Feasible[1])
+                        {
+                            numTimesCustomerServed.AddTerm(1.0, z[i][1]);
+                        }
+                    }
+                }//for i
+                string constraint_name = "Customer " + customerID;
+                switch (coverConstraintType)
+                {
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce:
+                        constraint_name += " at most once";
+                        allConstraints_list.Add(AddLe(numTimesCustomerServed, 1.0, constraint_name));
+                        break;
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce:
+                        constraint_name += " exactly once";
+                        allConstraints_list.Add(AddEq(numTimesCustomerServed, 1.0, constraint_name));
+                        break;
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce:
+                        constraint_name += " at least once";
+                        allConstraints_list.Add(AddGe(numTimesCustomerServed, 1.0, constraint_name));
+                        break;
+                }
+            }//foreach customerID
+        }
+
+        public override SolutionBase GetCompleteSolution(Type SolutionType)
+        {
+            if (SolutionType != typeof(CustomerSetBasedSolution))
+                throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
+
+            return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1(), customerSetArray);
+        }
+        public override string GetDescription_AllVariables_Array()
+        {
+            return
+                "for (int i = 0; i < nCustomerSets; i++)\nfor (int v = 0; v < 2; v++)\ny[i][v]";
         }
         public int[,] GetZVariablesSetTo1()
         {

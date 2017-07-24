@@ -41,7 +41,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Cplex parameters
             SetCplexParameters();
             //output variables
-            initializeOutputVariables();
+            InitializeOutputVariables();
         }
 
         public override SolutionBase GetCompleteSolution(Type SolutionType)

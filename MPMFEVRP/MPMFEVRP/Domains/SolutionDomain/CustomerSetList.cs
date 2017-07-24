@@ -12,6 +12,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public CustomerSetList() { }
 
+        public CustomerSetList(CustomerSetList twinCSList)
+        {
+            for (int i = 0; i < twinCSList.Count; i++)
+            {
+                Add(twinCSList[i]);
+            }
+        }
+
         public bool Includes(CustomerSet candidate)
         {
             for (int i = 0; i < this.Count; i++)

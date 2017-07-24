@@ -33,6 +33,11 @@ namespace MPMFEVRP.Interfaces
         double GDV_TSP_CompTime = 0.0;
         double EV_TSP_CompTime = 0.0;
 
+        bool GDVOptimalRouteFeasibleForEV = false;
+        List<string> RouteConstructionExplanationForEV = new List<string>(); // TODO you can delete these after the debugging
+
+
+
         /// <summary>
         /// EVvsGDV_MaxProfit_VRP_Model.OptimizeForSingleVehicle can only be called from CustomerSet, which requests to be optimized and passes itself hereinto
         /// </summary>
@@ -40,7 +45,7 @@ namespace MPMFEVRP.Interfaces
         /// <returns></returns>
         public RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
-            // TODO you can delete this after the debugging
+            // TODO you can delete these after the debugging
             RouteOptimizerOutput outcome = new RouteOptimizerOutput(RouteOptimizationStatus.NotYetOptimized);
             if (archiveAllCustomerSets)
             {
@@ -69,6 +74,7 @@ namespace MPMFEVRP.Interfaces
 
             if (GDV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if GDV infeasible, no need to check EV, stop
             {
+                RouteConstructionExplanationForEV.Add("CPLEX both inf");//TODO delete: for debugging
                 outcome = new RouteOptimizerOutput(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
                 return outcome;
             }
@@ -85,8 +91,9 @@ namespace MPMFEVRP.Interfaces
                 ofv[1] = GDV_TSPSolver.GetBestObjValue();
                 //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
 
-                // TODO first check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
-                bool GDVOptimalRouteFeasibleForEV = false;
+                //TODO first check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
+                GDVOptimalRouteFeasibleForEV = true;
+
                 assignedRoutes[0] = new AssignedRoute(this, 0);
                 AssignedRoute newAR = new AssignedRoute(this, 0);
                 for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
@@ -100,9 +107,11 @@ namespace MPMFEVRP.Interfaces
 
                 if (GDVOptimalRouteFeasibleForEV)
                 {
-                    //seems like this is all taken care of by cloning the DGV optimal route for EV in a step-by-step manner
+                    //seems like this is all taken care of by cloning the GDV optimal route for EV in a step-by-step manner
                     ofv[0] = assignedRoutes[0].TotalProfit;
-                    return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                    RouteConstructionExplanationForEV.Add("Analytical");//TODO delete: for debugging
+                    outcome = new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+                    return outcome;
                 }
                 else
                 {
@@ -111,7 +120,8 @@ namespace MPMFEVRP.Interfaces
                     //if (CS.Customers[0] == "C15")
                     //    if (CS.Customers[1] == "C4")
                     //        System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
-
+                    assignedRoutes[0] = new AssignedRoute();
+                    ofv[0] = double.MinValue; //TODO: Revert this when working with a minimization problem
                     DateTime startTime_ev = DateTime.Now;
                     EV_TSPSolver.RefineDecisionVariables(CS);
                     //EV_TSPSolver.ExportModel("EV_TSP_model.lp");
@@ -120,6 +130,7 @@ namespace MPMFEVRP.Interfaces
 
                     if (EV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if EV infeasible, return only GDV 
                     {
+                        RouteConstructionExplanationForEV.Add("CPLEX EV Inf"); //TODO delete: for debugging
                         outcome = new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, ofv: ofv, optimizedRoute: assignedRoutes);
                         return outcome;
                     }
@@ -144,7 +155,7 @@ namespace MPMFEVRP.Interfaces
                             if ((!newAR.IsSame(assignedRoutes[0])) || (Math.Abs(newOFV - ofv[0]) > 0.00001))
                                 System.Windows.Forms.MessageBox.Show("The GDV-optimal route that happens to be EV-feasible somehow is not the same as the EV-optimal obtained independently!");
                         }
-
+                        RouteConstructionExplanationForEV.Add("CPLEX"); //TODO delete: for debugging
                         outcome = new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
                         return outcome;
                     }
@@ -172,6 +183,57 @@ namespace MPMFEVRP.Interfaces
             return ncs.Routes[0];
         }
 
+        //TODO delete this after debugging
+        public void ExportCustomerSetArchive2txt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = InputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_CustomerSetArchiveWcplex" + (!GDVOptimalRouteFeasibleForEV).ToString() + ".txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("EV Routes" + "\t" + "EV Routes Profit" + "\t" +"OFV[0]" +"\t"+ "GDV Routes" + "\t" + "GDV Routes Profit" + "\t" + "OFV[1]" + "\t" + "EV Feasible" + "\t" + "GDV Feasible" + "\t" + "EV Calc Type");
+            for (int i = 0; i < CustomerSetArchive.Count; i++)
+            {
+                if (CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0] == null && CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1] == null)
+                {
+                    sw.Write("null" + "\t" + "null" + "\t" + "null" + "\t" + "null" + "\t" + "null" + "\t" + "null");
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[0] + "-" + "null");
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[1] + "-" + "null");
+                    sw.Write("\t" + RouteConstructionExplanationForEV[i]);
+
+                }
+                else if (CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited == null && CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1] != null)
+                {
+                    sw.Write("null" + "\t" + "null" + "\t" + "null" + "\t");
+                    for (int j = 0; j < CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited.Count-1; j++)
+                        sw.Write(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited[j] + "-");
+                    sw.Write(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited[CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited.Count - 1]);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].TotalProfit);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.OFV[1]);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[0] + "-" + "null");
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[1] + "-" + CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].Feasible.Last());
+                    sw.Write("\t" + "null");
+                }
+                else //if(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited != null)
+                {
+                    for (int j = 0; j < CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited.Count-1; j++)
+                        sw.Write(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited[j] + "-");
+                    sw.Write(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited[CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited.Count - 1]);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].TotalProfit);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.OFV[0] + "\t");
+                    for (int j = 0; j < CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited.Count-1; j++)
+                        sw.Write(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited[j] + "-");
+                    sw.Write(CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited[CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].SitesVisited.Count - 1] + "-");
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].TotalProfit);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.OFV[1]);
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[0] + "-" + CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].Feasible.Last());
+                    sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[1] + "-" + CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1].Feasible.Last());
+                    sw.Write("\t" + RouteConstructionExplanationForEV[i]);
+                }
+                sw.WriteLine();
+            }
+            sw.Close();
+        }
 
         public abstract string GetName();
         public abstract string GetDescription();

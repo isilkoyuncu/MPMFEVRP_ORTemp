@@ -21,7 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlexParameters(
             double errorTolerance = 0.00001,
             bool limitComputationTime = false,
-            double runtimeLimit_Seconds = 10.0,
+            double runtimeLimit_Seconds = double.MaxValue,
             XCPlexRelaxation relaxation = XCPlexRelaxation.None,
             bool tSP = false,
             VehicleCategories vehCategory = VehicleCategories.GDV,
