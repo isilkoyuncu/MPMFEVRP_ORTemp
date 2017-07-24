@@ -92,18 +92,18 @@ namespace MPMFEVRP.Interfaces
                 //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
 
                 //TODO first check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
-                GDVOptimalRouteFeasibleForEV = true;
+                GDVOptimalRouteFeasibleForEV = false;
 
-                assignedRoutes[0] = new AssignedRoute(this, 0);
-                AssignedRoute newAR = new AssignedRoute(this, 0);
-                for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
-                {
-                    assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
-                    GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
-                    //newAR.Extend(assignedRoutes[1].SitesVisited[siteIndex]);
-                    //GDVOptimalRouteFeasibleForEV = newAR.Feasible.Last();
-                }
-                double newOFV = newAR.TotalProfit;
+                //assignedRoutes[0] = new AssignedRoute(this, 0);
+                //AssignedRoute newAR = new AssignedRoute(this, 0);
+                //for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
+                //{
+                //    assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
+                //    GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
+                //    //newAR.Extend(assignedRoutes[1].SitesVisited[siteIndex]);
+                //    //GDVOptimalRouteFeasibleForEV = newAR.Feasible.Last();
+                //}
+                //double newOFV = newAR.TotalProfit;
 
                 if (GDVOptimalRouteFeasibleForEV)
                 {
@@ -116,10 +116,11 @@ namespace MPMFEVRP.Interfaces
                 else
                 {
                     //TODO this is to catch a suspicious instance
-                    //if (CS.NumberOfCustomers == 2)
-                    //if (CS.Customers[0] == "C15")
-                    //    if (CS.Customers[1] == "C4")
-                    //        System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
+                    if (customerSetArchive.Count==341)
+                        System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
+                    if (CS.NumberOfCustomers == 3)
+                        if (CS.Customers.Contains("C4")&& CS.Customers.Contains("C6")&& CS.Customers.Contains("C12"))
+                                System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
                     assignedRoutes[0] = new AssignedRoute();
                     ofv[0] = double.MinValue; //TODO: Revert this when working with a minimization problem
                     DateTime startTime_ev = DateTime.Now;
