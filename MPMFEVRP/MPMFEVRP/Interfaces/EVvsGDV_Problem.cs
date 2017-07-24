@@ -9,7 +9,7 @@ using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Interfaces
 {
-    public class EVvsGDV_Problem:ProblemBase
+    public abstract class EVvsGDV_Problem:ProblemBase
     {
         public EVvsGDV_Problem() { }
 
@@ -27,7 +27,7 @@ namespace MPMFEVRP.Interfaces
                 (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
                 throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
 
-            PDP.VRD.NumVehicles[0] = 3; //These do not belong here! They should be a part of computational experiment
+            PDP.VRD.NumVehicles[0] = 3; //TODO These do not belong here! They should be a part of computational experiment
             PDP.VRD.NumVehicles[1] = 3;
         }
 
