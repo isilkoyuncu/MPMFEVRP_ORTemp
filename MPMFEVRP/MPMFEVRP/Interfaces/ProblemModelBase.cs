@@ -106,8 +106,8 @@ namespace MPMFEVRP.Interfaces
                 {
                     assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
                     GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
-                    newAR.Extend(assignedRoutes[1].SitesVisited[siteIndex]);
-                    GDVOptimalRouteFeasibleForEV = newAR.Feasible.Last();
+                    //newAR.Extend(assignedRoutes[1].SitesVisited[siteIndex]);
+                    //GDVOptimalRouteFeasibleForEV = newAR.Feasible.Last();
                 }
                 double newOFV = newAR.TotalProfit;
 
@@ -155,12 +155,12 @@ namespace MPMFEVRP.Interfaces
                         assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
                         ofv[0] = EV_TSPSolver.GetBestObjValue();
 
-                        if (GDVOptimalRouteFeasibleForEV)
-                        {
-                            //We'll compare the two EV  routes
-                            if ((!newAR.IsSame(assignedRoutes[0])) || (Math.Abs(newOFV - ofv[0]) > 0.00001))
-                                System.Windows.Forms.MessageBox.Show("The GDV-optimal route that happens to be EV-feasible somehow is not the same as the EV-optimal obtained independently!");
-                        }
+                        //if (GDVOptimalRouteFeasibleForEV)
+                        //{
+                        //    //We'll compare the two EV  routes
+                        //    if ((!newAR.IsSame(assignedRoutes[0])) || (Math.Abs(newOFV - ofv[0]) > 0.00001))
+                        //        System.Windows.Forms.MessageBox.Show("The GDV-optimal route that happens to be EV-feasible somehow is not the same as the EV-optimal obtained independently!");
+                        //}
                         RouteConstructionExplanationForEV.Add("CPLEX"); //TODO delete: for debugging
                         outcome = new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
                         return outcome;
