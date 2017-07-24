@@ -34,14 +34,14 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public RandomizedGreedy()
         {
-            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "20"));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "30"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, ParameterType.ComboBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 25, 50, 100 }, 25, ParameterType.ComboBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.PROB_SELECTION_POWER, "Power", "2.0"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_NEEDED, "Recovery", new List<object>() { true, false }, true, ParameterType.CheckBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_OPTIONS, "Recovery Options", new List<object>() { Recovery_Options.AssignmentProbByCPLEX, Recovery_Options.AnalyticallySolve }, Recovery_Options.AssignmentProbByCPLEX, ParameterType.ComboBox));
-            AlgorithmParameters.AddParameter(new Parameter(ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, false, ParameterType.CheckBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, true, ParameterType.CheckBox));
         }
 
         public override string GetName()
@@ -91,7 +91,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     {
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
 
-                        ////TODO follwing is to check the suspicious instance, delete after debugging
+                        //TODO follwing is to check the suspicious instance, delete after debugging
                         //if (currentCS.NumberOfCustomers > 0)
                         //    if (currentCS.Contains("C15")) //currentCS.Contains("C4") ||
                         //        if (customerToAdd=="C4") //customerToAdd == "C15"|| 
@@ -128,7 +128,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             wholeCompTime = (DateTime.Now - globalStartTime).TotalMilliseconds;
 
             if (setCoverOption) { RunSetCover(); }
-            else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }            
+            else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }
+            //TODO delete the following after debugging
+            model.ExportCustomerSetArchive2txt();
         }
 
         public override void SpecializedConclude()
@@ -320,7 +322,21 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void RunSetCover()
         {
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
+            // TODO delete this: for debugging
+            CustomerSetList cs_List = new CustomerSetList(model.CustomerSetArchive);
+            for(int i=0; i<cs_List.Count; i++)
+            {
+                if (cs_List[i].RouteOptimizerOutcome.OptimizedRoute[0] == null && cs_List[i].RouteOptimizerOutcome.OptimizedRoute[1] == null)
+                {
+                    cs_List.Remove(cs_List[i]);
+                }
+                else if(cs_List[i].RouteOptimizerOutcome.OptimizedRoute[0] == null)
+                {
+                    cs_List[i].RouteOptimizerOutcome.OFV[0] = double.MinValue;
+                }
+            }            // TODO until here delete this: for debugging
+
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam, cs_List);
             //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));

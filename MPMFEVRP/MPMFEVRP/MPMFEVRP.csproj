@@ -57,6 +57,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Libraries\GanttChart.dll</HintPath>
     </Reference>
+    <Reference Include="Gurobi75.NET">
+      <HintPath>..\..\..\..\..\..\gurobi751\win64\bin\Gurobi75.NET.dll</HintPath>
+    </Reference>
     <Reference Include="ILOG.Concert">
       <HintPath>..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.Concert.dll</HintPath>
     </Reference>
@@ -158,6 +161,7 @@
     <Compile Include="Models\AlgorithmParameters.cs" />
     <Compile Include="Models\EnumExtensions.cs" />
     <Compile Include="Models\Enums.cs" />
+    <Compile Include="Models\Gurobi\facility_cs.cs" />
     <Compile Include="Models\Parameter.cs" />
     <Compile Include="Models\SolutionList.cs" />
     <Compile Include="Models\XCPlex\XCPlexBase.cs" />

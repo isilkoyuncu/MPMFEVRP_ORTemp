@@ -66,7 +66,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Cplex parameters
             SetCplexParameters();
             //output variables
-            initializeOutputVariables();
+            InitializeOutputVariables();
         }
         
         protected void Initialize()
@@ -166,7 +166,7 @@ namespace MPMFEVRP.Models.XCPlex
             return GetTwoDimensionalDecisionVariableValue(name);
         }
 
-        protected void initializeOutputVariables()
+        protected void InitializeOutputVariables()
         {
             //Initializing outputs
             this.solutionStatus = XCPlexSolutionStatus.NotYetSolved;
@@ -202,7 +202,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
         {
-            initializeOutputVariables();
+            InitializeOutputVariables();
             if (specifiedSubproblemRoot != null)
             {
                 RefineDecisionVariables(specifiedSubproblemRoot);

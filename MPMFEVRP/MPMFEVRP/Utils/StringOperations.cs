@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace MPMFEVRP.Utils
 {
@@ -56,6 +57,26 @@ namespace MPMFEVRP.Utils
         public static string CombineFullFileName(string file_name, string file_extension, string sourceDirectory = "")
         {
             return sourceDirectory + file_name + file_extension;
+        }
+
+        public static void CompareTwoCustomerSetArchive(string filesdirectory)
+        {
+            String directory = filesdirectory; //TODO give a directory
+            String[] linesA = File.ReadAllLines(Path.Combine(directory, "fileA.txt"));
+            String[] linesB = File.ReadAllLines(Path.Combine(directory, "fileB.txt"));
+
+            IEnumerable<String> onlyB = linesB.Except(linesA);
+
+            IEnumerable<String> onlyA = linesA.Except(linesB);
+
+            if (onlyB.Count() > 0 || onlyA.Count() > 0)
+            {
+                Console.WriteLine("Two files are different.");
+            }
+            else
+            {
+                Console.WriteLine("Two files are same.");
+            }
         }
 
     }
