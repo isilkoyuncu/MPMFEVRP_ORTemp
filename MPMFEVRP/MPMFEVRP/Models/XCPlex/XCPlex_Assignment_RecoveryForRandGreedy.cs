@@ -12,7 +12,7 @@ using MPMFEVRP.Implementations.Solutions;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    class XCPlex_Assignment_RecoveryForRandGreedy : XCPlexBase
+    class XCPlex_Assignment_RecoveryForRandGreedy : XCPlexBase //TODO delete this after merging
     {
         INumVar[][] z;//[customerSet][2: 0 of EV, 1 for GDV]
         ILinearNumExpr obj;
