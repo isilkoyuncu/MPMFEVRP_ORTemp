@@ -1,22 +1,49 @@
-/* Copyright 2017, Gurobi Optimization, Inc. */
-
-/* Facility location: a company currently ships its product from 5 plants
-   to 4 warehouses. It is considering closing some plants to reduce
-   costs. What plant(s) should the company close, in order to minimize
-   transportation and fixed costs?
-
-   Based on an example from Frontline Systems:
-   http://www.solver.com/disfacility.htm
-   Used with permission.
- */
-
 using System;
 using Gurobi;
-namespace MPMFEVRP.Models.Gurobi
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MPMFEVRP.Implementations.Solutions;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Interfaces;
+
+namespace MPMFEVRP.Models.XGurobi
 {
-    public class facility_cs
+    public abstract class XGurobiBase: GRBEnv
     {
-        public facility_cs()
+        protected ProblemModelBase problemModel;
+        protected XCPlexParameters xCplexParam;
+        protected GRBVar variable_type = GRBVar; // TODO I dont think this gives the var type
+        protected List<GRBVar> allVariables_list;
+        protected GRBVar[] allVariables_array;
+        protected List<GRBConstr> allConstraints_list;
+        protected GRBConstr[] allConstraints_array;
+        protected XCPlexSolutionStatus solutionStatus;
+        protected bool optimalCompleteSolutionObtained;
+        protected bool variableValuesObtained;
+        protected bool reducedCostsObtained;
+        protected double lowerBound;
+        protected double upperBound;
+        protected double cpuTime;
+        public double[] AllValues { get { return GetValues(); } }
+        public double[] AllReducedCosts { get { return GetReducedCosts(); } }
+        public int[] AllVariableBasisStatuses { get { return GetBasisStatuses(); } }
+        public double[] AllSlacks { get { return GetSlacks(); } }
+        public double[] AllShadowPrices { get { return GetDuals(); } }
+
+        public Cplex.BasisStatus[] AllConstraintBasisStatuses { get { return GetBasisStatuses(allConstraints_array); } }
+        public XCPlexSolutionStatus SolutionStatus { get { return solutionStatus; } }
+        public bool OptimalCompleteSolutionObtained { get { return optimalCompleteSolutionObtained; } }
+        public bool VariableValuesObtained { get { return variableValuesObtained; } }
+        public bool ReducedCostsObtained { get { return reducedCostsObtained; } }
+        public double LowerBound_XCPlex { get { return lowerBound; } }
+        public double UpperBound_XCPlex { get { return upperBound; } }
+        public double CPUtime { get { return cpuTime; } }
+
+        Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
+        public XGurobiBase()
         {
             //try {
 
@@ -155,6 +182,51 @@ namespace MPMFEVRP.Models.Gurobi
             //} catch (GRBException e) {
             //  Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
             //}
+        }
+        double[] GetValues()
+        {
+            double[] allValues = new double[allVariables_array.Length];
+            for (int i = 0; i < allVariables_array.Length; i++)
+            {
+                allValues[i] = allVariables_array[i].X;
+            }
+            return allValues;
+        }
+        double[] GetReducedCosts()
+        {
+            double[] allReducedCosts = new double[allVariables_array.Length];
+            for (int i = 0; i < allVariables_array.Length; i++)
+            {
+                allReducedCosts[i] = allVariables_array[i].RC;
+            }
+            return allReducedCosts;
+        }
+        int []GetBasisStatuses()
+        {
+            int[] allBasisStatuses = new int[allVariables_array.Length];
+            for (int i = 0; i < allVariables_array.Length; i++)
+            {
+                allBasisStatuses[i] = allVariables_array[i].VBasis;
+            }
+            return allBasisStatuses;
+        }
+        double[] GetSlacks()
+        {
+            double[] allSlacks = new double[allConstraints_array.Length];
+            for (int i = 0; i < allConstraints_array.Length; i++)
+            {
+                allSlacks[i] = allConstraints_array[i].Slack;
+            }
+            return allSlacks;
+        }
+        double[] GetDuals()
+        {
+            double[] allDuals = new double[allConstraints_array.Length];
+            for (int i = 0; i < allConstraints_array.Length; i++)
+            {
+                allDuals[i] = allConstraints_array[i].Pi;
+            }
+            return allDuals;
         }
     }
 }
