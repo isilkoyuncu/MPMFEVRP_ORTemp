@@ -57,16 +57,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Libraries\GanttChart.dll</HintPath>
     </Reference>
-    <Reference Include="Gurobi75.NET">
-      <HintPath>..\..\..\..\..\..\gurobi751\win64\bin\Gurobi75.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="ILOG.Concert, Version=12.7.1.0, Culture=neutral, PublicKeyToken=7906592bc7cc7340, processorArchitecture=MSIL">
+    <Reference Include="ILOG.Concert, Version=12.7.0.0, Culture=neutral, PublicKeyToken=7906592bc7cc7340, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.Concert.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.Concert.dll</HintPath>
     </Reference>
-    <Reference Include="ILOG.CPLEX, Version=12.7.1.0, Culture=neutral, PublicKeyToken=7906592bc7cc7340, processorArchitecture=MSIL">
+    <Reference Include="ILOG.CPLEX, Version=12.7.0.0, Culture=neutral, PublicKeyToken=7906592bc7cc7340, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.CPLEX.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.CPLEX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
