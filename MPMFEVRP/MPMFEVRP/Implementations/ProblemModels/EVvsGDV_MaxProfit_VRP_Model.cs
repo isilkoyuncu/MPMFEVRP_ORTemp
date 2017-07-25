@@ -64,6 +64,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
         public override bool CheckFeasibilityOfSolution(ISolution solution)
         {
+            throw new NotImplementedException();
+
             Type solutionType = solution.GetType();
 
             if (solutionType == typeof(CustomerSetBasedSolution))
@@ -84,11 +86,12 @@ namespace MPMFEVRP.Implementations.ProblemModels
         }
         bool CheckFeasibilityOfSolution(CustomerSetBasedSolution solution)
         {
+            throw new NotImplementedException();
+
             bool outcome = true;
             //TODO check for any infeasibility and return false as soon as one is found!
             return outcome;
         }
-
         public override double CalculateObjectiveFunctionValue(ISolution solution)
         {
             throw new NotImplementedException();
