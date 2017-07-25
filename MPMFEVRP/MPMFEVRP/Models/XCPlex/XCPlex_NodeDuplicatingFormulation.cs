@@ -270,7 +270,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_OutgoingXfromDepotTotalEqualsU();
             AddConstraint_IncomingXTotalEqualsU();
             AddConstraint_OutgoingXTotalEqualsU();
-            AddConstraint_AtMostOneVisitPerNode();
+            AddConstraint_NumberOfVisitsPerNode();
             AddConstraint_NoGDVVisitToESNodes();
             AddConstraint_MaxNumberOfVehiclesPerCategory();
             AddConstraint_TimeRegulationFollowingACustomerVisit();
@@ -333,15 +333,26 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddEq(OutgoingXTotalMinusU, 0.0, constraint_name));
                 }
         }
-        void AddConstraint_AtMostOneVisitPerNode()
+        void AddConstraint_NumberOfVisitsPerNode()
         {
             for (int j = 1; j < numNodes; j++)
             {
                 ILinearNumExpr NumberOfVehiclesVisitingTheNode = LinearNumExpr();
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                     NumberOfVehiclesVisitingTheNode.AddTerm(1.0, U[j][v]);
-                string constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
-                allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
+
+                string constraint_name;
+
+                if ((problemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)&&(j >= firstCustomerNodeIndex) && (j <= lastCustomerNodeIndex))
+                {
+                    constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
+                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
+                }
+                else
+                {
+                    constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
+                    allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
+                }
             }
         }
         void AddConstraint_NoGDVVisitToESNodes()
