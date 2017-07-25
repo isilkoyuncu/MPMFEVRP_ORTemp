@@ -14,7 +14,7 @@ using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
-    public class EVvsGDV_MaxProfit_VRP_Model: ProblemModelBase
+    public class EVvsGDV_MaxProfit_VRP_Model: EVvsGDV_ProblemModel
     {
         string problemName;
         

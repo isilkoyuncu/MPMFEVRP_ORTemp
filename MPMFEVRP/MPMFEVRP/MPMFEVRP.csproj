@@ -144,6 +144,7 @@
     <Compile Include="Implementations\Algorithms\BestOfRandom.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
     <Compile Include="Interfaces\EVvsGDV_Problem.cs" />
+    <Compile Include="Interfaces\EVvsGDV_ProblemModel.cs" />
     <Compile Include="Interfaces\IWriter.cs" />
     <Compile Include="Interfaces\ProblemBase.cs" />
     <Compile Include="Interfaces\ProblemModelBase.cs" />
