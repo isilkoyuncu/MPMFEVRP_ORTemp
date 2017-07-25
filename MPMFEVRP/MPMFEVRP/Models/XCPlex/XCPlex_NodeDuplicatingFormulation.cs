@@ -222,6 +222,13 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected override void AddTheObjectiveFunction()
         {
+            if (problemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
+                AddMaxTypeObjectiveFunction();
+            else
+                AddMinTypeObjectiveFunction();
+        }
+        void AddMaxTypeObjectiveFunction()
+        {
             ILinearNumExpr objFunction = LinearNumExpr();
             //First term: prize collection
             for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
@@ -239,6 +246,22 @@ namespace MPMFEVRP.Models.XCPlex
             //Now adding the objective function to the model
             AddMaximize(objFunction);
         }
+        void AddMinTypeObjectiveFunction()
+        {
+            ILinearNumExpr objFunction = LinearNumExpr();
+            //Second term: distance-based costs
+            for (int i = 0; i < numNodes; i++)
+                for (int j = 0; j < numNodes; j++)
+                    for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                        objFunction.AddTerm(problemModel.VRD.VehicleArray[v].VariableCostPerMile * problemModel.SRD.Distance[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]], X[i][j][v]);
+            //Third term: vehicle fixed costs
+            for (int j = 0; j < numNodes; j++)
+                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                    objFunction.AddTerm(problemModel.VRD.VehicleArray[v].FixedCost, X[0][j][v]);
+            //Now adding the objective function to the model
+            AddMinimize(objFunction);
+        }
+
         protected override void AddAllConstraints()
         {
             allConstraints_list = new List<IRange>();
