@@ -76,7 +76,7 @@ namespace MPMFEVRP.Utils
             return createdProblemModel;
         }
 
-        public static ProblemModelBase CreateProblemModelByProblem(IProblem problem)
+        public static ProblemModelBase CreateProblemModelByProblem(Type theProblemModelType, IProblem problem)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
@@ -85,18 +85,19 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ProblemModelBase createdProblemModel = (ProblemModelBase)Activator.CreateInstance(typeof(EVvsGDV_MinCost_VRP),problem);
+            ProblemModelBase createdProblemModel;
 
             foreach (var problemModel in allProblemModels)
-            {
-                createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel,problem);
-                if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
+                if (problemModel == theProblemModelType)
                 {
-                    return createdProblemModel;
+                    createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel, problem);
+                    if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
+                    {
+                        return createdProblemModel;
+                    }
                 }
-            }
 
-            return createdProblemModel;
+            return null;
         }
 
         public static void ArrangeNodesIntoLists(ProblemModelBase problemModel, 

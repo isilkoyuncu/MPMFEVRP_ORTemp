@@ -50,32 +50,68 @@ namespace MPMFEVRP.Utils
             return result;
         }
 
-        public static IProblem CreateProblemByResourceName(String resName)
+        public static IProblem CreateProblemByResourceName(String problemName, String resName)
         {
             String problemData = Properties.Resources.ResourceManager.GetString(resName);
-            return CreateProblemByRawData(problemData);
+            return CreateProblemByRawData(problemName, problemData);
         }
 
-        public static IProblem CreateProblemByRawData(String rawData)
+        public static IProblem CreateProblemByRawData(String problemName, String rawData)
         {
             KoyuncuYavuzReader KYreader = new KoyuncuYavuzReader();
             KYreader.ProcessRawDataFromFile(rawData);
 
             ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
-            IProblem theProblem = new EVvsGDV_MinCost_VRP(dataPackage); //TODO create by problem type
 
-            return theProblem;
+            var allProblems = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => typeof(IProblem).IsAssignableFrom(p))
+                .Where(type => typeof(IProblem).IsAssignableFrom(type))
+                .Where(t => !t.IsAbstract)
+                .ToList();
+
+            IProblem createdProblem;
+
+            foreach (var problem in allProblems)
+            {
+                createdProblem = (IProblem)Activator.CreateInstance(problem, dataPackage);
+                if (createdProblem.GetName() == problemName)
+                {
+                    return createdProblem;
+                }
+            }
+
+            //If we're here, the problem doesn't exist!
+            return null;
         }
 
-        public static IProblem CreateProblemByFileName(String fullFileName)
+        public static IProblem CreateProblemByFileName(String problemName, String fullFileName)
         {
             KoyuncuYavuzReader KYreader = new KoyuncuYavuzReader(fullFileName);
             KYreader.Read();
 
             ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
-            IProblem theProblem = new EVvsGDV_MinCost_VRP(dataPackage); //TODO create by problem type
 
-            return theProblem;
+            var allProblems = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => typeof(IProblem).IsAssignableFrom(p))
+                .Where(type => typeof(IProblem).IsAssignableFrom(type))
+                .Where(t => !t.IsAbstract)
+                .ToList();
+
+            IProblem createdProblem;
+
+            foreach (var problem in allProblems)
+            {
+                createdProblem = (IProblem)Activator.CreateInstance(problem, dataPackage);
+                if (createdProblem.GetName() == problemName)
+                {
+                    return createdProblem;
+                }
+            }
+
+            //If we're here, the problem doesn't exist!
+            return null;
         }
 
         // TODO this random problem needs to be changed
@@ -93,7 +129,7 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            IProblem createdProblem = (IProblem)Activator.CreateInstance(typeof(EVvsGDV_MinCost_VRP));
+            IProblem createdProblem;
 
             foreach (var problem in allProblems)
             {
@@ -104,7 +140,7 @@ namespace MPMFEVRP.Utils
                 }
             }
 
-            return createdProblem;
+            return null;
         }
     }
 }

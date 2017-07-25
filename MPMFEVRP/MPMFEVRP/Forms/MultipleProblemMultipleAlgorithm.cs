@@ -185,8 +185,8 @@ namespace MPMFEVRP.Forms
                 {
                     for (int i = 0; i < dialog.FileNames.Length; i++)
                     {
-                        theProblem = ProblemUtil.CreateProblemByFileName(dialog.FileNames[i]);
-                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblem);
+                        theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileNames[i]);
+                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem);
 
                         problems.Add(theProblem);
                         problemModels.Add(theProblemModel);
