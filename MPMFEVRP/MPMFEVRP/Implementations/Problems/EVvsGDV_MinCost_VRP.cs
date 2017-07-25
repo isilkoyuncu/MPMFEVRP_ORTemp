@@ -23,10 +23,14 @@ namespace MPMFEVRP.Implementations.Problems
             { return CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce; }
         }
 
-        public EVvsGDV_MinCost_VRP() { }
+        public EVvsGDV_MinCost_VRP()
+        {
+            objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
+        }
 
         public EVvsGDV_MinCost_VRP(ProblemDataPackage PDP) : base(PDP)
         {
+            objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
         }
 
         public override string GetName()

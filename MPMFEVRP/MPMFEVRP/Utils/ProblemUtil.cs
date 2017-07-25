@@ -62,7 +62,7 @@ namespace MPMFEVRP.Utils
             KYreader.ProcessRawDataFromFile(rawData);
 
             ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
-            IProblem theProblem = new EVvsGDV_MaxProfit_VRP(dataPackage);
+            IProblem theProblem = new EVvsGDV_MinCost_VRP(dataPackage); //TODO create by problem type
 
             return theProblem;
         }
@@ -73,7 +73,7 @@ namespace MPMFEVRP.Utils
             KYreader.Read();
 
             ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
-            IProblem theProblem = new EVvsGDV_MaxProfit_VRP(dataPackage);
+            IProblem theProblem = new EVvsGDV_MinCost_VRP(dataPackage); //TODO create by problem type
 
             return theProblem;
         }
@@ -93,7 +93,7 @@ namespace MPMFEVRP.Utils
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            IProblem createdProblem = (IProblem)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP));
+            IProblem createdProblem = (IProblem)Activator.CreateInstance(typeof(EVvsGDV_MinCost_VRP));
 
             foreach (var problem in allProblems)
             {
