@@ -15,6 +15,11 @@ namespace MPMFEVRP.Implementations.Algorithms
     public class AColumnGenerationHeuristic : AlgorithmBase
     {
         ObjectiveFunctionTypes ofvType;
+
+        //These are the important characteristics that will have to be tied to the form
+        int beamWidth;
+        CustomerSetList.CustomerListPopStrategy popStrategy;
+
         PartitionedCustomerSetList unexploredCustomerSets;
         CustomerSetList parents, children;
 
@@ -39,7 +44,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             ofvType = Utils.ProblemUtil.CreateProblemByName(model.GetNameOfProblemOfModel()).ObjectiveFunctionType;
 
-            unexploredCustomerSets = new PartitionedCustomerSetList();
+            //These are the important characteristics that will have to be tied to the form
+            beamWidth = 3;
+            popStrategy = CustomerSetList.CustomerListPopStrategy.MaxOFVforAnyVehicle;
+
+            unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
             int nCustomers = model.SRD.NumCustomers;
             foreach(Site s in model.SRD.SiteArray)
             {
@@ -60,8 +69,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            //These are the important characteristics that will have to be tied to the form
-            int beamWidth = 3;
 
             //The following are miscellaneous variables needed in the algorithm
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;

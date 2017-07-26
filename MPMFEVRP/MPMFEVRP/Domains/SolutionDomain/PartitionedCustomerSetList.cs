@@ -8,6 +8,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class PartitionedCustomerSetList
     {
+        CustomerSetList.CustomerListPopStrategy popStrategy;
+
         int deepestLevel;
         public int DeepestLevel { get { return deepestLevel; } }
 
@@ -15,6 +17,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public PartitionedCustomerSetList()
         {
+            deepestLevel = -1;
+            CSLList = new List<CustomerSetList>();
+        }
+        public PartitionedCustomerSetList(CustomerSetList.CustomerListPopStrategy popStrategy)
+        {
+            this.popStrategy = popStrategy;
             deepestLevel = -1;
             CSLList = new List<CustomerSetList>();
         }
@@ -30,7 +38,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if(level > deepestLevel)//this is the first ever customer set seen at this level, the list at the level has not been needed so far, this is the time to create it
             {
                 for (int l = deepestLevel + 1; l <= level; l++)
-                    CSLList.Add(new CustomerSetList());
+                    CSLList.Add(new CustomerSetList(popStrategy));
                 deepestLevel = level;
             }
 
