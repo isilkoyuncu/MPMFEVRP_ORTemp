@@ -8,26 +8,57 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class PartitionedCustomerSetList
     {
-        int maxNumberOfCustomers = -1;
-        List<CustomerSetList> CSList;
+        int deepestLevel;
+        public int DeepestLevel { get { return deepestLevel; } }
+
+        List<CustomerSetList> CSLList;
 
         public PartitionedCustomerSetList()
         {
-            CSList = new List<CustomerSetList>();
+            deepestLevel = -1;
+            CSLList = new List<CustomerSetList>();
         }
 
         public void ConsiderForAddition(CustomerSet CS)
         {
             int level = CS.NumberOfCustomers;
-            if(level > maxNumberOfCustomers)//this is the first ever customer set seen at this level, the list at the level has not been needed so far, this is the time to create it
+            if(level > deepestLevel)//this is the first ever customer set seen at this level, the list at the level has not been needed so far, this is the time to create it
             {
-                for (int l = maxNumberOfCustomers + 1; l <= level; l++)
-                    CSList.Add(new CustomerSetList());
-                maxNumberOfCustomers = level;
+                for (int l = deepestLevel + 1; l <= level; l++)
+                    CSLList.Add(new CustomerSetList());
+                deepestLevel = level;
             }
 
-            if (!CSList[level].Includes(CS))
-                CSList[level].Add(CS);
+            if (!CSLList[level].Includes(CS))
+                CSLList[level].Add(CS);
         }
+        
+        public CustomerSetList Pop(int level, int numberToPop)
+        {
+            return CSLList[level].Pop(numberToPop);
+        }
+
+        public int HighestNonemptyLevel()
+        {
+            for (int level = 0; level <= deepestLevel; level++)
+                if (CSLList[level].Count > 0)
+                    return level;
+            return -1;
+        }
+        public int DeepestNonemptyLevel()
+        {
+            for (int level = deepestLevel; level >= 0; level--)
+                if (CSLList[level].Count > 0)
+                    return level;
+            return -1;
+        }
+        public int TotalCount()
+        {
+            int outcome = 0;
+            foreach (CustomerSetList csl in CSLList)
+                outcome += csl.Count;
+            return outcome;
+        }
+
     }
 }

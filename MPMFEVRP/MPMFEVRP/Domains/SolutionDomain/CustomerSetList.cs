@@ -8,12 +8,27 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class CustomerSetList : List<CustomerSet>
     {
-        public enum CustomerListPopStrategy {First, MinOFVforMostAdvancedVehicle, MaxOFVforMostAdvancedVehicle, MinOFVforAnyVehicle, MaxOFVforAnyVehicle, Random };
+        public enum CustomerListPopStrategy { First, MinOFVforMostAdvancedVehicle, MaxOFVforMostAdvancedVehicle, MinOFVforAnyVehicle, MaxOFVforAnyVehicle, Random };
 
-        public CustomerSetList() { }
+        bool popStrategyDefined;
+        CustomerListPopStrategy popStrategy;
+
+        public CustomerSetList()
+        {
+            popStrategyDefined = false;
+        }
+
+        public CustomerSetList(CustomerListPopStrategy popStrategy)
+        {
+            popStrategyDefined = true;
+            this.popStrategy = popStrategy;
+        }
 
         public CustomerSetList(CustomerSetList twinCSList, bool deepCopy)
         {
+            popStrategyDefined = twinCSList.popStrategyDefined;
+            if (popStrategyDefined)
+                popStrategy = twinCSList.popStrategy;
             foreach (CustomerSet twinCS in twinCSList)
             {
                 if (deepCopy)
@@ -38,12 +53,42 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return null;
         }
 
+        public CustomerSetList Pop(int numberToPop)
+        {
+            if (popStrategyDefined)
+                return Pop(numberToPop, popStrategy);
+            else
+                return Pop(numberToPop, CustomerListPopStrategy.First);//Using the default strategy
+        }
+        public CustomerSetList Pop(int numberToPop, CustomerListPopStrategy strategy)
+        {
+            CustomerSetList outcome;
+            if (numberToPop <= this.Count)
+            {
+                outcome = new CustomerSetList(this, false);//TODO: Verify whether shallow copy works or deep copy is needed
+                Clear();
+            }
+            else
+            {
+                outcome = new CustomerSetList();
+                for (int i = 0; i < numberToPop; i++)
+                    outcome.Add(Pop(strategy));
+            }
+            return outcome;
+        }
+        public CustomerSet Pop()
+        {
+            if (popStrategyDefined)
+                return Pop(popStrategy);
+            else
+                return Pop(CustomerListPopStrategy.First);//Using the default strategy
+        }
         public CustomerSet Pop(CustomerListPopStrategy strategy)
         {
             CustomerSet outcome = null;
             if (Count >= 0)
             {
-                var resultIndex = 0; // default is the first one
+                int resultIndex;
                 switch (strategy)
                 {
                     case CustomerListPopStrategy.Random:
@@ -54,6 +99,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
                         break;
                     case CustomerListPopStrategy.MaxOFVforMostAdvancedVehicle:
                         resultIndex = GetIndexOfBestOFVforMostAdvancedVehicleCustomerSet(true);
+                        break;
+                    case CustomerListPopStrategy.MinOFVforAnyVehicle:
+                        resultIndex = GetIndexOfBestOFVforAnyVehicleCustomerSet(false);
+                        break;
+                    case CustomerListPopStrategy.MaxOFVforAnyVehicle:
+                        resultIndex = GetIndexOfBestOFVforAnyVehicleCustomerSet(true);
+                        break;
+                    default:
+                        resultIndex = 0;
                         break;
                 }
                 outcome = this[resultIndex];
@@ -74,7 +128,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
                     this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                     continue;
-                if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV==0))
+                if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV == 0))
                     continue;
 
                 if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV && (indexOfKeyOFV == 1))
@@ -118,7 +172,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             List<double> outcome = new List<double>();
             foreach (CustomerSet cs in this)
-                outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1],0));
+                outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1], 0));
             return outcome;
         }
     }
