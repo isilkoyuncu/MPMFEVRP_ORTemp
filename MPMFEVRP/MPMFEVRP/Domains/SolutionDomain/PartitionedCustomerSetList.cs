@@ -19,6 +19,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
             CSLList = new List<CustomerSetList>();
         }
 
+        public void ConsiderForAddition(CustomerSetList CSL)
+        {
+            while (CSL.Count > 0)
+                ConsiderForAddition(CSL.Pop(CustomerSetList.CustomerListPopStrategy.First));//TODO: Verify that this actually depletes the CSL one-CS-at-a-time
+        }
         public void ConsiderForAddition(CustomerSet CS)
         {
             int level = CS.NumberOfCustomers;
@@ -38,26 +43,29 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return CSLList[level].Pop(numberToPop);
         }
 
-        public int HighestNonemptyLevel()
+        public int GetHighestNonemptyLevel()
         {
             for (int level = 0; level <= deepestLevel; level++)
                 if (CSLList[level].Count > 0)
                     return level;
             return -1;
         }
-        public int DeepestNonemptyLevel()
+        public int GetDeepestNonemptyLevel()
         {
             for (int level = deepestLevel; level >= 0; level--)
                 if (CSLList[level].Count > 0)
                     return level;
             return -1;
         }
-        public int TotalCount()
+        public int TotalCount
         {
-            int outcome = 0;
-            foreach (CustomerSetList csl in CSLList)
-                outcome += csl.Count;
-            return outcome;
+            get
+            {
+                int outcome = 0;
+                foreach (CustomerSetList csl in CSLList)
+                    outcome += csl.Count;
+                return outcome;
+            }
         }
 
     }

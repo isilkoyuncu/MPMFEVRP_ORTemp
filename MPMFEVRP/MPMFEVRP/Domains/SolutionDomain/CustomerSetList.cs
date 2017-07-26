@@ -63,7 +63,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public CustomerSetList Pop(int numberToPop, CustomerListPopStrategy strategy)
         {
             CustomerSetList outcome;
-            if (numberToPop <= this.Count)
+            if (numberToPop >= this.Count)
             {
                 outcome = new CustomerSetList(this, false);//TODO: Verify whether shallow copy works or deep copy is needed
                 Clear();
