@@ -7,6 +7,8 @@ using MPMFEVRP.Interfaces;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Models;
+using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.Implementations.Solutions;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -17,6 +19,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         CustomerSetList parents, children;
 
         DateTime startTime;
+
+        XCPlexBase CPlexExtender = null;
+        XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
 
         public override string GetName()
         {
@@ -56,7 +61,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             //These are the important characteristics that will have to be tied to the form
-            int beamWidth = 1;
+            int beamWidth = 3;
 
             //The following are miscellaneous variables needed in the algorithm
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
@@ -72,6 +77,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 while (currentLevel <= deepestPossibleLevel)
                 {
                     //Take the parents from the current level
+                    if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
+                        break;
                     parents = unexploredCustomerSets.Pop(currentLevel, beamWidth);
 
                     //populate children from parents
@@ -82,10 +89,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
                     //end of the level, moving on to the next level
                     currentLevel++;
-                } 
+                }
 
                 //After the iteration:
                 //run the set cover model and update the best found solution
+                RunSetCover();
             } while ((unexploredCustomerSets.TotalCount > 0) && ((DateTime.Now - startTime).TotalSeconds < runTimeLimitInSeconds));
 
 
@@ -112,6 +120,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }//foreach (string customerID in remainingCustomers)
             }//foreach (CustomerSet cs in parents)
             parents.Clear();
+        }
+        void RunSetCover()
+        {
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
+            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
+            CPlexExtender.Solve_and_PostProcess();
+            bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
         }
 
         public override string[] GetOutputSummary()
