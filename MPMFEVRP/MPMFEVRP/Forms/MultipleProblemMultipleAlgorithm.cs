@@ -43,12 +43,42 @@ namespace MPMFEVRP.Forms
             algorithms = new BindingList<IAlgorithm>();
             listBox_algorithms.DataSource = algorithms;
 
+            comboBox_multi_problems.Items.AddRange(ProblemUtil.GetAllProblemNames().ToArray());
+            comboBox_multi_problems.SelectedIndexChanged += ComboBox_multi_problems_SelectedIndexChanged;
+            comboBox_multi_problems.SelectedIndex = 0;
+
             listBox_algorithms.MouseDoubleClick += ListBox_algorithms_MouseDoubleClick;
             listBox_algorithms.MouseMove += ListBox_algorithms_MouseMove;
             comboBox_algorithms.Items.AddRange(AlgorithmUtil.GetAllAlgorithmNames().ToArray());
             comboBox_algorithms.SelectedIndex = 0;
         }
 
+        private void ComboBox_multi_problems_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            theProblem = ProblemUtil.CreateProblemByName(comboBox_multi_problems.SelectedItem.ToString());
+            if (theProblem == null)
+                MessageBox.Show("We just selected the problem, but it failed to create!");
+            else
+            {
+                comboBox_multi_problemModels.Items.Clear();
+                comboBox_multi_problemModels.Items.AddRange(ProblemModelUtil.GetCompatibleProblemModelNames(theProblem).ToArray());
+                comboBox_multi_problemModels.SelectedIndexChanged += ComboBox_multi_problemModels_SelectedIndexChanged;
+                comboBox_multi_problemModels.SelectedIndex = 0;
+                UpdateProblemLabels();
+            }
+        }
+        private void ComboBox_multi_problemModels_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            theProblemModel = ProblemModelUtil.CreateProblemModelByName(comboBox_multi_problemModels.SelectedItem.ToString());
+            if (theProblemModel == null)
+                MessageBox.Show("We just selected the problem, but it failed to create!");
+            else
+                UpdateProblemLabels();
+        }
+        void UpdateProblemLabels()
+        {
+            // TODO this should not be empty
+        }
         private void ListBox_algorithms_MouseMove(object sender, MouseEventArgs e)
         {
             ListBox lb = (ListBox)sender;
