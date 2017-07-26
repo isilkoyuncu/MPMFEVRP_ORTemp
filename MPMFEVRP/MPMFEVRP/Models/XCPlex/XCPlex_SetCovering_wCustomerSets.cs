@@ -100,6 +100,7 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
             AddCustomerCoverageConstraints();
+            AddUseLimitedNumberOfVehiclesConstraints();
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
@@ -145,7 +146,16 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }//foreach customerID
         }
-
+        void AddUseLimitedNumberOfVehiclesConstraints()
+        {
+            ILinearNumExpr numTimesVehicleTypeIsUsed = LinearNumExpr();
+            for (int i = 0; i < nCustomerSets; i++)
+            {
+                numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][0]);
+            }//for i
+            string constraint_name = "Vehicle type 0 can be used at most" + problemModel.VRD.NumVehicles[0] + "times";
+            allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, problemModel.VRD.NumVehicles[0], constraint_name));
+        }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             if (SolutionType != typeof(CustomerSetBasedSolution))
