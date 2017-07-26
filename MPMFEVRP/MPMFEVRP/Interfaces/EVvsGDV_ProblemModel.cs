@@ -42,7 +42,7 @@ namespace MPMFEVRP.Interfaces
                 }
             }
             customerSetArchive.Add(CS);
-
+            
             double worstCaseOFV = double.MinValue; //TODO: Revert this when working with a minimization problem
 
             AssignedRoute[] assignedRoutes = new AssignedRoute[2];

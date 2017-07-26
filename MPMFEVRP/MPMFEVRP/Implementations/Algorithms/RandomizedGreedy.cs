@@ -16,6 +16,7 @@ namespace MPMFEVRP.Implementations.Algorithms
     public class RandomizedGreedy : AlgorithmBase
     {
         int poolSize = 20;
+        int runTimeLimitInSeconds=0;
         Random random;
         double power;
 
@@ -66,10 +67,26 @@ namespace MPMFEVRP.Implementations.Algorithms
             isRecoveryNeeded = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_NEEDED).GetBoolValue();
             selectedRecoveryOpt = (Recovery_Options)AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTIONS).Value;
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
+            runTimeLimitInSeconds = algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetIntValue(); 
         }
 
         public override void SpecializedRun()
         {
+            //TODO delete this, this is for debugging
+
+            //CustomerSet csset = new CustomerSet();
+            //CustomerSet extendcs = new CustomerSet();
+            //extendcs.Extend("C10", model);
+            //csset = extendcs;
+            //extendcs = new CustomerSet(csset);
+            //extendcs.Extend("C5", model);
+            //csset = extendcs;
+            //extendcs = new CustomerSet(csset);
+            //extendcs.Extend("C8", model);
+
+
+
+
             extensionCompTime = 0.0;
             reassignmentCompTime = 0.0;
             wholeCompTime = 0.0;
@@ -78,8 +95,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
-            for (int trial = 0; trial < poolSize; trial++)
-            {
+do            {
                 CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
                 bool csSuccessfullyAdded = false;
@@ -116,7 +132,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }//This gives you the new trialSolution
 
                 allSolutions.Add(trialSolution);
-            }//for(int trial = 0; trial<poolSize; trial++)
+            }while((DateTime.Now - globalStartTime).TotalSeconds < runTimeLimitInSeconds);//for(int trial = 0; trial<poolSize; trial++)
 
             wholeCompTime = (DateTime.Now - globalStartTime).TotalMilliseconds;
 
