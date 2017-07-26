@@ -117,6 +117,16 @@ namespace MPMFEVRP.Implementations.Algorithms
                     remainingCustomers.Remove(customerID);
                 foreach (string customerID in remainingCustomers)
                 {
+                    if (unexploredCustomerSets.TotalCount == 221)
+                        if (cs.NumberOfCustomers == 6)
+                            if (cs.Customers[0] == "C11")
+                                if (cs.Customers[1] == "C14")
+                                    if (cs.Customers[2] == "C18")
+                                        if (cs.Customers[3] == "C20")
+                                            if (cs.Customers[4] == "C3")
+                                                if (cs.Customers[5] == "C9")
+                                                    if (customerID == "C17")
+                                                        Console.WriteLine("This is the suspicious case!");
                     CustomerSet candidate = new CustomerSet(cs);
                     candidate.Extend(customerID, model);
                     if(!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved

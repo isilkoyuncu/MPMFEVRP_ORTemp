@@ -299,12 +299,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
             {
-                ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
-                for (int i = 0; i < numNodes; i++)
-                    IncomingXTotalMinusU.AddTerm(1.0, X[i][0][v]);
-                IncomingXTotalMinusU.AddTerm(-1.0, U[0][v]);
-                string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_incoming_to_depot_equals_the_U_variable";
-                allConstraints_list.Add(AddEq(IncomingXTotalMinusU, 0.0, constraint_name));
+                ILinearNumExpr OutgoingXTotalMinusU = LinearNumExpr();
+                for (int k = 0; k < numNodes; k++)
+                    OutgoingXTotalMinusU.AddTerm(1.0, X[0][k][v]);
+                OutgoingXTotalMinusU.AddTerm(-1.0, U[0][v]);
+                string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_outgoing_from_depot_equals_the_U_variable";
+                allConstraints_list.Add(AddEq(OutgoingXTotalMinusU, 0.0, constraint_name));
             }
         }
         void AddConstraint_IncomingXTotalEqualsU()
