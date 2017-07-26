@@ -12,11 +12,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public CustomerSetList() { }
 
-        public CustomerSetList(CustomerSetList twinCSList)
+        public CustomerSetList(CustomerSetList twinCSList, bool deepCopy)
         {
-            for (int i = 0; i < twinCSList.Count; i++)
+            foreach (CustomerSet twinCS in twinCSList)
             {
-                Add(twinCSList[i]);
+                if (deepCopy)
+                    Add(new CustomerSet(twinCS));
+                else
+                    Add(twinCS);
             }
         }
 
