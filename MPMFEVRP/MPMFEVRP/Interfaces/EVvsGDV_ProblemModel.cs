@@ -44,6 +44,8 @@ namespace MPMFEVRP.Interfaces
                     return roo;
                 }
             }
+            // TODO I think we need the following but for some reason it didn't work as intended.
+            //CS.RouteOptimizerOutcome = new RouteOptimizerOutput();
             customerSetArchive.Add(CS);
             double worstCaseOFV = double.MinValue; //TODO: Revert this when working with a minimization problem
 
@@ -52,7 +54,6 @@ namespace MPMFEVRP.Interfaces
 
             //GDV First: if it is infeasible, no need to check EV
             DateTime startTime_gdv = DateTime.Now;
-            CS.RouteOptimizerOutcome = new RouteOptimizerOutput();
             GDV_TSPSolver.RefineDecisionVariables(CS);
             GDV_TSPSolver.Solve_and_PostProcess();
             GDV_TSP_CompTime += (DateTime.Now - startTime_gdv).TotalMilliseconds;
