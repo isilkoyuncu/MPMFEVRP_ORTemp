@@ -50,6 +50,7 @@ namespace MPMFEVRP.Interfaces
 
             //GDV First: if it is infeasible, no need to check EV
             DateTime startTime_gdv = DateTime.Now;
+            CS.RouteOptimizerOutcome = new RouteOptimizerOutput();
             GDV_TSPSolver.RefineDecisionVariables(CS);
             GDV_TSPSolver.Solve_and_PostProcess();
             GDV_TSP_CompTime += (DateTime.Now - startTime_gdv).TotalMilliseconds;

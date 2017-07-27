@@ -107,8 +107,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             compatibleSolutions = new List<Type>()
             {
-                typeof(RouteBasedSolution),
-                typeof(CustomerSetBasedSolution)
+                typeof(CustomerSetBasedSolution),
+                typeof(RouteBasedSolution)
+
             };
         }
         void CreateCustomerSetArchive()

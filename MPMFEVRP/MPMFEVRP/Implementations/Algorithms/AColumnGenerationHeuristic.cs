@@ -89,7 +89,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     parents = unexploredCustomerSets.Pop(currentLevel, beamWidth);
 
                     //populate children from parents
-                    populateChildren();
+                    PopulateChildren();
 
                     //add the children to the unexplored list (level:currentLevel+1)
                     unexploredCustomerSets.ConsiderForAddition(children);//TODO: Verify that this clears the children set
@@ -106,7 +106,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             throw new NotImplementedException();
         }
-        void populateChildren()
+        void PopulateChildren()
         {
             if (children.Count > 0)
                 throw new Exception("children is not empty, can't populate new children!");
@@ -128,6 +128,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                                                     if (customerID == "C17")
                                                         Console.WriteLine("This is the suspicious case!");
                     CustomerSet candidate = new CustomerSet(cs);
+
+                    //TODO delete the following after debugging
+                    if (cs.NumberOfCustomers == 2)
+                        if(cs.Customers.Contains("C8")&&cs.Customers.Contains("C5")|| cs.Customers.Contains("C8") && cs.Customers.Contains("C10")|| cs.Customers.Contains("C10") && cs.Customers.Contains("C5"))
+                            if(customerID=="C10"|| customerID == "C5" || customerID == "C8")
+                            Console.WriteLine("Potentially suspicious case!");
+
                     candidate.Extend(customerID, model);
                     if(!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved
                         if((candidate.RouteOptimizerOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
