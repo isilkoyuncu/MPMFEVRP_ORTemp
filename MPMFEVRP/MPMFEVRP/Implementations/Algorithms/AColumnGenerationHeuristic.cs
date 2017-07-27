@@ -33,11 +33,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             return "Customer Set-based Column Generation Heuristic";
         }
 
-        public override void SpecializedConclude()
-        {
-            throw new NotImplementedException();
-        }
-
         public override void SpecializedInitialize(ProblemModelBase model)
         {
             startTime = DateTime.Now;
@@ -61,15 +56,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             children = new CustomerSetList();//this was necessary to avoid a null reference
         }
-
-        public override void SpecializedReset()
-        {
-            throw new NotImplementedException();
-        }
-
         public override void SpecializedRun()
         {
-
             //The following are miscellaneous variables needed in the algorithm
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = model.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
@@ -106,6 +94,15 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             throw new NotImplementedException();
         }
+        public override void SpecializedConclude()
+        {
+            throw new NotImplementedException();
+        }
+        public override void SpecializedReset()
+        {
+            throw new NotImplementedException();
+        }
+
         void PopulateChildren()
         {
             if (children.Count > 0)
