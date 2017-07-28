@@ -33,11 +33,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             return "Customer Set-based Column Generation Heuristic";
         }
 
-        public override void SpecializedConclude()
-        {
-            throw new NotImplementedException();
-        }
-
         public override void SpecializedInitialize(ProblemModelBase model)
         {
             startTime = DateTime.Now;
@@ -61,15 +56,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             children = new CustomerSetList();//this was necessary to avoid a null reference
         }
-
-        public override void SpecializedReset()
-        {
-            throw new NotImplementedException();
-        }
-
         public override void SpecializedRun()
         {
-
             //The following are miscellaneous variables needed in the algorithm
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = model.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
@@ -93,7 +81,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         if (currentLevel == 6)
                             Console.WriteLine("Stop and go into populate Children!");
                     //populate children from parents
-                    populateChildren();
+                    PopulateChildren();
 
                     //add the children to the unexplored list (level:currentLevel+1)
                     unexploredCustomerSets.ConsiderForAddition(children);//TODO: Verify that this clears the children set
@@ -107,7 +95,16 @@ namespace MPMFEVRP.Implementations.Algorithms
                 RunSetCover();
             } while ((unexploredCustomerSets.TotalCount > 0) && ((DateTime.Now - startTime).TotalSeconds < runTimeLimitInSeconds));
         }
-        void populateChildren()
+        public override void SpecializedConclude()
+        {
+            throw new NotImplementedException();
+        }
+        public override void SpecializedReset()
+        {
+            throw new NotImplementedException();
+        }
+
+        void PopulateChildren()
         {
             if (children.Count > 0)
                 throw new Exception("children is not empty, can't populate new children!");
@@ -130,6 +127,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                                                     if (customerID == "C5")
                                                         Console.WriteLine("This is the suspicious case!");
                     CustomerSet candidate = new CustomerSet(cs);
+
+                    //TODO delete the following after debugging
+                    if (cs.NumberOfCustomers == 2)
+                        if(cs.Customers.Contains("C8")&&cs.Customers.Contains("C5")|| cs.Customers.Contains("C8") && cs.Customers.Contains("C10")|| cs.Customers.Contains("C10") && cs.Customers.Contains("C5"))
+                            if(customerID=="C10"|| customerID == "C5" || customerID == "C8")
+                            Console.WriteLine("Potentially suspicious case!");
+
                     candidate.Extend(customerID, model);
                     if(!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved
                         if((candidate.RouteOptimizerOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))

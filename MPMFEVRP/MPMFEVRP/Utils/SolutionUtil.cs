@@ -26,7 +26,7 @@ namespace MPMFEVRP.Utils
             {
                 result.Add(solution.GetMethod("GetName").Invoke(Activator.CreateInstance(solution), null).ToString());
             }
-
+            result.Sort();
             return result;
         }
         public static string[] ReadSolutionByFileName(String fullFileName)

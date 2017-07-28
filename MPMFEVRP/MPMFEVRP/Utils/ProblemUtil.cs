@@ -46,7 +46,7 @@ namespace MPMFEVRP.Utils
             {
                 result.Add(problem.GetMethod("GetName").Invoke(Activator.CreateInstance(problem), null).ToString());
             }
-
+            result.Sort();
             return result;
         }
 
