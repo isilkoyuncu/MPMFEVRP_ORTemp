@@ -31,6 +31,14 @@ namespace MPMFEVRP.Interfaces
         /// <returns></returns>
         public override RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
+
+            if (CS.NumberOfCustomers == 2)
+                if(CS.Customers.Contains("C1"))
+                    if (CS.Customers.Contains("C6"))
+                    {
+                        Console.WriteLine("This is the customer set that sets the OFV equal to total profit whereas the GDV route is not even EV-feasible!!!");
+                    }
+
             if (archiveAllCustomerSets)
             {
                 DateTime startTime = DateTime.Now;
@@ -67,10 +75,10 @@ namespace MPMFEVRP.Interfaces
                 }
                 //If we're here, we know GDV route has been successfully optimized
                 assignedRoutes[1] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)GDV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
-                ofv[1] = GDV_TSPSolver.GetBestObjValue();
+                ofv[1] = GDV_TSPSolver.GetObjValue();
                 //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
 
-                GDVOptimalRouteFeasibleForEV = false; //First check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
+                GDVOptimalRouteFeasibleForEV = true; //First check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
 
                 assignedRoutes[0] = new AssignedRoute(this, 0);
                 for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
@@ -108,7 +116,7 @@ namespace MPMFEVRP.Interfaces
                         }
                         //If we're here, we know GDV route has been successfully optimized
                         assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
-                        ofv[0] = EV_TSPSolver.GetBestObjValue();
+                        ofv[0] = EV_TSPSolver.GetObjValue();
 
                         RouteConstructionMethodForEV.Add("Optimized with CPLEX");
                         return new RouteOptimizerOutput(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);

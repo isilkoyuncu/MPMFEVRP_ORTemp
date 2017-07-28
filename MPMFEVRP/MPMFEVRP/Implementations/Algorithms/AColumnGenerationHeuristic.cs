@@ -74,9 +74,10 @@ namespace MPMFEVRP.Implementations.Algorithms
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = model.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
             double runTimeLimitInSeconds = algorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.RUNTIME_SECONDS).GetDoubleValue();
-
+            int iter = 0;
             do
             {
+                iter++;
                 //We have a non-empty list 
 
                 //The body of an iteration:
@@ -88,6 +89,9 @@ namespace MPMFEVRP.Implementations.Algorithms
                         break;
                     parents = unexploredCustomerSets.Pop(currentLevel, beamWidth);
 
+                    if (iter == 2)
+                        if (currentLevel == 6)
+                            Console.WriteLine("Stop and go into populate Children!");
                     //populate children from parents
                     populateChildren();
 
@@ -102,9 +106,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //run the set cover model and update the best found solution
                 RunSetCover();
             } while ((unexploredCustomerSets.TotalCount > 0) && ((DateTime.Now - startTime).TotalSeconds < runTimeLimitInSeconds));
-
-
-            throw new NotImplementedException();
         }
         void populateChildren()
         {
@@ -117,15 +118,16 @@ namespace MPMFEVRP.Implementations.Algorithms
                     remainingCustomers.Remove(customerID);
                 foreach (string customerID in remainingCustomers)
                 {
-                    if (unexploredCustomerSets.TotalCount == 221)
-                        if (cs.NumberOfCustomers == 6)
+                    //if (unexploredCustomerSets.TotalCount == 221)
+                        if (cs.NumberOfCustomers == 7)
                             if (cs.Customers[0] == "C11")
                                 if (cs.Customers[1] == "C14")
-                                    if (cs.Customers[2] == "C18")
-                                        if (cs.Customers[3] == "C20")
-                                            if (cs.Customers[4] == "C3")
-                                                if (cs.Customers[5] == "C9")
-                                                    if (customerID == "C17")
+                                    if (cs.Customers[2] == "C17")
+                                        if (cs.Customers[3] == "C18")
+                                            if (cs.Customers[4] == "C20")
+                                                if (cs.Customers[5] == "C3")
+                                                    if(cs.Customers[6] == "C9")
+                                                    if (customerID == "C5")
                                                         Console.WriteLine("This is the suspicious case!");
                     CustomerSet candidate = new CustomerSet(cs);
                     candidate.Extend(customerID, model);
