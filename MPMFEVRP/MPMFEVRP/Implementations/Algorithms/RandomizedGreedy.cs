@@ -74,18 +74,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            //TODO delete this, this is for debugging
-
-            //CustomerSet csset = new CustomerSet();
-            //CustomerSet extendcs = new CustomerSet();
-            //extendcs.Extend("C10", model);
-            //csset = extendcs;
-            //extendcs = new CustomerSet(csset);
-            //extendcs.Extend("C5", model);
-            //csset = extendcs;
-            //extendcs = new CustomerSet(csset);
-            //extendcs.Extend("C8", model);
-
             extensionCompTime = 0.0;
             reassignmentCompTime = 0.0;
             wholeCompTime = 0.0;

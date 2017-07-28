@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Instance_Generation.Forms;
+using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Forms
 {
@@ -21,7 +22,6 @@ namespace MPMFEVRP.Forms
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
         ISolution theSolution;
-
         public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();

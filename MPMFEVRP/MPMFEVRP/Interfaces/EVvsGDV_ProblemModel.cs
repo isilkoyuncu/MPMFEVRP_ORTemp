@@ -33,14 +33,6 @@ namespace MPMFEVRP.Interfaces
         /// <returns></returns>
         public override RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS)
         {
-
-            if (CS.NumberOfCustomers == 2)
-                if(CS.Customers.Contains("C1"))
-                    if (CS.Customers.Contains("C6"))
-                    {
-                        Console.WriteLine("This is the customer set that sets the OFV equal to total profit whereas the GDV route is not even EV-feasible!!!");
-                    }
-
             if (archiveAllCustomerSets)
             {
                 DateTime startTime = DateTime.Now;
@@ -52,8 +44,6 @@ namespace MPMFEVRP.Interfaces
                     return roo;
                 }
             }
-            // TODO I think we need the following but for some reason it didn't work as intended.
-            //CS.RouteOptimizerOutcome = new RouteOptimizerOutput();
             customerSetArchive.Add(CS);
             double worstCaseOFV = double.MinValue; //TODO: Revert this when working with a minimization problem
 
@@ -148,7 +138,7 @@ namespace MPMFEVRP.Interfaces
                     sw.Write("null" + "\t" + "null" + "\t" + "null" + "\t" + "null" + "\t" + "null" + "\t" + "null");
                     sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[0] + "-" + "null");
                     sw.Write("\t" + CustomerSetArchive[i].RouteOptimizerOutcome.Feasible[1] + "-" + "null");
-                    sw.Write("\t" + "");//RouteConstructionMethodForEV[i]);
+                    sw.Write("\t" + RouteConstructionMethodForEV[i]);
 
                 }
                 else if (CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[0].SitesVisited == null && CustomerSetArchive[i].RouteOptimizerOutcome.OptimizedRoute[1] != null)

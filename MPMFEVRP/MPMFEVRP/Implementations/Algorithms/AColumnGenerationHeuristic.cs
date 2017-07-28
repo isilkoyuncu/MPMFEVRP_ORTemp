@@ -115,25 +115,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     remainingCustomers.Remove(customerID);
                 foreach (string customerID in remainingCustomers)
                 {
-                    //if (unexploredCustomerSets.TotalCount == 221)
-                        if (cs.NumberOfCustomers == 7)
-                            if (cs.Customers[0] == "C11")
-                                if (cs.Customers[1] == "C14")
-                                    if (cs.Customers[2] == "C17")
-                                        if (cs.Customers[3] == "C18")
-                                            if (cs.Customers[4] == "C20")
-                                                if (cs.Customers[5] == "C3")
-                                                    if(cs.Customers[6] == "C9")
-                                                    if (customerID == "C5")
-                                                        Console.WriteLine("This is the suspicious case!");
                     CustomerSet candidate = new CustomerSet(cs);
-
-                    //TODO delete the following after debugging
-                    if (cs.NumberOfCustomers == 2)
-                        if(cs.Customers.Contains("C8")&&cs.Customers.Contains("C5")|| cs.Customers.Contains("C8") && cs.Customers.Contains("C10")|| cs.Customers.Contains("C10") && cs.Customers.Contains("C5"))
-                            if(customerID=="C10"|| customerID == "C5" || customerID == "C8")
-                            Console.WriteLine("Potentially suspicious case!");
-
                     candidate.Extend(customerID, model);
                     if(!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved
                         if((candidate.RouteOptimizerOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
@@ -147,7 +129,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         void RunSetCover()
         {
             CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
-            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
         }
