@@ -42,6 +42,10 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
     //enum values:
     //Unsolved until Solve() is tried, the other four are the same as AlgorithmSolutionStatus
 
+    public enum XGurobiSolutionStatus { NotYetSolved = 1, Optimal, Infeasible, Inf_or_Unbd, Unbounded, Cutoff, Iteration_Limit, Node_Limit, Time_Limit, Solution_Limit, Interrupted, Numeric, Suboptimal, Inprogress };
+    //enum values:
+    //Unsolved until Solve() is tried
+
     public enum AlgorithmSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };
     //enum values:
     //Infeasible (-1): An exhaustive search proved that no feasible solution exists
