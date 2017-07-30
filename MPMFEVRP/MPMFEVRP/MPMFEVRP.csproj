@@ -167,7 +167,6 @@
     <Compile Include="Models\XCPlex\XCPlexBase.cs" />
     <Compile Include="Models\XCPlex\XCPlexParameters.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation.cs" />
-    <Compile Include="Models\XCPlex\XCPlex_Assignment_RecoveryForRandGreedy.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation.cs" />
     <Compile Include="Models\XCPlex\XCPlex_SetCovering_wCustomerSets.cs" />
     <Compile Include="Program.cs" />
