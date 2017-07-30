@@ -60,6 +60,11 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
     // None: Full IP with integer variables
     // LinearProgramming: full formulation, only the variables are relaxed to be continuous
 
+    public enum XGurobiRelaxation { None, LinearProgramming };
+    //enum values:
+    // None: Full IP with integer variables
+    // LinearProgramming: full formulation, only the variables are relaxed to be continuous
+
     public enum CPlex_MIPEmphasisSwitch
     {
         _0,
@@ -97,6 +102,25 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
     //    _1,
     //    [Description("Dynamic: Apply dynamic search")]
     //    _2
+    //};
+    public enum Gurobi_MIPFocusSwitch
+    {
+        _0,
+        _1,
+        _2,
+        _3
+    };
+
+    //public enum Gurobi_MIPFocusSwitch
+    //{
+    //    [Description("Balanced")]
+    //    _0,
+    //    [Description("Feasibility")]
+    //    _1,
+    //    [Description("Optimality")]
+    //    _2,
+    //    [Description("Best bound")]
+    //    _3,
     //};
 
 }

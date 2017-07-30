@@ -69,7 +69,7 @@ namespace MPMFEVRP.Models.XCPlex
             InitializeOutputVariables();
         }
         
-        protected void Initialize()
+        protected void Initialize() // TODO this has no references, i.e. we never use this initialize 
         {
             DefineDecisionVariables();
             AddTheObjectiveFunction();
@@ -240,12 +240,12 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 //Not relaxed, outcome can be Unknown, Feasible or Optimal (Can't be infeasible, if it was, it we wouldn't come this far)
                 //Obtain a lower bound
-                lowerBound = GetBestObjValue();
+                lowerBound = GetBestObjValue(); //TODO this shouldn't be LB all the time, depends on the objective function type
                 //if at least feasible, obtain an upper bound and complete solution giving the upper bound
                 if (solutionStatus > 0)
                 {
                     //Obtain upper bound value
-                    upperBound = GetObjValue();
+                    upperBound = GetObjValue(); //TODO this shouldn't be LB all the time, depends on the objective function type
                     //Obtain X and maybe Y values so a complete solution can be constructed from them 
                     optimalCompleteSolutionObtained = (solutionStatus == XCPlexSolutionStatus.Optimal);
                 }
