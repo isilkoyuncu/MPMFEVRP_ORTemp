@@ -57,6 +57,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Libraries\GanttChart.dll</HintPath>
     </Reference>
+    <Reference Include="Gurobi75.NET">
+      <HintPath>..\..\..\..\..\..\gurobi751\win64\bin\Gurobi75.NET.dll</HintPath>
+    </Reference>
     <Reference Include="ILOG.Concert, Version=12.7.0.0, Culture=neutral, PublicKeyToken=7906592bc7cc7340, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.Concert.dll</HintPath>
@@ -167,9 +170,10 @@
     <Compile Include="Models\XCPlex\XCPlexBase.cs" />
     <Compile Include="Models\XCPlex\XCPlexParameters.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation.cs" />
-    <Compile Include="Models\XCPlex\XCPlex_Assignment_RecoveryForRandGreedy.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation.cs" />
     <Compile Include="Models\XCPlex\XCPlex_SetCovering_wCustomerSets.cs" />
+    <Compile Include="Models\XGurobi\XGurobiParameters.cs" />
+    <Compile Include="Models\XGurobi\XGurobi_NodeDuplicatingFormulation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\AlgorithmUtil.cs" />

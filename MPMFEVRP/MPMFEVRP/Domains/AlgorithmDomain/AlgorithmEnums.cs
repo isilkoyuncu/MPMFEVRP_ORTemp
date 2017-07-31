@@ -42,6 +42,10 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
     //enum values:
     //Unsolved until Solve() is tried, the other four are the same as AlgorithmSolutionStatus
 
+    public enum XGurobiSolutionStatus { NotYetSolved = 1, Optimal, Infeasible, Inf_or_Unbd, Unbounded, Cutoff, Iteration_Limit, Node_Limit, Time_Limit, Solution_Limit, Interrupted, Numeric, Suboptimal, Inprogress };
+    //enum values:
+    //Unsolved until Solve() is tried
+
     public enum AlgorithmSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };
     //enum values:
     //Infeasible (-1): An exhaustive search proved that no feasible solution exists
@@ -52,6 +56,11 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
     public enum XCPlex_Formulation { NodeDuplicating, ArcDuplicating };
 
     public enum XCPlexRelaxation { None, LinearProgramming };
+    //enum values:
+    // None: Full IP with integer variables
+    // LinearProgramming: full formulation, only the variables are relaxed to be continuous
+
+    public enum XGurobiRelaxation { None, LinearProgramming };
     //enum values:
     // None: Full IP with integer variables
     // LinearProgramming: full formulation, only the variables are relaxed to be continuous
@@ -93,6 +102,25 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
     //    _1,
     //    [Description("Dynamic: Apply dynamic search")]
     //    _2
+    //};
+    public enum Gurobi_MIPFocusSwitch
+    {
+        _0,
+        _1,
+        _2,
+        _3
+    };
+
+    //public enum Gurobi_MIPFocusSwitch
+    //{
+    //    [Description("Balanced")]
+    //    _0,
+    //    [Description("Feasibility")]
+    //    _1,
+    //    [Description("Optimality")]
+    //    _2,
+    //    [Description("Best bound")]
+    //    _3,
     //};
 
 }

@@ -11,177 +11,181 @@
 
 //namespace MPMFEVRP.Models.XGurobi
 //{
-//    public abstract class XGurobiBase: GRBEnv
+//    public abstract class XGurobiBase:GRBModel
 //    {
+//        protected GRBEnv gurobi_environment;
 //        protected ProblemModelBase problemModel;
-//        protected XCPlexParameters xCplexParam;
-//        protected GRBVar variable_type = GRBVar; // TODO I dont think this gives the var type
+//        protected XGurobiParameters xGurobiParam;
+//        //protected GRBVar variable_type = GRBVar; // TODO I dont think this gives the var type
 //        protected List<GRBVar> allVariables_list;
 //        protected GRBVar[] allVariables_array;
 //        protected List<GRBConstr> allConstraints_list;
 //        protected GRBConstr[] allConstraints_array;
-//        protected XCPlexSolutionStatus solutionStatus;
+//        protected XGurobiSolutionStatus solutionStatus;
 //        protected bool optimalCompleteSolutionObtained;
 //        protected bool variableValuesObtained;
 //        protected bool reducedCostsObtained;
 //        protected double lowerBound;
 //        protected double upperBound;
 //        protected double cpuTime;
-//        public double[] AllValues { get { return GetValues(); } }
-//        public double[] AllReducedCosts { get { return GetReducedCosts(); } }
-//        public int[] AllVariableBasisStatuses { get { return GetBasisStatuses(); } }
-//        public double[] AllSlacks { get { return GetSlacks(); } }
-//        public double[] AllShadowPrices { get { return GetDuals(); } }
-
-//        public Cplex.BasisStatus[] AllConstraintBasisStatuses { get { return GetBasisStatuses(allConstraints_array); } }
-//        public XCPlexSolutionStatus SolutionStatus { get { return solutionStatus; } }
+//        public double[] AllValues => GetValues();
+//        public double[] AllReducedCosts => GetReducedCosts();
+//        public int[] AllVariableBasisStatuses => GetBasisStatuses();
+//        public double[] AllSlacks => GetSlacks();
+//        public double[] AllShadowPrices => GetDuals();
+//        public double[] AllConstraintBasisStatuses => GetConstraintBasisStatuses();
+//        public XGurobiSolutionStatus SolutionStatus { get { return solutionStatus; } }
 //        public bool OptimalCompleteSolutionObtained { get { return optimalCompleteSolutionObtained; } }
 //        public bool VariableValuesObtained { get { return variableValuesObtained; } }
 //        public bool ReducedCostsObtained { get { return reducedCostsObtained; } }
-//        public double LowerBound_XCPlex { get { return lowerBound; } }
-//        public double UpperBound_XCPlex { get { return upperBound; } }
+//        public double LowerBound_XGurobi { get { return lowerBound; } }
+//        public double UpperBound_XGurobi { get { return upperBound; } }
 //        public double CPUtime { get { return cpuTime; } }
 
 //        Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
-//        public XGurobiBase()
+
+
+//        public XGurobiBase(GRBEnv Gurobi_Environment):base(Gurobi_Environment) { }
+//        public XGurobiBase(GRBEnv Gurobi_Environment, ProblemModelBase problemModel, XGurobiParameters xGurobiParam) : base(Gurobi_Environment)
 //        {
-//            //try {
+//            gurobi_environment = Gurobi_Environment;
+//            this.problemModel = problemModel;
+//            this.xGurobiParam = xGurobiParam;
+//            XGurobiRelaxation relaxation;
+//            relaxation = xGurobiParam.Relaxation;
+            
+//            //now we are ready to put the model together and then solve it
+//            //Define the variables
+//            DefineDecisionVariables();
+//            if ((xGurobiParam.Relaxation == XGurobiRelaxation.LinearProgramming)
+//                //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
+//                )
+//                SetAllVariablesType(GRB.CONTINUOUS);
+//            //Objective function
+//            AddTheObjectiveFunction();
+//            //Constraints
+//            AddAllConstraints();
+//            //Cplex parameters
+//            SetGurobiParameters();
+//            //output variables
+//            InitializeOutputVariables();
+//        }
 
-//            // Warehouse demand in thousands of units
-//            double[] Demand = new double[] { 15, 18, 14, 20 };
-
-//            // Plant capacity in thousands of units
-//            double[] Capacity = new double[] { 20, 22, 17, 19, 18 };
-
-//            // Fixed costs for each plant
-//            double[] FixedCosts =
-//                new double[] { 12000, 15000, 17000, 13000, 16000 };
-
-//            // Transportation costs per thousand units
-//            double[,] TransCosts =
-//                new double[,] { { 4000, 2000, 3000, 2500, 4500 },
-//              { 2500, 2600, 3400, 3000, 4000 },
-//              { 1200, 1800, 2600, 4100, 3000 },
-//              { 2200, 2600, 3100, 3700, 3200 } };
-
-//            // Number of plants and warehouses
-//            int nPlants = Capacity.Length;
-//            int nWarehouses = Demand.Length;
-
-//            // Model
-//            GRBEnv env = new GRBEnv();
-//            GRBModel model = new GRBModel(env);
-
-//            model.ModelName = "facility";
-
-//            // Plant open decision variables: open[p] == 1 if plant p is open.
-//            GRBVar[] open = new GRBVar[nPlants];
-//            for (int p = 0; p < nPlants; ++p)
+//        protected void Initialize() // TODO this has no references, i.e. we never use this initialize 
+//        {
+//            DefineDecisionVariables();
+//            AddTheObjectiveFunction();
+//            AddAllConstraints();
+//        }
+//        protected abstract void DefineDecisionVariables();
+//        protected abstract void AddTheObjectiveFunction();
+//        protected abstract void AddAllConstraints();
+//        public abstract string GetDescription_AllVariables_Array();
+//        public abstract SolutionBase GetCompleteSolution(Type SolutionType);//TODO Figure out how to make this work with a run-time-selected Solution type
+//        protected void InitializeOutputVariables()
+//        {
+//            //Initializing outputs
+//            this.solutionStatus = XGurobiSolutionStatus.NotYetSolved;
+//            this.optimalCompleteSolutionObtained = false;
+//            this.variableValuesObtained = false;
+//            this.reducedCostsObtained = false;
+//            this.lowerBound = double.MinValue;
+//            this.upperBound = double.MaxValue;
+//        }
+//        protected void RefineDecisionVariables(PartialSolution PS)
+//        {
+//            double[] allLB = PS.GetAllDecisionVariableLowerBounds();
+//            double[] allUB = PS.GetAllDecisionVariableUpperBounds();
+//            for (int dvIndex = 0; dvIndex < allVariables_array.Length; dvIndex++)
 //            {
-//                open[p] = model.AddVar(0, 1, FixedCosts[p], GRB.BINARY, "Open" + p);
+//                allVariables_array[dvIndex].LB = allLB[dvIndex];
+//                allVariables_array[dvIndex].UB = allUB[dvIndex];
 //            }
-
-//            // Transportation decision variables: how much to transport from
-//            // a plant p to a warehouse w
-//            GRBVar[,] transport = new GRBVar[nWarehouses, nPlants];
-//            for (int w = 0; w < nWarehouses; ++w)
+//        }
+//        protected void SetGurobiParameters()
+//        {
+//            //SetOut(null);
+//            if (xGurobiParam.LimitComputationTime)
+//                Set(GRB.DoubleParam.TimeLimit, xGurobiParam.RuntimeLimit_Seconds);
+//            if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_EMPHASIS))
+//                Set(GRB.IntParam.MIPFocus, int.Parse(xGurobiParam.OptionalCPlexParameters[ParameterID.MIP_EMPHASIS].Value.ToString().Substring(1)));
+//            //if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_SEARCH))
+//            //Set(GRB.IntParam.MIP.Strategy.Search, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_SEARCH].Value.ToString().Substring(1)));
+//            //if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.CUTS_FACTOR))
+//            //Set(GRB.IntParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.CUTS_FACTOR].Value.ToString()));
+//            if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.THREADS))
+//                Set(GRB.IntParam.Threads, int.Parse(xGurobiParam.OptionalCPlexParameters[ParameterID.THREADS].Value.ToString()));
+//        }
+//        public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
+//        {
+//            InitializeOutputVariables();
+//            if (specifiedSubproblemRoot != null)
 //            {
-//                for (int p = 0; p < nPlants; ++p)
+//                RefineDecisionVariables(specifiedSubproblemRoot);
+//            }
+//            DateTime beginTime = new DateTime();
+//            DateTime endTime = new DateTime();
+//            beginTime = DateTime.Now;
+//            //ExportModel("model.lp");
+//            Optimize();
+//            endTime = DateTime.Now;
+//            cpuTime = (endTime - beginTime).TotalSeconds;
+//            int originalGurobiStatus = Status;
+//            solutionStatus = (XGurobiSolutionStatus)originalGurobiStatus;
+
+//            if (xGurobiParam.Relaxation == XGurobiRelaxation.None)
+//            {
+//                //Not relaxed, outcome can be Unknown, Feasible or Optimal (Can't be infeasible, if it was, we wouldn't come this far)
+
+//                //ObjVal: Objective value for current solution
+//                //ObjBound: Best available objective bound (LB: minimization, UB: maximization)
+
+//                //Obtain a lower bound
+//                lowerBound = ObjVal;//TODO this shouldn't be LB all the time, depends on the objective function type
+//                //if at least feasible, obtain an upper bound and complete solution giving the upper bound
+//                if (solutionStatus > 0)
 //                {
-//                    transport[w, p] =
-//                        model.AddVar(0, GRB.INFINITY, TransCosts[w, p], GRB.CONTINUOUS,
-//                                     "Trans" + p + "." + w);
+//                    //Obtain upper bound value
+//                    upperBound = ObjBoundC;
+//                    //Obtain X and maybe Y values so a complete solution can be constructed from them 
+//                    optimalCompleteSolutionObtained = (solutionStatus == XGurobiSolutionStatus.Optimal);
+//                }
+//            }//if not relaxed
+//            else//relaxed
+//            {
+//                //If we're here we know we have an optimal solution
+//                //Obtain a lower bound
+//                upperBound = ObjBoundC;
+//                lowerBound = upperBound;//Because the solution is optimal
+//                                        //Obtain X and maybe Y values so a complete solution can be constructed from them 
+//                if (ValidateCompletenessOfRelaxedSolution())
+//                    optimalCompleteSolutionObtained = true;
+//            }//if relaxed
+//        }
+//        bool ValidateCompletenessOfRelaxedSolution()
+//        {
+//            if (xGurobiParam.Relaxation == XGurobiRelaxation.LinearProgramming)
+//                return ValidateIntegralityOfLPRelaxation();
+//            //We should never get here
+//            return false;
+//        }
+//        bool ValidateIntegralityOfLPRelaxation()
+//        {
+//            double[] allValues = GetValues();
+//            for (int dvInd = 0; dvInd < allValues.Length; dvInd++)
+//                if (Math.Min(Math.Abs(allVariables_array[dvInd].UB - allValues[dvInd]), Math.Abs(allValues[dvInd] - allVariables_array[dvInd].LB)) > xGurobiParam.ErrorTolerance)
+//                    return false;
+//            return true;
+//        }
+//        void SetAllVariablesType(char varType)
+//        {
+//            for (int i = 0; i < allVariables_array.Length; i++)
+//            {          
+//            if (allVariables_array[i].VType != varType)
+//                {
+//                    allVariables_array[i].VType = varType;
 //                }
 //            }
-
-//            // The objective is to minimize the total fixed and variable costs
-//            model.ModelSense = GRB.MINIMIZE;
-
-//            // Production constraints
-//            // Note that the right-hand limit sets the production to zero if
-//            // the plant is closed
-//            for (int p = 0; p < nPlants; ++p)
-//            {
-//                GRBLinExpr ptot = 0.0;
-//                for (int w = 0; w < nWarehouses; ++w)
-//                    ptot.AddTerm(1.0, transport[w, p]);
-//                model.AddConstr(ptot <= Capacity[p] * open[p], "Capacity" + p);
-//            }
-
-//            // Demand constraints
-//            for (int w = 0; w < nWarehouses; ++w)
-//            {
-//                GRBLinExpr dtot = 0.0;
-//                for (int p = 0; p < nPlants; ++p)
-//                    dtot.AddTerm(1.0, transport[w, p]);
-//                model.AddConstr(dtot == Demand[w], "Demand" + w);
-//            }
-
-//            // Guess at the starting point: close the plant with the highest
-//            // fixed costs; open all others
-
-//            // First, open all plants
-//            for (int p = 0; p < nPlants; ++p)
-//            {
-//                open[p].Start = 1.0;
-//            }
-
-//            // Now close the plant with the highest fixed cost
-//            Console.WriteLine("Initial guess:");
-//            double maxFixed = -GRB.INFINITY;
-//            for (int p = 0; p < nPlants; ++p)
-//            {
-//                if (FixedCosts[p] > maxFixed)
-//                {
-//                    maxFixed = FixedCosts[p];
-//                }
-//            }
-//            for (int p = 0; p < nPlants; ++p)
-//            {
-//                if (FixedCosts[p] == maxFixed)
-//                {
-//                    open[p].Start = 0.0;
-//                    Console.WriteLine("Closing plant " + p + "\n");
-//                    break;
-//                }
-//            }
-
-//            // Use barrier to solve root relaxation
-//            model.Parameters.Method = GRB.METHOD_BARRIER;
-
-//            // Solve
-//            model.Optimize();
-
-//            // Print solution
-//            Console.WriteLine("\nTOTAL COSTS: " + model.ObjVal);
-//            Console.WriteLine("SOLUTION:");
-//            for (int p = 0; p < nPlants; ++p)
-//            {
-//                if (open[p].X > 0.99)
-//                {
-//                    Console.WriteLine("Plant " + p + " open:");
-//                    for (int w = 0; w < nWarehouses; ++w)
-//                    {
-//                        if (transport[w, p].X > 0.0001)
-//                        {
-//                            Console.WriteLine("  Transport " +
-//                                transport[w, p].X + " units to warehouse " + w);
-//                        }
-//                    }
-//                }
-//                else
-//                {
-//                    Console.WriteLine("Plant " + p + " closed!");
-//                }
-//            }
-
-//            // Dispose of model and env
-//            model.Dispose();
-//            env.Dispose();
-
-//            //} catch (GRBException e) {
-//            //  Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
-//            //}
 //        }
 //        double[] GetValues()
 //        {
@@ -201,7 +205,7 @@
 //            }
 //            return allReducedCosts;
 //        }
-//        int []GetBasisStatuses()
+//        int[] GetBasisStatuses()
 //        {
 //            int[] allBasisStatuses = new int[allVariables_array.Length];
 //            for (int i = 0; i < allVariables_array.Length; i++)
@@ -227,6 +231,15 @@
 //                allDuals[i] = allConstraints_array[i].Pi;
 //            }
 //            return allDuals;
+//        }
+//        double[] GetConstraintBasisStatuses()
+//        {
+//            double[] allConstraintBasisStatuses = new double[allConstraints_array.Length];
+//            for (int i = 0; i < allConstraints_array.Length; i++)
+//            {
+//                allConstraintBasisStatuses[i] = allConstraints_array[i].CBasis;
+//            }
+//            return allConstraintBasisStatuses;
 //        }
 //    }
 //}

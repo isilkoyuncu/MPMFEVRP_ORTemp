@@ -16,7 +16,9 @@ namespace MPMFEVRP.Implementations.Algorithms
     public class RandomizedGreedy : AlgorithmBase
     {
         List<DateTime> lapses = new List<DateTime>();
-        int lapseCounter=0;
+        DateTime startTime;
+        double duration;
+        int lapseCounter =0;
         int poolSize = 0;
         double runTimeLimitInSeconds=0.0;
         Random random;
@@ -56,6 +58,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
+            startTime = DateTime.Now;
+
             model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
@@ -70,6 +74,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             selectedRecoveryOpt = (Recovery_Options)AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTIONS).Value;
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
             runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();
+
         }
 
         public override void SpecializedRun()
@@ -82,8 +87,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
             int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
-            for (int trial = 0; trial < poolSize; trial++)
-            {
+            //for (int trial = 0; trial < poolSize; trial++)
+            do{
                 CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
                 bool csSuccessfullyAdded = false;
@@ -123,12 +128,14 @@ namespace MPMFEVRP.Implementations.Algorithms
                 DateTime lapse = DateTime.Now;
                 lapses.Add(lapse);
                 lapseCounter++;
-            } //while ((lapses.Last() - globalStartTime).TotalSeconds < runTimeLimitInSeconds);//for(int trial = 0; trial<poolSize; trial++)
+                duration = (DateTime.Now - startTime).TotalSeconds;
+            } while (duration < runTimeLimitInSeconds);
 
             wholeCompTime = (DateTime.Now - globalStartTime).TotalMilliseconds;
 
             if (setCoverOption) { RunSetCover(); }
             else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }
+            double durationAfterSetCover = (DateTime.Now - startTime).TotalSeconds;
         }
 
         public override void SpecializedConclude()
