@@ -23,6 +23,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         RouteOptimizerOutput routeOptimizerOutcome;
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
+        public bool IsGDVFeasible { get { return routeOptimizerOutcome.Feasible[1]; } }
+        public double GDVMilesTraveled { get { if (routeOptimizerOutcome.Feasible[1]) return routeOptimizerOutcome.OptimizedRoute[1].TotalDistance; else return 0.0; } }
+        public bool IsAFVFeasible { get { return routeOptimizerOutcome.Feasible[0]; } }
+        public double AFVMilesTraveled { get { if (routeOptimizerOutcome.Feasible[0]) return routeOptimizerOutcome.OptimizedRoute[0].TotalDistance; else return 0.0; } }
 
         public CustomerSet()
         {
@@ -113,6 +117,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 if (Customers[i] == customerID)
                     return true;
             return false;
+        }
+
+        public string Encode()
+        {
+            string outcome = "";
+            if (customers != null)
+                if (customers.Count > 0)
+                    outcome = customers[0];
+            for (int i = 1; i < customers.Count; i++)
+            {
+                outcome += " " + customers[i];
+            }
+            return outcome;
         }
     }
 }

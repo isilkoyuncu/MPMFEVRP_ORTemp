@@ -40,7 +40,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             ofvType = Utils.ProblemUtil.CreateProblemByName(model.GetNameOfProblemOfModel()).ObjectiveFunctionType;
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 3;
+            beamWidth = 1;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MaxOFVforAnyVehicle;
 
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
@@ -94,6 +94,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //run the set cover model and update the best found solution
                 RunSetCover();
             } while ((unexploredCustomerSets.TotalCount > 0) && ((DateTime.Now - startTime).TotalSeconds < runTimeLimitInSeconds));
+            //model.CustomerSetArchive.ExportAllCustomerSets("sample1.txt", false);
         }
         public override void SpecializedConclude()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -174,6 +175,31 @@ namespace MPMFEVRP.Domains.SolutionDomain
             foreach (CustomerSet cs in this)
                 outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1], 0));
             return outcome;
+        }
+
+        public void ExportAllGDVCustomerSets(string filename, bool writeInfeasibles)
+        {
+            //This method doesn't support append
+            StreamWriter sw = new StreamWriter(filename, false);
+            sw.WriteLine("Customer Set\tGDV Feasible\tGDV Miles");
+            foreach (CustomerSet cs in this)
+            {
+                if ((writeInfeasibles) || (cs.RouteOptimizerOutcome.Feasible[1]))
+                    sw.WriteLine("{0}\t{1}\t{2:F5}", cs.Encode(), cs.IsGDVFeasible, cs.GDVMilesTraveled);
+            }
+            sw.Close();
+        }
+        public void ExportAllCustomerSets(string filename, bool writeInfeasibles)
+        {
+            //This method doesn't support append
+            StreamWriter sw = new StreamWriter(filename, false);
+            sw.WriteLine("Customer Set\tGDV Feasible\tGDV Miles\tAFV Feasible\tAFV Miles");
+            foreach (CustomerSet cs in this)
+            {
+                if ((writeInfeasibles) || (cs.RouteOptimizerOutcome.Feasible[1]))
+                    sw.WriteLine("{0}\t{1}\t{2:F5}\t{3}\t{4:F5}", cs.Encode(), cs.IsGDVFeasible, cs.GDVMilesTraveled, cs.IsAFVFeasible, cs.AFVMilesTraveled);
+            }
+            sw.Close();
         }
     }
 }
