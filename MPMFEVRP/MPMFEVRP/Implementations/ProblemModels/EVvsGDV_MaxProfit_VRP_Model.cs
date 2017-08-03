@@ -24,6 +24,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             problemName = problem.GetName();
             objectiveFunctionType = problem.ObjectiveFunctionType;
             coverConstraintType = problem.CoverConstraintType;
+            rechargingDuration_status = RechargingDurationAndAllowableLeavingStatusFromES.Variable_Full;
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();

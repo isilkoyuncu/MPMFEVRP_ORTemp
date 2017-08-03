@@ -13,8 +13,10 @@ using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Models.XCPlex
 {
+    // TODO apply all the changes that are done in node based formulation!!!
     public class XCPlex_ArcDuplicatingFormulation : XCPlexBase
     {
+        RechargingDurationAndAllowableLeavingStatusFromES rechargingDuration_status;
         List<int> customerSiteNodeIndices, depotPlusCustomerSiteNodeIndices, ESSiteNodeIndices;
         int numCustomers, numES;
 
@@ -30,6 +32,7 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlex_ArcDuplicatingFormulation(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
             : base(problemModel, xCplexParam)
         {
+            rechargingDuration_status = problemModel.RechargingDuration_status;
         }
         protected override void DefineDecisionVariables()
         {

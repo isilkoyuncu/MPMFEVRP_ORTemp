@@ -42,7 +42,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "30"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, ParameterType.ComboBox));
-            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 25, 50, 100 }, 25, ParameterType.ComboBox));
+            AlgorithmParameters.AddParameter(new Parameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 30, 50 }, 30, ParameterType.ComboBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.PROB_SELECTION_POWER, "Power", "2.0"));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_NEEDED, "Recovery", new List<object>() { true, false }, true, ParameterType.CheckBox));
             AlgorithmParameters.AddParameter(new Parameter(ParameterID.RECOVERY_OPTIONS, "Recovery Options", new List<object>() { Recovery_Options.AssignmentProbByCPLEX, Recovery_Options.AnalyticallySolve }, Recovery_Options.AssignmentProbByCPLEX, ParameterType.ComboBox));

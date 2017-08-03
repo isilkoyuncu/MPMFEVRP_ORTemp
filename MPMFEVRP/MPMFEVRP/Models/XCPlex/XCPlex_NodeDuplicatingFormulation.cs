@@ -13,6 +13,8 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlex_NodeDuplicatingFormulation : XCPlexBase
     {
+        RechargingDurationAndAllowableLeavingStatusFromES rechargingDuration_status;
+
         int numNodes;
         int[] nodeToOriginalSiteNumberMap;
         int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;//There is a single depot and it is always node #0
@@ -27,6 +29,7 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlex_NodeDuplicatingFormulation(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
             : base(problemModel, xCplexParam)
         {
+            rechargingDuration_status = problemModel.RechargingDuration_status;
         }
         protected override void DefineDecisionVariables()
         {
@@ -274,12 +277,28 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NoGDVVisitToESNodes();
             AddConstraint_MaxNumberOfVehiclesPerCategory();
             AddConstraint_TimeRegulationFollowingACustomerVisit();
-            AddConstraint_TimeRegulationFollowingAnESVisit();
-            AddConstraint_SOCRegulationFollowingNondepot();
+            switch (rechargingDuration_status)
+            {
+                case RechargingDurationAndAllowableLeavingStatusFromES.Fixed_Full: //EMH problem
+                    //TODO add the following constraints to the model:
+                    //AddConstraint_TimeRegulationFollowingAnESVisit(), AddConstraint_SOCRegulationFollowingNondepot(), AddConstraint_DepartureSOCFromESNode()
+                    throw new NotImplementedException();
+                    break;
+                case RechargingDurationAndAllowableLeavingStatusFromES.Variable_Full: //KoyuncuYavuz problem
+                    AddConstraint_TimeRegulationFollowingAnESVisit();
+                    AddConstraint_SOCRegulationFollowingNondepot();
+                    AddConstraint_DepartureSOCFromESNode();
+                    break;
+                case RechargingDurationAndAllowableLeavingStatusFromES.Variable_Partial:
+                    //TODO add the following constraints to the model:
+                    //AddConstraint_TimeRegulationFollowingAnESVisit(), AddConstraint_SOCRegulationFollowingNondepot(), AddConstraint_DepartureSOCFromESNode()
+                    throw new NotImplementedException();
+                    break;
+            }
             AddConstraint_SOCRegulationFollowingDepot();
             AddConstraint_MaxRechargeAtCustomerNode();
             AddConstraint_MaxDepartureSOCFromCustomerNode();
-            AddConstraint_DepartureSOCFromESNode();
+            
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
@@ -426,6 +445,7 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                 }
         }
+
         void AddConstraint_SOCRegulationFollowingNondepot()
         {
             for (int i = 1; i < numNodes; i++)
