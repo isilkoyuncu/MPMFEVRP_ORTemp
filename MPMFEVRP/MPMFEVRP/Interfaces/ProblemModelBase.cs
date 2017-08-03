@@ -24,6 +24,9 @@ namespace MPMFEVRP.Interfaces
         protected CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType;
         public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get { return coverConstraintType; }set { coverConstraintType = value; } }
 
+        protected RechargingDurationAndAllowableLeavingStatusFromES rechargingDuration_status;
+        public RechargingDurationAndAllowableLeavingStatusFromES RechargingDuration_status { get { return rechargingDuration_status; } set { rechargingDuration_status = value; } }
+
         protected ProblemDataPackage pdp;
         public SiteRelatedData SRD { get { return pdp.SRD; } }
         public VehicleRelatedData VRD { get { return pdp.VRD; } }
