@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -90,6 +91,82 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     }
             }
             //Any final adjustments?
+        }
+    }
+
+    public class VehicleSpecificRouteOptimizationOutcome
+    {
+        VehicleCategories vehicleCategory;
+        public VehicleCategories VehicleCategory { get { return vehicleCategory; } }
+
+        VehicleSpecificRouteOptimizationStatus status;
+        public VehicleSpecificRouteOptimizationStatus Status { get { return status; } }
+
+        double objectiveFunctionValue;//This is for convenience than anything else, this information is easily reproducible based on the details in optimizedRoute, given a method to calculate the objective function value
+        public double ObjectiveFunctionValue { get { return objectiveFunctionValue; } }
+
+        AssignedRoute optimizedRoute;
+        public AssignedRoute OptimizedRoute { get { return optimizedRoute; } }
+
+        public VehicleSpecificRouteOptimizationOutcome()
+        {
+            status = VehicleSpecificRouteOptimizationStatus.NotYetOptimized;
+        }
+        public VehicleSpecificRouteOptimizationOutcome(VehicleSpecificRouteOptimizationOutcome twinVSROO)
+        {
+            vehicleCategory = twinVSROO.vehicleCategory;
+            status = twinVSROO.status;
+            objectiveFunctionValue = twinVSROO.objectiveFunctionValue;
+            optimizedRoute = new AssignedRoute(twinVSROO.optimizedRoute);//A new instance is created here because we may want to extend the route manually in heuristic algorithms 
+        }
+        public VehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory, VehicleSpecificRouteOptimizationStatus status, double objectiveFunctionValue = 0.0, AssignedRoute optimizedRoute = null)
+        {
+            this.vehicleCategory = vehicleCategory;
+            this.status = status;
+
+            switch (status)
+            {
+                case VehicleSpecificRouteOptimizationStatus.NotYetOptimized:
+                    break;
+                case VehicleSpecificRouteOptimizationStatus.Infeasible:
+                    break;
+                case VehicleSpecificRouteOptimizationStatus.Optimized:
+                    this.objectiveFunctionValue = objectiveFunctionValue;
+                    this.optimizedRoute = optimizedRoute;
+                    break;
+            }
+        }
+    }
+
+    public class RouteOptimizationOutcome//TODO: This class will completely replace RouteOptimizerOutput
+    {
+        List<VehicleSpecificRouteOptimizationOutcome> theList;
+        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
+
+        public RouteOptimizationOutcome()
+        {
+            theList = new List<VehicleSpecificRouteOptimizationOutcome>();
+            retrievedFromArchive = false;
+        }
+        public RouteOptimizationOutcome(bool retrievedFromArchive, RouteOptimizationOutcome twinROO)
+        {
+            if (retrievedFromArchive)
+                this.retrievedFromArchive = true;
+            else
+                this.retrievedFromArchive = twinROO.retrievedFromArchive;
+            theList = new List<VehicleSpecificRouteOptimizationOutcome>();
+            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in twinROO.theList)
+                theList.Add(new VehicleSpecificRouteOptimizationOutcome(vsroo));
+        }
+        public RouteOptimizationOutcome(List<VehicleSpecificRouteOptimizationOutcome> theList)
+        {
+            this.theList = theList;
+            retrievedFromArchive = false;
+        }
+
+        public VehicleSpecificRouteOptimizationOutcome GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory)
+        {
+            return theList.Find(x => x.VehicleCategory == vehicleCategory);
         }
     }
 }
