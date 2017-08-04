@@ -13,7 +13,7 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlex_NodeDuplicatingFormulation : XCPlexBase
     {
-        RechargingDurationAndAllowableLeavingStatusFromES rechargingDuration_status;
+        RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
         int numNodes;
         int[] nodeToOriginalSiteNumberMap;
@@ -277,24 +277,11 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NoGDVVisitToESNodes();
             AddConstraint_MaxNumberOfVehiclesPerCategory();
             AddConstraint_TimeRegulationFollowingACustomerVisit();
-            switch (rechargingDuration_status)
-            {
-                case RechargingDurationAndAllowableLeavingStatusFromES.Fixed_Full: //EMH problem
-                    //TODO add the following constraints to the model:
-                    //AddConstraint_TimeRegulationFollowingAnESVisit(), AddConstraint_SOCRegulationFollowingNondepot(), AddConstraint_DepartureSOCFromESNode()
-                    throw new NotImplementedException();
-                    break;
-                case RechargingDurationAndAllowableLeavingStatusFromES.Variable_Full: //KoyuncuYavuz problem
-                    AddConstraint_TimeRegulationFollowingAnESVisit();
-                    AddConstraint_SOCRegulationFollowingNondepot();
-                    AddConstraint_DepartureSOCFromESNode();
-                    break;
-                case RechargingDurationAndAllowableLeavingStatusFromES.Variable_Partial:
-                    //TODO add the following constraints to the model:
-                    //AddConstraint_TimeRegulationFollowingAnESVisit(), AddConstraint_SOCRegulationFollowingNondepot(), AddConstraint_DepartureSOCFromESNode()
-                    throw new NotImplementedException();
-                    break;
-            }
+
+            AddConstraint_TimeRegulationFollowingAnESVisit();
+            AddConstraint_SOCRegulationFollowingNondepot();
+            AddConstraint_DepartureSOCFromESNode();
+
             AddConstraint_SOCRegulationFollowingDepot();
             AddConstraint_MaxRechargeAtCustomerNode();
             AddConstraint_MaxDepartureSOCFromCustomerNode();
@@ -430,7 +417,8 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                 }
         }
-        void AddConstraint_TimeRegulationFollowingAnESVisit()
+
+        void AddConstraint_TimeRegulationFollowingAnESVisit() // TODO make sure all the other constraints are the same as formulation
         {
             for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
                 for (int j = 0; j < numNodes; j++)
@@ -438,14 +426,13 @@ namespace MPMFEVRP.Models.XCPlex
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
                     TimeDifference.AddTerm(-1.0, T[i]);
+                    TimeDifference.AddTerm(-1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate, epsilon[i]);
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                         TimeDifference.AddTerm(-1.0 * (problemModel.SRD.TimeConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]] + (maxValue_T[i] - minValue_T[j] + 1.0/problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate)), X[i][j][v]);
-                    TimeDifference.AddTerm(1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate, delta[i]);
                     string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
+                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]+ 1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate), constraint_name));
                 }
         }
-
         void AddConstraint_SOCRegulationFollowingNondepot()
         {
             for (int i = 1; i < numNodes; i++)
@@ -462,6 +449,7 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddLe(SOCDifference, maxValue_delta[j] - minValue_delta[i], constraint_name));
                 }
         }
+
         void AddConstraint_SOCRegulationFollowingDepot()
         {
             for (int j = 0; j < numNodes; j++)
@@ -502,6 +490,7 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, 0.0, constraint_name));
             }
         }
+
         void AddConstraint_DepartureSOCFromESNode()
         {
             for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
