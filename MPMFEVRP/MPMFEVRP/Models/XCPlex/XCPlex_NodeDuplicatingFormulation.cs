@@ -277,8 +277,8 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NoGDVVisitToESNodes();
             AddConstraint_MaxNumberOfVehiclesPerCategory();
             AddConstraint_TimeRegulationFollowingACustomerVisit();
-
             AddConstraint_TimeRegulationFollowingAnESVisit();
+
             AddConstraint_SOCRegulationFollowingNondepot();
             AddConstraint_DepartureSOCFromESNode();
 
@@ -417,7 +417,6 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                 }
         }
-
         void AddConstraint_TimeRegulationFollowingAnESVisit() // TODO make sure all the other constraints are the same as formulation
         {
             for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
@@ -426,11 +425,22 @@ namespace MPMFEVRP.Models.XCPlex
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
                     TimeDifference.AddTerm(-1.0, T[i]);
-                    TimeDifference.AddTerm(-1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate, epsilon[i]);
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
                         TimeDifference.AddTerm(-1.0 * (problemModel.SRD.TimeConsumption[nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j]] + (maxValue_T[i] - minValue_T[j] + 1.0/problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate)), X[i][j][v]);
-                    string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]+ 1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate), constraint_name));
+                    // Here we decide whether recharging duration is fixed or depends on the arrival SOC
+                    if (rechargingDuration_status==RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                    {
+                        // If the recharging duration is fixed, then it is enough for RHS to be Tmax 
+                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
+                    }
+                    else
+                    {
+                        // If the recharging duration depends on the arrival SOC, then we need to add the possible maximum duration to the RHS
+                        TimeDifference.AddTerm(-1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate, epsilon[i]);
+                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j] + 1.0 / problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].RechargingRate), constraint_name));
+                    }
                 }
         }
         void AddConstraint_SOCRegulationFollowingNondepot()
