@@ -142,6 +142,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
     {
         List<VehicleSpecificRouteOptimizationOutcome> theList;
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
+        RouteOptimizationStatus overallStatus;
 
         public RouteOptimizationOutcome()
         {
@@ -167,6 +168,45 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public VehicleSpecificRouteOptimizationOutcome GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory)
         {
             return theList.Find(x => x.VehicleCategory == vehicleCategory);
+        }
+
+        public VehicleSpecificRouteOptimizationStatus GetRouteOptimizationStatus(VehicleCategories vehicleCategory)
+        {
+            return theList.Find(x => x.VehicleCategory == vehicleCategory).Status;//TODO Find out what this does when the vehicleCategory in question hasn't been added yet
+        }
+        public RouteOptimizationStatus GetRouteOptimizationStatus()
+        {
+            if(overallStatus== RouteOptimizationStatus.NotYetOptimized)
+                if(theList!=null)
+                    if (theList.Count > 0)
+                    {
+                        //Need to update overallStatus
+                        UpdateOverallStatus();
+                    }
+            return overallStatus;
+        }
+        void UpdateOverallStatus()
+        {
+            VehicleSpecificRouteOptimizationStatus GDVStatus = GetRouteOptimizationStatus(VehicleCategories.GDV);
+            VehicleSpecificRouteOptimizationStatus EVStatus = GetRouteOptimizationStatus(VehicleCategories.EV);
+            if (GDVStatus == VehicleSpecificRouteOptimizationStatus.Infeasible)
+            {
+                overallStatus = RouteOptimizationStatus.InfeasibleForBothGDVandEV;
+                return;
+            }
+            if(GDVStatus== VehicleSpecificRouteOptimizationStatus.Optimized)
+            {
+                if (EVStatus == VehicleSpecificRouteOptimizationStatus.NotYetOptimized)
+                    throw new Exception("Why not yet optimized???");
+                if (EVStatus == VehicleSpecificRouteOptimizationStatus.Infeasible)
+                {
+                    overallStatus = RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV;
+                    return;
+                }
+                //if we're here, EV must be optimized
+                overallStatus = RouteOptimizationStatus.OptimizedForBothGDVandEV;
+                return;
+            }
         }
     }
 }

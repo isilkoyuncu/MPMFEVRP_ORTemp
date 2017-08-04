@@ -23,6 +23,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         RouteOptimizerOutput routeOptimizerOutcome;
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
+
+        RouteOptimizationOutcome routeOptimizationOutcome;//TODO Delete RouteOptimizerOutput and use this instead
+        public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } }
         public bool IsGDVFeasible { get { return routeOptimizerOutcome.Feasible[1]; } }
         public double GDVMilesTraveled { get { if (routeOptimizerOutcome.Feasible[1]) return routeOptimizerOutcome.OptimizedRoute[1].TotalDistance; else return 0.0; } }
         public bool IsAFVFeasible { get { return routeOptimizerOutcome.Feasible[0]; } }
