@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPMFEVRP", "MPMFEVRP\MPMFEVRP.csproj", "{D030B923-6C97-4736-AC2C-73C6F6F3639A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instance Generation", "File Management\Instance Generation.csproj", "{72B5A283-6F39-4AE0-9349-32123D7BF2E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVvsGDVFrontierAnalyzer", "EVvsGDVFrontierAnalyzer\EVvsGDVFrontierAnalyzer.csproj", "{F74C7303-9A64-42B8-8DC4-8E97CE111E26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPMFEVRPTests", "MPMFEVRPTests\MPMFEVRPTests.csproj", "{8DD317BF-B653-4FD8-9EA0-94045C48229F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,14 @@ Global
 		{F74C7303-9A64-42B8-8DC4-8E97CE111E26}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F74C7303-9A64-42B8-8DC4-8E97CE111E26}.Release|x64.ActiveCfg = Release|Any CPU
 		{F74C7303-9A64-42B8-8DC4-8E97CE111E26}.Release|x64.Build.0 = Release|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Debug|x64.Build.0 = Debug|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Release|x64.ActiveCfg = Release|Any CPU
+		{8DD317BF-B653-4FD8-9EA0-94045C48229F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

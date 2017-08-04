@@ -36,9 +36,15 @@ namespace MPMFEVRP.Forms
             y[numNodes - 1] = y[0];
 
             InitializeComponent();
-            //panel_Paint(this, null);
-            //panel_problemViewer.Show();
+            panel_Paint(this, null);
+            panel_problemViewer.Show();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void panel_Paint(object sender, PaintEventArgs e)
         {
             Pen penG = new Pen(Color.Green, 3);
@@ -63,12 +69,11 @@ namespace MPMFEVRP.Forms
             {
                 g.DrawEllipse(penGY, x[i], y[i], 20, 20);
                 g.DrawString(i.ToString(), font, sb, x[i] + 3, y[i] + 3);
+              
             }
         }
         
     }
-
-    
 
     public class ColoredTask : Task
     {
