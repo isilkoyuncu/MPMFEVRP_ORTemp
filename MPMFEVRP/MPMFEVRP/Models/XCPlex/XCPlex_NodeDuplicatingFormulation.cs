@@ -512,7 +512,14 @@ namespace MPMFEVRP.Models.XCPlex
                     if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
                         DepartureSOCFromES.AddTerm(-1.0 * maxValue_epsilon[j], U[j][v]);
                 string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
-                allConstraints_list.Add(AddEq(DepartureSOCFromES, 0.0, constraint_name));
+                if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
+                {
+                    allConstraints_list.Add(AddLe(DepartureSOCFromES, 0.0, constraint_name));
+                }
+                else
+                {
+                    allConstraints_list.Add(AddEq(DepartureSOCFromES, 0.0, constraint_name));
+                }
             }
         }
 
