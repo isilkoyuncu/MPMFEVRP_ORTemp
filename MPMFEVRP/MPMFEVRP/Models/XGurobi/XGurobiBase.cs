@@ -107,14 +107,14 @@
 //            //SetOut(null);
 //            if (xGurobiParam.LimitComputationTime)
 //                Set(GRB.DoubleParam.TimeLimit, xGurobiParam.RuntimeLimit_Seconds);
-//            if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_EMPHASIS))
-//                Set(GRB.IntParam.MIPFocus, int.Parse(xGurobiParam.OptionalCPlexParameters[ParameterID.MIP_EMPHASIS].Value.ToString().Substring(1)));
-//            //if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_SEARCH))
-//            //Set(GRB.IntParam.MIP.Strategy.Search, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_SEARCH].Value.ToString().Substring(1)));
-//            //if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.CUTS_FACTOR))
-//            //Set(GRB.IntParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.CUTS_FACTOR].Value.ToString()));
-//            if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.THREADS))
-//                Set(GRB.IntParam.Threads, int.Parse(xGurobiParam.OptionalCPlexParameters[ParameterID.THREADS].Value.ToString()));
+//            if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_MIP_EMPHASIS))
+//                Set(GRB.IntParam.MIPFocus, int.Parse(xGurobiParam.OptionalCPlexParameters[ParameterID.ALG_MIP_EMPHASIS].Value.ToString().Substring(1)));
+//            //if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_MIP_SEARCH))
+//            //Set(GRB.IntParam.MIP.Strategy.Search, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_MIP_SEARCH].Value.ToString().Substring(1)));
+//            //if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_CUTS_FACTOR))
+//            //Set(GRB.IntParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_CUTS_FACTOR].Value.ToString()));
+//            if (xGurobiParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_THREADS))
+//                Set(GRB.IntParam.Threads, int.Parse(xGurobiParam.OptionalCPlexParameters[ParameterID.ALG_THREADS].Value.ToString()));
 //        }
 //        public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
 //        {

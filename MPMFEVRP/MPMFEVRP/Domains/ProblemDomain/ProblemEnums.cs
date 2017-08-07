@@ -11,11 +11,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
     public enum ChargingLevels { L3, L2, L1 };
     public enum CustomerCoverageConstraint_EachCustomerMustBeCovered { ExactlyOnce, AtMostOnce, AtLeastOnce };
     public enum RechargingDurationAndAllowableDepartureStatusFromES { Fixed_Full, Variable_Full, Variable_Partial };
-    public enum ParameterID
-    {
-        NUM_EV,
-        NUM_GDV,
-        USE_EXACTLY_NUM_EV_AVAILABLE,
-        USE_EXACTLY_NUM_GDV_AVAILABLE
-    };
+    
+        
+
 }

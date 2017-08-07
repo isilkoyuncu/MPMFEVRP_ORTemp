@@ -20,7 +20,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
-            //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
+            //algorithmParameters.AddParameter(new Parameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
         }
 
         public override string GetName()
@@ -53,7 +53,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     CPlexExtender = new XCPlex_ArcDuplicatingFormulation(model, XcplexParam);
                     break;
             }
-            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value).ToString()+"model.lp");
+            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
         }
 
