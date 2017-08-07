@@ -14,4 +14,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
     public enum CustomerSetExtensionStatus {Success, Failure};//Extended: success
 
+    public enum ParameterID { } //TODO put solution statistics, things you need select from the form in order to show them to user.
+
 }

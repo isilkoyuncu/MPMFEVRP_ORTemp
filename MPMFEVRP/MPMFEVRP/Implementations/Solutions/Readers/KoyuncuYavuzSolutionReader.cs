@@ -17,19 +17,12 @@ namespace MPMFEVRP.Implementations.Solutions.Readers
         string fullFilename;
 
         //Input related
-        private string inputFileName;
-        private string[] inputString;
 
         //Output related
         string[] instanceSolutionSummary;
         public string[] InstanceSolutionSummary { get { return instanceSolutionSummary; } }
-        private string[] headerRow;
-        public string[] HeaderRow { get { return headerRow; } }
-
-        string outputFileName;
 
         System.IO.StreamReader sr;
-        List<string> outputSumm;
         public KoyuncuYavuzSolutionReader()
         {
         }
@@ -65,17 +58,6 @@ namespace MPMFEVRP.Implementations.Solutions.Readers
             int nTabularRows = blankRowPosition;
             instanceSolutionSummary = new string[nTabularRows];
             instanceSolutionSummary = outputSumm.ToArray();
-        }
-        public string[] GetHeaderRow()
-        {
-            List<string> outputSumm = new List<string>();
-            int nTabularRows = outputSumm.Count() - 1;
-            for (int i = 0; i < nTabularRows; i++)
-            {
-                String toRemove = outputSumm[i];
-                instanceSolutionSummary[i] = toRemove.Substring(0, toRemove.IndexOf(":"));
-            }
-            return headerRow;
         }
     }
 }
