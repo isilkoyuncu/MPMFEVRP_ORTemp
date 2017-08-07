@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.Domains.AlgorithmDomain
 {
-    public enum ParameterType { CheckBox, ComboBox, Slider, TextBox }
 
     public enum ParameterID//When adding a new optional Cplex parameter, make sure to add ity to the public static list in the XCplexParameters class and make a note next to it so we can double-check!
     {
         RUNTIME_SECONDS,
-        DUMMY_CHECKBOX,
-        DUMMY_TEXTBOX,
-        DUMMY_SLIDER,
-        DUMMY_COMBOBOX,
         RANDOM_POOL_SIZE,
         RANDOM_SEED,
         SOLUTION_TYPES,

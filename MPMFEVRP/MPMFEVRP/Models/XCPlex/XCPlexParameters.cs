@@ -16,7 +16,7 @@ namespace MPMFEVRP.Models.XCPlex
         bool tSP; public bool TSP { get { return tSP; } }
         VehicleCategories vehCategory; public VehicleCategories VehCategory { get { return vehCategory; } }
         //the additionals, for whatever need they may serve:
-        Dictionary<ParameterID, Parameter> optionalCPlexParameters; public Dictionary<ParameterID, Parameter> OptionalCPlexParameters { get { return optionalCPlexParameters; } }
+        Dictionary<ParameterID, InputOrOutputParameter> optionalCPlexParameters; public Dictionary<ParameterID, InputOrOutputParameter> OptionalCPlexParameters { get { return optionalCPlexParameters; } }
 
         public XCPlexParameters(
             double errorTolerance = 0.00001,
@@ -25,7 +25,7 @@ namespace MPMFEVRP.Models.XCPlex
             XCPlexRelaxation relaxation = XCPlexRelaxation.None,
             bool tSP = false,
             VehicleCategories vehCategory = VehicleCategories.GDV,
-            Dictionary<ParameterID, Parameter> optionalCPlexParameters = null
+            Dictionary<ParameterID, InputOrOutputParameter> optionalCPlexParameters = null
             )
         {
             this.errorTolerance = errorTolerance;
@@ -36,10 +36,10 @@ namespace MPMFEVRP.Models.XCPlex
             this.tSP = tSP;
             this.vehCategory = vehCategory;
             if (optionalCPlexParameters == null)
-                this.optionalCPlexParameters = new Dictionary<ParameterID, Parameter>();
+                this.optionalCPlexParameters = new Dictionary<ParameterID, InputOrOutputParameter>();
         }
 
-        public void UpdateForDirectAlgorithmUse(AlgorithmParameters algParams)//This is used when all parameters of an algorithm are set directly by the user, not in a depp level automatically as part of a bigger task. Some of them may need to be passed to CPlex.
+        public void UpdateForDirectAlgorithmUse(InputOrOutputParameterSet algParams)//This is used when all parameters of an algorithm are set directly by the user, not in a depp level automatically as part of a bigger task. Some of them may need to be passed to CPlex.
         {
             //We assume runtime seconds exists because that's a default parameter. The user, however, has a choice to enter a big-M for it!
             runtimeLimit_Seconds = algParams.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();

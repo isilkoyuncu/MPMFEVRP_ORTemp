@@ -7,7 +7,9 @@ using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Models
 {
-    public class Parameter
+    public enum UserInputObjectType { CheckBox, ComboBox, Slider, TextBox } //This enum identifies the input type on the form.
+
+    public class InputOrOutputParameter
     {
 
         Object value;
@@ -22,8 +24,8 @@ namespace MPMFEVRP.Models
         Object defaultValue;
         public Object DefaultValue { get { return defaultValue; } }
 
-        ParameterType paramType;
-        public ParameterType ParamType { get { return paramType; } }
+        UserInputObjectType userInputObjType;
+        public UserInputObjectType UserInputObjType { get { return userInputObjType; } }
 
         ParameterID id;
         public ParameterID ID { get { return id; } }
@@ -39,13 +41,13 @@ namespace MPMFEVRP.Models
         /// <param name="desc"></param>
         /// <param name="defVal"></param>
         /// <param name="typ"></param>
-        public Parameter(ParameterID id, String desc, Object defVal)
+        public InputOrOutputParameter(ParameterID id, String desc, Object defVal)
         {
             this.id = id;
             this.description = desc;
             this.value = defVal;
             this.defaultValue = defVal;
-            this.paramType = ParameterType.TextBox;
+            this.userInputObjType = UserInputObjectType.TextBox;
 
             this.possibleValues = new List<object>();
             this.valueDescriptions = new List<string>();
@@ -59,14 +61,14 @@ namespace MPMFEVRP.Models
         /// <param name="possibleVal"></param>
         /// <param name="defVal"></param>
         /// <param name="typ"></param>
-        public Parameter(ParameterID id, String desc, List<Object> possibleVal, Object defVal, ParameterType typ)
+        public InputOrOutputParameter(ParameterID id, String desc, List<Object> possibleVal, Object defVal, UserInputObjectType typ)
         {
             this.id = id;
             this.description = desc;
             this.value = defVal;
             this.possibleValues = possibleVal;
             this.defaultValue = defVal;
-            this.paramType = typ;
+            this.userInputObjType = typ;
 
             this.valueDescriptions = new List<string>();
 
@@ -92,7 +94,7 @@ namespace MPMFEVRP.Models
         /// <param name="valueDescs"></param>
         /// <param name="defVal"></param>
         /// <param name="typ"></param>
-        public Parameter(ParameterID id, String desc, List<Object> possibleVal, List<String> valueDescs, Object defVal, ParameterType typ) :
+        public InputOrOutputParameter(ParameterID id, String desc, List<Object> possibleVal, List<String> valueDescs, Object defVal, UserInputObjectType typ) :
             this(id, desc, possibleVal, defVal, typ)
         {
             this.valueDescriptions = valueDescs;
@@ -105,7 +107,7 @@ namespace MPMFEVRP.Models
 
         public int GetIntValue()
         {
-            if (paramType == ParameterType.TextBox)
+            if (userInputObjType == UserInputObjectType.TextBox)
             {
                 return int.Parse(GetStringValue());
             }
@@ -114,7 +116,7 @@ namespace MPMFEVRP.Models
 
         public double GetDoubleValue()
         {
-            if (paramType == ParameterType.TextBox)
+            if (userInputObjType == UserInputObjectType.TextBox)
             {
                 return double.Parse(GetStringValue());
             }

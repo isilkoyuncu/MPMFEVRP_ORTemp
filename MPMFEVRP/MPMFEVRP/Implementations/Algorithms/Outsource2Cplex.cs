@@ -18,9 +18,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public Outsource2Cplex() : base() 
         {
-            algorithmParameters.AddParameter(new Parameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, ParameterType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
-            //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,ParameterType.ComboBox));
+            //algorithmParameters.AddParameter(new Parameter(ParameterID.THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
         }
 
         public override string GetName()
