@@ -39,14 +39,14 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public RandomizedGreedy()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "30"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 30, 50 }, 30, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.PROB_SELECTION_POWER, "Power", "2.0"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.RECOVERY_NEEDED, "Recovery", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.RECOVERY_OPTIONS, "Recovery Options", new List<object>() { Recovery_Options.AssignmentProbByCPLEX, Recovery_Options.AnalyticallySolve }, Recovery_Options.AssignmentProbByCPLEX, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.RANDOM_POOL_SIZE, "Random Pool Size", "30"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.RANDOM_SEED, "Random Seed", "50"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 30, 50 }, 30, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.PROB_SELECTION_POWER, "Power", "2.0"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.RECOVERY_NEEDED, "Recovery", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.RECOVERY_OPTIONS, "Recovery Options", new List<object>() { Recovery_Options.AssignmentProbByCPLEX, Recovery_Options.AnalyticallySolve }, Recovery_Options.AssignmentProbByCPLEX, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(Domains.AlgorithmDomain.ParameterID.SET_COVER, "Set Cover", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
         }
 
         public override string GetName()
@@ -64,16 +64,16 @@ namespace MPMFEVRP.Implementations.Algorithms
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
 
-            poolSize = AlgorithmParameters.GetParameter(ParameterID.RANDOM_POOL_SIZE).GetIntValue();
-            int randomSeed = AlgorithmParameters.GetParameter(ParameterID.RANDOM_SEED).GetIntValue();
+            poolSize = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.RANDOM_POOL_SIZE).GetIntValue();
+            int randomSeed = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.RANDOM_SEED).GetIntValue();
             random = new Random(randomSeed);
-            selectedCriterion =(Selection_Criteria) AlgorithmParameters.GetParameter(ParameterID.SELECTION_CRITERIA).Value;
-            closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
-            power = AlgorithmParameters.GetParameter(ParameterID.PROB_SELECTION_POWER).GetDoubleValue();
-            isRecoveryNeeded = AlgorithmParameters.GetParameter(ParameterID.RECOVERY_NEEDED).GetBoolValue();
-            selectedRecoveryOpt = (Recovery_Options)AlgorithmParameters.GetParameter(ParameterID.RECOVERY_OPTIONS).Value;
-            setCoverOption = AlgorithmParameters.GetParameter(ParameterID.SET_COVER).GetBoolValue();
-            runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();
+            selectedCriterion =(Selection_Criteria) AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.SELECTION_CRITERIA).Value;
+            closestPercentSelect = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
+            power = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.PROB_SELECTION_POWER).GetDoubleValue();
+            isRecoveryNeeded = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.RECOVERY_NEEDED).GetBoolValue();
+            selectedRecoveryOpt = (Recovery_Options)AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.RECOVERY_OPTIONS).Value;
+            setCoverOption = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.SET_COVER).GetBoolValue();
+            runTimeLimitInSeconds = AlgorithmParameters.GetParameter(Domains.AlgorithmDomain.ParameterID.RUNTIME_SECONDS).GetDoubleValue();
 
         }
 
