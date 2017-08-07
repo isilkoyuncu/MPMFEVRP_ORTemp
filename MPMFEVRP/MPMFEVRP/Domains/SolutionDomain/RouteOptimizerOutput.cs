@@ -148,6 +148,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             theList = new List<VehicleSpecificRouteOptimizationOutcome>();
             retrievedFromArchive = false;
+            overallStatus = RouteOptimizationStatus.NotYetOptimized;
         }
         public RouteOptimizationOutcome(bool retrievedFromArchive, RouteOptimizationOutcome twinROO)
         {
@@ -158,11 +159,28 @@ namespace MPMFEVRP.Domains.SolutionDomain
             theList = new List<VehicleSpecificRouteOptimizationOutcome>();
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in twinROO.theList)
                 theList.Add(new VehicleSpecificRouteOptimizationOutcome(vsroo));
+            overallStatus = twinROO.overallStatus;
+        }
+        public RouteOptimizationOutcome(RouteOptimizationStatus status, List<VehicleSpecificRouteOptimizationOutcome> theList = null)
+        {
+            if((status== RouteOptimizationStatus.NotYetOptimized)||(status== RouteOptimizationStatus.InfeasibleForBothGDVandEV))
+            {
+                this.theList = new List<VehicleSpecificRouteOptimizationOutcome>();
+                retrievedFromArchive = false;
+                overallStatus = status;
+            }
+            else
+            {
+                this.theList = theList;
+                retrievedFromArchive = false;
+                overallStatus = status;
+            }
         }
         public RouteOptimizationOutcome(List<VehicleSpecificRouteOptimizationOutcome> theList)
         {
             this.theList = theList;
             retrievedFromArchive = false;
+            UpdateOverallStatus();
         }
 
         public VehicleSpecificRouteOptimizationOutcome GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory)
