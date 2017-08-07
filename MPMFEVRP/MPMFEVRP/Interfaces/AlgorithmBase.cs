@@ -18,8 +18,8 @@ namespace MPMFEVRP.Interfaces
 
         protected ProblemModelBase model;
 
-        protected AllParameters algorithmParameters;
-        public AllParameters AlgorithmParameters { get { return algorithmParameters; } }
+        protected InputOrOutputParameterSet algorithmParameters;
+        public InputOrOutputParameterSet AlgorithmParameters { get { return algorithmParameters; } }
 
         protected AlgorithmSolutionStatus status;
         public AlgorithmSolutionStatus Status { get { return status; } }
@@ -29,23 +29,23 @@ namespace MPMFEVRP.Interfaces
 
         public AlgorithmBase()
         {
-            algorithmParameters = new AllParameters();
+            algorithmParameters = new InputOrOutputParameterSet();
 
             algorithmParameters.AddParameter(
-                new Parameter(
+                new InputOrOutputParameter(
                     ParameterID.RUNTIME_SECONDS,
                     "Runtime Seconds",
                     new List<Object>() { 10.0, 30.0, 60.0, 120.0, 300.0, 600.0, 900.0, 1200.0, 1800.0, 3600.0, 36000.0 },
                     600.0,
-                    ParameterType.ComboBox));
+                    UserInputObjectType.ComboBox));
 
             algorithmParameters.AddParameter(
-                new Parameter(
+                new InputOrOutputParameter(
                     ParameterID.SOLUTION_TYPES,
                     "Solution Types",
                     SolutionUtil.GetAllSolutionNames().ToList<object>(),
                     SolutionUtil.GetAllSolutionNames()[0],
-                    ParameterType.ComboBox));
+                    UserInputObjectType.ComboBox));
         }
 
         public void Initialize(ProblemModelBase model)

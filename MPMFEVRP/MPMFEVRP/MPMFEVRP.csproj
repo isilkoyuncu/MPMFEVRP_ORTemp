@@ -96,6 +96,7 @@
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
+    <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic_v2.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MinCost_VRP.cs" />
     <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
@@ -161,11 +162,11 @@
     <Compile Include="Interfaces\IProblemModel.cs" />
     <Compile Include="Interfaces\IReader.cs" />
     <Compile Include="Interfaces\ISolution.cs" />
-    <Compile Include="Models\AllParameters.cs" />
+    <Compile Include="Models\InputOrOutputParameterSet.cs" />
     <Compile Include="Models\EnumExtensions.cs" />
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\XGurobi\XGurobiBase.cs" />
-    <Compile Include="Models\Parameter.cs" />
+    <Compile Include="Models\InputOrOutputParameter.cs" />
     <Compile Include="Models\SolutionList.cs" />
     <Compile Include="Models\XCPlex\XCPlexBase.cs" />
     <Compile Include="Models\XCPlex\XCPlexParameters.cs" />

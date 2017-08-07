@@ -12,7 +12,7 @@ namespace MPMFEVRP.Utils
 {
     public class ParamUtil
     {
-        public static void DrawParameters(Control container, Dictionary<ParameterID, Parameter> parameters, int stepY = 28, int padding = 5, int paddingTop = 5)
+        public static void DrawParameters(Control container, Dictionary<ParameterID, InputOrOutputParameter> parameters, int stepY = 28, int padding = 5, int paddingTop = 5)
         {
             container.Controls.Clear();
             int startY = paddingTop, currentY = startY, startX = padding;
@@ -25,9 +25,9 @@ namespace MPMFEVRP.Utils
                 concreteParamLabel.Text = param.Value.Description;
                 container.Controls.Add(concreteParamLabel);
 
-                switch (param.Value.ParamType)
+                switch (param.Value.UserInputObjType)
                 {
-                    case ParameterType.CheckBox:
+                    case UserInputObjectType.CheckBox:
                         var concreteCheckBox = new CheckBox();
                         concreteCheckBox.Location = new System.Drawing.Point(3 * container.Width / 4 - 8, currentY);
                         concreteCheckBox.Name = param.Key + "_Val";
@@ -37,7 +37,7 @@ namespace MPMFEVRP.Utils
                         concreteCheckBox.CheckedChanged += (s, e) => parameters[(ParameterID)((CheckBox)s).Tag].Value = ((CheckBox)s).Checked;
                         container.Controls.Add(concreteCheckBox);
                         break;
-                    case ParameterType.ComboBox:
+                    case UserInputObjectType.ComboBox:
                         var concreteComboBox = new ComboBox();
                         concreteComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
                         concreteComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -65,7 +65,7 @@ namespace MPMFEVRP.Utils
                         concreteComboBox.SelectedValueChanged += (s, e) => parameters[(ParameterID)((ComboBox)s).Tag].Value = parameters[(ParameterID)((ComboBox)s).Tag].PossibleValues[((ComboBox)s).SelectedIndex];
                         container.Controls.Add(concreteComboBox);
                         break;
-                    case ParameterType.Slider:
+                    case UserInputObjectType.Slider:
                         var concreteSlider = new TrackBar();
                         concreteSlider.Location = new System.Drawing.Point(container.Width / 2, currentY - 7);
                         concreteSlider.Name = param.Key + "_Val";
@@ -77,7 +77,7 @@ namespace MPMFEVRP.Utils
                         concreteSlider.ValueChanged += (s, e) => parameters[(ParameterID)((TrackBar)s).Tag].Value = ((TrackBar)s).Value;
                         container.Controls.Add(concreteSlider);
                         break;
-                    case ParameterType.TextBox:
+                    case UserInputObjectType.TextBox:
                         var concreteTextbox = new TextBox();
                         concreteTextbox.Location = new System.Drawing.Point(container.Width / 2, currentY - 3);
                         concreteTextbox.Name = param.Key + "_Val";
