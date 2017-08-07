@@ -62,6 +62,11 @@ namespace MPMFEVRP.Interfaces
         public List<Type> GetCompatibleSolutions() { return compatibleSolutions; }
 
         public abstract RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS);
+        //public abstract RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles);
+
+        public abstract VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, AssignedRoute GDVOptimalRoute = null);
+        public abstract RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles);
+
         public abstract ISolution GetRandomSolution(int seed, Type SolutionType);
         public abstract bool CheckFeasibilityOfSolution(ISolution solution);
         public abstract double CalculateObjectiveFunctionValue(ISolution solution);

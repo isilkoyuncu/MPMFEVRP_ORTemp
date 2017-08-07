@@ -122,6 +122,87 @@ namespace MPMFEVRP.Interfaces
                 }
             }
         }
+
+        public override RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles)
+        {
+            //This method is designed to work with exactly one GDV and exactly one EV
+            int GDVPositionInList = 0;
+            int EVPositionInList = 1;
+            if (vehicles.Count != 2)
+                throw new Exception("EVvsGDV_ProblemModel.OptimizeRoute must be invoked with a list of 2 vehicles!");
+            if (vehicles[0].Category== vehicles[1].Category)
+                throw new Exception("EVvsGDV_ProblemModel.OptimizeRoute must be invoked with exactly one GDV and one EV!");
+            if (vehicles[0].Category == VehicleCategories.EV)
+            {
+                GDVPositionInList = 1;
+                EVPositionInList = 0;
+            }
+
+            List<VehicleSpecificRouteOptimizationOutcome> theList = new List<VehicleSpecificRouteOptimizationOutcome>();
+            VehicleSpecificRouteOptimizationOutcome vsroo_GDV = OptimizeRoute(CS, vehicles[GDVPositionInList]);
+            if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
+                return new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+            theList.Add(vsroo_GDV);
+            VehicleSpecificRouteOptimizationOutcome vsroo_EV = OptimizeRoute(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+            theList.Add(vsroo_EV);
+            return new RouteOptimizationOutcome(theList);
+        }
+        public override VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, AssignedRoute GDVOptimalRoute=null)
+        {
+            //This method has nothing to do with a list of previously generated customer sets, management of that is completely some other class's responsibility
+
+            if ((vehicle.Category == VehicleCategories.GDV) || (GDVOptimalRoute == null))
+                return OptimizeRoute(CS, vehicle);
+            //else: we are looking at an EV problem with a provided GDV-optimal route
+            //First, we must check for AFV-feasibility of the provided GDV-optimal route
+            //Make an AFV-optimized route out of the given GDV-optimized route:
+            AssignedRoute fittedRoute = FitGDVOptimalRouteToAFV(GDVOptimalRoute, vehicle);
+            if (fittedRoute.Feasible.Last())//if the fitted route is feasible:
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: fittedRoute.TotalProfit, optimizedRoute: fittedRoute);
+            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            //If none of the previous conditions worked, we must solve an EV-TSP
+            return OptimizeRoute(CS, vehicle);
+        }
+        bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRouteOptimizationOutcome GDVOptimalRoute)
+        {
+            //Return true if and only if the GDV-Optimal Route is AFV-Feasible (in which case it's known to be AFV-Optimal as well
+
+            if (GDVOptimalRoute == null)//The GDVOptimalRoute that was not provided cannot be feasible
+                return false;
+
+            return false;//TODO Do the actual checking here!
+        }
+        AssignedRoute FitGDVOptimalRouteToAFV(AssignedRoute GDVOptimalRoute, Vehicle vehicle)
+        {
+            AssignedRoute outcome = new AssignedRoute(this, 0);
+            bool GDVOptimalRouteFeasibleForEV = true;
+            for (int siteIndex = 1; ((siteIndex < GDVOptimalRoute.SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
+            {
+                outcome.Extend(GDVOptimalRoute.SitesVisited[siteIndex]);
+                GDVOptimalRouteFeasibleForEV = outcome.Feasible.Last();
+            }
+            return outcome;
+        }
+        bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, AssignedRoute GDVOptimalRoute = null)
+        {
+            //Return true if and only if the GDV-Optimal route must be AFV-infeasible based on the data
+            //This method may be a little confusing because it returns true when infeasible
+            //For now we ignore this method //TODO: Develop the analytically provable conditions of AFV-infeasibility of a given GDV-feasible route
+
+            return false;
+        }
+        VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle)
+        {
+            XCPlex_NodeDuplicatingFormulation solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
+            solver.RefineDecisionVariables(CS);
+            solver.Solve_and_PostProcess();
+            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
+                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            else//optimal
+                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: solver.GetObjValue(), optimizedRoute: ExtractTheSingleRouteFromSolution((RouteBasedSolution)solver.GetCompleteSolution(typeof(RouteBasedSolution))));
+        }
+
         //It can be useful if you want to check customer set archive ever
         public void ExportCustomerSetArchive2txt()
         {

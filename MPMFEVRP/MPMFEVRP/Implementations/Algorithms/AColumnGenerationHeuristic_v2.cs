@@ -51,7 +51,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 if (s.SiteType == SiteTypes.Customer)
                 {
-                    CustomerSet candidate = new CustomerSet(s.ID, model);
+                    CustomerSet candidate = new CustomerSet(s.ID);//The customer set is not TSP-optimized
+                    //Now it's time to GDV-optimize
                     unexploredCustomerSets.ConsiderForAddition(candidate);
                 }
             }

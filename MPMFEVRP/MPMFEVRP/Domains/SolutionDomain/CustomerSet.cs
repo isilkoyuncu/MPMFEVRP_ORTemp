@@ -52,6 +52,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
             }
         }
+        public CustomerSet(string customerID)
+        {
+            customers = new List<string>();
+                customers.Add(customerID);
+                routeOptimizerOutcome = new RouteOptimizerOutput();
+                routeOptimizationOutcome = new RouteOptimizationOutcome();
+        }
         public CustomerSet(CustomerSet twinCS)
         {
             //assignedVehicle = twinCS.AssignedVehicle;
