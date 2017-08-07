@@ -8,11 +8,11 @@ using MPMFEVRP.Domains.AlgorithmDomain;
 namespace MPMFEVRP.Models
 {
     
-    public class AlgorithmParameters
+    public class AllParameters
     {
         Dictionary<ParameterID, Parameter> allParameters = new Dictionary<ParameterID, Parameter>();
 
-        public AlgorithmParameters() { }
+        public AllParameters() { }
 
         public Dictionary<ParameterID, Parameter> GetAllParameters()
         {

@@ -161,7 +161,7 @@
     <Compile Include="Interfaces\IProblemModel.cs" />
     <Compile Include="Interfaces\IReader.cs" />
     <Compile Include="Interfaces\ISolution.cs" />
-    <Compile Include="Models\AlgorithmParameters.cs" />
+    <Compile Include="Models\AllParameters.cs" />
     <Compile Include="Models\EnumExtensions.cs" />
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\XGurobi\XGurobiBase.cs" />

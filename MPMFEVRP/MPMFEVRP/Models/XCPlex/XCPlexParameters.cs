@@ -39,7 +39,7 @@ namespace MPMFEVRP.Models.XCPlex
                 this.optionalCPlexParameters = new Dictionary<ParameterID, Parameter>();
         }
 
-        public void UpdateForDirectAlgorithmUse(AlgorithmParameters algParams)//This is used when all parameters of an algorithm are set directly by the user, not in a depp level automatically as part of a bigger task. Some of them may need to be passed to CPlex.
+        public void UpdateForDirectAlgorithmUse(AllParameters algParams)//This is used when all parameters of an algorithm are set directly by the user, not in a depp level automatically as part of a bigger task. Some of them may need to be passed to CPlex.
         {
             //We assume runtime seconds exists because that's a default parameter. The user, however, has a choice to enter a big-M for it!
             runtimeLimit_Seconds = algParams.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();

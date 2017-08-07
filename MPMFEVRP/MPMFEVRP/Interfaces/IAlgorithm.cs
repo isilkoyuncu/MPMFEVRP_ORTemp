@@ -14,7 +14,7 @@ namespace MPMFEVRP.Interfaces
         void Run();
         void Conclude();
         void Reset();
-        AlgorithmParameters AlgorithmParameters { get; }
+        AllParameters AlgorithmParameters { get; }
         //AlgorithmSolutionStatus Status { get; }
         //AlgorithmStatistics Stats { get; }
 

@@ -18,8 +18,8 @@ namespace MPMFEVRP.Interfaces
 
         protected ProblemModelBase model;
 
-        protected AlgorithmParameters algorithmParameters;
-        public AlgorithmParameters AlgorithmParameters { get { return algorithmParameters; } }
+        protected AllParameters algorithmParameters;
+        public AllParameters AlgorithmParameters { get { return algorithmParameters; } }
 
         protected AlgorithmSolutionStatus status;
         public AlgorithmSolutionStatus Status { get { return status; } }
@@ -29,7 +29,7 @@ namespace MPMFEVRP.Interfaces
 
         public AlgorithmBase()
         {
-            algorithmParameters = new AlgorithmParameters();
+            algorithmParameters = new AllParameters();
 
             algorithmParameters.AddParameter(
                 new Parameter(
