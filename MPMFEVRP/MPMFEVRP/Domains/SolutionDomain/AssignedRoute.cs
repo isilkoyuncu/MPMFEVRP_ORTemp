@@ -8,14 +8,14 @@ using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
-    public class AssignedRoute
+    public class AssignedRoute//TODO Rename this class to VehicleSpecificRoute
     {
         /* Each route starts at the depot (0) and ends at the depot (0)
          * */
 
         // Input related fields
         IProblemModel problemModel;
-        int vehicleCategory;
+        int vehicleCategory;//TODO: vehicleCategory shouldn't be an integer! We should use the VehicleCategories enum here
         public int VehicleCategory { get { return vehicleCategory; } }
         // Output related fields
         List<int> sitesVisited;
@@ -27,8 +27,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
         double totalCollectedPrize;
         public double TotalCollectedPrize { get { return totalCollectedPrize; } }
 
-        double totalFixedCost;
-        public double TotalFixedCost { get { return totalFixedCost; } }
+        double fixedCost;
+        public double FixedCost { get { return fixedCost; } }
 
         double totalVariableTravelCost;
         public double TotalVariableTravelCost { get { return totalVariableTravelCost; } }
@@ -45,7 +45,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
         List<double> arrivalSOC;
         public List<double> ArrivalSOC { get { return arrivalSOC; } }
 
-
         List<double> departureSOC;
         public List<double> DepartureSOC { get { return departureSOC; } }
 
@@ -57,6 +56,22 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public bool Complete { get { return sitesVisited.Last() == 0; } }
 
         public AssignedRoute() { } //An empty constructor
+        public AssignedRoute(AssignedRoute twinAR)// twin copy constructor
+        {
+            problemModel = twinAR.problemModel;
+            vehicleCategory = twinAR.vehicleCategory;
+            sitesVisited = twinAR.sitesVisited;
+            totalDistance = twinAR.totalDistance;
+            totalCollectedPrize = twinAR.totalCollectedPrize;
+            fixedCost = twinAR.fixedCost;
+            totalVariableTravelCost = twinAR.totalVariableTravelCost;
+            totalProfit = twinAR.totalProfit;
+            arrivalTime = twinAR.arrivalTime;
+            departureTime = twinAR.departureTime;
+            arrivalSOC = twinAR.arrivalSOC;
+            departureSOC = twinAR.departureSOC;
+            feasible = twinAR.feasible;
+        }
 
         public AssignedRoute(IProblemModel problemModel, int vehicleCategory)
         {
@@ -65,9 +80,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             sitesVisited = new List<int>(); sitesVisited.Add(0);//The depot is the only visited site, this is how we get the route going
             totalDistance = 0.0;
             totalCollectedPrize = 0.0;
-            totalFixedCost = problemModel.VRD.VehicleArray[vehicleCategory].FixedCost;
+            fixedCost = problemModel.VRD.VehicleArray[vehicleCategory].FixedCost;
             totalVariableTravelCost = 0.0;
-            totalProfit = -totalFixedCost;
+            totalProfit = -fixedCost;
             arrivalTime = new List<double>(); arrivalTime.Add(0.0);//Starting at the depot at time 0
             departureTime = new List<double>(); departureTime.Add(0.0);//Starting at the depot at time 0
             arrivalSOC = new List<double>(); arrivalSOC.Add(1.0);//Starting at the depot with full charge
@@ -133,7 +148,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return false;
             if (Math.Abs(totalCollectedPrize -otherAR.TotalCollectedPrize)>0.00001)
                 return false;
-            if (totalFixedCost != otherAR.TotalFixedCost)
+            if (fixedCost != otherAR.FixedCost)
                 return false;
             if (Math.Abs(totalVariableTravelCost - otherAR.TotalVariableTravelCost) > 0.00001)
                 return false;

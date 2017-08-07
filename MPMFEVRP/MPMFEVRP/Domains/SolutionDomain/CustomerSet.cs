@@ -23,6 +23,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         RouteOptimizerOutput routeOptimizerOutcome;
         public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
+
+        RouteOptimizationOutcome routeOptimizationOutcome;//TODO Delete RouteOptimizerOutput and use this instead
+        public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } }
         public bool IsGDVFeasible { get { return routeOptimizerOutcome.Feasible[1]; } }
         public double GDVMilesTraveled { get { if (routeOptimizerOutcome.Feasible[1]) return routeOptimizerOutcome.OptimizedRoute[1].TotalDistance; else return 0.0; } }
         public bool IsAFVFeasible { get { return routeOptimizerOutcome.Feasible[0]; } }
@@ -32,15 +35,22 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             customers = new List<string>();
             routeOptimizerOutcome = new RouteOptimizerOutput();
+            routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
         public CustomerSet(string customerID, ProblemModelBase problemModelBase)
         {
-            customers = new List<string>
+            customers = new List<string>();
+            if (problemModelBase.GetAllCustomerIDs().Contains(customerID))
             {
-                customerID
-            };
-            routeOptimizerOutcome = new RouteOptimizerOutput();
-            routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
+                customers.Add(customerID);
+                routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
+                //routeOptimizationOutcome = problemModelBase.OptimizeForSingleVehicle(this);TODO Implement this instead of the line right before this
+            }
+            else
+            {
+                routeOptimizerOutcome = new RouteOptimizerOutput();
+                routeOptimizationOutcome = new RouteOptimizationOutcome();
+            }
         }
         public CustomerSet(CustomerSet twinCS)
         {
@@ -52,6 +62,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             // TODO check if this works as intended
             routeOptimizerOutcome = new RouteOptimizerOutput(false, twinCS.RouteOptimizerOutcome);
+            routeOptimizationOutcome = new RouteOptimizationOutcome(false, twinCS.RouteOptimizationOutcome);
         }
 
         public bool IsIdentical(CustomerSet otherCS)

@@ -120,7 +120,7 @@ namespace MPMFEVRP.Implementations.Solutions
             {
                 for (int r = 0; r < Routes.Count; r++)
                 {
-                    list.Add(String.Join("-", Routes[r].SitesVisited) + "\t" + Routes[r].VehicleCategory.ToString() + "\t" + Routes[r].TotalCollectedPrize + "\t" + (Routes[r].TotalFixedCost + Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit + "\t" + Routes[r].DepartureTime.Last().ToString());
+                    list.Add(String.Join("-", Routes[r].SitesVisited) + "\t" + Routes[r].VehicleCategory.ToString() + "\t" + Routes[r].TotalCollectedPrize + "\t" + (Routes[r].FixedCost + Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit + "\t" + Routes[r].DepartureTime.Last().ToString());
                 }
             }
             string[] toReturn = new string[list.Count];
