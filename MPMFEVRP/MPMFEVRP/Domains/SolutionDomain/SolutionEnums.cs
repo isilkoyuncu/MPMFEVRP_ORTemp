@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
-    public enum RouteOptimizationStatus { NotYetOptimized, InfeasibleForBothGDVandEV, OptimizedForGDVButInfeasibleForEV, OptimizedForBothGDVandEV };
+    public enum RouteOptimizationStatus { NotYetOptimized, InfeasibleForBothGDVandEV, OptimizedForGDVButNotYetOptimizedForEV, OptimizedForGDVButInfeasibleForEV, OptimizedForBothGDVandEV };
 
     public enum VehicleSpecificRouteOptimizationStatus { NotYetOptimized, Infeasible, Optimized };
 

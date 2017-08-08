@@ -190,7 +190,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public VehicleSpecificRouteOptimizationStatus GetRouteOptimizationStatus(VehicleCategories vehicleCategory)
         {
-            return theList.Find(x => x.VehicleCategory == vehicleCategory).Status;//TODO Find out what this does when the vehicleCategory in question hasn't been added yet
+            VehicleSpecificRouteOptimizationOutcome theItem = theList.Find(x => x.VehicleCategory == vehicleCategory);
+            return (theItem == null ? VehicleSpecificRouteOptimizationStatus.NotYetOptimized : theItem.Status);
         }
         public RouteOptimizationStatus GetRouteOptimizationStatus()
         {
@@ -212,10 +213,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 overallStatus = RouteOptimizationStatus.InfeasibleForBothGDVandEV;
                 return;
             }
-            if(GDVStatus== VehicleSpecificRouteOptimizationStatus.Optimized)
+            if (GDVStatus == VehicleSpecificRouteOptimizationStatus.Optimized)
             {
                 if (EVStatus == VehicleSpecificRouteOptimizationStatus.NotYetOptimized)
-                    throw new Exception("Why not yet optimized???");
+                {
+                    overallStatus = RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV;
+                    return;
+                }
                 if (EVStatus == VehicleSpecificRouteOptimizationStatus.Infeasible)
                 {
                     overallStatus = RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV;
