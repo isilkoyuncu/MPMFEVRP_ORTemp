@@ -31,7 +31,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             unexploredList = new SolutionList();
 
             // Step 0: Create root and add it to unexploredList (solution type is fetched as a parameters to the algorithm)
-            ISolution root = SolutionUtil.CreateSolutionByName(algorithmParameters.GetParameter(ParameterID.SOLUTION_TYPES).GetStringValue(), model);
+            ISolution root = SolutionUtil.CreateSolutionByName(algorithmParameters.GetParameter(ParameterID.ALG_SOLUTION_TYPES).GetStringValue(), model);
 
             unexploredList.Add(root);
 

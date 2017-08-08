@@ -191,14 +191,14 @@ namespace MPMFEVRP.Models.XCPlex
             //SetOut(null);
             if (xCplexParam.LimitComputationTime)
                 SetParam(Cplex.DoubleParam.TiLim, xCplexParam.RuntimeLimit_Seconds);
-            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_EMPHASIS))
-                SetParam(Cplex.Param.Emphasis.MIP, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_EMPHASIS].Value.ToString().Substring(1)));
-            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.MIP_SEARCH))
-                SetParam(Cplex.Param.MIP.Strategy.Search, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.MIP_SEARCH].Value.ToString().Substring(1)));
-            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.CUTS_FACTOR))
-                SetParam(Cplex.DoubleParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.CUTS_FACTOR].Value.ToString()));
-            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.THREADS))
-                SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.THREADS].Value.ToString()));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_MIP_EMPHASIS))
+                SetParam(Cplex.Param.Emphasis.MIP, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_MIP_EMPHASIS].Value.ToString().Substring(1)));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_MIP_SEARCH))
+                SetParam(Cplex.Param.MIP.Strategy.Search, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_MIP_SEARCH].Value.ToString().Substring(1)));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_CUTS_FACTOR))
+                SetParam(Cplex.DoubleParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_CUTS_FACTOR].Value.ToString()));
+            if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_THREADS))
+                SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_THREADS].Value.ToString()));
         }
         public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
         {

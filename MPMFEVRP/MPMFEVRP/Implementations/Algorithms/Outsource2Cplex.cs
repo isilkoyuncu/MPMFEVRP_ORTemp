@@ -18,7 +18,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public Outsource2Cplex() : base() 
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             //algorithmParameters.AddParameter(new Parameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
         }
@@ -38,13 +38,13 @@ namespace MPMFEVRP.Implementations.Algorithms
             
             XcplexParam = new XCPlexParameters(
                 limitComputationTime: true, 
-                runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue(),
+                runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue(),
                 optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters));
         }
 
         public override void SpecializedRun()
         {
-            switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value)
+            switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value)
             {
                 case XCPlex_Formulation.NodeDuplicating:
                     CPlexExtender = new XCPlex_NodeDuplicatingFormulation(model, XcplexParam);
@@ -64,7 +64,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             stats.RunTimeMilliSeconds = (long)CPlexExtender.CPUtime;
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
             stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
-            if (((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
+            if (((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value) == XCPlex_Formulation.ArcDuplicating)
                 DecompressArcDuplicatingFormulationVariables(CPlexExtender.AllValues);
             GetOutputSummary();
             //Create solution based on status: Not yet solved, infeasible, no feasible soln found, feasible, optimal
@@ -116,12 +116,12 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             List<string> list = new List<string>{
                  //Algorithm Name has to be the first entry for output file name purposes
-                "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
+                "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value.ToString(),
                 //Run time limit has to be the second entry for output file name purposes
-                "Parameter: " + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).Value.ToString(),
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Value.ToString(),
                 
                 //Optional
-                "Parameter: " + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.XCPLEX_FORMULATION).Value.ToString(),
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value.ToString(),
                 //algorithmParameters.GetAllParameters();
                 //var asString = string.Join(";", algorithmParameters.GetAllParameters());
                 //list.Add(asString);

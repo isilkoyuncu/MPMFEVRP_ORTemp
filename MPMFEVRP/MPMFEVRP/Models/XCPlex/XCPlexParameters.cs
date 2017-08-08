@@ -7,7 +7,7 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlexParameters
     {
-        public static List<ParameterID> recognizedOptionalCplexParameters = new List<ParameterID> (){ ParameterID.CUTS_FACTOR, ParameterID.MIP_EMPHASIS, ParameterID.MIP_SEARCH, ParameterID.THREADS };
+        public static List<ParameterID> recognizedOptionalCplexParameters = new List<ParameterID> (){ ParameterID.ALG_CUTS_FACTOR, ParameterID.ALG_MIP_EMPHASIS, ParameterID.ALG_MIP_SEARCH, ParameterID.ALG_THREADS };
 
         double errorTolerance; public double ErrorTolerance { get { return errorTolerance; } }
         bool limitComputationTime; public bool LimitComputationTime { get { return limitComputationTime; } }
@@ -42,7 +42,7 @@ namespace MPMFEVRP.Models.XCPlex
         public void UpdateForDirectAlgorithmUse(InputOrOutputParameterSet algParams)//This is used when all parameters of an algorithm are set directly by the user, not in a depp level automatically as part of a bigger task. Some of them may need to be passed to CPlex.
         {
             //We assume runtime seconds exists because that's a default parameter. The user, however, has a choice to enter a big-M for it!
-            runtimeLimit_Seconds = algParams.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();
+            runtimeLimit_Seconds = algParams.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
         }
     }
 }

@@ -61,7 +61,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             //The following are miscellaneous variables needed in the algorithm
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = model.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
-            double runTimeLimitInSeconds = algorithmParameters.GetParameter(ParameterID.RUNTIME_SECONDS).GetDoubleValue();
+            double runTimeLimitInSeconds = algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
             int iter = 0;
             do
             {

@@ -33,7 +33,7 @@ namespace MPMFEVRP.Interfaces
 
             algorithmParameters.AddParameter(
                 new InputOrOutputParameter(
-                    ParameterID.RUNTIME_SECONDS,
+                    ParameterID.ALG_RUNTIME_SECONDS,
                     "Runtime Seconds",
                     new List<Object>() { 10.0, 30.0, 60.0, 120.0, 300.0, 600.0, 900.0, 1200.0, 1800.0, 3600.0, 36000.0 },
                     600.0,
@@ -41,7 +41,7 @@ namespace MPMFEVRP.Interfaces
 
             algorithmParameters.AddParameter(
                 new InputOrOutputParameter(
-                    ParameterID.SOLUTION_TYPES,
+                    ParameterID.ALG_SOLUTION_TYPES,
                     "Solution Types",
                     SolutionUtil.GetAllSolutionNames().ToList<object>(),
                     SolutionUtil.GetAllSolutionNames()[0],
