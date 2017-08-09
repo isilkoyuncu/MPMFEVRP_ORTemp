@@ -77,7 +77,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
 
         public bool Contains(CustomerSet cs) { return (CSLList.Count == 0 ? false : (CSLList[cs.NumberOfCustomers] == null ? false : CSLList[cs.NumberOfCustomers].Contains(cs))); }
-        public void Add(CustomerSet cs) { if ((CSLList.Count==0)||(CSLList[cs.NumberOfCustomers] == null)) ConsiderForAddition(cs); else CSLList[cs.NumberOfCustomers].Add(cs); }
+        public void Add(CustomerSet cs)
+        {
+            if ((CSLList.Count==0)||(cs.NumberOfCustomers>deepestLevel))
+                ConsiderForAddition(cs);
+            else
+                CSLList[cs.NumberOfCustomers].Add(cs);
+        }
 
         public CustomerSetList ToCustomerSetList()
         {

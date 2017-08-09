@@ -10,19 +10,42 @@ namespace MPMFEVRP.SetCoverFileUtilities
 {
     public class CustomerSetArchive
     {
-        public static void WriteToFile(PartitionedCustomerSetList pcsl, string filename)
+        public static void SaveToFile(PartitionedCustomerSetList pcsl, string filename, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
         {
             StreamWriter sw = new StreamWriter(filename, false);//append not allowed
-            foreach(CustomerSet cs in pcsl.ToCustomerSetList()) { }
+            sw.AutoFlush = true;
+            sw.WriteLine(HeaderRow());
+            foreach(CustomerSet cs in pcsl.ToCustomerSetList())
+            {
+                sw.WriteLine(CustomerSetRow(cs, problemModel));
+            }
+            sw.Close();
         }
-        string CustomerSetToString(CustomerSet cs)
+        static string HeaderRow()
+        {
+            return "Customer Set\tVehicle (GDV) Specific Route Optimization Status";
+        }
+        static string CustomerSetRow(CustomerSet cs, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
+        {
+            return CustomerSetToString(cs, problemModel) + "\t" + cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status.ToString();
+        }
+        static string CustomerSetToString(CustomerSet cs, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
         {
             if (cs.RouteOptimizationOutcome == null)
                 return SeparateBySpace(cs.Customers);
-            string outcome = "";
-            return outcome;
+            //If here, cs.RouteOptimizationOutcome != null
+            if (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status!= VehicleSpecificRouteOptimizationStatus.Optimized)
+                return SeparateBySpace(cs.Customers);
+            //if here, cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status = VehicleSpecificRouteOptimizationStatus.Optimized
+            List<string> listOfCustIDs = new List<string>();
+            for (int i = 1; i < cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).OptimizedRoute.SitesVisited.Count - 1; i++)
+            {
+                int siteIndex = cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).OptimizedRoute.SitesVisited[i];
+                listOfCustIDs.Add(problemModel.SRD.SiteArray[siteIndex].ID);
+            }
+            return SeparateBySpace(listOfCustIDs);
         }
-        string SeparateBySpace(List<string> theList)
+        static string SeparateBySpace(List<string> theList)
         {
             if ((theList == null) || (theList.Count == 0))
                 return "";
@@ -30,6 +53,30 @@ namespace MPMFEVRP.SetCoverFileUtilities
             for (int i = 1; i < theList.Count; i++)
                 outcome += " " + theList[i];
             return outcome;
+        }
+
+
+        public static PartitionedCustomerSetList RecreateFromFile(string filename, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
+        {
+            PartitionedCustomerSetList outcome = new PartitionedCustomerSetList();
+            StreamReader sr = new StreamReader(filename);
+            sr.ReadLine();//This is the header row, won't use for anything
+            while (!sr.EndOfStream)
+            {
+                string line = sr.ReadLine();
+                string[] entriesInLine = line.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                VehicleSpecificRouteOptimizationStatus vsrossss = (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]);
+                CustomerSet cs = new CustomerSet(problemModel, RemoveSpacesAndConvertToList(entriesInLine[0]), vsros: (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]));
+                outcome.Add(cs);
+            }
+            sr.Close();
+            return outcome;
+        }
+        static List<string> RemoveSpacesAndConvertToList(string spaceSeparatedString)
+        {
+            List<string> outcome = spaceSeparatedString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
+            return outcome;
+            return spaceSeparatedString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
         }
     }
 

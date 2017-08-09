@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Domains\SolutionDomain\RouteOptimizationOutcomeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetCoverFileUtilities\CustomerSetArchiveTests.cs" />
     <Compile Include="TestUtility-DefaultGetters\ProblemRelated.cs" />
     <Compile Include="TestUtility-DefaultGetters\SolutionRelated.cs" />
     <Compile Include="Utils\DeepCopierTests.cs" />

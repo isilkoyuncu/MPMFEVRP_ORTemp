@@ -166,15 +166,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if((status== RouteOptimizationStatus.NotYetOptimized)||(status== RouteOptimizationStatus.InfeasibleForBothGDVandEV))
             {
                 this.theList = new List<VehicleSpecificRouteOptimizationOutcome>();
-                retrievedFromArchive = false;
-                overallStatus = status;
             }
             else
             {
                 this.theList = theList;
-                retrievedFromArchive = false;
-                overallStatus = status;
             }
+            retrievedFromArchive = false;
+            overallStatus = status;
         }
         public RouteOptimizationOutcome(List<VehicleSpecificRouteOptimizationOutcome> theList)
         {

@@ -73,21 +73,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
         {
-            if(vsros == VehicleSpecificRouteOptimizationStatus.Optimized)
+            this.customers = customers;
+            switch (vsros)
             {
-                this.customers = customers;
-                AssignedRoute ar = AssignedRoute.EvaluateOrderedListOfCustomers(problemModel, customers);
-                if (!ar.Feasible.Last())
-                    throw new Exception("Reconstructed AssignedRoute is infeasible!");
-                VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(ProblemDomain.VehicleCategories.GDV, vsros, optimizedRoute: ar);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
-                RouteOptimizationOutcome roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
-
+                case VehicleSpecificRouteOptimizationStatus.Optimized:
+                    AssignedRoute ar = AssignedRoute.EvaluateOrderedListOfCustomers(problemModel, customers);
+                    if (!ar.Feasible.Last())
+                        throw new Exception("Reconstructed AssignedRoute is infeasible!");
+                    VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(ProblemDomain.VehicleCategories.GDV, vsros, optimizedRoute: ar);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
+                    routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
+                    break;
+                case VehicleSpecificRouteOptimizationStatus.NotYetOptimized:
+                    routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.NotYetOptimized);
+                    break;
+                case VehicleSpecificRouteOptimizationStatus.Infeasible:
+                    routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+                    break;
             }
-            else
-            {
-                this.customers = customers;
-                routeOptimizationOutcome = new RouteOptimizationOutcome();
-            }
+            this.customers.Sort();
         }
         public bool IsIdentical(CustomerSet otherCS)
         {
