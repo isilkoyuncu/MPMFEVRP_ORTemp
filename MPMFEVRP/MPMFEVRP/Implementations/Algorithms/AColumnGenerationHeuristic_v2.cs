@@ -74,8 +74,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //If the archive file exists, it must be read
                 if (ArchiveFileExists)//This means the unexplored file is not empty
                 {
-                    //Read the unexplored file to populate the unexplored list
-                    //Read the archive file to populate the archive (including infeasible customer sets)
+                    allCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVFeasibleCustomerSetArchiveFileName, model);
+                    unexploredCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVFeasibleCustomerSetUnexploredFileName, model);
                 }
                 else//the archive file doesn't exist, we'll simply ignore the unexplored file even if it exists
                 {
@@ -107,7 +107,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         parents = unexploredCustomerSets.Pop(currentLevel, beamWidth);
 
                         //populate children from parents
-                        PopulateChildren();
+                        PopulateChildren();//TODO: Make sure this uses the right extend method and route optimization
 
                         //add the children to the unexplored list (level:currentLevel+1)
                         unexploredCustomerSets.ConsiderForAddition(children);//TODO: Verify that this clears the children set
@@ -125,14 +125,17 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //Write to the archive file (don't append, just wipe old stuff out and replace because we can't keep track of which is old which is new without separating lists and separation would just overly complicate the code)
                 if (unexploredCustomerSets.TotalCount == 0)
                 {
+                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(allCustomerSets, GDVFeasibleCustomerSetArchiveFileName, model);
                     phase1Completed = true;
                 }
                 else
                 {
-                    //TODO: readers, writers, decision on whether run phase 2 with incomplete phase 1, etc.
+                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(unexploredCustomerSets, GDVFeasibleCustomerSetUnexploredFileName, model);
+                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(allCustomerSets, GDVFeasibleCustomerSetArchiveFileName, model);
                 }
             }
 
+            //TODO: readers, writers, decision on whether run phase 2 with incomplete phase 1, etc.
             do
             {
                 iter++;
