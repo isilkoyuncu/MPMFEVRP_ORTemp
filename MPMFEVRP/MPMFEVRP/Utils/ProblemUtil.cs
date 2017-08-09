@@ -85,7 +85,7 @@ namespace MPMFEVRP.Utils
             return null;
         }
 
-        public static IProblem CreateProblemByFileName(String problemName, String fullFileName)
+        public static IProblem CreateProblemByFileName(String problemName, String fullFileName) //TODO problem characteristics needs to be defined before this in order to create a proper model
         {
             KoyuncuYavuzReader KYreader = new KoyuncuYavuzReader(fullFileName);
             KYreader.Read();

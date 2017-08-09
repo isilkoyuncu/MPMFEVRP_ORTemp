@@ -13,6 +13,7 @@ namespace MPMFEVRP.Interfaces
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
 
         ProblemDataPackage PDP { get; }
+        InputOrOutputParameterSet ProblemCharacteristics { get; }
 
         string GetName();
 

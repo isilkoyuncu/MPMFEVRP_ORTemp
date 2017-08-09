@@ -46,6 +46,7 @@ namespace MPMFEVRP.Forms
         private void ComboBox_problems_SelectedIndexChanged(object sender, EventArgs e)
         {
             theProblem = ProblemUtil.CreateProblemByName(comboBox_problems.SelectedItem.ToString());
+            ParamUtil.DrawParameters(panel_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
             if (theProblem == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
@@ -102,11 +103,8 @@ namespace MPMFEVRP.Forms
                 label_selectedFile.Text = dialog.FileName;
                 try
                 {
-                    //String fileContents = File.ReadAllText(dialog.FileName);
                     theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileName);
-                    //theProblemModel = ProblemModelUtil.CreateProblemModelByProblemName(theProblem.GetName());
                     theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(),theProblem);
-
                     UpdateProblemLabels();
                     Log("Problem loaded from file.");
                 }

@@ -18,9 +18,13 @@ namespace MPMFEVRP.Interfaces
         protected ObjectiveFunctionTypes objectiveFunctionType;
         public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; }set { objectiveFunctionType = value; } }
 
+        protected InputOrOutputParameterSet problemCharacteristics;
+        public InputOrOutputParameterSet ProblemCharacteristics { get { return problemCharacteristics; } }
+
         public ProblemBase()
         {
             pdp = new ProblemDataPackage();
+            problemCharacteristics = new InputOrOutputParameterSet();
         }
         public abstract string GetName();
 
