@@ -110,6 +110,30 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 customers.Add(customer);
                 customers.Sort();//TODO Write a unit test to see if this really works as intended
                 routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[1]);
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+                routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
+            }
+            else
+                throw new Exception("Customer is already in the set, know before asking to extend!");
+        }
+        public void Extend(string customer, ProblemModelBase problemModelBase, Domains.ProblemDomain.Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
+        {
+            if (!customers.Contains(customer))
+            {
+                customers.Add(customer);
+                customers.Sort();//TODO Write a unit test to see if this really works as intended
+                if(vehicle.Category== ProblemDomain.VehicleCategories.GDV)
+                {
+                    VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
+                    routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
+                }
+                else//It's an EV, and the customer set must have been optimized for a GDV beforehand
+                {
+                    VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+                    routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
+                }
+
             }
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");

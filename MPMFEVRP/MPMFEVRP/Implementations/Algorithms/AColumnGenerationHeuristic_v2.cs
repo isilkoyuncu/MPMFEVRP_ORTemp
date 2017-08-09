@@ -187,9 +187,9 @@ namespace MPMFEVRP.Implementations.Algorithms
                 foreach (string customerID in remainingCustomers)
                 {
                     CustomerSet candidate = new CustomerSet(cs);
-                    candidate.Extend(customerID, model);
-                    if (!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved
-                        if ((candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV) || (candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
+                    candidate.Extend(customerID, model, theGDV);
+                    if (!candidate.RouteOptimizationOutcome.RetrievedFromArchive)//not retrieved
+                        if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
                         {
                             children.Add(candidate);
                         }
