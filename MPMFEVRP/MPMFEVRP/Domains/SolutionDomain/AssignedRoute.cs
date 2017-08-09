@@ -15,8 +15,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         // Input related fields
         IProblemModel problemModel;
-        int vehicleCategory;//TODO: vehicleCategory shouldn't be an integer! We should use the VehicleCategories enum here
-        public int VehicleCategory { get { return vehicleCategory; } }
+        int vehicleCategoryIndex;//TODO: vehicleCategory shouldn't be an integer! We should use the VehicleCategories enum here
+        public int VehicleCategoryIndex { get { return vehicleCategoryIndex; } }
         // Output related fields
         List<int> sitesVisited;
         public List<int> SitesVisited { get { return sitesVisited; } }
@@ -59,7 +59,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public AssignedRoute(AssignedRoute twinAR)// twin copy constructor
         {
             problemModel = twinAR.problemModel;
-            vehicleCategory = twinAR.vehicleCategory;
+            vehicleCategoryIndex = twinAR.vehicleCategoryIndex;
             sitesVisited = twinAR.sitesVisited;
             totalDistance = twinAR.totalDistance;
             totalCollectedPrize = twinAR.totalCollectedPrize;
@@ -73,14 +73,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
             feasible = twinAR.feasible;
         }
 
-        public AssignedRoute(IProblemModel problemModel, int vehicleCategory)
+        public AssignedRoute(IProblemModel problemModel, int vehicleCategoryIndex)
         {
             this.problemModel = problemModel;
-            this.vehicleCategory = vehicleCategory;
+            this.vehicleCategoryIndex = vehicleCategoryIndex;
             sitesVisited = new List<int>(); sitesVisited.Add(0);//The depot is the only visited site, this is how we get the route going
             totalDistance = 0.0;
             totalCollectedPrize = 0.0;
-            fixedCost = problemModel.VRD.VehicleArray[vehicleCategory].FixedCost;
+            fixedCost = problemModel.VRD.VehicleArray[vehicleCategoryIndex].FixedCost;
             totalVariableTravelCost = 0.0;
             totalProfit = -fixedCost;
             arrivalTime = new List<double>(); arrivalTime.Add(0.0);//Starting at the depot at time 0
@@ -94,9 +94,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             int lastSite = sitesVisited.Last();
             sitesVisited.Add(nextSite);
             totalDistance += problemModel.SRD.Distance[lastSite, nextSite];
-            totalCollectedPrize += problemModel.SRD.SiteArray[nextSite].Prize[vehicleCategory];
-            totalVariableTravelCost += problemModel.SRD.Distance[lastSite, nextSite] * problemModel.VRD.VehicleArray[vehicleCategory].VariableCostPerMile;
-            totalProfit += problemModel.SRD.SiteArray[nextSite].Prize[vehicleCategory] - problemModel.SRD.Distance[lastSite, nextSite] * problemModel.VRD.VehicleArray[vehicleCategory].VariableCostPerMile;
+            totalCollectedPrize += problemModel.SRD.SiteArray[nextSite].Prize[vehicleCategoryIndex];
+            totalVariableTravelCost += problemModel.SRD.Distance[lastSite, nextSite] * problemModel.VRD.VehicleArray[vehicleCategoryIndex].VariableCostPerMile;
+            totalProfit += problemModel.SRD.SiteArray[nextSite].Prize[vehicleCategoryIndex] - problemModel.SRD.Distance[lastSite, nextSite] * problemModel.VRD.VehicleArray[vehicleCategoryIndex].VariableCostPerMile;
             double nextArrivalTime;
             double nextDepartureTime;
             double nextArrivalSOC;
@@ -104,8 +104,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             bool nextFeasible;
 
             nextArrivalTime = departureTime.Last() + problemModel.SRD.TimeConsumption[lastSite, nextSite];
-            nextArrivalSOC = departureSOC.Last() - problemModel.SRD.EnergyConsumption[lastSite, nextSite, vehicleCategory];
-            double batteryCapacity = problemModel.VRD.VehicleArray[vehicleCategory].BatteryCapacity;
+            nextArrivalSOC = departureSOC.Last() - problemModel.SRD.EnergyConsumption[lastSite, nextSite, vehicleCategoryIndex];
+            double batteryCapacity = problemModel.VRD.VehicleArray[vehicleCategoryIndex].BatteryCapacity;
             double rechargingRate = problemModel.SRD.SiteArray[nextSite].RechargingRate;
             double serviceDuration = problemModel.SRD.SiteArray[nextSite].ServiceDuration;
             switch (problemModel.SRD.SiteArray[nextSite].SiteType)
@@ -140,6 +140,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
             arrivalSOC.Add(nextArrivalSOC);
             departureSOC.Add(nextDepartureSOC);
             feasible.Add(nextFeasible);
+        }
+
+        public static AssignedRoute EvaluateOrderedListOfCustomers(IProblemModel problemModel, List<string> customers)
+        {
+            AssignedRoute outcome = new AssignedRoute(problemModel, 1);//I hope 1 is the index of GDV
+            foreach (string c in customers)
+                outcome.Extend(problemModel.SRD.GetSiteIndex(c));
+            outcome.Extend(0);//I hope this is the index of the depot
+            return outcome;
         }
 
         public bool IsSame(AssignedRoute otherAR)

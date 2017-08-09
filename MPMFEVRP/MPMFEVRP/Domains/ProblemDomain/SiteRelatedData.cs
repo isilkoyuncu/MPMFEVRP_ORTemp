@@ -94,5 +94,13 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
             return distance;
         }
+
+        public int GetSiteIndex(string siteID)
+        {
+            for (int i = 0; i < siteArray.Length; i++)
+                if (SiteArray[i].ID == siteID)
+                    return i;
+            throw new Exception("SiteRelatedData.GetSiteIndex can't find the site with the given ID!");
+        }
     }
 }

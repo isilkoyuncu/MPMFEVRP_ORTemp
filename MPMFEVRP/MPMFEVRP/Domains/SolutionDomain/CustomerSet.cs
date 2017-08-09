@@ -71,7 +71,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
             routeOptimizerOutcome = new RouteOptimizerOutput(false, twinCS.RouteOptimizerOutcome);
             routeOptimizationOutcome = new RouteOptimizationOutcome(false, twinCS.RouteOptimizationOutcome);
         }
+        public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
+        {
+            if(vsros == VehicleSpecificRouteOptimizationStatus.Optimized)
+            {
+                this.customers = customers;
+                AssignedRoute ar = AssignedRoute.EvaluateOrderedListOfCustomers(problemModel, customers);
+                if (!ar.Feasible.Last())
+                    throw new Exception("Reconstructed AssignedRoute is infeasible!");
+                VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(ProblemDomain.VehicleCategories.GDV, vsros, optimizedRoute: ar);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
+                RouteOptimizationOutcome roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
 
+            }
+            else
+            {
+                this.customers = customers;
+                routeOptimizationOutcome = new RouteOptimizationOutcome();
+            }
+        }
         public bool IsIdentical(CustomerSet otherCS)
         {
             if (customers.Count != otherCS.NumberOfCustomers)
