@@ -24,8 +24,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         //Other fields
         List<SiteVisit> siteVisits;
-        //public List<string> SitesVisited_ID { get { return sitesVisited_ID; } }//Keep unaccessible until needed, which hopefully won't be needed at all
+        bool rechargeAmountsCalculated = false;
+        double iSTotalRechargeAmount = 0.0;
+        double eSTotalRechargeAmount = 0.0;
+        double eodTotalRechargeAmount = 0.0;//end-of-day
 
+        //constructors
         //public VehicleSpecificRoute() { }//empty constructor, make accessible when needed, hopefully never
         public VehicleSpecificRoute(ProblemModelBase problemModel, Vehicle vehicle, bool alwaysClosedLoop = true)
         {
@@ -96,17 +100,47 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 siteVisits.Add(new SiteVisit(siteVisits.Last(), problemModel.SRD.GetSingleDepotSite(), problemModel.SRD.GetDistance(siteVisits.Last().SiteID, problemModel.SRD.GetSingleDepotID()), problemModel.SRD.GetTravelTime(siteVisits.Last().SiteID, problemModel.SRD.GetSingleDepotID()), vehicle, energyConsumption: problemModel.SRD.GetEVEnergyConsumption(siteVisits.Last().SiteID, problemModel.SRD.GetSingleDepotID())));
         }
 
+        //Other methods
+        public double GetVehicleMilesTraveled() { return siteVisits.Last().CumulativeTravelDistance; }
+
+        public double GetISTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return iSTotalRechargeAmount; }
+        public double GetESTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return eSTotalRechargeAmount; }
+        public double GetEndOfDayTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return eodTotalRechargeAmount; }
+        public double GetGrandTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return (iSTotalRechargeAmount+ eSTotalRechargeAmount+ eodTotalRechargeAmount); }
+        void CalculateAllTotalRechargeAmounts()
+        {
+            if (siteVisits == null)
+                throw new Exception("CalculateAllTotalRechargeAmounts invoked before siteVisits!");
+            foreach(SiteVisit sv in siteVisits)
+            {
+                switch (sv.Site.SiteType)
+                {
+                    case SiteTypes.Customer:
+                        iSTotalRechargeAmount += sv.SOCGain;
+                        break;
+                    case SiteTypes.ExternalStation:
+                        eSTotalRechargeAmount += sv.SOCGain;
+                        break;
+                    case SiteTypes.Depot:
+                        eodTotalRechargeAmount += sv.SOCGain;
+                        break;
+                }
+            }
+            rechargeAmountsCalculated = true;
+        }
     }
 
     public class SiteVisit
     {
         //site visited
-        string siteID; public string SiteID { get { return siteID; } }
+        Site site;
+        public Site Site { get { return site; } }
+        public string SiteID { get { return site.ID; } }
 
         //time and SOC at the site
         double arrivalTime;
         double arrivalSOC;
-        double SOCGain;
+        double socGain; public double SOCGain { get { return socGain; } }
         double departureTime;
         double departureSOC;
 
@@ -125,10 +159,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             if (depot.SiteType != SiteTypes.Depot)
                 throw new Exception("SiteVisit special constructor for depot invoked for a non-depot site!");
-            siteID = depot.ID;
+            site = depot;
             arrivalTime = 0.0;
             arrivalSOC = 1.0;
-            SOCGain = 0.0;
+            socGain = 0.0;
             departureTime = 0.0;
             departureSOC = 1.0;
             cumulativeTravelDistance = 0.0;
@@ -139,40 +173,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
             //Obviously, if there is no previous site, this constructor cannot be used!
             //A limitation is that we must know the stay duration gain beforehand, can't come back to optimize it!
 
-            siteID = currentSite.ID;
+            site = currentSite;
 
             arrivalTime = previousSV.departureTime + travelTime;
             departureTime = arrivalTime + stayDuration;
             if (vehicle.Category == VehicleCategories.GDV)
             {
                 arrivalSOC = 1.0;
-                SOCGain = 0.0;
+                socGain = 0.0;
                 departureSOC = 1.0;
             }
             else
             {
                 arrivalSOC = previousSV.departureSOC - energyConsumption;
-                SOCGain = Utils.Calculators.MaxSOCGainAtSite(currentSite, vehicle, stayDuration);
-                departureSOC = arrivalSOC + SOCGain;
+                socGain = Utils.Calculators.MaxSOCGainAtSite(currentSite, vehicle, stayDuration);
+                departureSOC = arrivalSOC + socGain;
             }
             cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
         }
-        //public SiteVisit(SiteVisit previousSV, Site currentSite, double travelDistance, double travelTime, Vehicle vehicle, double energyConsumption = 0.0, double stayDuration = double.MaxValue, double maxSOCGain = 1.0)
-        //{
-        //    // travelDistance, travelTime and energyConsumption are all about the travel between the previous site and this
-        //    //Obviously, if there is no previous site, this constructor cannot be used!
-        //    //A limitation is that we must know the stay duration or maximum SOC gain beforehand, can't come back to optimize it!
-
-        //    siteID = currentSite.ID;
-
-        //    arrivalTime = previousSV.departureTime + travelTime;
-        //    arrivalSOC = previousSV.departureSOC - energyConsumption;
-        //    SOCGain = Utils.Calculators.MaxSOCGainAtSite(currentSite, vehicle, stayDuration);
-        //    departureTime = arrivalTime + stayDuration;
-        //    departureSOC = arrivalSOC + SOCGain;
-
-        //    cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
-        //}
 
     }
 }
