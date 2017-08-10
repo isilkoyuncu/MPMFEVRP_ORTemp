@@ -95,6 +95,7 @@
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
+    <Compile Include="Domains\SolutionDomain\VehicleSpecificRoute.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic_v2.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
