@@ -67,7 +67,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             // travelDistance, travelTime and energyConsumption are all about the travel between the previous site and this
             //Obviously, if there is no previous site, this constructor cannot be used!
-            //A limitation is that we must know the stay duration beforehand, can't come back to optimize it!
+            //A limitation is that we must know the stay duration gain beforehand, can't come back to optimize it!
 
             siteID = currentSite.ID;
 
@@ -79,7 +79,22 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
         }
+        public SiteVisit(SiteVisit previousSV, Site currentSite, double travelDistance, double travelTime, Vehicle vehicle, double energyConsumption = 0.0, double stayDuration = double.MaxValue, double maxSOCGain = 1.0)
+        {
+            // travelDistance, travelTime and energyConsumption are all about the travel between the previous site and this
+            //Obviously, if there is no previous site, this constructor cannot be used!
+            //A limitation is that we must know the stay duration or maximum SOC gain beforehand, can't come back to optimize it!
 
+            siteID = currentSite.ID;
+
+            arrivalTime = previousSV.departureTime + travelTime;
+            arrivalSOC = previousSV.departureSOC - energyConsumption;
+            SOCGain = Utils.Calculators.MaxSOCGainAtSite(currentSite, vehicle, stayDuration);
+            departureTime = arrivalTime + stayDuration;
+            departureSOC = arrivalSOC + SOCGain;
+
+            cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
+        }
 
     }
 }
