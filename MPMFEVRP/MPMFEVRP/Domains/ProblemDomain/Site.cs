@@ -77,5 +77,17 @@ namespace MPMFEVRP.Domains.ProblemDomain
                     throw new Exception("Site type incompatible!");
             }
         }
+        public double GetPrize(VehicleCategories vehCategory)
+        {
+            if(vehCategory == VehicleCategories.EV)
+            {
+                return prize[0];
+            }
+            else
+            {
+                return prize[1];
+            }
+        }
+
     }
 }
