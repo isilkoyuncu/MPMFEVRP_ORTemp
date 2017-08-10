@@ -194,7 +194,7 @@ namespace MPMFEVRP.Interfaces
         }
         VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle)
         {
-            XCPlex_NodeDuplicatingFormulation solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
+            XCPlex_NodeDuplicatingFormulation solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver); //TODO this needs to be fixed: if GDV infeasible, then we shouldn't try to optimize it for EV here
             solver.RefineDecisionVariables(CS);
             solver.Solve_and_PostProcess();
             if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
