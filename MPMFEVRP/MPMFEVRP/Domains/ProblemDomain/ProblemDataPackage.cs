@@ -114,5 +114,6 @@ namespace MPMFEVRP.Domains.ProblemDomain
             vrd = new VehicleRelatedData(twinPDP.VRD);
             crd = new ContextRelatedData(twinPDP.CRD);
         }
+
     }
 }

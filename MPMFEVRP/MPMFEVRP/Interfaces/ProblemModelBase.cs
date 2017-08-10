@@ -21,6 +21,9 @@ namespace MPMFEVRP.Interfaces
         protected ObjectiveFunctionTypes objectiveFunctionType;
         public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; } }
 
+        protected InputOrOutputParameterSet problemCharacteristics;
+        public InputOrOutputParameterSet ProblemCharacteristics { get { return problemCharacteristics; } }
+
         protected CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType;
         public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get { return coverConstraintType; }set { coverConstraintType = value; } }
 

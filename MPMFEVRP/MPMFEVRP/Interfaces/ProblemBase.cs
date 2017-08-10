@@ -28,6 +28,8 @@ namespace MPMFEVRP.Interfaces
         }
         public abstract string GetName();
 
+        public abstract void LoadProblemCharacteristics();
+
         public override string ToString()
         {
             throw new NotImplementedException(); //TODO multiple-multiple run ederken anlamli olacak aciklamayi return et

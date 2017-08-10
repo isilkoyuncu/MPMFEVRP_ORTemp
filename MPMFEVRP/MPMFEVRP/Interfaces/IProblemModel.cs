@@ -13,6 +13,8 @@ namespace MPMFEVRP.Interfaces
         string InputFileName { get; }
 
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
+        InputOrOutputParameterSet ProblemCharacteristics { get; }
+
         CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get; }
 
         //Individual Data Fields

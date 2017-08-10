@@ -21,7 +21,7 @@ namespace MPMFEVRP.Implementations.Problems
         public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get
             { return CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce; } }
 
-        public EVvsGDV_MaxProfit_VRP():base()
+        public EVvsGDV_MaxProfit_VRP()
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
         }

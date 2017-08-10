@@ -46,7 +46,6 @@ namespace MPMFEVRP.Forms
         private void ComboBox_problems_SelectedIndexChanged(object sender, EventArgs e)
         {
             theProblem = ProblemUtil.CreateProblemByName(comboBox_problems.SelectedItem.ToString());
-            ParamUtil.DrawParameters(panel_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
             if (theProblem == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
@@ -104,6 +103,7 @@ namespace MPMFEVRP.Forms
                 try
                 {
                     theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileName);
+                    ParamUtil.DrawParameters(panel_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
                     theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(),theProblem);
                     UpdateProblemLabels();
                     Log("Problem loaded from file.");
@@ -123,6 +123,8 @@ namespace MPMFEVRP.Forms
             }
             else
             {
+                Log("Problem characteristics are loading.");
+                theProblem.LoadProblemCharacteristics();
                 Log("Algorithm initializing.");
                 theAlgorithm.Initialize(theProblemModel);
                 Log("Algorithm running.");
