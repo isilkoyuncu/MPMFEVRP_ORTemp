@@ -111,7 +111,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 customers.Sort();//TODO Write a unit test to see if this really works as intended
                 routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[1]);
-                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
+                if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)
+                {
+                    // Do not try to optimize for EV
+                }
+                else
+                {
+                    vsroo_EV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+                }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
             else

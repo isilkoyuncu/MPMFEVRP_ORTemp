@@ -113,7 +113,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         }
                         //TODO delete this after debugging
                         if (visitableCustomers.Count == 14)
-                            System.Windows.Forms.MessageBox.Show("This is the suspicious instance");
+                            System.Windows.Forms.MessageBox.Show("Next is the suspicious instance");
                     } while (csSuccessfullyUpdated && visitableCustomers.Count > 0);
 
                     csSuccessfullyAdded = AddCustomerSet2Soln(trialSolution, currentCS); //return true if the customerSet is successfully added to the solution; return false if it is skipped  
