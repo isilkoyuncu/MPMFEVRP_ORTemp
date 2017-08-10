@@ -22,9 +22,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             EVvsGDV_MinCost_VRP problem = new EVvsGDV_MinCost_VRP();
             problemName = problem.GetName();
-            objectiveFunctionType = problem.ObjectiveFunctionType;
-            coverConstraintType = problem.CoverConstraintType;
-            rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full;
+            //objectiveFunctionType = problem.ObjectiveFunctionType;
+            //coverConstraintType = problem.CoverConstraintType;
+            //rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
@@ -38,6 +38,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             coverConstraintType = problem.CoverConstraintType;
 
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            //EV_TSPSolver.ExportModel("EV_tsp_minCostModel.lp");
             GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
 
             PopulateCompatibleSolutionTypes();

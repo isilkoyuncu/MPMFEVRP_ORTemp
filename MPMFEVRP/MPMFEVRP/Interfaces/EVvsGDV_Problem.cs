@@ -29,7 +29,10 @@ namespace MPMFEVRP.Interfaces
             //Then, the first (0) must be an EV, and the other (1) must be a GDV!
             if ((PDP.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
                 (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
-                throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");  
+                throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
+
+            PDP.VRD.NumVehicles[0] = 3;
+            PDP.VRD.NumVehicles[1] = 3;
         }
 
         public override void LoadProblemCharacteristics()
