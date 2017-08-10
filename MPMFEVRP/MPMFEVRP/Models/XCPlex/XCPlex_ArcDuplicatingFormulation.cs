@@ -191,7 +191,7 @@ namespace MPMFEVRP.Models.XCPlex
                 else
                     minValue_epsilon[j] = 0.0;
                 if (problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].SiteType == SiteTypes.Customer)
-                    maxValue_epsilon[j] = Math.Min(1.0, problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].ServiceDuration * Math.Min(problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].RechargingRate, problemModel.VRD.VehicleArray[0].MaxChargingRate) / problemModel.VRD.VehicleArray[0].BatteryCapacity);
+                    maxValue_epsilon[j] = Math.Min(1.0, problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].ServiceDuration * Math.Min(problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].RechargingRate, problemModel.VRD.VehicleArray[0].MaxChargingRate) / problemModel.VRD.VehicleArray[0].BatteryCapacity);//TODO: Use the utility function instead!
                 else
                     maxValue_epsilon[j] = 1.0;
             }

@@ -42,5 +42,44 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         //the cumulatives (for statistics)
         double cumulativeTravelDistance; //(by arrival at this site)
+        public double CumulativeTravelDistance { get { return cumulativeTravelDistance; } }
+
+        //feasibility
+        public bool GetTimeFeasible(double Tmax)  { return arrivalTime <= Tmax; }
+        public bool GetSOCFeasible() { return arrivalSOC >= 0; }
+        public bool GetFeasible(double Tmax) { return (GetSOCFeasible() && GetTimeFeasible(Tmax)); }
+
+        //Constructors
+        //public SiteVisit() { }//empty constructor, make accessible when needed, hopefully never
+        public SiteVisit(Site depot)
+        {
+            if (depot.SiteType != SiteTypes.Depot)
+                throw new Exception("SiteVisit special constructor for depot invoked for a non-depot site!");
+            siteID = depot.ID;
+            arrivalTime = 0.0;
+            arrivalSOC = 1.0;
+            SOCGain = 0.0;
+            departureTime = 0.0;
+            departureSOC = 1.0;
+            cumulativeTravelDistance = 0.0;
+        }
+        public SiteVisit(SiteVisit previousSV, Site currentSite, double travelDistance, double travelTime, Vehicle vehicle, double energyConsumption = 0.0, double stayDuration = double.MaxValue)
+        {
+            // travelDistance, travelTime and energyConsumption are all about the travel between the previous site and this
+            //Obviously, if there is no previous site, this constructor cannot be used!
+            //A limitation is that we must know the stay duration beforehand, can't come back to optimize it!
+
+            siteID = currentSite.ID;
+
+            arrivalTime = previousSV.departureTime + travelTime;
+            arrivalSOC = previousSV.departureSOC - energyConsumption;
+            SOCGain = Utils.Calculators.MaxSOCGainAtSite(currentSite,vehicle,stayDuration);
+            departureTime = arrivalTime + stayDuration;
+            departureSOC = arrivalSOC + SOCGain;
+
+            cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
+        }
+
+
     }
 }
