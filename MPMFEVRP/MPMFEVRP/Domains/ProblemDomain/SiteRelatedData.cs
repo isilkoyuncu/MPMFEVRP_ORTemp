@@ -64,6 +64,24 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 }
             throw new Exception("No depot found!");
         }
+        public Site GetSingleDepotSite()
+        {
+            foreach (Site s in siteArray)
+                if (s.SiteType == SiteTypes.Depot)
+                {
+                    return s;
+                }
+            throw new Exception("No depot found!");
+        }
+        public Site GetSiteByID(string siteID)
+        {
+            foreach (Site s in siteArray)
+                if (s.ID == siteID)
+                {
+                    return s;
+                }
+            throw new Exception("No depot found!");
+        }
         public List<string> GetClosenessOrder(string nodeID)
         {
             Dictionary<double, string> preOrder = new Dictionary<double, string>();
@@ -94,6 +112,41 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
             return distance;
         }
+        public double GetTravelTime(string currentNode, string nextNode)
+        {
+            int currentIndex = 0, nextIndex = 0;
+            double travelTime = 0.0;
+
+            for (int i = 0; i < siteArray.Length; i++)
+            {
+                if (siteArray[i].ID == currentNode)
+                    currentIndex = i;
+                if (siteArray[i].ID == nextNode)
+                    nextIndex = i;
+            }
+
+            travelTime = TimeConsumption[currentIndex, nextIndex];
+
+            return travelTime;
+        }
+        public double GetEVEnergyConsumption(string currentNode, string nextNode)
+        {
+            int currentIndex = 0, nextIndex = 0;
+            double eVenergyConsumption = 0.0;
+
+            for (int i = 0; i < siteArray.Length; i++)
+            {
+                if (siteArray[i].ID == currentNode)
+                    currentIndex = i;
+                if (siteArray[i].ID == nextNode)
+                    nextIndex = i;
+            }
+
+            eVenergyConsumption = EnergyConsumption[currentIndex, nextIndex,0];
+
+            return eVenergyConsumption;
+        }
+
 
         public int GetSiteIndex(string siteID)
         {
