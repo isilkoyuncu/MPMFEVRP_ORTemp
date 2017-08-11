@@ -99,6 +99,20 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (alwaysClosedLoop)
                 siteVisits.Add(new SiteVisit(siteVisits.Last(), problemModel.SRD.GetSingleDepotSite(), problemModel.SRD.GetDistance(siteVisits.Last().SiteID, problemModel.SRD.GetSingleDepotID()), problemModel.SRD.GetTravelTime(siteVisits.Last().SiteID, problemModel.SRD.GetSingleDepotID()), vehicle, energyConsumption: problemModel.SRD.GetEVEnergyConsumption(siteVisits.Last().SiteID, problemModel.SRD.GetSingleDepotID())));
         }
+        public VehicleSpecificRoute(VehicleSpecificRoute twinVSR)
+        {
+            problemModel = twinVSR.problemModel;
+            vehicle = twinVSR.vehicle;
+            alwaysClosedLoop = twinVSR.alwaysClosedLoop;
+
+            siteVisits = new List<SiteVisit>();
+            foreach (SiteVisit sv in twinVSR.siteVisits)
+                siteVisits.Add(new SiteVisit(sv));
+            rechargeAmountsCalculated = twinVSR.rechargeAmountsCalculated;
+            iSTotalRechargeAmount = twinVSR.iSTotalRechargeAmount;
+            eSTotalRechargeAmount = twinVSR.eSTotalRechargeAmount;
+            eodTotalRechargeAmount = twinVSR.eodTotalRechargeAmount;
+        }
 
         //Other methods
         public double GetVehicleMilesTraveled() { return siteVisits.Last().CumulativeTravelDistance; }
