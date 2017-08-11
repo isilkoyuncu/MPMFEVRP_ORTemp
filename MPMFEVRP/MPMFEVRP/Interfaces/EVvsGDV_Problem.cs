@@ -9,19 +9,16 @@ using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Interfaces
 {
-    public abstract class EVvsGDV_Problem:ProblemBase
+    public abstract class EVvsGDV_Problem : ProblemBase
     {
         public EVvsGDV_Problem() { }
 
-        public EVvsGDV_Problem(ProblemDataPackage PDP) 
+        public EVvsGDV_Problem(ProblemDataPackage PDP)
         {
+            AddProblemCharacteristics();
             base.PDP = new ProblemDataPackage(PDP);
             //The following are the problem characteristics. Each problem will have these fixed here, and they have nothing to do with data!
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_EV, "Available # of EVS", "3"));
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_GDV, "Available # of GDVs", PDP.VRD.NumVehicles[1].ToString()));
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_RECHARGING_ASSUMPTION, "Recharging Assumption", new List<object>() { RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial }, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full, UserInputObjectType.ComboBox));
+
             //This code is extremely strict, for sake of simplicity!
             //First, we must be given exactly 2 vehicles
             if (PDP.VRD.VehicleArray.Length != 2)
@@ -30,26 +27,19 @@ namespace MPMFEVRP.Interfaces
             if ((PDP.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
                 (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
                 throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
-
-            PDP.VRD.NumVehicles[0] = 3;
-            PDP.VRD.NumVehicles[1] = 3;
         }
 
-        public override void LoadProblemCharacteristics()
+        void AddProblemCharacteristics()
         {
-            PDP.VRD.NumVehicles[0] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
-            PDP.VRD.NumVehicles[1] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_GDV).GetIntValue();
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_EV, "Available # of EVS", "3"));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_GDV, "Available # of GDVs", "3"));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_RECHARGING_ASSUMPTION, "Recharging Assumption", new List<object>() { RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial }, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full, UserInputObjectType.ComboBox));
         }
 
+        public override string GetName() { return "EV vs GDV VRP"; }
 
-        public override string GetName()
-        {
-            return "EV vs GDV VRP";
-        }
-
-        public override string ToString()
-        {
-            return PDP.InputFileName;
-        }
+        public override string ToString() { return "EV vs GDV Vehicle Routing Problem"; }
     }
 }

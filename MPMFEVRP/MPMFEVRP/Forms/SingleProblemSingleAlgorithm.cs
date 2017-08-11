@@ -18,6 +18,7 @@ namespace MPMFEVRP.Forms
 {
     public partial class SingleProblemSingleAlgorithm : Form
     {
+        string rawData;
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
@@ -102,11 +103,8 @@ namespace MPMFEVRP.Forms
                 label_selectedFile.Text = dialog.FileName;
                 try
                 {
-                    theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileName);
+                    theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), label_selectedFile.Text);
                     ParamUtil.DrawParameters(panel_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
-                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(),theProblem);
-                    UpdateProblemLabels();
-                    Log("Problem loaded from file.");
                 }
                 catch (Exception)
                 {
@@ -114,17 +112,28 @@ namespace MPMFEVRP.Forms
                 }
             }
         }
-
+        private void Button_createProblemModel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem);
+                UpdateProblemLabels();
+                Log("Problem data loaded from file.");
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("There is something wrong while loading problem from the whole data!", "Problem loading error!");
+            }
+        }
         private void Button_run_Click(object sender, EventArgs e)
         {
+            
             if (theProblem == null)
             {
                 MessageBox.Show("Please load a problem first!", "No problem!");
             }
             else
             {
-                Log("Problem characteristics are loading.");
-                theProblem.LoadProblemCharacteristics();
                 Log("Algorithm initializing.");
                 theAlgorithm.Initialize(theProblemModel);
                 Log("Algorithm running.");
@@ -152,5 +161,6 @@ namespace MPMFEVRP.Forms
             new TestInstanceGenerator().ShowDialog();
         }
 
+        
     }
 }
