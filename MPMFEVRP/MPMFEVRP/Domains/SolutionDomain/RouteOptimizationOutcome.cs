@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -48,6 +49,59 @@ namespace MPMFEVRP.Domains.SolutionDomain
             this.theList = theList;
             retrievedFromArchive = false;
             UpdateOverallStatus();
+        }
+        public RouteOptimizationOutcome(ProblemModelBase problemModel, CustomerSet customerSet, List<Vehicle> vehicles)
+        {
+            if ((vehicles == null) || (vehicles.Count == 0))
+                throw new Exception("RouteOptimizationOutcome constructor invoked with no vehicles!");
+            List<Vehicle> GDVs = new List<Vehicle>();
+            List<Vehicle> EVs = new List<Vehicle>();
+            foreach(Vehicle v in vehicles)
+                switch (v.Category)
+                {
+                    case VehicleCategories.GDV:
+                        GDVs.Add(v);
+                        break;
+                    case VehicleCategories.EV:
+                        EVs.Add(v);
+                        break;
+                }
+            if (GDVs.Count > 1)
+                throw new Exception("There can't be more than 1 GDVs in this project, because a GDV is essentially an unconstrained vehicle!");
+            if (EVs.Count > 1)
+                throw new Exception("Capability to work with multiple EVs is a possible feature to add later, but is not included as of now!");
+
+            //At this time, if we get to here, we know for sure that there are one or two vehicles. If there are two, one is a GDV and the other an EV.
+            //If there is only an EV, we want to GDV-optimize it first because we believe that would save time overall
+            if (GDVs.Count == 0)
+                GDVs.Add(problemModel.VRD.VehicleArray[1]);//Because [1] is the index of the GDV
+            //the previous line just assured that there is always a GDV to optimize for
+            Vehicle theGDV = GDVs[0];
+            VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModel.OptimizeRoute(customerSet, theGDV);
+            theList = new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV };
+            if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
+            {
+                overallStatus = RouteOptimizationStatus.InfeasibleForBothGDVandEV;
+            }
+            else
+            {
+                theList.Add(vsroo_GDV);
+                Vehicle theEV = EVs[0];
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModel.OptimizeRoute(customerSet, theEV, GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+                theList.Add(vsroo_EV);
+                switch (vsroo_EV.Status)
+                {
+                    case VehicleSpecificRouteOptimizationStatus.Infeasible:
+                        overallStatus = RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV;
+                        break;
+                    case VehicleSpecificRouteOptimizationStatus.Optimized:
+                        overallStatus = RouteOptimizationStatus.OptimizedForBothGDVandEV;
+                        break;
+                    default:
+                        throw new Exception("We just optimized for the EV, the status of it should have been either optimal or infeasible!");
+                }
+
+            }
         }
 
         public VehicleSpecificRouteOptimizationOutcome GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory)
