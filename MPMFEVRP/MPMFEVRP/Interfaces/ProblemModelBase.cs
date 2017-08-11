@@ -35,6 +35,8 @@ namespace MPMFEVRP.Interfaces
         public VehicleRelatedData VRD { get { return pdp.VRD; } }
         public ContextRelatedData CRD { get { return pdp.CRD; } }
 
+        protected int[] numVehicles; public int[] NumVehicles { get { return numVehicles; } set { numVehicles = value; } }
+
         protected bool archiveAllCustomerSets; public bool ArchiveAllCustomerSets { get { return archiveAllCustomerSets; } }
         protected CustomerSetList customerSetArchive; public CustomerSetList CustomerSetArchive { get { return customerSetArchive; } }
 

@@ -86,7 +86,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             DateTime localStartTime;
 
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
-            int numberOfEVs = model.VRD.NumVehicles[0]; //[0]=EV, [1]=GDV 
+            int numberOfEVs = model.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue(); 
             //for (int trial = 0; trial < poolSize; trial++)
             do{
                 CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();
@@ -302,7 +302,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         Array.Sort(dP, cs_Array);
                         for (int i = cs_Array.Length-1; i >=0; i--)
                         {
-                            if (dP[i] > 0 && cs_Array[i].RouteOptimizerOutcome.OFV[0] > 0 && outcome.NumCS_assigned2EV < model.VRD.NumVehicles[0])
+                            if (dP[i] > 0 && cs_Array[i].RouteOptimizerOutcome.OFV[0] > 0 && outcome.NumCS_assigned2EV < model.NumVehicles[0])
                             {
                                 outcome.AddCustomerSet2EVList(cs_Array[i]);
                             }
@@ -322,7 +322,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 return false;
 
             //If we're here, we know at least one of the profits is a positive! And that's all we need, if this is a sub-optimal decision, we can still recover from it later, no worries.
-            if ((solution.NumCS_assigned2EV < model.VRD.NumVehicles[0]))
+            if ((solution.NumCS_assigned2EV < model.NumVehicles[0]))
                 solution.AddCustomerSet2EVList(CS);
             else
                 solution.AddCustomerSet2GDVList(CS);

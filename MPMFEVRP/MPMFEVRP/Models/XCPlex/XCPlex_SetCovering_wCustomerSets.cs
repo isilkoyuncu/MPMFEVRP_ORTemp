@@ -153,8 +153,8 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][0]);
             }//for i
-            string constraint_name = "Vehicle type 0 can be used at most" + problemModel.VRD.NumVehicles[0] + "times";
-            allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, problemModel.VRD.NumVehicles[0], constraint_name));
+            string constraint_name = "Vehicle type 0 can be used at most" + problemModel.NumVehicles[0] + "times";
+            allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, problemModel.NumVehicles[0], constraint_name));
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {

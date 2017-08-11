@@ -18,7 +18,6 @@ namespace MPMFEVRP.Forms
 {
     public partial class SingleProblemSingleAlgorithm : Form
     {
-        string rawData;
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
@@ -105,6 +104,7 @@ namespace MPMFEVRP.Forms
                 {
                     theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), label_selectedFile.Text);
                     ParamUtil.DrawParameters(panel_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
+                    Log("Problem data loaded from file.");
                 }
                 catch (Exception)
                 {
@@ -118,7 +118,7 @@ namespace MPMFEVRP.Forms
             {
                 theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem);
                 UpdateProblemLabels();
-                Log("Problem data loaded from file.");
+                Log("Problem model is created.");
             }
             catch (Exception)
             {

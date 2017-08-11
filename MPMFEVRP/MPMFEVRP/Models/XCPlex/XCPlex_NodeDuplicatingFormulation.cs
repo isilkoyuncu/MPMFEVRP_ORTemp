@@ -102,7 +102,7 @@ namespace MPMFEVRP.Models.XCPlex
         void DuplicateAndMapNodes()
         {
             int numCustomers = problemModel.SRD.NumCustomers;
-            int numES = problemModel.CRD.Lambda * problemModel.VRD.NumVehicles[0] * problemModel.SRD.NumES;
+            int numES = problemModel.CRD.Lambda * problemModel.NumVehicles[0] * problemModel.SRD.NumES;
             numNodes = 1 + numCustomers + numES;
 
             nodeToOriginalSiteNumberMap = new int[numNodes];
@@ -123,7 +123,7 @@ namespace MPMFEVRP.Models.XCPlex
                     case SiteTypes.ExternalStation:
                         if (firstESNodeIndex == 0)
                             firstESNodeIndex = nodeCounter;
-                        for (int i = 0; i < problemModel.CRD.Lambda * problemModel.VRD.NumVehicles[0]; i++)
+                        for (int i = 0; i < problemModel.CRD.Lambda * problemModel.NumVehicles[0]; i++)
                             nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
                         lastESNodeIndex = nodeCounter - 1;
                         break;
@@ -135,7 +135,7 @@ namespace MPMFEVRP.Models.XCPlex
         int GetUpperBound(int j, int v)
         {
             if (j == 0)
-                return problemModel.VRD.NumVehicles[v];
+                return problemModel.NumVehicles[v];
             else
                 return 1;
         }
@@ -392,7 +392,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             else//not TSP
             {
-                numVehicles = problemModel.VRD.NumVehicles;
+                numVehicles = problemModel.NumVehicles;
             }
             for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
             {

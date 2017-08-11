@@ -253,6 +253,12 @@ namespace MPMFEVRP.Interfaces
             return new VehicleSpecificRoute(this, vehicle, nondepotSiteIDsInOrder);
         }
 
+        public void SetNumVehicles()
+        {
+            NumVehicles = new int[pdp.VRD.NumVehicleCategories];
+            NumVehicles[0] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
+            NumVehicles[1] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_GDV).GetIntValue();
+        }
         //It can be useful if you want to check customer set archive ever
         public void ExportCustomerSetArchive2txt()
         {

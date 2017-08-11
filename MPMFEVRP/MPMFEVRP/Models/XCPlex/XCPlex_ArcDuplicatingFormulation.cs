@@ -19,7 +19,6 @@ namespace MPMFEVRP.Models.XCPlex
         RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
         List<int> customerSiteNodeIndices, depotPlusCustomerSiteNodeIndices, ESSiteNodeIndices;
         int numCustomers, numES;
-
         double[] minValue_T, maxValue_T, minValue_delta, maxValue_delta, minValue_epsilon, maxValue_epsilon;
 
         INumVar[][][] X;
@@ -126,7 +125,7 @@ namespace MPMFEVRP.Models.XCPlex
         int GetUpperBound(int j, int v)
         {
             if (j == 0)
-                return problemModel.VRD.NumVehicles[v];
+                return problemModel.NumVehicles[v];
             else
                 return 1;
         }
@@ -350,8 +349,8 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
                 NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, U[0][v]);
-                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_and_returning_to_node_0_cannot_exceed_" + problemModel.VRD.NumVehicles[v].ToString();
-                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, problemModel.VRD.NumVehicles[v], constraint_name));
+                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_and_returning_to_node_0_cannot_exceed_" + problemModel.NumVehicles[v].ToString();
+                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, problemModel.NumVehicles[v], constraint_name));
             }
         }
         void AddConstraint_TimeRegulationForDirectArcFromACustomer()//7

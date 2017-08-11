@@ -31,9 +31,6 @@ namespace MPMFEVRP.Domains.ProblemDomain
             srd.NumES = reader.GetNumberOfES();
             srd.NumNodes = srd.NumCustomers + srd.NumES + 1;
             vrd.NumVehicleCategories = reader.GetVehicleArray().Length;
-            vrd.NumVehicles = new int[vrd.NumVehicleCategories];
-            for (int v = 0; v < vrd.NumVehicleCategories; v++)
-                vrd.NumVehicles[v] = srd.NumCustomers;//TODO We entered numCustomers as the available number of vehicles in a category to make it unrestrictive. Limiting the numbers of vehicles is something we'd love to experiment on, and thus, this point will have to be clarified later on.
 
             srd.SiteArray = new Site[srd.NumNodes];
             for (int s = 0; s < srd.NumNodes; s++)

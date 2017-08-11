@@ -36,6 +36,8 @@ namespace MPMFEVRP.Implementations.ProblemModels
             problemName = problem.GetName();
             objectiveFunctionType = problem.ObjectiveFunctionType;
             coverConstraintType = problem.CoverConstraintType;
+            SetNumVehicles();
+            rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
 
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
             //EV_TSPSolver.ExportModel("EV_tsp_minCostModel.lp");

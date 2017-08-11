@@ -38,8 +38,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
             objectiveFunctionType = problem.ObjectiveFunctionType;
             coverConstraintType = problem.CoverConstraintType;
-            pdp.VRD.NumVehicles[0] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
-            pdp.VRD.NumVehicles[1] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_GDV).GetIntValue();
+            SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
 
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
@@ -49,7 +48,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             CreateCustomerSetArchive();
         }
         
-
+        
         public override string GetDescription()
         {
             throw new NotImplementedException();
