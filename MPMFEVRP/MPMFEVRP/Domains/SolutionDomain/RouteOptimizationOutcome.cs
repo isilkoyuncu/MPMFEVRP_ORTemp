@@ -152,7 +152,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
         }
 
-        public List <double> GetVehicleMilesTraveled()
+        public List <double> GetVehicleMilesTraveled() //This outcome is parallel to the RouteOptimizationOutcome theList.
         {
             List<double> outcome = new List<double>();
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
