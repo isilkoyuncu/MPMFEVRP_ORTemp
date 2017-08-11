@@ -149,7 +149,7 @@ namespace MPMFEVRP.Interfaces
             theList.Add(vsroo_EV);
             return new RouteOptimizationOutcome(theList);
         }
-        public override VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, AssignedRoute GDVOptimalRoute=null)
+        public override VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute=null)
         {
             //This method has nothing to do with a list of previously generated customer sets, management of that is completely some other class's responsibility
 
@@ -158,9 +158,9 @@ namespace MPMFEVRP.Interfaces
             //else: we are looking at an EV problem with a provided GDV-optimal route
             //First, we must check for AFV-feasibility of the provided GDV-optimal route
             //Make an AFV-optimized route out of the given GDV-optimized route:
-            AssignedRoute fittedRoute = FitGDVOptimalRouteToAFV(GDVOptimalRoute, vehicle);
-            if (fittedRoute.Feasible.Last())//if the fitted route is feasible:
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: fittedRoute.TotalProfit, optimizedRoute: fittedRoute);
+            VehicleSpecificRoute fittedRoute = FitGDVOptimalRouteToEV(GDVOptimalRoute, vehicle);
+            if (fittedRoute.Feasible)//if the fitted route is feasible:
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: fittedRoute.GetVehicleMilesTraveled(), vsOptimizedRoute: fittedRoute);//TODO: The objective function value here is hardcoded to be the VMT, make this flexible! 
             if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Infeasible);
             //If none of the previous conditions worked, we must solve an EV-TSP
@@ -175,18 +175,13 @@ namespace MPMFEVRP.Interfaces
 
             return false;//TODO Do the actual checking here!
         }
-        AssignedRoute FitGDVOptimalRouteToAFV(AssignedRoute GDVOptimalRoute, Vehicle vehicle)
+        VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
         {
-            AssignedRoute outcome = new AssignedRoute(this, 0);
-            bool GDVOptimalRouteFeasibleForEV = true;
-            for (int siteIndex = 1; ((siteIndex < GDVOptimalRoute.SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
-            {
-                outcome.Extend(GDVOptimalRoute.SitesVisited[siteIndex]);
-                GDVOptimalRouteFeasibleForEV = outcome.Feasible.Last();
-            }
-            return outcome;
+            if (vehicle.Category != VehicleCategories.EV)
+                throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
+            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.listOfVisitedSiteIDs);
         }
-        bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, AssignedRoute GDVOptimalRoute = null)
+        bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
         {
             //Return true if and only if the GDV-Optimal route must be AFV-infeasible based on the data
             //This method may be a little confusing because it returns true when infeasible
@@ -202,7 +197,7 @@ namespace MPMFEVRP.Interfaces
             if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
-                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: solver.GetObjValue(), optimizedRoute: ExtractTheSingleRouteFromSolution((RouteBasedSolution)solver.GetCompleteSolution(typeof(RouteBasedSolution))));
+                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: solver.GetObjValue(), vsOptimizedRoute: GetVSRFromFlowVariables(vehicle,solver.GetXVariablesSetTo1()));
         }
 
         public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1)

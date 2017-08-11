@@ -24,6 +24,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         //Other fields
         List<SiteVisit> siteVisits;
+        public int NumberOfSitesVisited { get { return siteVisits.Count; } }
+        public List<string> listOfVisitedSiteIDs { get { List<string> listOfVisitedSiteIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) listOfVisitedSiteIDs.Add(sv.SiteID); return listOfVisitedSiteIDs; } }
+        public bool Feasible { get { return siteVisits.Last().GetFeasible(problemModel.CRD.TMax); } }
         bool rechargeAmountsCalculated = false;
         double iSTotalRechargeAmount = 0.0;
         double eSTotalRechargeAmount = 0.0;

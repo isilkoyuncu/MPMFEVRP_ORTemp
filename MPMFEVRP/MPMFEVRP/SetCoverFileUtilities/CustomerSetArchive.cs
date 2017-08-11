@@ -37,12 +37,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
             if (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status!= VehicleSpecificRouteOptimizationStatus.Optimized)
                 return SeparateBySpace(cs.Customers);
             //if here, cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status = VehicleSpecificRouteOptimizationStatus.Optimized
-            List<string> listOfCustIDs = new List<string>();
-            for (int i = 1; i < cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.SitesVisited.Count - 1; i++)
-            {
-                int siteIndex = cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.SitesVisited[i];
-                listOfCustIDs.Add(problemModel.SRD.SiteArray[siteIndex].ID);
-            }
+            List<string> listOfCustIDs = cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.listOfVisitedSiteIDs;
             return SeparateBySpace(listOfCustIDs);
         }
         static string SeparateBySpace(List<string> theList)

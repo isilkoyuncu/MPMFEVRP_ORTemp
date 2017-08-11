@@ -73,14 +73,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
         {
+            if (vehicle.Category == ProblemDomain.VehicleCategories.EV)
+                throw new Exception("The capability to recreate an EV-optimized customer set from file is not yet implemented!");
             this.customers = customers;
             switch (vsros)
             {
                 case VehicleSpecificRouteOptimizationStatus.Optimized:
-                    AssignedRoute ar = AssignedRoute.EvaluateOrderedListOfCustomers(problemModel, customers);
-                    if (!ar.Feasible.Last())
+                    VehicleSpecificRoute vsr = new VehicleSpecificRoute(problemModel,vehicle,customers);
+                    if (!vsr.Feasible)
                         throw new Exception("Reconstructed AssignedRoute is infeasible!");
-                    VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(ProblemDomain.VehicleCategories.GDV, vsros, optimizedRoute: ar);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
+                    VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(ProblemDomain.VehicleCategories.GDV, vsros, vsOptimizedRoute: vsr);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
                     routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
                     break;
                 case VehicleSpecificRouteOptimizationStatus.NotYetOptimized:
