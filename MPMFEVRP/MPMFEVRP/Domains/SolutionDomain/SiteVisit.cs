@@ -68,6 +68,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
         }
+        public SiteVisit(SiteVisit twinSiteVisit)
+        {
+            site = twinSiteVisit.site;
 
+            arrivalTime = twinSiteVisit.arrivalTime;
+            arrivalSOC = twinSiteVisit.arrivalSOC;
+            socGain = twinSiteVisit.socGain;
+            departureTime = twinSiteVisit.departureTime;
+            departureSOC = twinSiteVisit.departureSOC;
+
+            cumulativeTravelDistance = twinSiteVisit.cumulativeTravelDistance;
     }
+}
 }
