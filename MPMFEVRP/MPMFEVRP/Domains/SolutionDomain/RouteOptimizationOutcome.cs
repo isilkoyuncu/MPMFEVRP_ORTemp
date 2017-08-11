@@ -151,5 +151,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return;
             }
         }
+
+        public List <double> GetVehicleMilesTraveled() //This outcome is parallel to the RouteOptimizationOutcome theList.
+        {
+            List<double> outcome = new List<double>();
+            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
+            {
+                outcome.Add(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled());
+            }
+            return outcome;
+        }
+
     }
 }

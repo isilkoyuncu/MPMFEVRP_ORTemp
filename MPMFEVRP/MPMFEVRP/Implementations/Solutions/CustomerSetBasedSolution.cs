@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BestRandom;
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
@@ -14,6 +15,7 @@ namespace MPMFEVRP.Implementations.Solutions
         private ProblemModelBase model;
         private Random random;
 
+        //For now we assume we have only EV and GDV lists, if you add another vehicle category, you should update the objective function calculations.
         CustomerSetList assigned2EV; public CustomerSetList Assigned2EV { get { return assigned2EV; } }
         CustomerSetList assigned2GDV; public CustomerSetList Assigned2GDV { get { return assigned2GDV; } }
 
@@ -91,6 +93,24 @@ namespace MPMFEVRP.Implementations.Solutions
             objectiveFunctionValue += currentCS.RouteOptimizerOutcome.OFV[1];
         }
 
+        public double GetTotalVehicleFixedCost()
+        {
+            double outcome = 0.0;
+            foreach (Vehicle v in model.VRD.VehicleArray)
+                if (v.Category == VehicleCategories.EV)
+                    outcome += NumCS_assigned2EV * v.FixedCost;
+                else if (v.Category == VehicleCategories.GDV)
+                    outcome += NumCS_assigned2GDV * v.FixedCost;
+                else
+                    throw new Exception("We encountered a vehicle type other than EV or GDV.");  
+            return outcome;
+        }
+        //public double GetTotalVehicleMilesTraveled()
+        //{
+        //    double outcome = 0.0;
+        //    foreach(CustomerSet cs in assigned2EV)
+        //    return outcome;
+        //}
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {
             throw new NotImplementedException();
