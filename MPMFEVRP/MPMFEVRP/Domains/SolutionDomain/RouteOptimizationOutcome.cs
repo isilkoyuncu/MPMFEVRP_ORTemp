@@ -87,7 +87,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 theList.Add(vsroo_GDV);
                 Vehicle theEV = EVs[0];
-                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModel.OptimizeRoute(customerSet, theEV, GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModel.OptimizeRoute(customerSet, theEV, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 theList.Add(vsroo_EV);
                 switch (vsroo_EV.Status)
                 {

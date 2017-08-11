@@ -143,7 +143,7 @@ namespace MPMFEVRP.Interfaces
             if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
                 return new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
             theList.Add(vsroo_GDV);
-            VehicleSpecificRouteOptimizationOutcome vsroo_EV = OptimizeRoute(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.OptimizedRoute);
+            VehicleSpecificRouteOptimizationOutcome vsroo_EV = OptimizeRoute(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
             theList.Add(vsroo_EV);
             return new RouteOptimizationOutcome(theList);
         }
