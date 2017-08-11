@@ -571,6 +571,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return new RouteBasedSolution(problemModel, GetXVariablesSetTo1());
         }
+        public VehicleSpecificRoute GetOptimalVehicleSpecificRoute()
+        {
+            return new VehicleSpecificRoute(problemModel, GetXVariablesSetTo1());
+        }
 
         double Distance(int i, int j)
         {

@@ -123,6 +123,8 @@ namespace MPMFEVRP.Interfaces
             }
         }
 
+
+
         public override RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles)
         {
             //This method is designed to work with exactly one GDV and exactly one EV
@@ -201,6 +203,59 @@ namespace MPMFEVRP.Interfaces
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: solver.GetObjValue(), optimizedRoute: ExtractTheSingleRouteFromSolution((RouteBasedSolution)solver.GetCompleteSolution(typeof(RouteBasedSolution))));
+        }
+
+        public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1)
+        {
+            List<string> nondepotSiteIDsInOrder = new List<string>();
+            int vehicleCategoryIndex = (vehicle.Category == VehicleCategories.EV ? 0 : 1);
+            int lastSiteIndex = -1;
+            string lastSiteID = "";
+
+            //first determining the number of routes
+            List<Tuple<int, int, int>> tobeRemoved = new List<Tuple<int, int, int>>();
+            foreach (Tuple<int, int, int> x in allXSetTo1)
+                if ((x.Item1 == 0) && (x.Item3 == vehicleCategoryIndex))
+                {
+                    lastSiteIndex = x.Item2;
+                    lastSiteID = SRD.SiteArray[lastSiteIndex].ID;
+                    nondepotSiteIDsInOrder.Add(lastSiteID);
+                    tobeRemoved.Add(x);
+                }
+            if (tobeRemoved.Count != 1)
+                throw new Exception("EVvsGDV_ProblemModel.GetVSRFromFlowVariables invoked with allXSetTo1 including multiple departures from the depot!");
+            foreach (Tuple<int, int, int> x in tobeRemoved)
+            {
+                allXSetTo1.Remove(x);
+            }
+            tobeRemoved.Clear();
+            //Next, completeing the routes one-at-a-time
+            int lastSiteIndex_2 = -1;
+            bool extensionDetected = false;
+            while ((lastSiteIndex != 0) && (allXSetTo1.Count > 0))
+            {
+                lastSiteIndex_2 = lastSiteIndex;
+                extensionDetected = false;
+                foreach (Tuple<int, int, int> x in allXSetTo1)
+                {
+                    if (x.Item1 == lastSiteIndex_2)
+                    {
+                        lastSiteIndex = x.Item2;
+                        lastSiteID = SRD.SiteArray[lastSiteIndex].ID;
+                        nondepotSiteIDsInOrder.Add(lastSiteID);
+                        allXSetTo1.Remove(x);
+                        extensionDetected = true;
+                        break;
+                    }
+                }
+                if (!extensionDetected)
+                    throw new Exception("Infeasible complete solution due to an incomplete route!");
+            }
+
+            if (allXSetTo1.Count > 0)
+                throw new Exception("Infeasible complete solution due to subtours or routes that don't start/end at the depot");
+
+            return new VehicleSpecificRoute(this, vehicle, nondepotSiteIDsInOrder);
         }
 
         //It can be useful if you want to check customer set archive ever
