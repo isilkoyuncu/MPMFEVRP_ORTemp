@@ -73,6 +73,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
         {
+            if (vehicle == null)
+                vehicle = problemModel.VRD.VehicleArray[1];//Setting the vehicle to the GDV in the problem model unless otherwise specified
             if (vehicle.Category == ProblemDomain.VehicleCategories.EV)
                 throw new Exception("The capability to recreate an EV-optimized customer set from file is not yet implemented!");
             this.customers = customers;
