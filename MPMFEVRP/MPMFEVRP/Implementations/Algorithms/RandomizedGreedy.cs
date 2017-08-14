@@ -28,19 +28,14 @@ namespace MPMFEVRP.Implementations.Algorithms
         XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
 
-        List<DateTime> lapses = new List<DateTime>();
-        DateTime startTime;
-        double duration;
-        int lapseCounter =0;
-        double totalRunTime=0.0;
-        double runTimeLimitInSeconds=0.0;
-
-        
-        
-
+        //Local statistics
         double extensionCompTime;
         double reassignmentCompTime;
-        double wholeCompTime;
+        double totalCompTimeBeforeSetCover;
+        double totalRunTimeMiliSec = 0.0;
+        DateTime globalStartTime;
+
+        double runTimeLimitInSeconds=0.0;
          
         public RandomizedGreedy():base()
         {
@@ -59,17 +54,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SET_COVER, "Set Cover", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
         }
 
-        public override string GetName()
-        {
-            return "Randomized Greedy";
-        }
-
-        public void Initialize() { }
-
         public override void SpecializedInitialize(ProblemModelBase problemModel)
         {
-            startTime = DateTime.Now;
-
             model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
@@ -84,16 +70,17 @@ namespace MPMFEVRP.Implementations.Algorithms
             selectedRecoveryOpt = (Recovery_Options)AlgorithmParameters.GetParameter(ParameterID.ALG_RECOVERY_OPTIONS).Value;
             setCoverOption = AlgorithmParameters.GetParameter(ParameterID.ALG_SET_COVER).GetBoolValue();
             runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
-
         }
 
         public override void SpecializedRun()
         {
+            globalStartTime = DateTime.Now;
+
             extensionCompTime = 0.0;
             reassignmentCompTime = 0.0;
-            wholeCompTime = 0.0;
-            DateTime globalStartTime = DateTime.Now;
+            totalCompTimeBeforeSetCover = 0.0;
             DateTime localStartTime;
+            DateTime localFinishTime;
 
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
             int numberOfEVs = model.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue(); 
@@ -135,32 +122,39 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }//This gives you the new trialSolution
 
                 allSolutions.Add(trialSolution);
-                DateTime lapse = DateTime.Now;
-                lapses.Add(lapse);
-                lapseCounter++;
-                duration = (DateTime.Now - startTime).TotalSeconds;
-            } while (duration < runTimeLimitInSeconds);
+                localFinishTime = DateTime.Now;
+            } while ((localFinishTime - globalStartTime).TotalSeconds < runTimeLimitInSeconds);
 
-            wholeCompTime = (DateTime.Now - globalStartTime).TotalMilliseconds;
+            totalCompTimeBeforeSetCover = (DateTime.Now - globalStartTime).TotalMilliseconds;
 
             if (setCoverOption) { RunSetCover(); }
             else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }
-            totalRunTime = (DateTime.Now - startTime).TotalSeconds;
+
+            totalRunTimeMiliSec = (DateTime.Now - globalStartTime).TotalMilliseconds;
         }
 
         public override void SpecializedConclude()
         {
             //Given that the instance is solved, we need to update status and statistics from it
-
-            // TODO finish this part but first check if we need to treat cplex and analytical solutions differently!!
-
+            //Since Randomized Greedy always provides feasible solutions we need to know if it is a max or min problem so that we can fill UB or LB accordingly
             if (bestSolutionFound != null)
             {
                 bestSolutionFound.Status = AlgorithmSolutionStatus.Feasible;
+
+                if (model.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)//If it is a maximization problem, LB is the incumbent solution's objective value
+                {
+                    bestSolutionFound.LowerBound = bestSolutionFound.ObjectiveFunctionValue;
+                    bestSolutionFound.UpperBound = double.MaxValue;
+                }
+                else //If it is a minimization problem, UB is the incumbent solution's objective value
+                {
+                    bestSolutionFound.UpperBound = bestSolutionFound.ObjectiveFunctionValue;
+                    bestSolutionFound.LowerBound = double.MinValue;
+                }
+                stats.LowerBound = bestSolutionFound.LowerBound;
+                stats.UpperBound = bestSolutionFound.UpperBound;
             }
-            stats.RunTimeMilliSeconds = (long)totalRunTime;
-            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
-            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
+            stats.RunTimeMilliSeconds = (long)totalRunTimeMiliSec;
         }
 
         public override void SpecializedReset()
@@ -176,6 +170,11 @@ namespace MPMFEVRP.Implementations.Algorithms
         public bool IsSupportingStepwiseSolutionCreation()
         {
             return true;
+        }
+
+        public override string GetName()
+        {
+            return "Randomized Greedy";
         }
 
         /// <summary>
@@ -333,9 +332,13 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             //If we're here, we know at least one of the profits is a positive! And that's all we need, if this is a sub-optimal decision, we can still recover from it later, no worries.
             if ((solution.NumCS_assigned2EV < model.NumVehicles[0]))
+            {
                 solution.AddCustomerSet2EVList(CS);
+            }
             else
+            {
                 solution.AddCustomerSet2GDVList(CS);
+            }
             return true;
         }
         void RunSetCover()
