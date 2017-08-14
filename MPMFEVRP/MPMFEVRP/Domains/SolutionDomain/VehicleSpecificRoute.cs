@@ -26,7 +26,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
         List<SiteVisit> siteVisits;
         public int NumberOfSitesVisited { get { return siteVisits.Count; } }
         //TODO check if not adding depot id to this list is the correct way.
-        public List<string> ListOfVisitedSiteIDs { get { List<string> listOfVisitedSiteIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) if(sv.SiteID!=problemModel.SRD.GetSingleDepotID()) listOfVisitedSiteIDs.Add(sv.SiteID); return listOfVisitedSiteIDs; } }
+        public List<string> ListOfVisitedSiteIncludingDepotIDs { get { List<string> listOfVisitedSiteIncludingDepotIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) listOfVisitedSiteIncludingDepotIDs.Add(sv.SiteID); return listOfVisitedSiteIncludingDepotIDs; } }
+        public List<string> ListOfVisitedNonDepotSiteIDs { get { List<string> listOfVisitedNonDepotSiteIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) if (sv.SiteID != problemModel.SRD.GetSingleDepotID()) listOfVisitedNonDepotSiteIDs.Add(sv.SiteID); return listOfVisitedNonDepotSiteIDs; } }
         public bool Feasible { get { return siteVisits.Last().GetFeasible(problemModel.CRD.TMax); } }
         bool rechargeAmountsCalculated = false;
         double iSTotalRechargeAmount = 0.0;
