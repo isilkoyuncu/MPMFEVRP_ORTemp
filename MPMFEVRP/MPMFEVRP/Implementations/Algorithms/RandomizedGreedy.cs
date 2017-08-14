@@ -15,29 +15,39 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     public class RandomizedGreedy : AlgorithmBase
     {
+        //Local algorithm parameters
+        int poolSize = 0;
+        Random random;
+        Selection_Criteria selectedCriterion;
+        double closestPercentSelect;
+        double power;
+        bool isRecoveryNeeded;
+        Recovery_Options selectedRecoveryOpt;
+        bool setCoverOption;
+
+        XCPlexBase CPlexExtender = null;
+        XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
+
         List<DateTime> lapses = new List<DateTime>();
         DateTime startTime;
         double duration;
         int lapseCounter =0;
-        int poolSize = 0;
+        double totalRunTime=0.0;
         double runTimeLimitInSeconds=0.0;
-        Random random;
-        double power;
 
-        Selection_Criteria selectedCriterion;
-        double closestPercentSelect;
-        bool isRecoveryNeeded;
-        Recovery_Options selectedRecoveryOpt;
-        bool setCoverOption;
         
-        XCPlexBase CPlexExtender = null;
-        XCPlexParameters XcplexParam = new XCPlexParameters(); //TODO do we need to add additional parameters for the assigment problem?
+        
 
         double extensionCompTime;
         double reassignmentCompTime;
         double wholeCompTime;
+         
+        public RandomizedGreedy():base()
+        {
+            AddSpecializedParameters();
+        }
 
-        public RandomizedGreedy()
+        public override void AddSpecializedParameters()
         {
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "30"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
@@ -135,7 +145,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             if (setCoverOption) { RunSetCover(); }
             else { bestSolutionFound = allSolutions[GetBestSolnIndex(allSolutions)]; }
-            double durationAfterSetCover = (DateTime.Now - startTime).TotalSeconds;
+            totalRunTime = (DateTime.Now - startTime).TotalSeconds;
         }
 
         public override void SpecializedConclude()
@@ -148,6 +158,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 bestSolutionFound.Status = AlgorithmSolutionStatus.Feasible;
             }
+            stats.RunTimeMilliSeconds = (long)totalRunTime;
+            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
+            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
         }
 
         public override void SpecializedReset()

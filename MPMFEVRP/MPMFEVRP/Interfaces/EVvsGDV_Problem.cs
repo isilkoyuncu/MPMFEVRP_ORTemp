@@ -11,6 +11,9 @@ namespace MPMFEVRP.Interfaces
 {
     public abstract class EVvsGDV_Problem : ProblemBase
     {
+        protected CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType;
+        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get { return coverConstraintType; } }
+
         public EVvsGDV_Problem() { }
 
         public EVvsGDV_Problem(ProblemDataPackage PDP)

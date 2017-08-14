@@ -32,7 +32,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             return "Customer Set-based Column Generation Heuristic";
         }
-
+        public override void AddSpecializedParameters(){ }
         public override void SpecializedInitialize(ProblemModelBase model)
         {
             startTime = DateTime.Now;

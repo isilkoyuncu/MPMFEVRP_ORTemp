@@ -16,8 +16,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MaxProfit_VRP_Model: EVvsGDV_ProblemModel
     {
-        string problemName;
-        
+
+
+
+        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem) : base(problem){ }
+
         public EVvsGDV_MaxProfit_VRP_Model()
         {
             EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
@@ -25,30 +28,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             objectiveFunctionType = problem.ObjectiveFunctionType;
             coverConstraintType = problem.CoverConstraintType;
             rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full;
-
-            PopulateCompatibleSolutionTypes();
-            CreateCustomerSetArchive();
         }//empty constructor
-        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem)
-        {
-            pdp = new ProblemDataPackage(problem.PDP);
-            problemCharacteristics = problem.ProblemCharacteristics;
-            inputFileName = problem.PDP.InputFileName;
-            problemName = problem.GetName();
-
-            objectiveFunctionType = problem.ObjectiveFunctionType;
-            coverConstraintType = problem.CoverConstraintType;
-            SetNumVehicles();
-            rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
-
-            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
-
-            PopulateCompatibleSolutionTypes();
-            CreateCustomerSetArchive();
-        }
-        
-        
         public override string GetDescription()
         {
             throw new NotImplementedException();
@@ -108,19 +88,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             throw new NotImplementedException();
         }
 
-        void PopulateCompatibleSolutionTypes()
-        {
-            compatibleSolutions = new List<Type>()
-            {
-                typeof(CustomerSetBasedSolution),
-                typeof(RouteBasedSolution)
-            };
-        }
-        void CreateCustomerSetArchive()
-        {
-            archiveAllCustomerSets = true;
-            customerSetArchive = new CustomerSetList();
-        }
+
 
         // These following 3 methods exports calculated information as a text file
         void ExportDistancesAsTxt()
