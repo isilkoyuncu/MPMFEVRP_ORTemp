@@ -13,6 +13,8 @@ namespace MPMFEVRP.Implementations.Algorithms
     {
         SolutionList unexploredList;
         double lowerBound;
+        public override void AddSpecializedParameters() { }
+
 
         public override string GetName()
         {

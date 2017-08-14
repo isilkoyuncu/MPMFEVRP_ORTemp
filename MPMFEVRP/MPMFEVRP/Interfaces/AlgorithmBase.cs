@@ -30,7 +30,11 @@ namespace MPMFEVRP.Interfaces
         public AlgorithmBase()
         {
             algorithmParameters = new InputOrOutputParameterSet();
-
+            AddParameters();
+        }
+        
+        public void AddParameters()
+        {
             algorithmParameters.AddParameter(
                 new InputOrOutputParameter(
                     ParameterID.ALG_RUNTIME_SECONDS,
@@ -47,6 +51,7 @@ namespace MPMFEVRP.Interfaces
                     SolutionUtil.GetAllSolutionNames()[0],
                     UserInputObjectType.ComboBox));
         }
+        public abstract void AddSpecializedParameters();
 
         public void Initialize(ProblemModelBase model)
         {

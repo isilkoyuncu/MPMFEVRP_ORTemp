@@ -14,6 +14,8 @@ namespace MPMFEVRP.Interfaces
 {
     public abstract class EVvsGDV_ProblemModel: ProblemModelBase
     {
+        protected string problemName;
+
         RouteOptimizerOutput roo;
 
         protected XCPlex_NodeDuplicatingFormulation EV_TSPSolver;
@@ -25,6 +27,25 @@ namespace MPMFEVRP.Interfaces
         
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
+        public EVvsGDV_ProblemModel() { }
+        public EVvsGDV_ProblemModel(EVvsGDV_Problem problem)
+        {
+            pdp = new ProblemDataPackage(problem.PDP);
+            problemCharacteristics = problem.ProblemCharacteristics;
+            inputFileName = problem.PDP.InputFileName;
+            problemName = problem.GetName();
+
+            objectiveFunctionType = problem.ObjectiveFunctionType;
+            coverConstraintType = problem.CoverConstraintType;
+            SetNumVehicles();
+            rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
+
+            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+
+            PopulateCompatibleSolutionTypes();
+            CreateCustomerSetArchive();
+        }
 
         /// <summary>
         /// EVvsGDV_MaxProfit_VRP_Model.OptimizeForSingleVehicle can only be called from CustomerSet, which requests to be optimized and passes itself hereinto
@@ -179,7 +200,7 @@ namespace MPMFEVRP.Interfaces
         {
             if (vehicle.Category != VehicleCategories.EV)
                 throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
-            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedSiteIDs);
+            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
         }
         bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
         {
@@ -259,6 +280,19 @@ namespace MPMFEVRP.Interfaces
             NumVehicles = new int[pdp.VRD.NumVehicleCategories];
             NumVehicles[0] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
             NumVehicles[1] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_GDV).GetIntValue();
+        }
+        void PopulateCompatibleSolutionTypes()
+        {
+            compatibleSolutions = new List<Type>()
+            {
+                typeof(CustomerSetBasedSolution),
+                typeof(RouteBasedSolution)
+            };
+        }
+        void CreateCustomerSetArchive()
+        {
+            archiveAllCustomerSets = true;
+            customerSetArchive = new CustomerSetList();
         }
         //It can be useful if you want to check customer set archive ever
         public void ExportCustomerSetArchive2txt()

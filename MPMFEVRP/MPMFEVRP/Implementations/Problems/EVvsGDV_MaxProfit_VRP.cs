@@ -18,17 +18,17 @@ namespace MPMFEVRP.Implementations.Problems
          * No time windows
          * Each customer must be visited at most once
          * */
-        public CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get
-            { return CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce; } }
 
         public EVvsGDV_MaxProfit_VRP()
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
 
         public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP) : base(PDP)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
 
         public override string GetName()

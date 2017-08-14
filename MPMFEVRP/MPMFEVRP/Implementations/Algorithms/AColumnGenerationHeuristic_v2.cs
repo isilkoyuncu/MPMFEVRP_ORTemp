@@ -35,6 +35,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             return "Customer Set-based Column Generation Heuristic Version 2: Keeps the customer set archive within (not in problem model)";
         }
+        public override void AddSpecializedParameters() { }
 
         public override void SpecializedInitialize(ProblemModelBase model)
         {

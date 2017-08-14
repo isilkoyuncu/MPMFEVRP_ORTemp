@@ -16,36 +16,15 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MinCost_VRP_Model : EVvsGDV_ProblemModel
     {
-        string problemName;
-
         public EVvsGDV_MinCost_VRP_Model()
         {
             EVvsGDV_MinCost_VRP problem = new EVvsGDV_MinCost_VRP();
             problemName = problem.GetName();
-            //objectiveFunctionType = problem.ObjectiveFunctionType;
-            //coverConstraintType = problem.CoverConstraintType;
-            //rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
-
-            PopulateCompatibleSolutionTypes();
-            CreateCustomerSetArchive();
-        }//empty constructor
-        public EVvsGDV_MinCost_VRP_Model(EVvsGDV_MinCost_VRP problem)
-        {
-            pdp = new ProblemDataPackage(problem.PDP);
-            inputFileName = problem.PDP.InputFileName;
-            problemName = problem.GetName();
             objectiveFunctionType = problem.ObjectiveFunctionType;
             coverConstraintType = problem.CoverConstraintType;
-            SetNumVehicles();
-            rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
-
-            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            //EV_TSPSolver.ExportModel("EV_tsp_minCostModel.lp");
-            GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
-
-            PopulateCompatibleSolutionTypes();
-            CreateCustomerSetArchive();
-        }
+            rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
+        }//empty constructor
+        public EVvsGDV_MinCost_VRP_Model(EVvsGDV_MinCost_VRP problem):base (problem){ }
 
         public override string GetDescription()
         {
@@ -106,22 +85,5 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             throw new NotImplementedException();
         }
-
-        void PopulateCompatibleSolutionTypes()
-        {
-            compatibleSolutions = new List<Type>()
-            {
-                typeof(CustomerSetBasedSolution),
-                typeof(RouteBasedSolution)
-
-            };
-        }
-        void CreateCustomerSetArchive()
-        {
-            archiveAllCustomerSets = true;
-            customerSetArchive = new CustomerSetList();
-        }
-
-
     }
 }
