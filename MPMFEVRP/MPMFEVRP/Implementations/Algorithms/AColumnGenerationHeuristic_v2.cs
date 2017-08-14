@@ -46,7 +46,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             //These are the important characteristics that will have to be tied to the form
             beamWidth = 1;
-            popStrategy = CustomerSetList.CustomerListPopStrategy.MaxOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
+            popStrategy = CustomerSetList.CustomerListPopStrategy.First;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
