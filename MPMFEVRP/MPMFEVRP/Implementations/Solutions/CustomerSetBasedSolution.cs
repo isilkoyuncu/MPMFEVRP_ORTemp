@@ -29,6 +29,8 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
+            upperBound = double.MaxValue;
+            lowerBound = double.MinValue;
         }
 
         public CustomerSetBasedSolution(ProblemModelBase model)
@@ -91,6 +93,15 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             assigned2GDV.Add(currentCS);
             objectiveFunctionValue += currentCS.RouteOptimizerOutcome.OFV[1];
+        }
+
+        public void UpdateUpperLowerBoundsAndStatus()
+        {
+            if (model.ObjectiveFunctionType == Models.ObjectiveFunctionTypes.Maximize)//If it is a maximization problem, LB is the incumbent solution's objective value
+                lowerBound = objectiveFunctionValue;
+            else //If it is a minimization problem, UB is the incumbent solution's objective value
+                upperBound = objectiveFunctionValue;
+            status = Domains.AlgorithmDomain.AlgorithmSolutionStatus.Feasible;
         }
 
         public double GetTotalVehicleFixedCost()

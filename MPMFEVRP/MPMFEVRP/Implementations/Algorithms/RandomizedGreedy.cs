@@ -139,18 +139,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             //Since Randomized Greedy always provides feasible solutions we need to know if it is a max or min problem so that we can fill UB or LB accordingly
             if (bestSolutionFound != null)
             {
-                bestSolutionFound.Status = AlgorithmSolutionStatus.Feasible;
-
-                if (model.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)//If it is a maximization problem, LB is the incumbent solution's objective value
-                {
-                    bestSolutionFound.LowerBound = bestSolutionFound.ObjectiveFunctionValue;
-                    bestSolutionFound.UpperBound = double.MaxValue;
-                }
-                else //If it is a minimization problem, UB is the incumbent solution's objective value
-                {
-                    bestSolutionFound.UpperBound = bestSolutionFound.ObjectiveFunctionValue;
-                    bestSolutionFound.LowerBound = double.MinValue;
-                }
+                status = bestSolutionFound.Status;
                 stats.LowerBound = bestSolutionFound.LowerBound;
                 stats.UpperBound = bestSolutionFound.UpperBound;
             }
@@ -334,10 +323,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             if ((solution.NumCS_assigned2EV < model.NumVehicles[0]))
             {
                 solution.AddCustomerSet2EVList(CS);
+                solution.UpdateUpperLowerBoundsAndStatus();
             }
             else
             {
                 solution.AddCustomerSet2GDVList(CS);
+                solution.UpdateUpperLowerBoundsAndStatus();
             }
             return true;
         }
