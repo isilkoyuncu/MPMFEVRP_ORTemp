@@ -14,7 +14,7 @@ namespace MPMFEVRPTests.TestUtility_DefaultGetters
         {
             List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();
             CustomerSet outcome = new CustomerSet(allCustomers[5], theProblemModel);
-            outcome.Extend(allCustomers[2], theProblemModel);
+            outcome.ExtendAndOptimize(allCustomers[2], theProblemModel);
             return outcome;
         }
 

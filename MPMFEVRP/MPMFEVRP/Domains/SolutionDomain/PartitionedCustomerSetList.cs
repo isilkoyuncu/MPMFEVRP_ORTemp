@@ -27,10 +27,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
             CSLList = new List<CustomerSetList>();
         }
 
-        public void ConsiderForAddition(CustomerSetList CSL)
+        public void PopAndConsiderForAddition(CustomerSetList CSL)//TODO: Delete this method because it creates tight coupling
         {
             while (CSL.Count > 0)
                 ConsiderForAddition(CSL.Pop(CustomerSetList.CustomerListPopStrategy.First));//TODO: Verify that this actually depletes the CSL one-CS-at-a-time
+        }
+        public void ConsiderForAddition(CustomerSetList CSL)
+        {
+            foreach (CustomerSet cs in CSL)
+                ConsiderForAddition(cs);
         }
         public void ConsiderForAddition(CustomerSet CS)
         {
@@ -76,7 +81,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
         }
 
-        public bool Contains(CustomerSet cs) { return (CSLList.Count == 0 ? false : (CSLList[cs.NumberOfCustomers] == null ? false : CSLList[cs.NumberOfCustomers].Contains(cs))); }
+        public bool ContainsAnIdenticalCustomerSet(CustomerSet cs)
+        {
+            return (CSLList.Count == 0 ? false : 
+                (cs.NumberOfCustomers >= CSLList.Count ? false : 
+                (CSLList[cs.NumberOfCustomers] == null ? false : CSLList[cs.NumberOfCustomers].ContainsAnIdenticalCustomerSet(cs))));
+        }
         public void Add(CustomerSet cs)
         {
             if ((CSLList.Count==0)||(cs.NumberOfCustomers>deepestLevel))

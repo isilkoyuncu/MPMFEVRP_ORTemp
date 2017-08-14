@@ -84,7 +84,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     PopulateChildren();
 
                     //add the children to the unexplored list (level:currentLevel+1)
-                    unexploredCustomerSets.ConsiderForAddition(children);//TODO: Verify that this clears the children set
+                    unexploredCustomerSets.PopAndConsiderForAddition(children);//TODO: Verify that this clears the children set
 
                     //end of the level, moving on to the next level
                     currentLevel++;
@@ -117,7 +117,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 foreach (string customerID in remainingCustomers)
                 {
                     CustomerSet candidate = new CustomerSet(cs);
-                    candidate.Extend(customerID, model);
+                    candidate.ExtendAndOptimize(customerID, model);
                     if(!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved
                         if((candidate.RouteOptimizerOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
                         {

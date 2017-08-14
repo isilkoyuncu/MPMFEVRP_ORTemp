@@ -101,7 +101,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
                         localStartTime = DateTime.Now;
                         CustomerSet extendedCS = new CustomerSet(currentCS);
-                        extendedCS.Extend(customerToAdd, model); //Extend function also optimizes the extended customer set
+                        extendedCS.ExtendAndOptimize(customerToAdd, model); //Extend function also optimizes the extended customer set
                         extensionCompTime += (DateTime.Now - localStartTime).TotalMilliseconds;
 
                         csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (trialSolution.NumCS_assigned2EV < numberOfEVs));

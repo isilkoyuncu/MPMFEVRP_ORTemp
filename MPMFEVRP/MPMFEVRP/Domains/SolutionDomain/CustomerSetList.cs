@@ -201,5 +201,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             sw.Close();
         }
+
+        public bool ContainsAnIdenticalCustomerSet(CustomerSet candidate)
+        {
+            foreach (CustomerSet cs in this)
+                if (cs.IsIdentical(candidate))
+                    return true;
+            return false;
+        }
     }
 }

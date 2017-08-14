@@ -11,7 +11,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
     public class RouteOptimizationOutcome//TODO: This class will completely replace RouteOptimizerOutput
     {
         List<VehicleSpecificRouteOptimizationOutcome> theList;
-        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
+        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: Retrieved from archive relates to CustomerSet, not RouteOptimizationOutcome!!! It should be deleted from here.
         RouteOptimizationStatus overallStatus;
 
         public RouteOptimizationOutcome()

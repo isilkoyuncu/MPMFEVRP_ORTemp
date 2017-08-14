@@ -56,9 +56,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             //The following are miscellaneous variables needed in the algorithm
-            string GDVFeasibleCustomerSetArchiveFileName = model.InputFileName.Insert(model.InputFileName.Length - 4, "-GDVFeasibleCSArchive");
+            string GDVEvaluatedCustomerSetArchiveFileName = model.InputFileName.Insert(model.InputFileName.Length - 4, "-GDVEvaluatedCSArchive");
             string GDVFeasibleCustomerSetUnexploredFileName = model.InputFileName.Insert(model.InputFileName.Length - 4, "-UnexploredGDVFeasibleCSList");
-            bool ArchiveFileExists = System.IO.File.Exists(GDVFeasibleCustomerSetArchiveFileName);
+            bool ArchiveFileExists = System.IO.File.Exists(GDVEvaluatedCustomerSetArchiveFileName);
             bool UnexploredFileExists = System.IO.File.Exists(GDVFeasibleCustomerSetUnexploredFileName);
             bool UnexploredFileEmpty = (UnexploredFileExists ? (new System.IO.FileInfo(GDVFeasibleCustomerSetUnexploredFileName).Length == 0) : true);
             bool phase1Completed = (ArchiveFileExists && UnexploredFileEmpty);
@@ -74,7 +74,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //If the archive file exists, it must be read
                 if (ArchiveFileExists)//This means the unexplored file is not empty
                 {
-                    allCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVFeasibleCustomerSetArchiveFileName, model);
+                    allCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVEvaluatedCustomerSetArchiveFileName, model);
                     unexploredCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVFeasibleCustomerSetUnexploredFileName, model);
                 }
                 else//the archive file doesn't exist, we'll simply ignore the unexplored file even if it exists
@@ -110,7 +110,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         PopulateChildren();//TODO: Make sure this uses the right extend method and route optimization
 
                         //add the children to the unexplored list (level:currentLevel+1)
-                        unexploredCustomerSets.ConsiderForAddition(children);//TODO: Verify that this clears the children set
+                        PlaceChildren();
 
                         //end of the level, moving on to the next level
                         currentLevel++;
@@ -125,13 +125,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //Write to the archive file (don't append, just wipe old stuff out and replace because we can't keep track of which is old which is new without separating lists and separation would just overly complicate the code)
                 if (unexploredCustomerSets.TotalCount == 0)
                 {
-                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(allCustomerSets, GDVFeasibleCustomerSetArchiveFileName, model);
+                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(allCustomerSets, GDVEvaluatedCustomerSetArchiveFileName, model);
                     phase1Completed = true;
                 }
                 else
                 {
                     SetCoverFileUtilities.CustomerSetArchive.SaveToFile(unexploredCustomerSets, GDVFeasibleCustomerSetUnexploredFileName, model);
-                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(allCustomerSets, GDVFeasibleCustomerSetArchiveFileName, model);
+                    SetCoverFileUtilities.CustomerSetArchive.SaveToFile(allCustomerSets, GDVEvaluatedCustomerSetArchiveFileName, model);
                 }
             }
 
@@ -154,7 +154,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     PopulateChildren();
 
                     //add the children to the unexplored list (level:currentLevel+1)
-                    unexploredCustomerSets.ConsiderForAddition(children);//TODO: Verify that this clears the children set
+                    PlaceChildren();
 
                     //end of the level, moving on to the next level
                     currentLevel++;
@@ -187,29 +187,40 @@ namespace MPMFEVRP.Implementations.Algorithms
                 foreach (string customerID in remainingCustomers)
                 {
                     CustomerSet candidate = new CustomerSet(cs);
-                    candidate.Extend(customerID, model, theGDV);
-                    if (!candidate.RouteOptimizationOutcome.RetrievedFromArchive)//not retrieved
-                        if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
-                        {
-                            children.Add(candidate);
-                        }
+                    candidate.Extend(customerID);
+                    if (!allCustomerSets.ContainsAnIdenticalCustomerSet(candidate))
+                    {
+                        candidate.Optimize(model, theGDV);
+                        allCustomerSets.Add(candidate);
+                        //if (!candidate.RouteOptimizationOutcome.RetrievedFromArchive)//Disabled because it is irrelevant
+                            if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
+                            {
+                                children.Add(candidate);
+                            }
+                    }//if candidate is not already in the archive
                 }//foreach (string customerID in remainingCustomers)
             }//foreach (CustomerSet cs in parents)
             parents.Clear();
         }
+        void PlaceChildren()
+        {
+            unexploredCustomerSets.ConsiderForAddition(children);
+            children.Clear();
+        }
+
         void RunSetCover()
         {
             CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
         }
-        void EvaluateForGDV(CustomerSet customerSet, Vehicle vehicle)
+        void EvaluateForGDV(CustomerSet customerSet, Vehicle vehicle)//TODO: Re-think this method's name. If it's for GDV only, why does it take vehicle as an input and not verify it's a GDV?
         {
             //Evaluate is not to be mistaken with explore
             //Evaluate is for a newly created node
             //At the end of the evaluation, a node can be eliminated or kept (by adding to the unexplored list)
 
-            if (allCustomerSets.Contains(customerSet))
+            if (allCustomerSets.ContainsAnIdenticalCustomerSet(customerSet))
                 return;
             VehicleSpecificRouteOptimizationOutcome vsroo = model.OptimizeRoute(customerSet, vehicle);
             customerSet.RouteOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
