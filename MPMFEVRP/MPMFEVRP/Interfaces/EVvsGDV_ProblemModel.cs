@@ -179,7 +179,7 @@ namespace MPMFEVRP.Interfaces
         {
             if (vehicle.Category != VehicleCategories.EV)
                 throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
-            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.listOfVisitedSiteIDs);
+            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedSiteIDs);
         }
         bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
         {
@@ -237,7 +237,8 @@ namespace MPMFEVRP.Interfaces
                     {
                         lastSiteIndex = x.Item2;
                         lastSiteID = SRD.SiteArray[lastSiteIndex].ID;
-                        nondepotSiteIDsInOrder.Add(lastSiteID);
+                        if(lastSiteID!=SRD.GetSingleDepotID())
+                            nondepotSiteIDsInOrder.Add(lastSiteID);
                         allXSetTo1.Remove(x);
                         extensionDetected = true;
                         break;

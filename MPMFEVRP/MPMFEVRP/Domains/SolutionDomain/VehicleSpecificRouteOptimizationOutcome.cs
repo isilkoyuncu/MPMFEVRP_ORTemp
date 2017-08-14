@@ -30,6 +30,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             vehicleCategory = twinVSROO.vehicleCategory;
             status = twinVSROO.status;
             objectiveFunctionValue = twinVSROO.objectiveFunctionValue;
+            if (twinVSROO.vsOptimizedRoute == null)
+                vsOptimizedRoute = null;
+            else
             vsOptimizedRoute = new VehicleSpecificRoute(twinVSROO.vsOptimizedRoute);//A new instance is created here because we may want to extend the route manually in heuristic algorithms 
         }
         public VehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory, VehicleSpecificRouteOptimizationStatus status, double objectiveFunctionValue = 0.0, VehicleSpecificRoute vsOptimizedRoute = null)
