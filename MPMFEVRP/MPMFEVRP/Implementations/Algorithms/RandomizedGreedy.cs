@@ -86,7 +86,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             int numberOfEVs = model.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue(); 
             //for (int trial = 0; trial < poolSize; trial++)
             do{
-                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution();
+                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution(model);
                 List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
                 bool csSuccessfullyAdded = false;
                 do

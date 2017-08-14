@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Solutions
 
         private int[,] zSetTo1;
 
-        public CustomerSetBasedSolution() 
+        public CustomerSetBasedSolution() //TODO check if we really need these to be created in the empty constructor
         {
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
@@ -38,6 +38,8 @@ namespace MPMFEVRP.Implementations.Solutions
             this.model = model;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
+            upperBound = double.MaxValue;
+            lowerBound = double.MinValue;
         }
 
         public CustomerSetBasedSolution(CustomerSetBasedSolution twinCSBasedSolution)
