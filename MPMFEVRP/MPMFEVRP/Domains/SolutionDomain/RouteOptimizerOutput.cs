@@ -31,6 +31,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public RouteOptimizerOutput(bool retrievedFromArchive, RouteOptimizerOutput twinRouteOptimizerOutput)
         {
+            if (twinRouteOptimizerOutput == null)
+                return;
             if (retrievedFromArchive)
                 this.retrievedFromArchive = true;
             else

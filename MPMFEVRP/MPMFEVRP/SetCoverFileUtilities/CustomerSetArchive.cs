@@ -27,11 +27,14 @@ namespace MPMFEVRP.SetCoverFileUtilities
         }
         static string CustomerSetRow(CustomerSet cs, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
         {
-            return CustomerSetToString(cs, problemModel) + "\t" + cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status.ToString();
+            if (cs.RouteOptimizationOutcome.GetRouteOptimizationStatus() == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+                return CustomerSetToString(cs, problemModel) + "\t" + VehicleSpecificRouteOptimizationStatus.Infeasible.ToString();
+            else
+                return CustomerSetToString(cs, problemModel) + "\t" + cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status.ToString();
         }
         static string CustomerSetToString(CustomerSet cs, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
         {
-            if (cs.RouteOptimizationOutcome == null)
+            if ((cs.RouteOptimizationOutcome == null) || (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV) == null))
                 return SeparateBySpace(cs.Customers);
             //If here, cs.RouteOptimizationOutcome != null
             if (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status!= VehicleSpecificRouteOptimizationStatus.Optimized)
