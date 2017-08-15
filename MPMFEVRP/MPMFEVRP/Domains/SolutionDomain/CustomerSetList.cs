@@ -46,11 +46,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     return true;
             return false;
         }
-        public RouteOptimizerOutput Retrieve(CustomerSet candidate)
+
+        public RouteOptimizationOutcome Retrieve(CustomerSet candidate)
         {
             for (int i = 0; i < this.Count; i++)
                 if (this[i].IsIdentical(candidate))
-                    return this[i].RouteOptimizerOutcome;
+                    return this[i].RouteOptimizationOutcome;
             return null;
         }
 
@@ -184,7 +185,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             sw.WriteLine("Customer Set\tGDV Feasible\tGDV Miles");
             foreach (CustomerSet cs in this)
             {
-                if ((writeInfeasibles) || (cs.RouteOptimizerOutcome.Feasible[1]))
+                if ((writeInfeasibles) || (cs.RouteOptimizationOutcome.IsGdvFeasible()))
                     sw.WriteLine("{0}\t{1}\t{2:F5}", cs.Encode(), cs.IsGDVFeasible, cs.GDVMilesTraveled);
             }
             sw.Close();
@@ -196,7 +197,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             sw.WriteLine("Customer Set\tGDV Feasible\tGDV Miles\tAFV Feasible\tAFV Miles");
             foreach (CustomerSet cs in this)
             {
-                if ((writeInfeasibles) || (cs.RouteOptimizerOutcome.Feasible[1]))
+                if ((writeInfeasibles) || (cs.RouteOptimizationOutcome.IsGdvFeasible()))
                     sw.WriteLine("{0}\t{1}\t{2:F5}\t{3}\t{4:F5}", cs.Encode(), cs.IsGDVFeasible, cs.GDVMilesTraveled, cs.IsAFVFeasible, cs.AFVMilesTraveled);
             }
             sw.Close();
