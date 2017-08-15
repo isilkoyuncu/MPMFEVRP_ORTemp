@@ -85,12 +85,18 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 foreach (ObjectiveFunctionInputDataPackage OFIDP in IndividualOFIDPs_EV)
                 {
                     numberOfCustomersServed_EV += OFIDP.numberOfCustomersServed_EV;
-                    numberOfCustomersServed_GDV += OFIDP.numberOfCustomersServed_GDV;
                     prizeCollected_EV += OFIDP.prizeCollected_EV;
-                    prizeCollected_GDV += OFIDP.prizeCollected_GDV;
                     numberOfVehiclesUsed_EV += OFIDP.numberOfVehiclesUsed_EV;
-                    numberOfVehiclesUsed_GDV += OFIDP.numberOfVehiclesUsed_GDV;
                     VMT_EV += OFIDP.VMT_EV;
+                }
+            }
+            if (IndividualOFIDPs_GDV != null)
+            {
+                foreach (ObjectiveFunctionInputDataPackage OFIDP in IndividualOFIDPs_GDV)
+                {
+                    numberOfCustomersServed_GDV += OFIDP.numberOfCustomersServed_GDV;
+                    prizeCollected_GDV += OFIDP.prizeCollected_GDV;
+                    numberOfVehiclesUsed_GDV += OFIDP.numberOfVehiclesUsed_GDV;
                     VMT_GDV += OFIDP.VMT_GDV;
                 }
             }
