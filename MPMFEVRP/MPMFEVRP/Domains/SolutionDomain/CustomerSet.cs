@@ -48,8 +48,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public CustomerSet(string customerID)
         {
-            customers = new List<string>();
-            customers.Add(customerID);
+            customers = new List<string> { customerID };
             routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
         public CustomerSet(CustomerSet twinCS)

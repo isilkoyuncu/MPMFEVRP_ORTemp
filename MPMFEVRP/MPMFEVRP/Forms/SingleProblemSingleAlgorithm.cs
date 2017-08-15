@@ -21,7 +21,7 @@ namespace MPMFEVRP.Forms
         IProblem theProblem;
         ProblemModelBase theProblemModel;
         IAlgorithm theAlgorithm;
-        ISolution theSolution;
+        //ISolution theSolution;
         public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();

@@ -12,8 +12,10 @@ namespace MPMFEVRP.SetCoverFileUtilities
     {
         public static void SaveToFile(PartitionedCustomerSetList pcsl, string filename, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
         {
-            StreamWriter sw = new StreamWriter(filename, false);//append not allowed
-            sw.AutoFlush = true;
+            StreamWriter sw = new StreamWriter(filename, false)
+            {
+                AutoFlush = true
+            };//append not allowed
             sw.WriteLine(HeaderRow());
             foreach(CustomerSet cs in pcsl.ToCustomerSetList())
             {
@@ -72,8 +74,6 @@ namespace MPMFEVRP.SetCoverFileUtilities
         }
         static List<string> RemoveSpacesAndConvertToList(string spaceSeparatedString)
         {
-            List<string> outcome = spaceSeparatedString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
-            return outcome;
             return spaceSeparatedString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
         }
     }

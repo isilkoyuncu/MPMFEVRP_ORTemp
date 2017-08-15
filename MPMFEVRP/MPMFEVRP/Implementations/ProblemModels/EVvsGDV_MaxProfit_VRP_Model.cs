@@ -49,9 +49,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
         public override bool CheckFeasibilityOfSolution(ISolution solution)
         {
-            throw new NotImplementedException();
-
             Type solutionType = solution.GetType();
+            if (!GetCompatibleSolutions().Contains(solutionType))
+                throw new Exception("Solution plugged into EVvsGDV_MinCost_VRP_Model.CheckFeasibilityOfSolution is not listed in GetCompatibleSolutions()!");
 
             if (solutionType == typeof(CustomerSetBasedSolution))
             {
@@ -65,7 +65,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("solution plugged into EVvsGDV_MaxProfit_VRP_Model.CheckFeasibilityOfSolution is incompatible!");
+                System.Windows.Forms.MessageBox.Show("Solution plugged into EVvsGDV_MaxProfit_VRP_Model.CheckFeasibilityOfSolution is not accounted for!");
                 return false;
             }
         }
@@ -73,9 +73,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
         {
             throw new NotImplementedException();
 
-            bool outcome = true;
-            //TODO check for any infeasibility and return false as soon as one is found!
-            return outcome;
+            //bool outcome = true;
+            ////TODO check for any infeasibility and return false as soon as one is found!
+            //return outcome;
         }
         public override double CalculateObjectiveFunctionValue(ISolution solution)
         {

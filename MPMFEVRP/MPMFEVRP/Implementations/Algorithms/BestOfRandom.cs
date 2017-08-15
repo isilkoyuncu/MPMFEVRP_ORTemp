@@ -11,8 +11,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     public class BestOfRandom : AlgorithmBase
     {
-        SolutionList unexploredList;
-        double lowerBound;
+        //SolutionList unexploredList;
+        //double lowerBound;
         public override void AddSpecializedParameters() { }
 
 

@@ -34,9 +34,9 @@ namespace MPMFEVRP.Forms
             var manager = new ProjectManager();
 
             Random r = new Random();
-            int cumulTime = 0;
+            //int cumulTime = 0;
             int maxLateness = int.MinValue;
-            int lateness = 0;
+            //int lateness = 0;
             //foreach (var jobID in theSolution.IDs)
             //{
             //    var task = new ColoredTask()
@@ -70,8 +70,7 @@ namespace MPMFEVRP.Forms
 
             chart.PaintTask += (s, e) =>
             {
-                ColoredTask ctask = e.Task as ColoredTask;
-                if (ctask != null)
+                if (e.Task is ColoredTask ctask)
                 {
                     var format = new TaskFormat();
                     format = e.Format;
