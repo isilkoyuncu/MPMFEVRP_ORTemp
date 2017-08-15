@@ -11,8 +11,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     public class BestOfRandom : AlgorithmBase
     {
-        //SolutionList unexploredList;
-        //double lowerBound;
+        SolutionList unexploredList;
+        double lowerBound;
         public override void AddSpecializedParameters() { }
 
 
@@ -31,14 +31,14 @@ namespace MPMFEVRP.Implementations.Algorithms
             //TODO uncomment this afer writing new default solution
 
 
-            //unexploredList = new SolutionList();
+            unexploredList = new SolutionList();
 
-            //// Step 0: Create root and add it to unexploredList
+            // Step 0: Create root and add it to unexploredList
 
-            //ISolution root = new DefaultSolution(model);
-            //unexploredList.Add(root);
+            ISolution root = new CustomerSetBasedSolution();//TODO: This was default solution, perhaps we should add more details to the problem model to specify the default solution type there
+            unexploredList.Add(root);
 
-            //lowerBound = root.LowerBound;
+            lowerBound = root.LowerBound;
         }
 
         public override void SpecializedReset()
@@ -48,6 +48,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
+            //TODO: Re-think the BestOfRandom algorithm: Why is it creating solutions via branching? Isn't there a method to get pseudo-random complete solutions already?
             while (unexploredList.Count > 0)
             {
                 // Node selection step
