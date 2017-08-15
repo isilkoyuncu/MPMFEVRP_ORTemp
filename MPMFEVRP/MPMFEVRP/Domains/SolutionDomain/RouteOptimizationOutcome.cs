@@ -151,15 +151,43 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return;
             }
         }
-
-        public List <double> GetVehicleMilesTraveled() //This outcome is parallel to the RouteOptimizationOutcome theList.
+        public double GetEVMilesTraveled()
         {
-            List<double> outcome = new List<double>();
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
             {
-                outcome.Add(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled());
+                if (vsroo.VehicleCategory == VehicleCategories.EV)
+                    return vsroo.VSOptimizedRoute.GetVehicleMilesTraveled();
             }
-            return outcome;
+            throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
+        }
+
+        public double GetGDVMilesTraveled()
+        {
+            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
+            {
+                if(vsroo.VehicleCategory==VehicleCategories.GDV)
+                    return vsroo.VSOptimizedRoute.GetVehicleMilesTraveled();
+            }
+             throw new Exception("There is no GDV in theList hence we couldn't retrieve it's miles traveled");
+        }
+        public bool IsEvFeasible()
+        {
+            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
+            {
+                if (vsroo.VehicleCategory == VehicleCategories.EV)
+                    return vsroo.VSOptimizedRoute.Feasible;
+            }
+            throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
+        }
+
+        public bool IsGdvFeasible()
+        {
+            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
+            {
+                if (vsroo.VehicleCategory == VehicleCategories.GDV)
+                    return vsroo.VSOptimizedRoute.Feasible;
+            }
+            throw new Exception("There is no GDV in theList hence we couldn't retrieve it's miles traveled");
         }
 
     }

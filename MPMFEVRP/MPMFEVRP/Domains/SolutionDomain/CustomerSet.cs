@@ -21,20 +21,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
 
-        RouteOptimizerOutput routeOptimizerOutcome;
-        public RouteOptimizerOutput RouteOptimizerOutcome { get { return routeOptimizerOutcome; } set { routeOptimizerOutcome = value; } }
-
-        RouteOptimizationOutcome routeOptimizationOutcome;//TODO Delete RouteOptimizerOutput and use this instead
+        RouteOptimizationOutcome routeOptimizationOutcome;
         public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
-        public bool IsGDVFeasible { get { return routeOptimizerOutcome.Feasible[1]; } }
-        public double GDVMilesTraveled { get { if (routeOptimizerOutcome.Feasible[1]) return routeOptimizerOutcome.OptimizedRoute[1].TotalDistance; else return 0.0; } }
-        public bool IsAFVFeasible { get { return routeOptimizerOutcome.Feasible[0]; } }
-        public double AFVMilesTraveled { get { if (routeOptimizerOutcome.Feasible[0]) return routeOptimizerOutcome.OptimizedRoute[0].TotalDistance; else return 0.0; } }
+        public bool IsGDVFeasible { get { return routeOptimizationOutcome.IsGdvFeasible(); } }
+        public double GDVMilesTraveled { get { if (routeOptimizationOutcome.IsGdvFeasible()) return routeOptimizationOutcome.GetGDVMilesTraveled(); else return 0.0; } }
+        public bool IsAFVFeasible { get { return routeOptimizationOutcome.IsEvFeasible(); } }
+        public double AFVMilesTraveled { get { if (routeOptimizationOutcome.IsEvFeasible()) return routeOptimizationOutcome.GetEVMilesTraveled(); else return 0.0; } }
 
         public CustomerSet()
         {
             customers = new List<string>();
-            routeOptimizerOutcome = new RouteOptimizerOutput();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
         public CustomerSet(string customerID, ProblemModelBase problemModelBase)
@@ -43,12 +39,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (problemModelBase.GetAllCustomerIDs().Contains(customerID))
             {
                 customers.Add(customerID);
-                routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
-                //routeOptimizationOutcome = problemModelBase.OptimizeForSingleVehicle(this);TODO Implement this instead of the line right before this
+                routeOptimizationOutcome = problemModelBase.OptimizeForSingleVehicle(this);
             }
             else
             {
-                routeOptimizerOutcome = new RouteOptimizerOutput();
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
             }
         }
@@ -56,19 +50,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             customers = new List<string>();
             customers.Add(customerID);
-            routeOptimizerOutcome = new RouteOptimizerOutput();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
         public CustomerSet(CustomerSet twinCS)
         {
-            //assignedVehicle = twinCS.AssignedVehicle;
             customers = new List<string>();
             foreach (string c in twinCS.Customers)
             {
                 customers.Add(c);
             }
-            // TODO check if this works as intended
-            routeOptimizerOutcome = new RouteOptimizerOutput(false, twinCS.RouteOptimizerOutcome);
+            // TODO unit test to check if this works as intended
             routeOptimizationOutcome = new RouteOptimizationOutcome(false, twinCS.RouteOptimizationOutcome);
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
@@ -113,7 +104,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(customer);
                 customers.Sort();//TODO Write a unit test to see if this really works as intended
-                routeOptimizerOutcome = problemModelBase.OptimizeForSingleVehicle(this);
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[1]);
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
                 if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)

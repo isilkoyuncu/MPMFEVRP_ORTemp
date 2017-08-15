@@ -106,7 +106,6 @@
     <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
     <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
-    <Compile Include="Domains\SolutionDomain\RouteOptimizerOutput.cs" />
     <Compile Include="Domains\SolutionDomain\SolutionEnums.cs" />
     <Compile Include="Forms\AlgorithmViewer.cs">
       <SubType>Form</SubType>
