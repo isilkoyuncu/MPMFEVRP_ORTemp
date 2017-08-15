@@ -94,6 +94,7 @@
     <Compile Include="Domains\SolutionDomain\AssignedRoute.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
+    <Compile Include="Domains\SolutionDomain\ObjectiveFunctionInputDataPackage.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
     <Compile Include="Domains\SolutionDomain\RouteOptimizationOutcome.cs" />
     <Compile Include="Domains\SolutionDomain\SiteVisit.cs" />
