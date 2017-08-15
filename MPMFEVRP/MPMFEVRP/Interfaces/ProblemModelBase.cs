@@ -66,8 +66,7 @@ namespace MPMFEVRP.Interfaces
         protected List<Type> compatibleSolutions;
         public List<Type> GetCompatibleSolutions() { return compatibleSolutions; }
 
-        public abstract RouteOptimizerOutput OptimizeForSingleVehicle(CustomerSet CS);
-        //public abstract RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles);
+        public abstract RouteOptimizationOutcome OptimizeForSingleVehicle(CustomerSet CS);
 
         public abstract VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute = null);
         public abstract RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles);

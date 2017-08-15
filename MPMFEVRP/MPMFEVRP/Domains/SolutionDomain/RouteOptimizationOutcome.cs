@@ -12,7 +12,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
     {
         List<VehicleSpecificRouteOptimizationOutcome> theList;
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: Retrieved from archive relates to CustomerSet, not RouteOptimizationOutcome!!! It should be deleted from here.
-        RouteOptimizationStatus overallStatus;
+        RouteOptimizationStatus overallStatus; public RouteOptimizationStatus Status;
 
         public RouteOptimizationOutcome()
         {
@@ -189,6 +189,23 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             throw new Exception("There is no GDV in theList hence we couldn't retrieve it's miles traveled");
         }
-
-    }
+        public double GetEvOfv()
+        {
+            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
+            {
+                if (vsroo.VehicleCategory == VehicleCategories.EV)
+                    return vsroo.ObjectiveFunctionValue;
+            }
+            throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
+        }
+            public double GetGdvOfv()
+            {
+                foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
+                {
+                    if (vsroo.VehicleCategory == VehicleCategories.GDV)
+                        return vsroo.ObjectiveFunctionValue;
+                }
+                throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
+            }
+        }
 }

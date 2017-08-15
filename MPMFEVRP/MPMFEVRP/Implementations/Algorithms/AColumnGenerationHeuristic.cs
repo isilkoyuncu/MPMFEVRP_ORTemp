@@ -118,8 +118,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 {
                     CustomerSet candidate = new CustomerSet(cs);
                     candidate.ExtendAndOptimize(customerID, model);
-                    if(!candidate.RouteOptimizerOutcome.RetrievedFromArchive)//not retrieved
-                        if((candidate.RouteOptimizerOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
+                    if(!candidate.RouteOptimizationOutcome.RetrievedFromArchive)//not retrieved
+                        if((candidate.RouteOptimizationOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
                         {
                             children.Add(candidate);
                         }

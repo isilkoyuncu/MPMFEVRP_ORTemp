@@ -127,13 +127,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             for (int i = 0; i < Count; i++)
             {
-                if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
-                    this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
+                    this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                     continue;
-                if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV == 0))
+                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV == 0))
                     continue;
 
-                if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV && (indexOfKeyOFV == 1))
+                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV && (indexOfKeyOFV == 1))
                     indexOfKeyOFV = 0;
 
                 if (minOFV[indexOfKeyOFV] > objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[indexOfKeyOFV])
@@ -154,8 +154,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             for (int i = 0; i < Count; i++)
             {
-                if (this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
-                    this[i].RouteOptimizerOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
+                    this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                     continue;
 
                 for (int v = 0; v < 2; v++)
