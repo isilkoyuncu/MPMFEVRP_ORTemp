@@ -11,7 +11,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
     public class RouteOptimizationOutcome//TODO: This class will completely replace RouteOptimizerOutput
     {
         List<VehicleSpecificRouteOptimizationOutcome> theList;
-        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: Retrieved from archive relates to CustomerSet, not RouteOptimizationOutcome!!! It should be deleted from here.
         RouteOptimizationStatus overallStatus; public RouteOptimizationStatus Status;
 
         public RouteOptimizationOutcome()
@@ -56,7 +55,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new Exception("RouteOptimizationOutcome constructor invoked with no vehicles!");
             List<Vehicle> GDVs = new List<Vehicle>();
             List<Vehicle> EVs = new List<Vehicle>();
-            foreach(Vehicle v in vehicles)
+            foreach (Vehicle v in vehicles)
                 switch (v.Category)
                 {
                     case VehicleCategories.GDV:
@@ -151,61 +150,36 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return;
             }
         }
-        public double GetEVMilesTraveled()
+        public double GetMilesTraveled(VehicleCategories vehCategory)
         {
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
             {
-                if (vsroo.VehicleCategory == VehicleCategories.EV)
+                if (vsroo.VehicleCategory == vehCategory)
                     return vsroo.VSOptimizedRoute.GetVehicleMilesTraveled();
             }
-            throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
+            return 0.0;
+            throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's miles traveled");
         }
-
-        public double GetGDVMilesTraveled()
+        public bool IsFeasible(VehicleCategories vehCategory)
         {
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
             {
-                if(vsroo.VehicleCategory==VehicleCategories.GDV)
-                    return vsroo.VSOptimizedRoute.GetVehicleMilesTraveled();
-            }
-             throw new Exception("There is no GDV in theList hence we couldn't retrieve it's miles traveled");
-        }
-        public bool IsEvFeasible()
-        {
-            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
-            {
-                if (vsroo.VehicleCategory == VehicleCategories.EV)
+                if (vsroo.VehicleCategory == vehCategory)
                     return vsroo.VSOptimizedRoute.Feasible;
             }
-            throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
+            return false; //TODO this is not correct, false means it is not feasible; we cannot distinguish between not yet optimized and feasible.
+            throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's feasibility status");
         }
 
-        public bool IsGdvFeasible()
+        public double GetPrizeCollected(VehicleCategories vehCategory)
         {
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
             {
-                if (vsroo.VehicleCategory == VehicleCategories.GDV)
-                    return vsroo.VSOptimizedRoute.Feasible;
+                if (vsroo.VehicleCategory == vehCategory)
+                    return vsroo.VSOptimizedRoute.GetPrizeCollected();
             }
-            throw new Exception("There is no GDV in theList hence we couldn't retrieve it's miles traveled");
+            return 0.0;
+            throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's collected prize");
         }
-        public double GetEvOfv()
-        {
-            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
-            {
-                if (vsroo.VehicleCategory == VehicleCategories.EV)
-                    return vsroo.ObjectiveFunctionValue;
-            }
-            throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
-        }
-            public double GetGdvOfv()
-            {
-                foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
-                {
-                    if (vsroo.VehicleCategory == VehicleCategories.GDV)
-                        return vsroo.ObjectiveFunctionValue;
-                }
-                throw new Exception("There is no EV in theList hence we couldn't retrieve it's miles traveled");
-            }
-        }
+    }
 }

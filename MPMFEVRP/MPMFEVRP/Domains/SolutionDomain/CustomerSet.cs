@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.AlgorithmDomain;
-
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -15,23 +15,26 @@ namespace MPMFEVRP.Domains.SolutionDomain
     /// </summary>
     public class CustomerSet
     {
-        //int assignedVehicle = -1; public int AssignedVehicle {get{return assignedVehicle;}set { assignedVehicle = value; } } // TODO check if this belongs to here: -1:not assigned, 0:EV, 1:GDV
-
-        List<string> customers = new List<string>();//TODO Should this really be a string? Ordering is an issue (1, 10, 2, .., 9)
+        List<string> customers = new List<string>();
         public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
 
         RouteOptimizationOutcome routeOptimizationOutcome;
         public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
-        public bool IsGDVFeasible { get { return routeOptimizationOutcome.IsGdvFeasible(); } }
-        public double GDVMilesTraveled { get { if (routeOptimizationOutcome.IsGdvFeasible()) return routeOptimizationOutcome.GetGDVMilesTraveled(); else return 0.0; } }
-        public bool IsAFVFeasible { get { return routeOptimizationOutcome.IsEvFeasible(); } }
-        public double AFVMilesTraveled { get { if (routeOptimizationOutcome.IsEvFeasible()) return routeOptimizationOutcome.GetEVMilesTraveled(); else return 0.0; } }
+        public bool IsGDVFeasible { get { return routeOptimizationOutcome.IsFeasible(VehicleCategories.GDV); } }
+        public double GDVMilesTraveled { get { if (routeOptimizationOutcome.IsFeasible(VehicleCategories.GDV)) return routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV); else return 0.0; } }
+        public bool IsAFVFeasible { get { return routeOptimizationOutcome.IsFeasible(VehicleCategories.EV); } }
+        public double AFVMilesTraveled { get { if (routeOptimizationOutcome.IsFeasible(VehicleCategories.EV)) return routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV); else return 0.0; } }
+
+        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
+
+        ObjectiveFunctionInputDataPackage ofdp; public ObjectiveFunctionInputDataPackage OFDP { get { return ofdp; } }
 
         public CustomerSet()
         {
             customers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
+            //ofdp = new ObjectiveFunctionInputDataPackage();   //TODO should we create an instance with empty constructor here
         }
         public CustomerSet(string customerID, ProblemModelBase problemModelBase)
         {
@@ -40,10 +43,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(customerID);
                 routeOptimizationOutcome = problemModelBase.OptimizeForSingleVehicle(this);
+                ofdp = new ObjectiveFunctionInputDataPackage(NumberOfCustomers, NumberOfCustomers, routeOptimizationOutcome.GetEvOfv(), routeOptimizationOutcome.GetGdvOfv(), 1, 1, routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV), routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV));
             }
             else
             {
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
+                //ofdp = new ObjectiveFunctionInputDataPackage();
             }
         }
         public CustomerSet(string customerID)
@@ -60,6 +65,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             // TODO unit test to check if this works as intended
             routeOptimizationOutcome = new RouteOptimizationOutcome(false, twinCS.RouteOptimizationOutcome);
+            FillOFDP();
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
         {
@@ -74,8 +80,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     VehicleSpecificRoute vsr = new VehicleSpecificRoute(problemModel,vehicle,customers);
                     if (!vsr.Feasible)
                         throw new Exception("Reconstructed AssignedRoute is infeasible!");
-                    VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(ProblemDomain.VehicleCategories.GDV, vsros, vsOptimizedRoute: vsr);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
+                    VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, vsros, vsOptimizedRoute: vsr);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
                     routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
+                    ofdp = new ObjectiveFunctionInputDataPackage(VehicleCategories.GDV, NumberOfCustomers, routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.GDV), 1,routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV));
                     break;
                 case VehicleSpecificRouteOptimizationStatus.NotYetOptimized:
                     routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.NotYetOptimized);
@@ -114,17 +121,18 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     vsroo_EV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
+                FillOFDP();
             }
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
-        public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase, Domains.ProblemDomain.Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
+        public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
         {
             if (!customers.Contains(customer))
             {
                 customers.Add(customer);
                 customers.Sort();//TODO Write a unit test to see if this really works as intended
-                if(vehicle.Category== ProblemDomain.VehicleCategories.GDV)
+                if(vehicle.Category== VehicleCategories.GDV)
                 {
                     VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
                     routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
@@ -133,6 +141,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 {
                     VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                     routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
+                    FillOFDP();
                 }
 
             }
@@ -150,9 +159,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
-        public void Optimize(ProblemModelBase problemModelBase, Domains.ProblemDomain.Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
+        public void Optimize(ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
         {
-            if (vehicle.Category == ProblemDomain.VehicleCategories.GDV)
+            if (vehicle.Category == VehicleCategories.GDV)
             {
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
@@ -163,7 +172,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
         }
-
+        void FillOFDP()
+        {
+            ofdp = new ObjectiveFunctionInputDataPackage(NumberOfCustomers,
+                                                         NumberOfCustomers,
+                                                         routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.EV),
+                                                         routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.GDV),
+                                                         1, 1,
+                                                         routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV),
+                                                         routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV));
+        }
 
         public void Remove(string customer)
         {
