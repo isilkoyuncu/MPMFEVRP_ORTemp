@@ -147,6 +147,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             rechargeAmountsCalculated = true;
         }
+        public double GetPrizeCollected()
+        {
+            double outcome=0.0;
+            foreach(SiteVisit sv in siteVisits)
+            {
+                outcome += sv.Site.GetPrize(vehicle.Category);
+            }
+            return outcome;
+        }
     }
 
 }

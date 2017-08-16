@@ -37,7 +37,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         {
             this.id = id;
             this.type = type;
-            siteType = convertStringTypeToSiteTypes(type);
+            siteType = ConvertStringTypeToSiteTypes(type);
             this.x = x;
             this.y = y;
             this.demand = demand;
@@ -63,7 +63,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             prize = (double[])twinSite.prize.Clone();
         }
 
-        SiteTypes convertStringTypeToSiteTypes(string strSiteType)
+        SiteTypes ConvertStringTypeToSiteTypes(string strSiteType)
         {
             switch (strSiteType.Substring(0, 1))
             {

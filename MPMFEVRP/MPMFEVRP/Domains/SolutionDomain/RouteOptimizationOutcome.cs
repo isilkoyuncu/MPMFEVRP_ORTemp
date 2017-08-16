@@ -16,15 +16,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public RouteOptimizationOutcome()
         {
             theList = new List<VehicleSpecificRouteOptimizationOutcome>();
-            retrievedFromArchive = false;
             overallStatus = RouteOptimizationStatus.NotYetOptimized;
         }
-        public RouteOptimizationOutcome(bool retrievedFromArchive, RouteOptimizationOutcome twinROO)
+        public RouteOptimizationOutcome(RouteOptimizationOutcome twinROO)
         {
-            if (retrievedFromArchive)
-                this.retrievedFromArchive = true;
-            else
-                this.retrievedFromArchive = twinROO.retrievedFromArchive;
             theList = new List<VehicleSpecificRouteOptimizationOutcome>();
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in twinROO.theList)
                 theList.Add(new VehicleSpecificRouteOptimizationOutcome(vsroo));
@@ -40,13 +35,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 this.theList = theList;
             }
-            retrievedFromArchive = false;
             overallStatus = status;
         }
         public RouteOptimizationOutcome(List<VehicleSpecificRouteOptimizationOutcome> theList)
         {
             this.theList = theList;
-            retrievedFromArchive = false;
             UpdateOverallStatus();
         }
         public RouteOptimizationOutcome(ProblemModelBase problemModel, CustomerSet customerSet, List<Vehicle> vehicles)
