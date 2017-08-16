@@ -21,14 +21,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         RouteOptimizationOutcome routeOptimizationOutcome;
         public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
-        public bool IsGDVFeasible { get { return routeOptimizationOutcome.IsFeasible(VehicleCategories.GDV); } }
-        public double GDVMilesTraveled { get { if (routeOptimizationOutcome.IsFeasible(VehicleCategories.GDV)) return routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV); else return 0.0; } }
-        public bool IsAFVFeasible { get { return routeOptimizationOutcome.IsFeasible(VehicleCategories.EV); } }
-        public double AFVMilesTraveled { get { if (routeOptimizationOutcome.IsFeasible(VehicleCategories.EV)) return routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV); else return 0.0; } }
+        public bool IsGDVFeasible { get { return routeOptimizationOutcome.IsFeasible(VehicleCategories.GDV); } } // TODO change this to Get feasibility status(veh category)
 
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
 
-        ObjectiveFunctionInputDataPackage ofdp; public ObjectiveFunctionInputDataPackage OFDP { get { return ofdp; } }
+        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.ofdp; } } //TODO this error will be resolved when we add ofdp field in route optimization outcome.
 
         public CustomerSet()
         {
@@ -64,7 +61,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 customers.Add(c);
             }
             // TODO unit test to check if this works as intended
-            routeOptimizationOutcome = new RouteOptimizationOutcome(false, twinCS.RouteOptimizationOutcome);
+            retrievedFromArchive = false;
+            routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
             FillOFDP();
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
