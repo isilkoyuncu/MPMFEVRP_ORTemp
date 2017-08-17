@@ -61,7 +61,7 @@ namespace MPMFEVRP.Interfaces
                 retrieve_CompTime += (DateTime.Now - startTime).TotalMilliseconds;
                 if (ROO != null)
                 {
-                    roo = new RouteOptimizationOutcome(true, ROO);
+                    roo = new RouteOptimizationOutcome(ROO);
                     return roo;
                 }
             }

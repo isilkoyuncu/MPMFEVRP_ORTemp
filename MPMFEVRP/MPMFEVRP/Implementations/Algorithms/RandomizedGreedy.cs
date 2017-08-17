@@ -244,7 +244,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         bool ExtendedCSIsFeasibleForDesiredVehicleCategory(CustomerSet CS, bool consideringForEV)
         {
-            switch (CS.RouteOptimizerOutcome.Status)
+            switch (CS.RouteOptimizationOutcome.Status)
             {
                 case RouteOptimizationStatus.OptimizedForBothGDVandEV:
                     return true;
@@ -288,23 +288,23 @@ namespace MPMFEVRP.Implementations.Algorithms
                         for (int i = 0; i < oldTrialSolution.NumCS_assigned2EV; i++)
                         {
                             cs_Array[count] = oldTrialSolution.Assigned2EV[i];
-                            dP[count] = cs_Array[count].RouteOptimizerOutcome.OFV[0] - cs_Array[count].RouteOptimizerOutcome.OFV[1];
+                            dP[count] = cs_Array[count].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue - cs_Array[count].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ObjectiveFunctionValue;
                             count++;
                         }
                         for (int i =0; i < oldTrialSolution.NumCS_assigned2GDV; i++)
                         {
                             cs_Array[count] = oldTrialSolution.Assigned2GDV[i];
-                            dP[count] = cs_Array[count].RouteOptimizerOutcome.OFV[0] - cs_Array[count].RouteOptimizerOutcome.OFV[1];
+                            dP[count] = cs_Array[count].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue - cs_Array[count].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ObjectiveFunctionValue;
                             count++;
                         }
                         Array.Sort(dP, cs_Array);
                         for (int i = cs_Array.Length-1; i >=0; i--)
                         {
-                            if (dP[i] > 0 && cs_Array[i].RouteOptimizerOutcome.OFV[0] > 0 && outcome.NumCS_assigned2EV < model.NumVehicles[0])
+                            if (dP[i] > 0 && cs_Array[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue > 0 && outcome.NumCS_assigned2EV < model.NumVehicles[0])
                             {
                                 outcome.AddCustomerSet2EVList(cs_Array[i]);
                             }
-                            else if (cs_Array[i].RouteOptimizerOutcome.OFV[1] > 0)
+                            else if (cs_Array[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ObjectiveFunctionValue > 0)
                             {
                                 outcome.AddCustomerSet2GDVList(cs_Array[i]);
                             }
@@ -316,7 +316,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         bool AddCustomerSet2Soln(CustomerSetBasedSolution solution, CustomerSet CS)
         {
-            if ((CS.RouteOptimizerOutcome.OFV[0] <= 0) && (CS.RouteOptimizerOutcome.OFV[1] <= 0))//The route is a negaive profit for either vehicle category!
+            if ((CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue <= 0) && (CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ObjectiveFunctionValue <= 0))//The route is a negaive profit for either vehicle category!
                 return false;
 
             //If we're here, we know at least one of the profits is a positive! And that's all we need, if this is a sub-optimal decision, we can still recover from it later, no worries.
