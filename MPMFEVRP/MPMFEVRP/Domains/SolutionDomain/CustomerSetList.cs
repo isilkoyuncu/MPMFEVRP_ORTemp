@@ -186,7 +186,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             foreach (CustomerSet cs in this)
             {
                 if ((writeInfeasibles) || (cs.RouteOptimizationOutcome.IsGdvFeasible()))
-                    sw.WriteLine("{0}\t{1}\t{2:F5}", cs.Encode(), cs.IsGDVFeasible, cs.GDVMilesTraveled);
+                    sw.WriteLine("{0}\t{1}\t{2:F5}", Utils.StringOperations.CombineAndSpaceSeparateArray(cs.Customers.ToArray()), cs.IsGDVFeasible, cs.GDVMilesTraveled);
             }
             sw.Close();
         }
@@ -198,7 +198,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             foreach (CustomerSet cs in this)
             {
                 if ((writeInfeasibles) || (cs.RouteOptimizationOutcome.IsGdvFeasible()))
-                    sw.WriteLine("{0}\t{1}\t{2:F5}\t{3}\t{4:F5}", cs.Encode(), cs.IsGDVFeasible, cs.GDVMilesTraveled, cs.IsAFVFeasible, cs.AFVMilesTraveled);
+                    sw.WriteLine("{0}\t{1}\t{2:F5}\t{3}\t{4:F5}", Utils.StringOperations.CombineAndSpaceSeparateArray(cs.Customers.ToArray()), cs.IsGDVFeasible, cs.GDVMilesTraveled, cs.IsAFVFeasible, cs.AFVMilesTraveled);
             }
             sw.Close();
         }

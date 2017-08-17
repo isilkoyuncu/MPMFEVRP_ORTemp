@@ -42,13 +42,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public CustomerSet(List<string> customerIDs, RouteOptimizationOutcome ROO = null, bool retrievedFromArchive = false)
         {
             customers = customerIDs;//Note that where we gather the list of customers, we must make sure that they are all customers! Since we don't want to pass problemModel here, we have no way of checking here!!!
+            customers.Sort();//just in case
             if (ROO != null)
                 routeOptimizationOutcome = ROO;
             else
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
             this.retrievedFromArchive = retrievedFromArchive;
         }
-
         public CustomerSet(CustomerSet twinCS, bool copyROO = false)
         {
             customers = new List<string>();
@@ -82,12 +82,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return true;
         }
 
-        public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase)
+        public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase)//Keep for now but consider deleting after seeing at least one method fully working iwth the new architecture
         {
             if (!customers.Contains(customer))
             {
                 customers.Add(customer);
-                customers.Sort();//TODO Write a unit test to see if this really works as intended
+                customers.Sort();
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[1]);
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
                 if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)
@@ -103,27 +103,29 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
-        public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
-        {
-            if (!customers.Contains(customer))
-            {
-                customers.Add(customer);
-                customers.Sort();//TODO Write a unit test to see if this really works as intended
-                if(vehicle.Category== VehicleCategories.GDV)
-                {
-                    VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
-                    routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
-                }
-                else//It's an EV, and the customer set must have been optimized for a GDV beforehand
-                {
-                    VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
-                    routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
-                }
 
-            }
-            else
-                throw new Exception("Customer is already in the set, know before asking to extend!");
-        }
+        ////This method should not exist! TODO:Delete
+        //public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
+        //{
+        //    if (!customers.Contains(customer))
+        //    {
+        //        customers.Add(customer);
+        //        customers.Sort();//TODO Write a unit test to see if this really works as intended
+        //        if(vehicle.Category== VehicleCategories.GDV)
+        //        {
+        //            VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
+        //            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
+        //        }
+        //        else//It's an EV, and the customer set must have been optimized for a GDV beforehand
+        //        {
+        //            VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+        //            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
+        //        }
+
+        //    }
+        //    else
+        //        throw new Exception("Customer is already in the set, know before asking to extend!");
+        //}
         public void Extend(string customer)
         {
             if (!customers.Contains(customer))
@@ -135,8 +137,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
+
+        public void Optimize(ProblemModelBase problemModelBase)
+        {
+            routeOptimizationOutcome = problemModelBase.OptimizeRoute(this);
+        }
         public void Optimize(ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
         {
+            //This method makes heavy use of the problem model
+            //A closer look therein reveals that the intelligence of checking whether GDV-optimal route is EV-feasible and if the customer set is definitely EV-infeasible are invoked
+            //Since those more-detailed methods use very deep info from problem model, it sounds reasonable, but we may also migrate them over to the customer set class in the future, upon assuring that all information tehy need are actually publicly given out by the problem model
+
             if (vehicle.Category == VehicleCategories.GDV)
             {
                 if ((vsroo_GDV != null) && (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.NotYetOptimized))
@@ -193,19 +204,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 if (Customers[i] == customerID)
                     return true;
             return false;
-        }
-
-        public string Encode()
-        {
-            string outcome = "";
-            if (customers != null)
-                if (customers.Count > 0)
-                    outcome = customers[0];
-            for (int i = 1; i < customers.Count; i++)
-            {
-                outcome += " " + customers[i];
-            }
-            return outcome;
         }
     }
 }

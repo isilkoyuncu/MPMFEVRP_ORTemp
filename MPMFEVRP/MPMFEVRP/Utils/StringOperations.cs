@@ -11,9 +11,20 @@ namespace MPMFEVRP.Utils
     {
         public static string CombineAndTabSeparateArray(object[] inputStrArray)
         {
-            string output = "";
-            for (int i = 0; i < inputStrArray.Length; i++)
-                output += inputStrArray[i].ToString() + "\t";
+            if ((inputStrArray == null) || (inputStrArray.Length == 0))
+                throw new Exception("CombineAndTabSeparateArray invoked with nothing to combine!");
+            string output = inputStrArray[0].ToString();
+            for (int i = 1; i < inputStrArray.Length; i++)
+                output += "\t" + inputStrArray[i].ToString();
+            return output;
+        }
+        public static string CombineAndSpaceSeparateArray(object[] inputStrArray)
+        {
+            if ((inputStrArray == null) || (inputStrArray.Length == 0))
+                throw new Exception("CombineAndSpaceSeparateArray invoked with nothing to combine!");
+            string output = inputStrArray[0].ToString(); ;
+            for (int i = 1; i < inputStrArray.Length; i++)
+                output += " " + inputStrArray[i].ToString();
             return output;
         }
 

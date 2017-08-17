@@ -69,6 +69,7 @@ namespace MPMFEVRP.Interfaces
         public abstract RouteOptimizationOutcome OptimizeForSingleVehicle(CustomerSet CS);
 
         public abstract VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute = null);
+        public abstract RouteOptimizationOutcome OptimizeRoute(CustomerSet CS);
         public abstract RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles);
 
         public abstract ISolution GetRandomSolution(int seed, Type SolutionType);

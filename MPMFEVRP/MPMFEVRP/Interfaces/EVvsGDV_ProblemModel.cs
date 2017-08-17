@@ -153,6 +153,11 @@ namespace MPMFEVRP.Interfaces
             else //(objectiveFunctionType == ObjectiveFunctionTypes.Minimize)
                 return double.MaxValue;
         }
+
+        public override RouteOptimizationOutcome OptimizeRoute(CustomerSet CS)
+        {
+            return OptimizeRoute(CS, VRD.VehicleArray.ToList());
+        }
         public override RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles)
         {
             //This method is designed to work with exactly one GDV and exactly one EV
