@@ -58,6 +58,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
 
         public static PartitionedCustomerSetList RecreateFromFile(string filename, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
         {
+            Domains.ProblemDomain.Vehicle theGDV = problemModel.VRD.VehicleArray[1];
             PartitionedCustomerSetList outcome = new PartitionedCustomerSetList();
             StreamReader sr = new StreamReader(filename);
             sr.ReadLine();//This is the header row, won't use for anything
@@ -66,7 +67,8 @@ namespace MPMFEVRP.SetCoverFileUtilities
                 string line = sr.ReadLine();
                 string[] entriesInLine = line.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 VehicleSpecificRouteOptimizationStatus vsrossss = (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]);
-                CustomerSet cs = new CustomerSet(problemModel, RemoveSpacesAndConvertToList(entriesInLine[0]), vsros: (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]));
+                VehicleSpecificRoute vsr = new VehicleSpecificRoute(problemModel, theGDV);
+                CustomerSet cs = new CustomerSet(RemoveSpacesAndConvertToList(entriesInLine[0]), vsros: (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]), vehicleSpecificRoute: vsr);
                 outcome.Add(cs);
             }
             sr.Close();
