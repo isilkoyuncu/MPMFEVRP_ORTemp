@@ -17,7 +17,7 @@ namespace MPMFEVRP.Interfaces
         void TriggerSpecification();
 
         bool IsComplete { get; }
-        double ObjectiveFunctionValue { get; }
+        ObjectiveFunctionInputDataPackage OFIDP { get; }
         List<ISolution> GetAllChildren();
         double LowerBound { get; set; }
         double UpperBound { get; set; }

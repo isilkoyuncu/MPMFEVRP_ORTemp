@@ -52,7 +52,7 @@ namespace MPMFEVRP.Implementations.Solutions
             twinCSBasedSolution.assigned2GDV.ForEach((item) => { AddCustomerSet2GDVList(new CustomerSet(item)); });
             isComplete = twinCSBasedSolution.isComplete;
             lowerBound = twinCSBasedSolution.lowerBound;
-            objectiveFunctionValue = twinCSBasedSolution.objectiveFunctionValue;
+            ofidp = new ObjectiveFunctionInputDataPackage( twinCSBasedSolution.OFIDP);
             status = twinCSBasedSolution.status;
             upperBound = twinCSBasedSolution.upperBound;
         }
@@ -88,21 +88,21 @@ namespace MPMFEVRP.Implementations.Solutions
         public void AddCustomerSet2EVList(CustomerSet currentCS)
         {
             assigned2EV.Add(currentCS);
-            objectiveFunctionValue += currentCS.RouteOptimizationOutcome.GetEvOfv();
+            ofidp.Add(currentCS.OFIDP);
         }
 
         public void AddCustomerSet2GDVList(CustomerSet currentCS)
         {
             assigned2GDV.Add(currentCS);
-            objectiveFunctionValue += currentCS.RouteOptimizationOutcome.GetGdvOfv();
+            ofidp.Add(currentCS.OFIDP);
         }
 
         public void UpdateUpperLowerBoundsAndStatus()
         {
             if (model.ObjectiveFunctionType == Models.ObjectiveFunctionTypes.Maximize)//If it is a maximization problem, LB is the incumbent solution's objective value
-                lowerBound = objectiveFunctionValue;
+                lowerBound = model.CalculateObjectiveFunctionValue(this);
             else //If it is a minimization problem, UB is the incumbent solution's objective value
-                upperBound = objectiveFunctionValue;
+                upperBound = model.CalculateObjectiveFunctionValue(this);
             status = Domains.AlgorithmDomain.AlgorithmSolutionStatus.Feasible;
         }
 

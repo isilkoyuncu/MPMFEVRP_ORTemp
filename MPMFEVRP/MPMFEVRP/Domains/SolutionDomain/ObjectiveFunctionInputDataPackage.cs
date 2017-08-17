@@ -89,7 +89,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
             VMT_EV = twin_OFIDP.GetVMT(VehicleCategories.EV);
             VMT_GDV = twin_OFIDP.GetVMT(VehicleCategories.GDV);
         }
-        public static ObjectiveFunctionInputDataPackage AggregateByAddition(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
+
+        public void Add(ObjectiveFunctionInputDataPackage theOtherOFIDP)
+        {
+            numberOfCustomersServed_EV += theOtherOFIDP.numberOfCustomersServed_EV;
+            numberOfCustomersServed_GDV += theOtherOFIDP.numberOfCustomersServed_GDV;
+            prizeCollected_EV += theOtherOFIDP.prizeCollected_EV;
+            prizeCollected_GDV += theOtherOFIDP.prizeCollected_GDV;
+            numberOfVehiclesUsed_EV += theOtherOFIDP.numberOfVehiclesUsed_EV;
+            numberOfVehiclesUsed_GDV += theOtherOFIDP.numberOfVehiclesUsed_GDV;
+            VMT_EV += theOtherOFIDP.VMT_EV;
+            VMT_GDV += theOtherOFIDP.VMT_GDV;
+        }
+        public static ObjectiveFunctionInputDataPackage AggregateByMerge(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
         {
             if ((IndividualOFIDPs_EV == null) && (IndividualOFIDPs_GDV == null))//Return an empty one because the individual inputs are not provided:
                 return new ObjectiveFunctionInputDataPackage();
@@ -122,6 +134,34 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     numberOfVehiclesUsed_GDV += OFIDP.numberOfVehiclesUsed_GDV;
                     VMT_GDV += OFIDP.VMT_GDV;
                 }
+            }
+            //Return:
+            return new ObjectiveFunctionInputDataPackage(numberOfCustomersServed_EV, numberOfCustomersServed_GDV, prizeCollected_EV, prizeCollected_GDV, numberOfVehiclesUsed_EV, numberOfVehiclesUsed_GDV, VMT_EV, VMT_GDV);
+        }
+        public static ObjectiveFunctionInputDataPackage AggregateByAddition(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs)
+        {
+            if (IndividualOFIDPs == null)//Return an empty one because the individual inputs are not provided:
+                return new ObjectiveFunctionInputDataPackage();
+            //Initialization:
+            int numberOfCustomersServed_EV = 0;
+            int numberOfCustomersServed_GDV = 0;
+            double prizeCollected_EV = 0.0;
+            double prizeCollected_GDV = 0.0;
+            int numberOfVehiclesUsed_EV = 0;
+            int numberOfVehiclesUsed_GDV = 0;
+            double VMT_EV = 0.0;
+            double VMT_GDV = 0.0;
+            //Aggregation:
+            foreach (ObjectiveFunctionInputDataPackage OFIDP in IndividualOFIDPs)
+            {
+                numberOfCustomersServed_EV += OFIDP.numberOfCustomersServed_EV;
+                numberOfCustomersServed_GDV += OFIDP.numberOfCustomersServed_GDV;
+                prizeCollected_EV += OFIDP.prizeCollected_EV;
+                prizeCollected_GDV += OFIDP.prizeCollected_GDV;
+                numberOfVehiclesUsed_EV += OFIDP.numberOfVehiclesUsed_EV;
+                numberOfVehiclesUsed_GDV += OFIDP.numberOfVehiclesUsed_GDV;
+                VMT_EV += OFIDP.VMT_EV;
+                VMT_GDV += OFIDP.VMT_GDV;
             }
             //Return:
             return new ObjectiveFunctionInputDataPackage(numberOfCustomersServed_EV, numberOfCustomersServed_GDV, prizeCollected_EV, prizeCollected_GDV, numberOfVehiclesUsed_EV, numberOfVehiclesUsed_GDV, VMT_EV, VMT_GDV);

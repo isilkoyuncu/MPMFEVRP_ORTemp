@@ -18,8 +18,8 @@ namespace MPMFEVRP.Interfaces
         protected bool isComplete;
         public bool IsComplete { get { return isComplete; } }
 
-        protected double objectiveFunctionValue;
-        public double ObjectiveFunctionValue { get { return objectiveFunctionValue; } }
+        protected ObjectiveFunctionInputDataPackage ofidp;
+        public ObjectiveFunctionInputDataPackage OFIDP { get { return ofidp; } }
 
         protected double lowerBound;
         public double LowerBound { get { return lowerBound; } set { lowerBound = value; } }
