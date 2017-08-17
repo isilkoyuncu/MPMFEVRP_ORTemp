@@ -21,36 +21,35 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         RouteOptimizationOutcome routeOptimizationOutcome;
         public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
-        public bool IsGDVFeasible { get { return routeOptimizationOutcome.IsFeasible(VehicleCategories.GDV); } } // TODO change this to Get feasibility status(veh category)
+        public VehicleSpecificRouteOptimizationStatus GetVehicleSpecificRouteOptimizationStatus(VehicleCategories vehCategory) { return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vehCategory).Status; }
 
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
 
-        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.OFIDP; } } 
+        public ObjectiveFunctionInputDataPackage OFIDP { get { return routeOptimizationOutcome.OFIDP; } } 
 
         public CustomerSet()
         {
             customers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
+            retrievedFromArchive = false;
         }
-        public CustomerSet(string customerID, ProblemModelBase problemModelBase)
-        {
-            customers = new List<string>();
-            if (problemModelBase.GetAllCustomerIDs().Contains(customerID))
-            {
-                customers.Add(customerID);
-                routeOptimizationOutcome = problemModelBase.OptimizeForSingleVehicle(this);
-            }
-            else
-            {
-                routeOptimizationOutcome = new RouteOptimizationOutcome();
-            }
-        }
-        public CustomerSet(string customerID)
+        public CustomerSet(string customerID, bool retrievedFromArchive = false)
         {
             customers = new List<string> { customerID };
             routeOptimizationOutcome = new RouteOptimizationOutcome();
+            this.retrievedFromArchive = retrievedFromArchive;
         }
-        public CustomerSet(CustomerSet twinCS)
+        public CustomerSet(List<string> customerIDs, RouteOptimizationOutcome ROO = null, bool retrievedFromArchive = false)
+        {
+            customers = customerIDs;//Note that where we gather the list of customers, we must make sure that they are all customers! Since we don't want to pass problemModel here, we have no way of checking here!!!
+            if (ROO != null)
+                routeOptimizationOutcome = ROO;
+            else
+                routeOptimizationOutcome = new RouteOptimizationOutcome();
+            this.retrievedFromArchive = retrievedFromArchive;
+        }
+
+        public CustomerSet(CustomerSet twinCS, bool copyROO = false)
         {
             customers = new List<string>();
             foreach (string c in twinCS.Customers)
@@ -59,33 +58,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             // TODO unit test to check if this works as intended
             retrievedFromArchive = false;
-            routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
+            if (copyROO)
+                routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
+            else
+                routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
-        public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
+        public CustomerSet(List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
-            if (vehicle == null)
-                vehicle = problemModel.VRD.VehicleArray[1];//Setting the vehicle to the GDV in the problem model unless otherwise specified
-            if (vehicle.Category == ProblemDomain.VehicleCategories.EV)
-                throw new Exception("The capability to recreate an EV-optimized customer set from file is not yet implemented!");
             this.customers = customers;
-            switch (vsros)
-            {
-                case VehicleSpecificRouteOptimizationStatus.Optimized:
-                    VehicleSpecificRoute vsr = new VehicleSpecificRoute(problemModel,vehicle,customers);
-                    if (!vsr.Feasible)
-                        throw new Exception("Reconstructed AssignedRoute is infeasible!");
-                    VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, vsros, vsOptimizedRoute: vsr);//TODO: Streamline objective function value calculation in VehicleSpecificRouteOptimizationOutcome
-                    routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
-                    break;
-                case VehicleSpecificRouteOptimizationStatus.NotYetOptimized:
-                    routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.NotYetOptimized);
-                    break;
-                case VehicleSpecificRouteOptimizationStatus.Infeasible:
-                    routeOptimizationOutcome = new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
-                    break;
-            }
-            this.customers.Sort();
+            this.customers.Sort();//just in case
+            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { new VehicleSpecificRouteOptimizationOutcome(vehicleSpecificRoute.VehicleCategory, vsros, vehicleSpecificRoute) });
+            retrievedFromArchive = false;
         }
+
         public bool IsIdentical(CustomerSet otherCS)
         {
             if (customers.Count != otherCS.NumberOfCustomers)

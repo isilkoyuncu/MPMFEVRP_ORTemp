@@ -8,7 +8,7 @@ using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
-    public class RouteOptimizationOutcome//TODO: This class will completely replace RouteOptimizerOutput
+    public class RouteOptimizationOutcome
     {
         List<VehicleSpecificRouteOptimizationOutcome> theListofVSROOs;
         RouteOptimizationStatus overallStatus; public RouteOptimizationStatus Status;
