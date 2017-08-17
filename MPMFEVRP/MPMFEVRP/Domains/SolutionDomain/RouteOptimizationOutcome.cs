@@ -79,7 +79,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         //        GDVs.Add(problemModel.VRD.VehicleArray[1]);//Because [1] is the index of the GDV
         //    //the previous line just assured that there is always a GDV to optimize for
         //    Vehicle theGDV = GDVs[0];
-        //    VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModel.OptimizeRoute(customerSet, theGDV);
+        //    VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModel.RouteOptimize(customerSet, theGDV);
         //    theListofVSROOs = new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV };
         //    if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
         //    {
@@ -89,7 +89,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         //    {
         //        theListofVSROOs.Add(vsroo_GDV);
         //        Vehicle theEV = EVs[0];
-        //        VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModel.OptimizeRoute(customerSet, theEV, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+        //        VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModel.RouteOptimize(customerSet, theEV, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
         //        theListofVSROOs.Add(vsroo_EV);
         //        switch (vsroo_EV.Status)
         //        {

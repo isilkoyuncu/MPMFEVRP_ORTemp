@@ -52,98 +52,100 @@ namespace MPMFEVRP.Interfaces
         /// </summary>
         /// <param name="CS"></param>
         /// <returns></returns>
-        public override RouteOptimizationOutcome OptimizeForSingleVehicle(CustomerSet CS)
-        {
-            if (archiveAllCustomerSets)
-            {
-                DateTime startTime = DateTime.Now;
-                RouteOptimizationOutcome ROO = customerSetArchive.Retrieve(CS);
-                retrieve_CompTime += (DateTime.Now - startTime).TotalMilliseconds;
-                if (ROO != null)
-                {
-                    roo = new RouteOptimizationOutcome(ROO);
-                    return roo;
-                }
-            }
-            customerSetArchive.Add(CS);
-            double worstCaseOFV = GetWorstCaseOFV();
+        /// 
+        //TODO delete this method since we have new optimize route methods
+        //public override RouteOptimizationOutcome OptimizeForSingleVehicle(CustomerSet CS)
+        //{
+        //    if (archiveAllCustomerSets)
+        //    {
+        //        DateTime startTime = DateTime.Now;
+        //        RouteOptimizationOutcome ROO = customerSetArchive.Retrieve(CS);
+        //        retrieve_CompTime += (DateTime.Now - startTime).TotalMilliseconds;
+        //        if (ROO != null)
+        //        {
+        //            roo = new RouteOptimizationOutcome(ROO);
+        //            return roo;
+        //        }
+        //    }
+        //    customerSetArchive.Add(CS);
+        //    double worstCaseOFV = GetWorstCaseOFV();
 
-            VehicleSpecificRoute[] assignedRoutes = new VehicleSpecificRoute[2];
-            double[] ofv = new double[] { worstCaseOFV, worstCaseOFV };
+        //    VehicleSpecificRoute[] assignedRoutes = new VehicleSpecificRoute[2];
+        //    double[] ofv = new double[] { worstCaseOFV, worstCaseOFV };
 
-            //GDV First: if it is infeasible, no need to check EV
-            DateTime startTime_gdv = DateTime.Now;
-            GDV_TSPSolver.RefineDecisionVariables(CS);
-            GDV_TSPSolver.Solve_and_PostProcess();
-            GDV_TSP_CompTime += (DateTime.Now - startTime_gdv).TotalMilliseconds;
+        //    //GDV First: if it is infeasible, no need to check EV
+        //    DateTime startTime_gdv = DateTime.Now;
+        //    GDV_TSPSolver.RefineDecisionVariables(CS);
+        //    GDV_TSPSolver.Solve_and_PostProcess();
+        //    GDV_TSP_CompTime += (DateTime.Now - startTime_gdv).TotalMilliseconds;
 
-            if (GDV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if GDV infeasible, no need to check EV, stop
-            {
-                RouteConstructionMethodForEV.Add("CPLEX proved both infeasible");
-                roo = new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
-                return roo;
-            }
-            else//GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
-            {
-                if (GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
-                {
-                    System.Windows.Forms.MessageBox.Show("GDV_TSPSolver status is other than Infeasible or Optimal!");
-                }
-                //If we're here, we know GDV route has been successfully optimized
-                assignedRoutes[1] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)GDV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
-                ofv[1] = GDV_TSPSolver.GetObjValue();
-                VehicleSpecificRouteOptimizationOutcome vsroo_gdv = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, VehicleSpecificRouteOptimizationStatus.Optimized, ofv[1], assignedRoutes[1]);
-                //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
+        //    if (GDV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if GDV infeasible, no need to check EV, stop
+        //    {
+        //        RouteConstructionMethodForEV.Add("CPLEX proved both infeasible");
+        //        roo = new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+        //        return roo;
+        //    }
+        //    else//GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
+        //    {
+        //        if (GDV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
+        //        {
+        //            System.Windows.Forms.MessageBox.Show("GDV_TSPSolver status is other than Infeasible or Optimal!");
+        //        }
+        //        //If we're here, we know GDV route has been successfully optimized
+        //        assignedRoutes[1] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)GDV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
+        //        ofv[1] = GDV_TSPSolver.GetObjValue();
+        //        VehicleSpecificRouteOptimizationOutcome vsroo_gdv = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, VehicleSpecificRouteOptimizationStatus.Optimized, ofv[1], assignedRoutes[1]);
+        //        //If we're here we know the optimal GDV solution, now it is time to optimize the EV route
 
-                GDVOptimalRouteFeasibleForEV = true; //First check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
+        //        GDVOptimalRouteFeasibleForEV = true; //First check for EV feasibility of the route constructed for GDV, if it is feasible then it must be optimal for EV
 
-                assignedRoutes[0] = new AssignedRoute(this, 0);
-                for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
-                {
-                    assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
-                    GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
-                }
-                if (GDVOptimalRouteFeasibleForEV)
-                {
-                    //seems like this is all taken care of by cloning the GDV optimal route for EV in a step-by-step manner
-                    ofv[0] = assignedRoutes[0].TotalProfit;
-                    RouteConstructionMethodForEV.Add("Checked Feasibility of GDV Route");
-                    roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
-                    return roo;
-                }
-                else
-                {
-                    assignedRoutes[0] = new AssignedRoute();
-                    ofv[0] = double.MinValue; //TODO: Revert this when working with a minimization problem
-                    DateTime startTime_ev = DateTime.Now;
-                    EV_TSPSolver.RefineDecisionVariables(CS);
-                    //EV_TSPSolver.ExportModel("EV_TSP_model.lp"); //Turn this on if you want to export the lp model of the problem
-                    EV_TSPSolver.Solve_and_PostProcess();
-                    EV_TSP_CompTime += (DateTime.Now - startTime_ev).TotalMilliseconds;
+        //        assignedRoutes[0] = new AssignedRoute(this, 0);
+        //        for (int siteIndex = 1; ((siteIndex < assignedRoutes[1].SitesVisited.Count) && (GDVOptimalRouteFeasibleForEV)); siteIndex++)
+        //        {
+        //            assignedRoutes[0].Extend(assignedRoutes[1].SitesVisited[siteIndex]);
+        //            GDVOptimalRouteFeasibleForEV = assignedRoutes[0].Feasible.Last();
+        //        }
+        //        if (GDVOptimalRouteFeasibleForEV)
+        //        {
+        //            //seems like this is all taken care of by cloning the GDV optimal route for EV in a step-by-step manner
+        //            ofv[0] = assignedRoutes[0].TotalProfit;
+        //            RouteConstructionMethodForEV.Add("Checked Feasibility of GDV Route");
+        //            roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+        //            return roo;
+        //        }
+        //        else
+        //        {
+        //            assignedRoutes[0] = new AssignedRoute();
+        //            ofv[0] = double.MinValue; //TODO: Revert this when working with a minimization problem
+        //            DateTime startTime_ev = DateTime.Now;
+        //            EV_TSPSolver.RefineDecisionVariables(CS);
+        //            //EV_TSPSolver.ExportModel("EV_TSP_model.lp"); //Turn this on if you want to export the lp model of the problem
+        //            EV_TSPSolver.Solve_and_PostProcess();
+        //            EV_TSP_CompTime += (DateTime.Now - startTime_ev).TotalMilliseconds;
 
-                    if (EV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if EV infeasible, return only GDV 
-                    {
-                        RouteConstructionMethodForEV.Add("CPLEX proved EV infeasibility");
-                        roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, ofv: ofv, optimizedRoute: assignedRoutes);
-                        return roo;
-                    }
-                    else//EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
-                    {
-                        if (EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
-                        {
-                            System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
-                        }
-                        //If we're here, we know GDV route has been successfully optimized
-                        assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
-                        ofv[0] = EV_TSPSolver.GetObjValue();
+        //            if (EV_TSPSolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)//if EV infeasible, return only GDV 
+        //            {
+        //                RouteConstructionMethodForEV.Add("CPLEX proved EV infeasibility");
+        //                roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, ofv: ofv, optimizedRoute: assignedRoutes);
+        //                return roo;
+        //            }
+        //            else//EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Infeasible
+        //            {
+        //                if (EV_TSPSolver.SolutionStatus != XCPlexSolutionStatus.Optimal)
+        //                {
+        //                    System.Windows.Forms.MessageBox.Show("EV_TSPSolver status is other than Infeasible or Optimal!");
+        //                }
+        //                //If we're here, we know GDV route has been successfully optimized
+        //                assignedRoutes[0] = ExtractTheSingleRouteFromSolution((RouteBasedSolution)EV_TSPSolver.GetCompleteSolution(typeof(RouteBasedSolution)));
+        //                ofv[0] = EV_TSPSolver.GetObjValue();
 
-                        RouteConstructionMethodForEV.Add("Optimized with CPLEX");
-                        roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
-                        return roo;
-                    }
-                }
-            }
-        }
+        //                RouteConstructionMethodForEV.Add("Optimized with CPLEX");
+        //                roo = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, ofv: ofv, optimizedRoute: assignedRoutes);
+        //                return roo;
+        //            }
+        //        }
+        //    }
+        //}
 
 
         double GetWorstCaseOFV()
@@ -154,19 +156,19 @@ namespace MPMFEVRP.Interfaces
                 return double.MaxValue;
         }
 
-        public override RouteOptimizationOutcome OptimizeRoute(CustomerSet CS)
+        public override RouteOptimizationOutcome RouteOptimize(CustomerSet CS)
         {
-            return OptimizeRoute(CS, VRD.VehicleArray.ToList());
+            return RouteOptimize(CS, VRD.VehicleArray.ToList());
         }
-        public override RouteOptimizationOutcome OptimizeRoute(CustomerSet CS, List<Vehicle> vehicles)
+        public override RouteOptimizationOutcome RouteOptimize(CustomerSet CS, List<Vehicle> vehicles)
         {
             //This method is designed to work with exactly one GDV and exactly one EV
             int GDVPositionInList = 0;
             int EVPositionInList = 1;
             if (vehicles.Count != 2)
-                throw new Exception("EVvsGDV_ProblemModel.OptimizeRoute must be invoked with a list of 2 vehicles!");
+                throw new Exception("EVvsGDV_ProblemModel.RouteOptimize must be invoked with a list of 2 vehicles!");
             if (vehicles[0].Category== vehicles[1].Category)
-                throw new Exception("EVvsGDV_ProblemModel.OptimizeRoute must be invoked with exactly one GDV and one EV!");
+                throw new Exception("EVvsGDV_ProblemModel.RouteOptimize must be invoked with exactly one GDV and one EV!");
             if (vehicles[0].Category == VehicleCategories.EV)
             {
                 GDVPositionInList = 1;
@@ -174,30 +176,30 @@ namespace MPMFEVRP.Interfaces
             }
 
             List<VehicleSpecificRouteOptimizationOutcome> theList = new List<VehicleSpecificRouteOptimizationOutcome>();
-            VehicleSpecificRouteOptimizationOutcome vsroo_GDV = OptimizeRoute(CS, vehicles[GDVPositionInList]);
+            VehicleSpecificRouteOptimizationOutcome vsroo_GDV = RouteOptimize(CS, vehicles[GDVPositionInList]);
             if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
                 return new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
             theList.Add(vsroo_GDV);
-            VehicleSpecificRouteOptimizationOutcome vsroo_EV = OptimizeRoute(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+            VehicleSpecificRouteOptimizationOutcome vsroo_EV = RouteOptimize(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
             theList.Add(vsroo_EV);
             return new RouteOptimizationOutcome(theList);
         }
-        public override VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute=null)
+        public override VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute=null)
         {
             //This method has nothing to do with a list of previously generated customer sets, management of that is completely some other class's responsibility
 
             if ((vehicle.Category == VehicleCategories.GDV) || (GDVOptimalRoute == null))
-                return OptimizeRoute(CS, vehicle);
+                return RouteOptimize(CS, vehicle);
             //else: we are looking at an EV problem with a provided GDV-optimal route
             //First, we must check for AFV-feasibility of the provided GDV-optimal route
             //Make an AFV-optimized route out of the given GDV-optimized route:
             VehicleSpecificRoute fittedRoute = FitGDVOptimalRouteToEV(GDVOptimalRoute, vehicle);
             if (fittedRoute.Feasible)//if the fitted route is feasible:
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: fittedRoute.GetVehicleMilesTraveled(), vsOptimizedRoute: fittedRoute);//TODO: The objective function value here is hardcoded to be the VMT, make this flexible! 
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: fittedRoute);
             if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Infeasible);
             //If none of the previous conditions worked, we must solve an EV-TSP
-            return OptimizeRoute(CS, vehicle);
+            return RouteOptimize(CS, vehicle);
         }
         bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRouteOptimizationOutcome GDVOptimalRoute)
         {
@@ -222,7 +224,7 @@ namespace MPMFEVRP.Interfaces
 
             return false;
         }
-        VehicleSpecificRouteOptimizationOutcome OptimizeRoute(CustomerSet CS, Vehicle vehicle)
+        VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
             XCPlex_NodeDuplicatingFormulation solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver); //TODO this needs to be fixed: if GDV infeasible, then we shouldn't try to optimize it for EV here
             solver.RefineDecisionVariables(CS);
@@ -230,7 +232,7 @@ namespace MPMFEVRP.Interfaces
             if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
-                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, objectiveFunctionValue: solver.GetObjValue(), vsOptimizedRoute: GetVSRFromFlowVariables(vehicle,solver.GetXVariablesSetTo1()));
+                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVSRFromFlowVariables(vehicle,solver.GetXVariablesSetTo1()));
         }
 
         public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1)

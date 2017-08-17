@@ -88,7 +88,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(customer);
                 customers.Sort();
-                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[1]);
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.RouteOptimize(this, problemModelBase.VRD.VehicleArray[1]);
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
                 if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)
                 {
@@ -96,7 +96,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 }
                 else
                 {
-                    vsroo_EV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                    vsroo_EV = problemModelBase.RouteOptimize(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
@@ -113,12 +113,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
         //        customers.Sort();//TODO Write a unit test to see if this really works as intended
         //        if(vehicle.Category== VehicleCategories.GDV)
         //        {
-        //            VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
+        //            VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.RouteOptimize(this, vehicle);
         //            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
         //        }
         //        else//It's an EV, and the customer set must have been optimized for a GDV beforehand
         //        {
-        //            VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+        //            VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
         //            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
         //        }
 
@@ -140,7 +140,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public void Optimize(ProblemModelBase problemModelBase)
         {
-            routeOptimizationOutcome = problemModelBase.OptimizeRoute(this);
+            routeOptimizationOutcome = problemModelBase.RouteOptimize(this);
         }
         public void Optimize(ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
         {
@@ -152,14 +152,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 if ((vsroo_GDV != null) && (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.NotYetOptimized))
                     throw new Exception("CustomerSet.Optimize seems to be invoked to optimize for a GDV, with a GDV-optimal route already at hand!");
-                VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.RouteOptimize(this, vehicle);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
             }
             else//It's an EV, and the customer set must have been optimized for a GDV beforehand
             {
                 if ((vsroo_GDV == null) || (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.Optimized))
                     throw new Exception("CustomerSet.Optimize invoked to optimize for an EV, without a GDV-optimal route at hand!");
-                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
         }

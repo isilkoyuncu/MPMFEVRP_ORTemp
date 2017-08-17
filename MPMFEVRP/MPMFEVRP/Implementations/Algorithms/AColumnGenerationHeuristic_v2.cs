@@ -223,7 +223,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             if (allCustomerSets.ContainsAnIdenticalCustomerSet(customerSet))
                 return;
-            VehicleSpecificRouteOptimizationOutcome vsroo = model.OptimizeRoute(customerSet, vehicle);
+            VehicleSpecificRouteOptimizationOutcome vsroo = model.RouteOptimize(customerSet, vehicle);
             customerSet.RouteOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
             allCustomerSets.Add(customerSet);
             if (vsroo.Status == VehicleSpecificRouteOptimizationStatus.Optimized)
