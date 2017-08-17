@@ -15,10 +15,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         VehicleSpecificRouteOptimizationStatus status;
         public VehicleSpecificRouteOptimizationStatus Status { get { return status; } }
 
-        double objectiveFunctionValue;//This is for convenience than anything else, this information is easily reproducible based on the details in optimizedRoute, given a method to calculate the objective function value
-        public double ObjectiveFunctionValue { get { return objectiveFunctionValue; } }
-
-        VehicleSpecificRoute vsOptimizedRoute;//TODO: Eliminate this, because this new architecture whould work with the new VehicleSpecificRoute only!
+        VehicleSpecificRoute vsOptimizedRoute;
         public VehicleSpecificRoute VSOptimizedRoute { get { return vsOptimizedRoute; } }
 
         public VehicleSpecificRouteOptimizationOutcome()
@@ -29,13 +26,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             vehicleCategory = twinVSROO.vehicleCategory;
             status = twinVSROO.status;
-            objectiveFunctionValue = twinVSROO.objectiveFunctionValue;
             if (twinVSROO.vsOptimizedRoute == null)
                 vsOptimizedRoute = null;
             else
             vsOptimizedRoute = new VehicleSpecificRoute(twinVSROO.vsOptimizedRoute);//A new instance is created here because we may want to extend the route manually in heuristic algorithms 
         }
-        public VehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory, VehicleSpecificRouteOptimizationStatus status, double objectiveFunctionValue = 0.0, VehicleSpecificRoute vsOptimizedRoute = null)
+        public VehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory, VehicleSpecificRouteOptimizationStatus status, VehicleSpecificRoute vsOptimizedRoute = null)
         {
             this.vehicleCategory = vehicleCategory;
             this.status = status;
@@ -47,7 +43,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 case VehicleSpecificRouteOptimizationStatus.Infeasible:
                     break;
                 case VehicleSpecificRouteOptimizationStatus.Optimized:
-                    this.objectiveFunctionValue = objectiveFunctionValue;
                     this.vsOptimizedRoute = vsOptimizedRoute;
                     break;
             }
