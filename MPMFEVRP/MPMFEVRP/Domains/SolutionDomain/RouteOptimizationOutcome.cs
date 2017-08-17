@@ -36,6 +36,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else
             {
                 this.theList = theList;
+                if(status == RouteOptimizationStatus.OptimizedForBothGDVandEV)
+                {
+                    //TODO unit test this to see if it works as intended.
+                    ofdp = new ObjectiveFunctionInputDataPackage(CreateOFDPinstance(VehicleCategories.EV), CreateOFDPinstance(VehicleCategories.GDV));
+                }
+                else
+                {
+                    ofdp = CreateOFDPinstance(VehicleCategories.GDV);
+                }
             }
             overallStatus = status;
         }
@@ -86,10 +95,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 switch (vsroo_EV.Status)
                 {
                     case VehicleSpecificRouteOptimizationStatus.Infeasible:
-                        overallStatus = RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV;
+                        {
+                            overallStatus = RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV;
+                            ofdp = CreateOFDPinstance(VehicleCategories.GDV);
+                        }
                         break;
                     case VehicleSpecificRouteOptimizationStatus.Optimized:
-                        overallStatus = RouteOptimizationStatus.OptimizedForBothGDVandEV;
+                        {
+                            overallStatus = RouteOptimizationStatus.OptimizedForBothGDVandEV;
+                            ofdp = new ObjectiveFunctionInputDataPackage(CreateOFDPinstance(VehicleCategories.EV), CreateOFDPinstance(VehicleCategories.GDV));
+                        }
                         break;
                     default:
                         throw new Exception("We just optimized for the EV, the status of it should have been either optimal or infeasible!");
@@ -145,16 +160,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return;
             }
         }
-        public double GetMilesTraveled(VehicleCategories vehCategory)
-        {
-            foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
-            {
-                if (vsroo.VehicleCategory == vehCategory)
-                    return vsroo.VSOptimizedRoute.GetVehicleMilesTraveled();
-            }
-            return 0.0;
-            throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's miles traveled");
-        }
+
         public bool IsFeasible(VehicleCategories vehCategory)
         {
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
@@ -166,15 +172,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
             throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's feasibility status");
         }
 
-        public double GetPrizeCollected(VehicleCategories vehCategory)
+        ObjectiveFunctionInputDataPackage CreateOFDPinstance(VehicleCategories vehCategory)
         {
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theList)
             {
                 if (vsroo.VehicleCategory == vehCategory)
-                    return vsroo.VSOptimizedRoute.GetPrizeCollected();
+                    return new ObjectiveFunctionInputDataPackage(vsroo.VehicleCategory,
+                                                                 vsroo.VSOptimizedRoute.NumberOfCustomersVisited,
+                                                                 vsroo.VSOptimizedRoute.GetPrizeCollected(),
+                                                                 1,
+                                                                 vsroo.VSOptimizedRoute.GetVehicleMilesTraveled());
             }
-            return 0.0;
-            throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's collected prize");
+            throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't construct a OFDP.");
         }
+
     }
 }

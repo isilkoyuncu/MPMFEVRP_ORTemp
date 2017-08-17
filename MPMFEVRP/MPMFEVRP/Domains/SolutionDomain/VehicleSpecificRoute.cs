@@ -25,6 +25,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         //Other fields
         List<SiteVisit> siteVisits;
         public int NumberOfSitesVisited { get { return siteVisits.Count; } }
+        public int NumberOfCustomersVisited { get { int outcome=0; foreach (SiteVisit sv in siteVisits) if (sv.Site.SiteType == SiteTypes.Customer) outcome++; return outcome; } }
         //TODO check if not adding depot id to this list is the correct way.
         public List<string> ListOfVisitedSiteIncludingDepotIDs { get { List<string> listOfVisitedSiteIncludingDepotIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) listOfVisitedSiteIncludingDepotIDs.Add(sv.SiteID); return listOfVisitedSiteIncludingDepotIDs; } }
         public List<string> ListOfVisitedNonDepotSiteIDs { get { List<string> listOfVisitedNonDepotSiteIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) if (sv.SiteID != problemModel.SRD.GetSingleDepotID()) listOfVisitedNonDepotSiteIDs.Add(sv.SiteID); return listOfVisitedNonDepotSiteIDs; } }

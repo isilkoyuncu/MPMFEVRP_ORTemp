@@ -25,13 +25,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
 
-        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.OFDP; } } //TODO this error will be resolved when we add ofdp field in route optimization outcome.
+        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.OFDP; } } 
 
         public CustomerSet()
         {
             customers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
-            //ofdp = new ObjectiveFunctionInputDataPackage();   //TODO should we create an instance with empty constructor here
         }
         public CustomerSet(string customerID, ProblemModelBase problemModelBase)
         {
@@ -40,12 +39,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(customerID);
                 routeOptimizationOutcome = problemModelBase.OptimizeForSingleVehicle(this);
-                ofdp = new ObjectiveFunctionInputDataPackage(NumberOfCustomers, NumberOfCustomers, routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.EV), routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.GDV), 1, 1, routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV), routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV));
             }
             else
             {
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
-                //ofdp = new ObjectiveFunctionInputDataPackage();
             }
         }
         public CustomerSet(string customerID)
@@ -63,7 +60,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             // TODO unit test to check if this works as intended
             retrievedFromArchive = false;
             routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
-            FillOFDP();
         }
         public CustomerSet(ProblemModelBase problemModel, List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, Domains.ProblemDomain.Vehicle vehicle = null)
         {
@@ -118,7 +114,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     vsroo_EV = problemModelBase.OptimizeRoute(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
-                FillOFDP();
             }
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
@@ -133,13 +128,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 {
                     VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
                     routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
-                    FillOFDP(vehicle.Category);
                 }
                 else//It's an EV, and the customer set must have been optimized for a GDV beforehand
                 {
                     VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                     routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
-                    FillOFDP();
                 }
 
             }
@@ -163,40 +156,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
-                FillOFDP(vehicle.Category);
             }
             else//It's an EV, and the customer set must have been optimized for a GDV beforehand
             {
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
-                FillOFDP();
             }
-        }
-        void FillOFDP()
-        {
-            ofdp = new ObjectiveFunctionInputDataPackage(NumberOfCustomers,
-                                                         NumberOfCustomers,
-                                                         routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.EV),
-                                                         routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.GDV),
-                                                         1, 1,
-                                                         routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV),
-                                                         routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV));
-        }
-
-        void FillOFDP(VehicleCategories vehCategory)
-        {
-            if(vehCategory==VehicleCategories.GDV)
-                ofdp = new ObjectiveFunctionInputDataPackage(VehicleCategories.GDV, 
-                                                             NumberOfCustomers, 
-                                                             routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.GDV), 
-                                                             1, 
-                                                             routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.GDV));
-            else
-                ofdp = new ObjectiveFunctionInputDataPackage(VehicleCategories.EV, 
-                                                             NumberOfCustomers, 
-                                                             routeOptimizationOutcome.GetPrizeCollected(VehicleCategories.EV), 
-                                                             1, 
-                                                             routeOptimizationOutcome.GetMilesTraveled(VehicleCategories.EV));
         }
 
         public void Remove(string customer)

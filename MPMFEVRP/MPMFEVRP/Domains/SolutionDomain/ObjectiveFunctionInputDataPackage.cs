@@ -66,7 +66,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
             this.VMT_GDV = VMT_GDV;
         }
         //Think carefully before adding other constructors. The constructors defined above had no coupling with the problem, solution, etc. 
-        public static ObjectiveFunctionInputDataPackage AggregateByAddition(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
+        public ObjectiveFunctionInputDataPackage(ObjectiveFunctionInputDataPackage ofdp_ev, ObjectiveFunctionInputDataPackage ofdp_gdv)
+        {
+            numberOfCustomersServed_EV = ofdp_ev.GetNumberOfCustomersServed(VehicleCategories.EV);
+            numberOfCustomersServed_GDV = ofdp_gdv.GetNumberOfCustomersServed(VehicleCategories.GDV);
+            prizeCollected_EV = ofdp_ev.GetPrizeCollected(VehicleCategories.EV);
+            prizeCollected_GDV = ofdp_gdv.GetPrizeCollected(VehicleCategories.GDV);
+            numberOfVehiclesUsed_EV = ofdp_ev.GetNumberOfVehiclesUsed(VehicleCategories.EV);
+            numberOfVehiclesUsed_GDV = ofdp_gdv.GetNumberOfVehiclesUsed(VehicleCategories.GDV);
+            VMT_EV = ofdp_ev.GetVMT(VehicleCategories.EV);
+            VMT_GDV = ofdp_gdv.GetVMT(VehicleCategories.GDV);
+        }
+        
+            public static ObjectiveFunctionInputDataPackage AggregateByAddition(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
         {
             if ((IndividualOFIDPs_EV == null) && (IndividualOFIDPs_GDV == null))//Return an empty one because the individual inputs are not provided:
                 return new ObjectiveFunctionInputDataPackage();
