@@ -12,6 +12,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
     {
         List<VehicleSpecificRouteOptimizationOutcome> theList;
         RouteOptimizationStatus overallStatus; public RouteOptimizationStatus Status;
+        ObjectiveFunctionInputDataPackage ofdp;
+        public ObjectiveFunctionInputDataPackage OFDP { get { return ofdp; } }
 
         public RouteOptimizationOutcome()
         {

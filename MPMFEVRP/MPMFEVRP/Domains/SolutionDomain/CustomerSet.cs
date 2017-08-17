@@ -25,7 +25,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
 
-        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.ofdp; } } //TODO this error will be resolved when we add ofdp field in route optimization outcome.
+        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.OFDP; } } //TODO this error will be resolved when we add ofdp field in route optimization outcome.
 
         public CustomerSet()
         {
