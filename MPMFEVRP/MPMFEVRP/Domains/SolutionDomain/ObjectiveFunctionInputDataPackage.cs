@@ -77,8 +77,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
             VMT_EV = ofdp_ev.GetVMT(VehicleCategories.EV);
             VMT_GDV = ofdp_gdv.GetVMT(VehicleCategories.GDV);
         }
-        
-            public static ObjectiveFunctionInputDataPackage AggregateByAddition(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
+
+        public ObjectiveFunctionInputDataPackage(ObjectiveFunctionInputDataPackage twin_OFIDP)
+        {
+            numberOfCustomersServed_EV = twin_OFIDP.GetNumberOfCustomersServed(VehicleCategories.EV);
+            numberOfCustomersServed_GDV = twin_OFIDP.GetNumberOfCustomersServed(VehicleCategories.GDV);
+            prizeCollected_EV = twin_OFIDP.GetPrizeCollected(VehicleCategories.EV);
+            prizeCollected_GDV = twin_OFIDP.GetPrizeCollected(VehicleCategories.GDV);
+            numberOfVehiclesUsed_EV = twin_OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.EV);
+            numberOfVehiclesUsed_GDV = twin_OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.GDV);
+            VMT_EV = twin_OFIDP.GetVMT(VehicleCategories.EV);
+            VMT_GDV = twin_OFIDP.GetVMT(VehicleCategories.GDV);
+        }
+        public static ObjectiveFunctionInputDataPackage AggregateByAddition(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
         {
             if ((IndividualOFIDPs_EV == null) && (IndividualOFIDPs_GDV == null))//Return an empty one because the individual inputs are not provided:
                 return new ObjectiveFunctionInputDataPackage();

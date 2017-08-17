@@ -25,7 +25,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
 
-        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.OFDP; } } 
+        public ObjectiveFunctionInputDataPackage OFDP { get { return routeOptimizationOutcome.OFIDP; } } 
 
         public CustomerSet()
         {
@@ -154,11 +154,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             if (vehicle.Category == VehicleCategories.GDV)
             {
+                if ((vsroo_GDV != null) && (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.NotYetOptimized))
+                    throw new Exception("CustomerSet.Optimize seems to be invoked to optimize for a GDV, with a GDV-optimal route already at hand!");
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.OptimizeRoute(this, vehicle);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
             }
             else//It's an EV, and the customer set must have been optimized for a GDV beforehand
             {
+                if ((vsroo_GDV == null) || (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.Optimized))
+                    throw new Exception("CustomerSet.Optimize invoked to optimize for an EV, without a GDV-optimal route at hand!");
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.OptimizeRoute(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }

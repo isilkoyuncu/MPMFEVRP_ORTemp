@@ -47,5 +47,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     break;
             }
         }
+
+        public ObjectiveFunctionInputDataPackage GetObjectiveFunctionInputDataPackage()
+        {
+            return new ObjectiveFunctionInputDataPackage(vehicleCategory,
+                                                         vsOptimizedRoute.NumberOfCustomersVisited,
+                                                         vsOptimizedRoute.GetPrizeCollected(),
+                                                         1,
+                                                         vsOptimizedRoute.GetVehicleMilesTraveled());
+        }
+
     }
 }
