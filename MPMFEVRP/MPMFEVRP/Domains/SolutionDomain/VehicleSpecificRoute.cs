@@ -150,11 +150,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public double GetPrizeCollected()
         {
-            double outcome=0.0;
-            foreach(SiteVisit sv in siteVisits)
-            {
-                outcome += sv.Site.GetPrize(vehicle.Category);
-            }
+            double outcome = 0.0;
+            if (siteVisits != null)//Doing this check so we never run into a null exception in runtime
+                foreach (SiteVisit sv in siteVisits)
+                {
+                    outcome += sv.Site.GetPrize(vehicle.Category);
+                }
             return outcome;
         }
     }
