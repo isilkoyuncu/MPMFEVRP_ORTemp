@@ -49,7 +49,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 if(s.SiteType == SiteTypes.Customer)
                 {
-                    CustomerSet candidate = new CustomerSet(s.ID, model);
+                    CustomerSet candidate = new CustomerSet(s.ID);
+                    candidate.Optimize(model);
                     unexploredCustomerSets.ConsiderForAddition(candidate);
                 }
             }
@@ -117,12 +118,16 @@ namespace MPMFEVRP.Implementations.Algorithms
                 foreach (string customerID in remainingCustomers)
                 {
                     CustomerSet candidate = new CustomerSet(cs);
-                    candidate.ExtendAndOptimize(customerID, model);
-                    if(!candidate.RouteOptimizationOutcome.RetrievedFromArchive)//not retrieved
-                        if((candidate.RouteOptimizationOutcome.Status== RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV)||(candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
-                        {
-                            children.Add(candidate);
-                        }
+                    candidate.Extend(customerID);
+                    //Need to have an archive here so we can compare
+                    if (candidate.RetrievedFromArchive)//retrieved//TODO Replace this by archive.Contains()
+                        continue;
+                    candidate.Optimize(model);
+
+                    if ((candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV) || (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
+                    {
+                        children.Add(candidate);
+                    }
                 }//foreach (string customerID in remainingCustomers)
             }//foreach (CustomerSet cs in parents)
             parents.Clear();
