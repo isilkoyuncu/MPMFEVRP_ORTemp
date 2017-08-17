@@ -120,28 +120,28 @@ namespace MPMFEVRP.Domains.SolutionDomain
         int GetIndexOfBestOFVforMostAdvancedVehicleCustomerSet(bool maximizationTypeOF = false)
         {
             int outcome = -1;
+            //TODO: Reengineer this method entirely based on the simplified structure of the OF and the data package needed for it
+            //double objSignAdjustor = (maximizationTypeOF) ? -1.0 : 1.0;
+            //double[] minOFV = new double[] { double.MaxValue, double.MaxValue };
+            //int indexOfKeyOFV = 1;
 
-            double objSignAdjustor = (maximizationTypeOF) ? -1.0 : 1.0;
-            double[] minOFV = new double[] { double.MaxValue, double.MaxValue };
-            int indexOfKeyOFV = 1;
+            //for (int i = 0; i < Count; i++)
+            //{
+            //    if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
+            //        this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+            //        continue;
+            //    if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV == 0))
+            //        continue;
 
-            for (int i = 0; i < Count; i++)
-            {
-                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
-                    this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
-                    continue;
-                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV && (indexOfKeyOFV == 0))
-                    continue;
+            //    if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV && (indexOfKeyOFV == 1))
+            //        indexOfKeyOFV = 0;
 
-                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV && (indexOfKeyOFV == 1))
-                    indexOfKeyOFV = 0;
-
-                if (minOFV[indexOfKeyOFV] > objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[indexOfKeyOFV])
-                {
-                    outcome = i;
-                    minOFV[indexOfKeyOFV] = objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[indexOfKeyOFV];
-                }
-            }
+            //    if (minOFV[indexOfKeyOFV] > objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[indexOfKeyOFV])
+            //    {
+            //        outcome = i;
+            //        minOFV[indexOfKeyOFV] = objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[indexOfKeyOFV];
+            //    }
+            //}
 
             return outcome;
         }
@@ -149,59 +149,36 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             int outcome = -1;
 
-            double objSignAdjustor = (maximizationTypeOF) ? -1.0 : 1.0;
-            double minOFV = double.MaxValue;
+            //TODO: Reengineer this method entirely based on the simplified structure of the OF and the data package needed for it
+            //double objSignAdjustor = (maximizationTypeOF) ? -1.0 : 1.0;
+            //double minOFV = double.MaxValue;
 
-            for (int i = 0; i < Count; i++)
-            {
-                if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
-                    this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
-                    continue;
+            //for (int i = 0; i < Count; i++)
+            //{
+            //    if (this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized ||
+            //        this[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+            //        continue;
 
-                for (int v = 0; v < 2; v++)
-                    if (this[i].RouteOptimizerOutcome.Feasible[v])
-                        if (minOFV > objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[v])
-                        {
-                            outcome = i;
-                            minOFV = objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[v];
-                        }
-            }
+            //    for (int v = 0; v < 2; v++)
+            //        if (this[i].RouteOptimizerOutcome.Feasible[v])
+            //            if (minOFV > objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[v])
+            //            {
+            //                outcome = i;
+            //                minOFV = objSignAdjustor * this[i].RouteOptimizerOutcome.OFV[v];
+            //            }
+            //}
 
             return outcome;
         }
 
-        public List<double> GetDeltaProfit()
-        {
-            List<double> outcome = new List<double>();
-            foreach (CustomerSet cs in this)
-                outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1], 0));
-            return outcome;
-        }
-
-        public void ExportAllGDVCustomerSets(string filename, bool writeInfeasibles)
-        {
-            //This method doesn't support append
-            StreamWriter sw = new StreamWriter(filename, false);
-            sw.WriteLine("Customer Set\tGDV Feasible\tGDV Miles");
-            foreach (CustomerSet cs in this)
-            {
-                if ((writeInfeasibles) || (cs.RouteOptimizationOutcome.IsGdvFeasible()))
-                    sw.WriteLine("{0}\t{1}\t{2:F5}", Utils.StringOperations.CombineAndSpaceSeparateArray(cs.Customers.ToArray()), cs.IsGDVFeasible, cs.GDVMilesTraveled);
-            }
-            sw.Close();
-        }
-        public void ExportAllCustomerSets(string filename, bool writeInfeasibles)
-        {
-            //This method doesn't support append
-            StreamWriter sw = new StreamWriter(filename, false);
-            sw.WriteLine("Customer Set\tGDV Feasible\tGDV Miles\tAFV Feasible\tAFV Miles");
-            foreach (CustomerSet cs in this)
-            {
-                if ((writeInfeasibles) || (cs.RouteOptimizationOutcome.IsGdvFeasible()))
-                    sw.WriteLine("{0}\t{1}\t{2:F5}\t{3}\t{4:F5}", Utils.StringOperations.CombineAndSpaceSeparateArray(cs.Customers.ToArray()), cs.IsGDVFeasible, cs.GDVMilesTraveled, cs.IsAFVFeasible, cs.AFVMilesTraveled);
-            }
-            sw.Close();
-        }
+        //TODO: Either re-fit to the new architecture or eliminate
+        //public List<double> GetDeltaProfit()
+        //{
+        //    List<double> outcome = new List<double>();
+        //    foreach (CustomerSet cs in this)
+        //        outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1], 0));
+        //    return outcome;
+        //}
 
         public bool ContainsAnIdenticalCustomerSet(CustomerSet candidate)
         {
