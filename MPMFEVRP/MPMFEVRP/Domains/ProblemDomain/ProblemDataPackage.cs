@@ -33,11 +33,11 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 srd.SiteArray[s] = new Site(reader.GetSiteArray()[s]);
             }
 
-            vrd.VehicleArray = new Vehicle[vrd.NumVehicleCategories];
-            for (int v = 0; v < vrd.NumVehicleCategories; v++)
-            {
-                vrd.VehicleArray[v] = new Vehicle(reader.GetVehicleArray()[v]);
-            }
+            //vrd.VehicleArray = new Vehicle[vrd.NumVehicleCategories];
+            //for (int v = 0; v < vrd.NumVehicleCategories; v++)
+            //{
+            //    vrd.VehicleArray[v] = new Vehicle(reader.GetVehicleArray()[v]);
+            //}
 
             //Assign travel speed
             crd.TravelSpeed = reader.GetTravelSpeed();
@@ -87,7 +87,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 {
                     for (int vc = 0; vc < vrd.NumVehicleCategories; vc++)
                     {
-                        if (vrd.VehicleArray[vc].Category == VehicleCategories.EV)
+                        if (vrd.GetTheVehicleOfCategory(VehicleCategories.EV))
                             srd.EnergyConsumption[i, j, vc] = srd.Distance[i, j] / (vrd.VehicleArray[vc].BatteryCapacity / vrd.VehicleArray[vc].ConsumptionRate);
                         else
                             srd.EnergyConsumption[i, j, vc] = 0.0;
