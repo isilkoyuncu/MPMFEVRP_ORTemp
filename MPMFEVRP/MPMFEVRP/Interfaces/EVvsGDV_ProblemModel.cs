@@ -16,15 +16,9 @@ namespace MPMFEVRP.Interfaces
     {
         protected string problemName;
 
-        RouteOptimizationOutcome roo;
-
         protected XCPlex_NodeDuplicatingFormulation EV_TSPSolver;
         protected XCPlex_NodeDuplicatingFormulation GDV_TSPSolver;
-
-        double retrieve_CompTime = 0.0;
-        double GDV_TSP_CompTime = 0.0;
-        double EV_TSP_CompTime = 0.0;
-        
+       
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
         public EVvsGDV_ProblemModel() { }

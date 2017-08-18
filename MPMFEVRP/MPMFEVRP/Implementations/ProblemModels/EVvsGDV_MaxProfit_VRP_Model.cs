@@ -79,7 +79,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
         }
         public override double CalculateObjectiveFunctionValue(ISolution solution)
         {
-
+            throw new NotImplementedException();
         }
 
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)

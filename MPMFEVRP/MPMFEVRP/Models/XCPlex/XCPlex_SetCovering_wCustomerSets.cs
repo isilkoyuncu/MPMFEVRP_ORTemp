@@ -79,7 +79,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
                     z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
-                    obj.AddTerm(customerSetArray[i].RouteOptimizerOutcome.OFV[v], z[i][v]);
+                    obj.AddTerm(customerSetArray[i].RouteOptimizationOutcome.OFV[v], z[i][v]);
                     allVariables_list.Add(z[i][v]);
                 }
             }
@@ -117,12 +117,12 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     if (customerSetArray[i].Customers.Contains(customerID))
                     {
-                        if (customerSetArray[i].RouteOptimizerOutcome.Feasible[0])
+                        if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.EV))
                         {
                             numTimesCustomerServed.AddTerm(1.0, z[i][0]);
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
                         }
-                        else if (customerSetArray[i].RouteOptimizerOutcome.Feasible[1])
+                        else if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
                         {
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
                         }
