@@ -25,7 +25,7 @@ namespace MPMFEVRPTests.TestUtility_DefaultGetters
             List<string> lc1 = new List<string>() { allCustomers[5], allCustomers[2] };
             //TODO we need to solve this ambiguity between customer set constructors: customerSet(csList, vsros...) and customerSet(csList, roo...) 
             //I had to correct the following by adding vsros as not yet optimized
-            CustomerSet cs1 = new CustomerSet(lc1,VehicleSpecificRouteOptimizationStatus.NotYetOptimized);
+            CustomerSet cs1 = new CustomerSet(lc1, vsros:VehicleSpecificRouteOptimizationStatus.NotYetOptimized);
             VehicleSpecificRouteOptimizationOutcome vsroo1 = theProblemModel.RouteOptimize(cs1, theProblemModel.VRD.VehicleArray[1]);
             cs1.RouteOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo1 });
             outcome.Add(cs1);
