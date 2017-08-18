@@ -103,7 +103,9 @@
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic_v2.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
+    <Compile Include="Implementations\ProblemModels\FleetCompositionProblemModelUnderCarbonRegulations.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MinCost_VRP.cs" />
+    <Compile Include="Implementations\Problems\FleetCompositionProblemUnderCarbonRegulations.cs" />
     <Compile Include="Implementations\Solutions\Readers\KoyuncuYavuzSolutionReader.cs" />
     <Compile Include="Implementations\Solutions\RouteBasedSolution.cs" />
     <Compile Include="Domains\SolutionDomain\PartialSolution.cs" />
