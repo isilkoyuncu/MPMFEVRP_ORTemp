@@ -12,7 +12,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
         public int NumVehicleCategories { get { return numVehicleCategories; } set { numVehicleCategories = value; } }
         //public int[] NumVehicles { get { return numVehicles; } set { numVehicles = value; } }
-        public Vehicle[] VehicleArray { get { return vehicleArray; } set { vehicleArray = value; } }
+        //public Vehicle[] VehicleArray { get { return vehicleArray; } set { vehicleArray = value; } }
         public List<Vehicle> GetVehiclesOfCategory(VehicleCategories vehicleCategory)
         {
             List<Vehicle> outcome = new List<Vehicle>();
@@ -47,7 +47,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         {
             numVehicleCategories = twinVRD.NumVehicleCategories;
             //numVehicles = twinVRD.NumVehicles;
-            vehicleArray = twinVRD.VehicleArray;
+            //vehicleArray = twinVRD.VehicleArray;
         }
     }
 }
