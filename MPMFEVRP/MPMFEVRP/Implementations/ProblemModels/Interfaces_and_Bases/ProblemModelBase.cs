@@ -19,6 +19,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected ObjectiveFunctions objectiveFunction;
         public ObjectiveFunctions ObjectiveFunction { get { return objectiveFunction; } }
 
+        protected ObjectiveFunctionCoefficientsPackage objectiveFunctionCoefficientsPackage;
+        public ObjectiveFunctionCoefficientsPackage ObjectiveFunctionCoefficientsPackage { get { return objectiveFunctionCoefficientsPackage; } }
+
         protected InputOrOutputParameterSet problemCharacteristics;
         public InputOrOutputParameterSet ProblemCharacteristics { get { return problemCharacteristics; } }
 

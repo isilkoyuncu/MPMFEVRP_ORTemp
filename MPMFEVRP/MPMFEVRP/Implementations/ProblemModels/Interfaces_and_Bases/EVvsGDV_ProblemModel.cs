@@ -32,6 +32,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             objectiveFunctionType = problem.ObjectiveFunctionType;
             objectiveFunction = problem.ObjectiveFunction;
+            objectiveFunctionCoefficientsPackage = problem.ObjectiveFunctionCoefficientsPackage;
             coverConstraintType = problem.CoverConstraintType;
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
@@ -364,27 +365,32 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         {
             //This method still uses everything from the problemModel, because this method resides in 
             double outcome = 0.0;
+            List<VehicleCategories> vcList = new List<VehicleCategories>() { VehicleCategories.EV, VehicleCategories.GDV };
             switch (objectiveFunction)
             {
                 case ObjectiveFunctions.MaximizeProfit:
-                    outcome += OFIDP.GetTotalPrizeCollected();
-                    outcome -= VRD.VehicleArray[0].FixedCost * OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.EV);
-                    outcome -= VRD.VehicleArray[1].FixedCost * OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.GDV);
-                    outcome -= VRD.VehicleArray[0].VariableCostPerMile * OFIDP.GetVMT(VehicleCategories.EV);
-                    outcome -= VRD.VehicleArray[1].VariableCostPerMile * OFIDP.GetVMT(VehicleCategories.GDV);
+                    foreach (VehicleCategories vc in vcList)
+                    {
+                        outcome += objectiveFunctionCoefficientsPackage.GetEVTotalPrizeCoefficient(vc) * OFIDP.GetPrizeCollected(vc);
+                        outcome -= objectiveFunctionCoefficientsPackage.GetFixedCostPerVehicle(vc) * OFIDP.GetNumberOfVehiclesUsed(vc);
+                        outcome -= objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
+                    }
                     break;
                 case ObjectiveFunctions.MinimizeVMT:
                     outcome += OFIDP.GetTotalVMT();
                     break;
                 case ObjectiveFunctions.MinimizeVariableCost:
-                    outcome += VRD.VehicleArray[0].VariableCostPerMile * OFIDP.GetVMT(VehicleCategories.EV);
-                    outcome += VRD.VehicleArray[1].VariableCostPerMile * OFIDP.GetVMT(VehicleCategories.GDV);
+                    foreach (VehicleCategories vc in vcList)
+                    {
+                        outcome += objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
+                    }
                     break;
                 case ObjectiveFunctions.MinimizeCost:
-                    outcome += VRD.VehicleArray[0].FixedCost * OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.EV);
-                    outcome += VRD.VehicleArray[1].FixedCost * OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.GDV);
-                    outcome += VRD.VehicleArray[0].VariableCostPerMile * OFIDP.GetVMT(VehicleCategories.EV);
-                    outcome += VRD.VehicleArray[1].VariableCostPerMile * OFIDP.GetVMT(VehicleCategories.GDV);
+                    foreach (VehicleCategories vc in vcList)
+                    {
+                        outcome += objectiveFunctionCoefficientsPackage.GetFixedCostPerVehicle(vc) * OFIDP.GetNumberOfVehiclesUsed(vc);
+                        outcome += objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
+                    }
                     break;
                 default:
                     throw new NotImplementedException("EVvsGDV_ProblemModel.CalculateObjectiveFunctionValue");

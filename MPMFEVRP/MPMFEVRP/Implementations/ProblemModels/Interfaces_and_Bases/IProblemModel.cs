@@ -12,6 +12,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
         ObjectiveFunctions ObjectiveFunction { get; }
+        ObjectiveFunctionCoefficientsPackage ObjectiveFunctionCoefficientsPackage { get; }
         InputOrOutputParameterSet ProblemCharacteristics { get; }
 
         CustomerCoverageConstraint_EachCustomerMustBeCovered CoverConstraintType { get; }

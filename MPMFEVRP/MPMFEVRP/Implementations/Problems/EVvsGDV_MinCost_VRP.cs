@@ -1,7 +1,6 @@
 ﻿using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
-
-
+using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Implementations.Problems
 {
@@ -18,6 +17,7 @@ namespace MPMFEVRP.Implementations.Problems
         {
             objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
             objectiveFunction = Models.ObjectiveFunctions.MinimizeCost;
+            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 0, 0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
 
