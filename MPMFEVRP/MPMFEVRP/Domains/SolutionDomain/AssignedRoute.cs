@@ -1,14 +1,12 @@
-﻿using System;
+﻿using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.ProblemDomain;
-using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
-    public class AssignedRoute//TODO Rename this class to VehicleSpecificRoute
+    public class AssignedRoute//TODO Rethink this class now that there is VehicleSpecificRoute
     {
         /* Each route starts at the depot (0) and ends at the depot (0)
          * */

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MPMFEVRP.Domains.AlgorithmDomain
+﻿namespace MPMFEVRP.Domains.AlgorithmDomain
 {
 
-    
+
 
     public enum Recovery_Options { AssignmentProbByCPLEX, AnalyticallySolve}
 

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Interfaces;
-using MPMFEVRP.Domains.SolutionDomain;
+﻿using MPMFEVRP.Interfaces;
+using System;
 
 namespace MPMFEVRP.Implementations.Solutions.Writers
 {

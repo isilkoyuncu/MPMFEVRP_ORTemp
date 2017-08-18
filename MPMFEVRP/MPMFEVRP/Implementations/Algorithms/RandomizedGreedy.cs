@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Interfaces;
-using MPMFEVRP.Models;
-using MPMFEVRP.Domains.AlgorithmDomain;
+﻿using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
+using MPMFEVRP.Models;
+using MPMFEVRP.Models.XCPlex;
+using System;
+using System.Collections.Generic;
 
 
 namespace MPMFEVRP.Implementations.Algorithms

@@ -1,13 +1,10 @@
 ﻿using BestRandom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
+using System.Collections.Generic;
 
-namespace MPMFEVRP.Interfaces
+namespace MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases
 {
     public interface ISolution : RandomGenerator<ISolution>
     {

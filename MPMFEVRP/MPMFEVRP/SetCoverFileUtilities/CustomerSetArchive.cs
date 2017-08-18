@@ -1,16 +1,15 @@
-﻿using System;
+﻿using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.SolutionDomain;
 using System.IO;
+using System.Linq;
 
 namespace MPMFEVRP.SetCoverFileUtilities
 {
     public class CustomerSetArchive
     {
-        public static void SaveToFile(PartitionedCustomerSetList pcsl, string filename, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
+        public static void SaveToFile(PartitionedCustomerSetList pcsl, string filename, EVvsGDV_ProblemModel theProblemModel)
         {
             StreamWriter sw = new StreamWriter(filename, false)
             {
@@ -27,14 +26,14 @@ namespace MPMFEVRP.SetCoverFileUtilities
         {
             return "Customer Set\tVehicle (GDV) Specific Route Optimization Status";
         }
-        static string CustomerSetRow(CustomerSet cs, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
+        static string CustomerSetRow(CustomerSet cs, EVvsGDV_ProblemModel theProblemModel)
         {
             if (cs.RouteOptimizationOutcome.GetRouteOptimizationStatus() == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                 return CustomerSetToString(cs, theProblemModel) + "\t" + VehicleSpecificRouteOptimizationStatus.Infeasible.ToString();
             else
                 return CustomerSetToString(cs, theProblemModel) + "\t" + cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status.ToString();
         }
-        static string CustomerSetToString(CustomerSet cs, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
+        static string CustomerSetToString(CustomerSet cs, EVvsGDV_ProblemModel theProblemModel)
         {
             if ((cs.RouteOptimizationOutcome == null) || (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV) == null))
                 return SeparateBySpace(cs.Customers);
@@ -56,7 +55,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
         }
 
 
-        public static PartitionedCustomerSetList RecreateFromFile(string filename, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
+        public static PartitionedCustomerSetList RecreateFromFile(string filename, EVvsGDV_ProblemModel theProblemModel)
         {
             Domains.ProblemDomain.Vehicle theGDV = theProblemModel.VRD.VehicleArray[1];
             PartitionedCustomerSetList outcome = new PartitionedCustomerSetList();

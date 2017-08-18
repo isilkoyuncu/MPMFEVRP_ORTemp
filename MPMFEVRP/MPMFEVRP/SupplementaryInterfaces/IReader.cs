@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.ProblemDomain;
+﻿using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Interfaces
 {

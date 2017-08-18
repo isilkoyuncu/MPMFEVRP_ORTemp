@@ -1,12 +1,9 @@
-﻿using MPMFEVRP.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.AlgorithmDomain;
+﻿using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using MPMFEVRP.Models;
 
-namespace MPMFEVRP.Interfaces
+
+namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 {
     public interface IAlgorithm
     {

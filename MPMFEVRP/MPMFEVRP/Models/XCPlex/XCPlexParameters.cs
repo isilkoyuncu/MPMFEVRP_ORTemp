@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using MPMFEVRP.Domains.AlgorithmDomain;
-using MPMFEVRP.Domains.SolutionDomain;
+﻿using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.ProblemDomain;
+using System.Collections.Generic;
 
 namespace MPMFEVRP.Models.XCPlex
 {

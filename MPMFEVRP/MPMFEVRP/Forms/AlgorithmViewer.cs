@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases;
 
 namespace MPMFEVRP.Forms
 {
@@ -25,7 +26,7 @@ namespace MPMFEVRP.Forms
             ParamUtil.DrawParameters(panel_params, theAlgorithm.AlgorithmParameters.GetAllParameters());
         }
 
-        private void button_Close_Click(object sender, EventArgs e)
+        private void Button_Close_Click(object sender, EventArgs e)
         {
             Close();
         }

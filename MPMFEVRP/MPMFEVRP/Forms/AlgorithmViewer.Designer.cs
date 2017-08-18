@@ -58,7 +58,7 @@
             this.button_Close.TabIndex = 2;
             this.button_Close.Text = "Close";
             this.button_Close.UseVisualStyleBackColor = true;
-            this.button_Close.Click += new System.EventHandler(this.button_Close_Click);
+            this.button_Close.Click += new System.EventHandler(this.Button_Close_Click);
             // 
             // AlgorithmViewer
             // 

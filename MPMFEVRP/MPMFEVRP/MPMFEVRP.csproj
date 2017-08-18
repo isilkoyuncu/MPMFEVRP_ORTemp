@@ -146,26 +146,26 @@
     </Compile>
     <Compile Include="Implementations\Solutions\Writers\IndividualSolutionWriter.cs" />
     <Compile Include="Implementations\Solutions\Writers\KoyuncuYavuzSummaryWriter.cs" />
-    <Compile Include="Interfaces\AlgorithmBase.cs" />
+    <Compile Include="Implementations\Algorithms\Interfaces_and_Bases\AlgorithmBase.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedGreedy.cs" />
     <Compile Include="Implementations\Algorithms\BranchAndBound.cs" />
     <Compile Include="Implementations\Algorithms\BestOfRandom.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
-    <Compile Include="Interfaces\EVvsGDV_Problem.cs" />
-    <Compile Include="Interfaces\EVvsGDV_ProblemModel.cs" />
-    <Compile Include="Interfaces\IWriter.cs" />
-    <Compile Include="Interfaces\ProblemBase.cs" />
-    <Compile Include="Interfaces\ProblemModelBase.cs" />
+    <Compile Include="Implementations\Problems\Interfaces_and_Bases\EVvsGDV_Problem.cs" />
+    <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\EVvsGDV_ProblemModel.cs" />
+    <Compile Include="SupplementaryInterfaces\IWriter.cs" />
+    <Compile Include="Implementations\Problems\Interfaces_and_Bases\ProblemBase.cs" />
+    <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\ProblemModelBase.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs" />
     <Compile Include="Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs" />
     <Compile Include="Implementations\Problems\Readers\KoyuncuYavuzReader.cs" />
-    <Compile Include="Interfaces\SolutionBase.cs" />
+    <Compile Include="Implementations\Solutions\Interfaces_and_Bases\SolutionBase.cs" />
     <Compile Include="Implementations\Solutions\CustomerSetBasedSolution.cs" />
-    <Compile Include="Interfaces\IAlgorithm.cs" />
-    <Compile Include="Interfaces\IProblem.cs" />
-    <Compile Include="Interfaces\IProblemModel.cs" />
-    <Compile Include="Interfaces\IReader.cs" />
-    <Compile Include="Interfaces\ISolution.cs" />
+    <Compile Include="Implementations\Algorithms\Interfaces_and_Bases\IAlgorithm.cs" />
+    <Compile Include="Implementations\Problems\Interfaces_and_Bases\IProblem.cs" />
+    <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\IProblemModel.cs" />
+    <Compile Include="SupplementaryInterfaces\IReader.cs" />
+    <Compile Include="Implementations\Solutions\Interfaces_and_Bases\ISolution.cs" />
     <Compile Include="Models\InputOrOutputParameterSet.cs" />
     <Compile Include="Models\EnumExtensions.cs" />
     <Compile Include="Models\Enums.cs" />
@@ -260,6 +260,7 @@
     <Content Include="Resources\RawData\data2.txt" />
     <Content Include="Resources\RawData\data1.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

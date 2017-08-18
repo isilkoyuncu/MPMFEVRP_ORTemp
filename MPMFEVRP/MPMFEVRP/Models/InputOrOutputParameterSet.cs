@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.AlgorithmDomain;
+﻿using System.Collections.Generic;
 
 namespace MPMFEVRP.Models
 {
-    
+
     public class InputOrOutputParameterSet
     {
         Dictionary<ParameterID, InputOrOutputParameter> allParameters = new Dictionary<ParameterID, InputOrOutputParameter>();

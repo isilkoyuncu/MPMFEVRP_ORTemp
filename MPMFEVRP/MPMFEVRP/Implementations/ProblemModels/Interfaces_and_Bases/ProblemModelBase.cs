@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.ProblemDomain;
+﻿using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Models.XCPlex;
-using MPMFEVRP.Models;
-using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Implementations.Solutions;
-using MPMFEVRP.Interfaces;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using MPMFEVRP.Models;
+using System;
+using System.Collections.Generic;
 
-namespace MPMFEVRP.Interfaces
+namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 {
     public abstract class ProblemModelBase : IProblemModel
     {

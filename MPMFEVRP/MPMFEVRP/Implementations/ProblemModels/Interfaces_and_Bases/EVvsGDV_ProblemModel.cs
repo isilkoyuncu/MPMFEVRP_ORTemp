@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Models.XCPlex;
-using MPMFEVRP.Models;
-using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using MPMFEVRP.Models;
+using MPMFEVRP.Models.XCPlex;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace MPMFEVRP.Interfaces
+
+namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 {
     public abstract class EVvsGDV_ProblemModel: ProblemModelBase
     {

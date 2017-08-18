@@ -1,15 +1,13 @@
-﻿using MPMFEVRP.Implementations.ProblemModels;
-using MPMFEVRP.Interfaces;
+﻿using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using MPMFEVRP.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.AlgorithmDomain;
 
-namespace MPMFEVRP.Interfaces
+namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 {
     public abstract class AlgorithmBase : IAlgorithm
     {

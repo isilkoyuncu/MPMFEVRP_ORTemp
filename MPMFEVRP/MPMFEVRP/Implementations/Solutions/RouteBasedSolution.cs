@@ -1,12 +1,12 @@
-﻿using System;
+﻿using BestRandom;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BestRandom;
-using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Interfaces;
-using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations.Solutions
 {

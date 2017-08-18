@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Interfaces;
-using MPMFEVRP.Implementations.Solutions;
+﻿using MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using MPMFEVRP.Utils;
-using MPMFEVRP.Domains.AlgorithmDomain;
+using System;
+using System.Collections.Generic;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {

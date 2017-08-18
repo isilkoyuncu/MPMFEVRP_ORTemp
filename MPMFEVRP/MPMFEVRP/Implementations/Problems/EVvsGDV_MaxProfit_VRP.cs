@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Interfaces;
-using MPMFEVRP.Domains.ProblemDomain;
+﻿using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 
 

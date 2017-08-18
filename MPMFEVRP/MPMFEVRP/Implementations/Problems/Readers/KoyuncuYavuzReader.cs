@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Interfaces;
-using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Utils;
+using System;
+using System.Linq;
 
 namespace MPMFEVRP.Implementations.Problems.Readers
 {

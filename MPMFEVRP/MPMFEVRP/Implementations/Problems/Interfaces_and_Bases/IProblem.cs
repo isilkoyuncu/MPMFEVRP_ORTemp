@@ -1,12 +1,7 @@
 ﻿using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MPMFEVRP.Interfaces
+namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
 {
     public interface IProblem
     {

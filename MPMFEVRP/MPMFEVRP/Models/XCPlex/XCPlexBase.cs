@@ -1,14 +1,12 @@
 ﻿using ILOG.Concert;
 using ILOG.CPLEX;
+using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Implementations.Solutions;
-using MPMFEVRP.Domains.AlgorithmDomain;
-using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Interfaces;
 
 namespace MPMFEVRP.Models.XCPlex
 {
