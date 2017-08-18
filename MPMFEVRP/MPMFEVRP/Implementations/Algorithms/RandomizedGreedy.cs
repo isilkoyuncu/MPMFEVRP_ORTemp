@@ -56,7 +56,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel problemModel)
         {
-            model = problemModel;
+            theProblemModel = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
 
@@ -83,11 +83,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             DateTime localFinishTime;
 
             List<CustomerSetBasedSolution> allSolutions = new List<CustomerSetBasedSolution>();
-            int numberOfEVs = model.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue(); 
+            int numberOfEVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue(); 
             //for (int trial = 0; trial < poolSize; trial++)
             do{
-                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution(model);
-                List<string> visitableCustomers = model.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
+                CustomerSetBasedSolution trialSolution = new CustomerSetBasedSolution(theProblemModel);
+                List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs();//We assume here that each customer is addable to a currently blank set
                 bool csSuccessfullyAdded = false;
                 do
                 {
@@ -98,7 +98,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
                         localStartTime = DateTime.Now;
                         CustomerSet extendedCS = new CustomerSet(currentCS);
-                        extendedCS.ExtendAndOptimize(customerToAdd, model); //Extend function also optimizes the extended customer set
+                        extendedCS.ExtendAndOptimize(customerToAdd, theProblemModel); //Extend function also optimizes the extended customer set
                         extensionCompTime += (DateTime.Now - localStartTime).TotalMilliseconds;
 
                         csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (trialSolution.NumCS_assigned2EV < numberOfEVs));
@@ -227,13 +227,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         double ShortestDistanceOfCandidateToCurrentCustomerSet(CustomerSet CS, string candidate)
         {
             if (CS.NumberOfCustomers == 0)
-                return model.SRD.GetDistance(candidate, model.SRD.GetSingleDepotID());
+                return theProblemModel.SRD.GetDistance(candidate, theProblemModel.SRD.GetSingleDepotID());
             else
             {
                 double outcome = double.MaxValue;
                 foreach (string customer in CS.Customers)
                 {
-                    double distance = model.SRD.GetDistance(candidate, customer);
+                    double distance = theProblemModel.SRD.GetDistance(candidate, customer);
                     if (outcome > distance)
                     {
                         outcome = distance;
@@ -275,7 +275,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                             cs_List.Add(oldTrialSolution.Assigned2GDV[i]);
                         }
                         //solve the linear optimization problem to recover from bad cs creation
-                        CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam, cs_List);
+                        CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam, cs_List);
                         CPlexExtender.Solve_and_PostProcess();
                         outcome = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
                         break;
@@ -300,7 +300,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         Array.Sort(dP, cs_Array);
                         for (int i = cs_Array.Length-1; i >=0; i--)
                         {
-                            if (dP[i] > 0 && cs_Array[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue > 0 && outcome.NumCS_assigned2EV < model.NumVehicles[0])
+                            if (dP[i] > 0 && cs_Array[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue > 0 && outcome.NumCS_assigned2EV < theProblemModel.NumVehicles[0])
                             {
                                 outcome.AddCustomerSet2EVList(cs_Array[i]);
                             }
@@ -320,7 +320,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 return false;
 
             //If we're here, we know at least one of the profits is a positive! And that's all we need, if this is a sub-optimal decision, we can still recover from it later, no worries.
-            if ((solution.NumCS_assigned2EV < model.NumVehicles[0]))
+            if ((solution.NumCS_assigned2EV < theProblemModel.NumVehicles[0]))
             {
                 solution.AddCustomerSet2EVList(CS);
                 solution.UpdateUpperLowerBoundsAndStatus();
@@ -334,7 +334,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void RunSetCover()
         {
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam);
             //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));

@@ -36,7 +36,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
-            model = theProblemModel;
+            base.theProblemModel = theProblemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
             
@@ -51,10 +51,10 @@ namespace MPMFEVRP.Implementations.Algorithms
             switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value)
             {
                 case XCPlex_Formulation.NodeDuplicating:
-                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(model, XcplexParam);
+                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicating:
-                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(model, XcplexParam);
+                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
             }
             //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString()+"model.lp");
@@ -184,8 +184,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             double[] delta_value;
             double[] epsilon_value;
 
-            int numCustomers = model.SRD.NumCustomers;
-            int numES = model.SRD.NumES;
+            int numCustomers = theProblemModel.SRD.NumCustomers;
+            int numES = theProblemModel.SRD.NumES;
             int counter = 0;
             X_value = new double[numCustomers+1][][];
             for (int i = 0; i <= numCustomers; i++)
@@ -193,8 +193,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 X_value[i] = new double[numCustomers + 1][];
                 for (int j = 0; j <= numCustomers; j++)
                 {
-                    X_value[i][j] = new double[model.VRD.NumVehicleCategories];
-                    for (int v = 0; v < model.VRD.NumVehicleCategories; v++)
+                    X_value[i][j] = new double[theProblemModel.VRD.NumVehicleCategories];
+                    for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
                         X_value[i][j][v] = allVariableValues[counter++];
                 }
             }
@@ -214,8 +214,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             U_value = new double[numCustomers + 1][];
             for (int j = 0; j <= numCustomers; j++)
             {
-                U_value[j] = new double[model.VRD.NumVehicleCategories];
-                for (int v = 0; v < model.VRD.NumVehicleCategories; v++)
+                U_value[j] = new double[theProblemModel.VRD.NumVehicleCategories];
+                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
 
                     U_value[j][v] = allVariableValues[counter++];
             }

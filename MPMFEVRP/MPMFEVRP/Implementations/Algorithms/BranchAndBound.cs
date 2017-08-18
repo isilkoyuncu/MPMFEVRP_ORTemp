@@ -29,6 +29,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
+            base.theProblemModel = theProblemModel;
             unexploredList = new SolutionList();
 
             // Step 0: Create root and add it to unexploredList (solution type is fetched as a parameters to the algorithm)
@@ -57,7 +58,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
                 if (current.IsComplete)
                 {
-                    if (current.ObjectiveFunctionValue < upperBound)
+                    if (theProblemModel.CalculateObjectiveFunctionValue(current) < upperBound)
                     {
                         bestSolutionFound = current;
                         UpdateUpperBound();
@@ -93,7 +94,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         /// </summary>
         void UpdateUpperBound()
         {
-            upperBound = bestSolutionFound.ObjectiveFunctionValue;
+            upperBound = theProblemModel.CalculateObjectiveFunctionValue( bestSolutionFound);
             unexploredList.Cut(upperBound);
             // TODO stats update
         }

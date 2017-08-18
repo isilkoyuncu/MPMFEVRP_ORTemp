@@ -61,7 +61,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             //The following are miscellaneous variables needed in the algorithm
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
-            int deepestPossibleLevel = model.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
+            int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
             double runTimeLimitInSeconds = algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
             int iter = 0;
             do
@@ -112,7 +112,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 throw new Exception("children is not empty, can't populate new children!");
             foreach (CustomerSet cs in parents)
             {
-                List<string> remainingCustomers = model.GetAllCustomerIDs();
+                List<string> remainingCustomers = theProblemModel.GetAllCustomerIDs();
                 foreach (string customerID in cs.Customers)
                     remainingCustomers.Remove(customerID);
                 foreach (string customerID in remainingCustomers)
@@ -122,7 +122,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Need to have an archive here so we can compare
                     if (candidate.RetrievedFromArchive)//retrieved//TODO Replace this by archive.Contains()
                         continue;
-                    candidate.Optimize(model);
+                    candidate.Optimize(theProblemModel);
 
                     if ((candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV) || (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV))
                     {
@@ -134,7 +134,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void RunSetCover()
         {
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(model, XcplexParam);
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam);
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
         }

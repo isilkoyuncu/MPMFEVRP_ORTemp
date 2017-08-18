@@ -16,7 +16,7 @@ namespace MPMFEVRP.Interfaces
         protected ISolution bestSolutionFound;
         public ISolution Solution { get { return bestSolutionFound; } }
 
-        protected EVvsGDV_ProblemModel model;
+        protected EVvsGDV_ProblemModel theProblemModel;
 
         protected InputOrOutputParameterSet algorithmParameters;
         public InputOrOutputParameterSet AlgorithmParameters { get { return algorithmParameters; } }
@@ -56,7 +56,7 @@ namespace MPMFEVRP.Interfaces
         public void Initialize(EVvsGDV_ProblemModel theProblemModel)
         {
             // common initialize for all algorithms
-            this.model = theProblemModel;
+            this.theProblemModel = theProblemModel;
             //TODO is this necessary?
             //this.bestSolutionFound = SolutionUtil.CreateSolutionByName(algorithmParameters.GetParameter(ParameterID.ALG_SOLUTION_TYPES).GetStringValue(), model);
             SpecializedInitialize(theProblemModel);
