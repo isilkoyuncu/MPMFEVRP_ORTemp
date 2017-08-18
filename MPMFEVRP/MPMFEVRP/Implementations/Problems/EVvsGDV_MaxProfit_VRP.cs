@@ -22,12 +22,14 @@ namespace MPMFEVRP.Implementations.Problems
         public EVvsGDV_MaxProfit_VRP()
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            objectiveFunction = ObjectiveFunctions.MaximizeProfit;
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
 
         public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP) : base(PDP)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            objectiveFunction = ObjectiveFunctions.MaximizeProfit;
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
 

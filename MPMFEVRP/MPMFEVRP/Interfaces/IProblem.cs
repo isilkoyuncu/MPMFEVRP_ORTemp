@@ -11,6 +11,7 @@ namespace MPMFEVRP.Interfaces
     public interface IProblem
     {
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
+        ObjectiveFunctions ObjectiveFunction { get; }
 
         ProblemDataPackage PDP { get; }
         InputOrOutputParameterSet ProblemCharacteristics { get; }

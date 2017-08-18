@@ -21,12 +21,14 @@ namespace MPMFEVRP.Implementations.Problems
         public EVvsGDV_MinCost_VRP()
         {
             objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
+            objectiveFunction = Models.ObjectiveFunctions.MinimizeCost;
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
 
         public EVvsGDV_MinCost_VRP(ProblemDataPackage PDP) : base(PDP)
         {
             objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
+            objectiveFunction = Models.ObjectiveFunctions.MinimizeCost;
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
 
