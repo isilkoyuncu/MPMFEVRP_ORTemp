@@ -82,13 +82,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return true;
         }
 
-        public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase)//Keep for now but consider deleting after seeing at least one method fully working iwth the new architecture
+        public void ExtendAndOptimize(string customer, EVvsGDV_ProblemModel theProblemModel)//Keep for now but consider deleting after seeing at least one method fully working iwth the new architecture
         {
             if (!customers.Contains(customer))
             {
                 customers.Add(customer);
                 customers.Sort();
-                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = problemModelBase.RouteOptimize(this, problemModelBase.VRD.VehicleArray[1]);
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.VehicleArray[1]);
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
                 if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)
                 {
@@ -96,7 +96,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 }
                 else
                 {
-                    vsroo_EV = problemModelBase.RouteOptimize(this, problemModelBase.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                    vsroo_EV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
@@ -138,11 +138,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
 
-        public void Optimize(ProblemModelBase problemModelBase)
+        public void Optimize(EVvsGDV_ProblemModel theProblemModel)
         {
-            routeOptimizationOutcome = problemModelBase.RouteOptimize(this);
+            routeOptimizationOutcome = theProblemModel.RouteOptimize(this);
         }
-        public void Optimize(ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
+        public void Optimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
         {
             //This method makes heavy use of the problem model
             //A closer look therein reveals that the intelligence of checking whether GDV-optimal route is EV-feasible and if the customer set is definitely EV-infeasible are invoked
@@ -152,14 +152,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 if ((vsroo_GDV != null) && (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.NotYetOptimized))
                     throw new Exception("CustomerSet.Optimize seems to be invoked to optimize for a GDV, with a GDV-optimal route already at hand!");
-                VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.RouteOptimize(this, vehicle);
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = theProblemModel.RouteOptimize(this, vehicle);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
             }
             else//It's an EV, and the customer set must have been optimized for a GDV beforehand
             {
                 if ((vsroo_GDV == null) || (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.Optimized))
                     throw new Exception("CustomerSet.Optimize invoked to optimize for an EV, without a GDV-optimal route at hand!");
-                VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV = theProblemModel.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
         }
@@ -179,23 +179,23 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new Exception("Cannot remove customer at a position that doesn't exist!");
         }
 
-        public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2, ProblemModelBase problemModelBase)
+        public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2, EVvsGDV_ProblemModel theProblemModel)
         {
             string c1, c2;
             c1 = CS1.customers[position1];
             c2 = CS2.customers[position2];
             CS1.RemoveAt(position1);
             CS2.RemoveAt(position2);
-            CS2.ExtendAndOptimize(c1, problemModelBase);
-            CS1.ExtendAndOptimize(c2, problemModelBase);
+            CS2.ExtendAndOptimize(c1, theProblemModel);
+            CS1.ExtendAndOptimize(c2, theProblemModel);
         }
-        public static void Swap(CustomerSet CS1, string customer1, CustomerSet CS2, string customer2, ProblemModelBase problemModelBase)
+        public static void Swap(CustomerSet CS1, string customer1, CustomerSet CS2, string customer2, EVvsGDV_ProblemModel theProblemModel)
         {
             CS1.Remove(customer1);
             CS2.Remove(customer2);
 
-            CS2.ExtendAndOptimize(customer1, problemModelBase);
-            CS1.ExtendAndOptimize(customer2, problemModelBase);
+            CS2.ExtendAndOptimize(customer1, theProblemModel);
+            CS1.ExtendAndOptimize(customer2, theProblemModel);
         }
         
         public bool Contains(string customerID)

@@ -21,11 +21,11 @@ namespace MPMFEVRP.Forms
     {
         BindingList<IAlgorithm> algorithms;
         BindingList<IProblem> problems;
-        BindingList<ProblemModelBase> problemModels;
+        BindingList<EVvsGDV_ProblemModel> problemModels;
         BindingList<ISolution> solutions; 
 
         IProblem theProblem;
-        ProblemModelBase theProblemModel;
+        EVvsGDV_ProblemModel theProblemModel;
         IAlgorithm theAlgorithm;
         ISolution theSolution;
         IWriter writer;
@@ -38,7 +38,7 @@ namespace MPMFEVRP.Forms
 
             problems = new BindingList<IProblem>();
             listBox_problems.DataSource = problems;
-            problemModels = new BindingList<ProblemModelBase>();
+            problemModels = new BindingList<EVvsGDV_ProblemModel>();
 
             algorithms = new BindingList<IAlgorithm>();
             listBox_algorithms.DataSource = algorithms;

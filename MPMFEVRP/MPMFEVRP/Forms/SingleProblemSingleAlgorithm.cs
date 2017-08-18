@@ -19,7 +19,7 @@ namespace MPMFEVRP.Forms
     public partial class SingleProblemSingleAlgorithm : Form
     {
         IProblem theProblem;
-        ProblemModelBase theProblemModel;
+        EVvsGDV_ProblemModel theProblemModel;
         IAlgorithm theAlgorithm;
         //ISolution theSolution;
         public SingleProblemSingleAlgorithm()

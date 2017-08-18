@@ -22,9 +22,9 @@ namespace MPMFEVRP.Models.XCPlex
         CustomerSet[] customerSetArray;
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
 
-        public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
+        public XCPlex_SetCovering_wCustomerSets(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
         {
-            this.problemModel = problemModel;
+            this.problemModel = theProblemModel;
             this.xCplexParam = xCplexParam;
             XCPlexRelaxation relaxation;
             relaxation = xCplexParam.Relaxation;
@@ -43,11 +43,11 @@ namespace MPMFEVRP.Models.XCPlex
             }
             else
             {
-                nCustomerSets = problemModel.CustomerSetArchive.Count;
+                nCustomerSets = theProblemModel.CustomerSetArchive.Count;
                 customerSetArray = new CustomerSet[nCustomerSets];
                 for (int i = 0; i < nCustomerSets; i++)
                 {
-                    customerSetArray[i] = problemModel.CustomerSetArchive[i];
+                    customerSetArray[i] = theProblemModel.CustomerSetArchive[i];
                 }
             }
 

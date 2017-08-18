@@ -17,7 +17,7 @@ namespace MPMFEVRP.Implementations.Solutions
         public RouteBasedSolution()
         {
         }
-        public RouteBasedSolution(IProblemModel problemModel, List<Tuple<int,int,int>> XSetTo1)
+        public RouteBasedSolution(EVvsGDV_ProblemModel theProblemModel, List<Tuple<int,int,int>> XSetTo1)
         {
             routes = new List<AssignedRoute>();
             //first determining the number of routes
@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Solutions
             foreach (Tuple<int,int,int> x in XSetTo1)
                 if (x.Item1 == 0)
                 {
-                    routes.Add(new AssignedRoute(problemModel, x.Item3));
+                    routes.Add(new AssignedRoute(theProblemModel, x.Item3));
                     routes.Last().Extend(x.Item2);
                     tobeRemoved.Add(x);
                 }

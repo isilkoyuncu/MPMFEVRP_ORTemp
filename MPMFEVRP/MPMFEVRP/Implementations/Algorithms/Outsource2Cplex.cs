@@ -34,9 +34,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public void Initialize(){}
 
-        public override void SpecializedInitialize(ProblemModelBase problemModel)
+        public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
-            model = problemModel;
+            model = theProblemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
             

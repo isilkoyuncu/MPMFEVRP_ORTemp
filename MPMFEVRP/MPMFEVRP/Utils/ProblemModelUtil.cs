@@ -17,8 +17,8 @@ namespace MPMFEVRP.Utils
 
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
@@ -31,20 +31,20 @@ namespace MPMFEVRP.Utils
             return result;
         }
 
-        public static ProblemModelBase CreateProblemModelByName(String problemModelName)
+        public static EVvsGDV_ProblemModel CreateProblemModelByName(String problemModelName)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ProblemModelBase createdProblemModel = (ProblemModelBase)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
+            EVvsGDV_ProblemModel createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
 
             foreach (var problemModel in allProblemModels)
             {
-                createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel);
+                createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel);
                 if (createdProblemModel.GetName() == problemModelName)
                 {
                     return createdProblemModel;
@@ -53,20 +53,20 @@ namespace MPMFEVRP.Utils
 
             return createdProblemModel;
         }
-        public static ProblemModelBase CreateProblemModelByProblemName(String problemName)
+        public static EVvsGDV_ProblemModel CreateProblemModelByProblemName(String problemName)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ProblemModelBase createdProblemModel = (ProblemModelBase)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
+            EVvsGDV_ProblemModel createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(typeof(EVvsGDV_MaxProfit_VRP_Model));
 
             foreach (var problemModel in allProblemModels)
             {
-                createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel);
+                createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel);
                 if (createdProblemModel.GetNameOfProblemOfModel() == problemName)
                 {
                     return createdProblemModel;
@@ -76,21 +76,21 @@ namespace MPMFEVRP.Utils
             return createdProblemModel;
         }
 
-        public static ProblemModelBase CreateProblemModelByProblem(Type theProblemModelType, IProblem problem)
+        public static EVvsGDV_ProblemModel CreateProblemModelByProblem(Type theProblemModelType, IProblem problem)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(ProblemModelBase).IsAssignableFrom(p))
-                .Where(type => typeof(ProblemModelBase).IsAssignableFrom(type))
+                .Where(p => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            ProblemModelBase createdProblemModel;
+            EVvsGDV_ProblemModel createdProblemModel;
 
             foreach (var problemModel in allProblemModels)
                 if (problemModel == theProblemModelType)
                 {
-                    createdProblemModel = (ProblemModelBase)Activator.CreateInstance(problemModel, problem);
+                    createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel, problem);
                     if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
                     {
                         return createdProblemModel;
@@ -100,7 +100,7 @@ namespace MPMFEVRP.Utils
             return null;
         }
 
-        public static void ArrangeNodesIntoLists(ProblemModelBase problemModel, 
+        public static void ArrangeNodesIntoLists(EVvsGDV_ProblemModel problemModel, 
             out int numCustomers, out int numES, 
             out List<int> customerSiteNodeIndices, out List<int> depotPlusCustomerSiteNodeIndices, out List<int> ESSiteNodeIndices)
         {

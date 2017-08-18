@@ -26,7 +26,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         }
 
-        public override void SpecializedInitialize(ProblemModelBase model)
+        public override void SpecializedInitialize(EVvsGDV_ProblemModel model)
         {
             //TODO uncomment this afer writing new default solution
 

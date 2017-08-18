@@ -10,7 +10,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
 {
     public class CustomerSetArchive
     {
-        public static void SaveToFile(PartitionedCustomerSetList pcsl, string filename, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
+        public static void SaveToFile(PartitionedCustomerSetList pcsl, string filename, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
         {
             StreamWriter sw = new StreamWriter(filename, false)
             {
@@ -19,7 +19,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
             sw.WriteLine(HeaderRow());
             foreach(CustomerSet cs in pcsl.ToCustomerSetList())
             {
-                sw.WriteLine(CustomerSetRow(cs, problemModel));
+                sw.WriteLine(CustomerSetRow(cs, theProblemModel));
             }
             sw.Close();
         }
@@ -27,14 +27,14 @@ namespace MPMFEVRP.SetCoverFileUtilities
         {
             return "Customer Set\tVehicle (GDV) Specific Route Optimization Status";
         }
-        static string CustomerSetRow(CustomerSet cs, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
+        static string CustomerSetRow(CustomerSet cs, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
         {
             if (cs.RouteOptimizationOutcome.GetRouteOptimizationStatus() == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
-                return CustomerSetToString(cs, problemModel) + "\t" + VehicleSpecificRouteOptimizationStatus.Infeasible.ToString();
+                return CustomerSetToString(cs, theProblemModel) + "\t" + VehicleSpecificRouteOptimizationStatus.Infeasible.ToString();
             else
-                return CustomerSetToString(cs, problemModel) + "\t" + cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status.ToString();
+                return CustomerSetToString(cs, theProblemModel) + "\t" + cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).Status.ToString();
         }
-        static string CustomerSetToString(CustomerSet cs, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
+        static string CustomerSetToString(CustomerSet cs, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
         {
             if ((cs.RouteOptimizationOutcome == null) || (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV) == null))
                 return SeparateBySpace(cs.Customers);
@@ -56,9 +56,9 @@ namespace MPMFEVRP.SetCoverFileUtilities
         }
 
 
-        public static PartitionedCustomerSetList RecreateFromFile(string filename, MPMFEVRP.Interfaces.ProblemModelBase problemModel)
+        public static PartitionedCustomerSetList RecreateFromFile(string filename, MPMFEVRP.Interfaces.EVvsGDV_ProblemModel theProblemModel)
         {
-            Domains.ProblemDomain.Vehicle theGDV = problemModel.VRD.VehicleArray[1];
+            Domains.ProblemDomain.Vehicle theGDV = theProblemModel.VRD.VehicleArray[1];
             PartitionedCustomerSetList outcome = new PartitionedCustomerSetList();
             StreamReader sr = new StreamReader(filename);
             sr.ReadLine();//This is the header row, won't use for anything
@@ -67,7 +67,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
                 string line = sr.ReadLine();
                 string[] entriesInLine = line.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 VehicleSpecificRouteOptimizationStatus vsrossss = (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]);
-                VehicleSpecificRoute vsr = new VehicleSpecificRoute(problemModel, theGDV);
+                VehicleSpecificRoute vsr = new VehicleSpecificRoute(theProblemModel, theGDV);
                 CustomerSet cs = new CustomerSet(RemoveSpacesAndConvertToList(entriesInLine[0]), vsros: (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]), vehicleSpecificRoute: vsr);
                 outcome.Add(cs);
             }

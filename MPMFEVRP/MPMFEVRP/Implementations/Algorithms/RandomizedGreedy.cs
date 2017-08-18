@@ -54,7 +54,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SET_COVER, "Set Cover", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
         }
 
-        public override void SpecializedInitialize(ProblemModelBase problemModel)
+        public override void SpecializedInitialize(EVvsGDV_ProblemModel problemModel)
         {
             model = problemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;

@@ -37,7 +37,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters() { }
 
-        public override void SpecializedInitialize(ProblemModelBase model)
+        public override void SpecializedInitialize(EVvsGDV_ProblemModel model)
         {
             startTime = DateTime.Now;
 

@@ -12,7 +12,7 @@ namespace MPMFEVRP.Implementations.Solutions
 {
     public class CustomerSetBasedSolution : SolutionBase 
     {
-        private ProblemModelBase model;
+        private EVvsGDV_ProblemModel model;
         private Random random;
 
         //For now we assume we have only EV and GDV lists, if you add another vehicle category, you should update the objective function calculations.
@@ -33,9 +33,9 @@ namespace MPMFEVRP.Implementations.Solutions
             lowerBound = double.MinValue;
         }
 
-        public CustomerSetBasedSolution(ProblemModelBase model)
+        public CustomerSetBasedSolution(EVvsGDV_ProblemModel theProblemModel)
         {
-            this.model = model;
+            this.model = theProblemModel;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
             upperBound = double.MaxValue;
@@ -57,9 +57,9 @@ namespace MPMFEVRP.Implementations.Solutions
             upperBound = twinCSBasedSolution.upperBound;
         }
 
-        public CustomerSetBasedSolution(ProblemModelBase model, int[,] zSetTo1, CustomerSet[] customerSetArray)
+        public CustomerSetBasedSolution(EVvsGDV_ProblemModel theProblemModel, int[,] zSetTo1, CustomerSet[] customerSetArray)
         {
-            this.model = model;
+            this.model = theProblemModel;
             this.zSetTo1 = zSetTo1;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
@@ -77,9 +77,9 @@ namespace MPMFEVRP.Implementations.Solutions
         }
         
         // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing)
-        public CustomerSetBasedSolution(ProblemModelBase model, Random random)
+        public CustomerSetBasedSolution(EVvsGDV_ProblemModel theProblemModel, Random random)
         {
-            this.model = model;
+            this.model = theProblemModel;
             this.random = random;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();

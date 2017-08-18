@@ -33,24 +33,24 @@ namespace MPMFEVRP.Implementations.Algorithms
             return "Customer Set-based Column Generation Heuristic";
         }
         public override void AddSpecializedParameters(){ }
-        public override void SpecializedInitialize(ProblemModelBase model)
+        public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
             startTime = DateTime.Now;
 
-            ofvType = Utils.ProblemUtil.CreateProblemByName(model.GetNameOfProblemOfModel()).ObjectiveFunctionType;
+            ofvType = Utils.ProblemUtil.CreateProblemByName(theProblemModel.GetNameOfProblemOfModel()).ObjectiveFunctionType;
 
             //These are the important characteristics that will have to be tied to the form
             beamWidth = 1;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MaxOFVforAnyVehicle;
 
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
-            int nCustomers = model.SRD.NumCustomers;
-            foreach(Site s in model.SRD.SiteArray)
+            int nCustomers = theProblemModel.SRD.NumCustomers;
+            foreach(Site s in theProblemModel.SRD.SiteArray)
             {
                 if(s.SiteType == SiteTypes.Customer)
                 {
                     CustomerSet candidate = new CustomerSet(s.ID);
-                    candidate.Optimize(model);
+                    candidate.Optimize(theProblemModel);
                     unexploredCustomerSets.ConsiderForAddition(candidate);
                 }
             }

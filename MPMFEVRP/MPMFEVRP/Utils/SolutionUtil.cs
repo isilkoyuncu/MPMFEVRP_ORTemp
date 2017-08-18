@@ -37,7 +37,7 @@ namespace MPMFEVRP.Utils
             solutionSummary = KYSolnReader.InstanceSolutionSummary;
             return solutionSummary;
         }
-        public static ISolution CreateSolutionByName(String solutionName, ProblemModelBase problemData)
+        public static ISolution CreateSolutionByName(String solutionName, EVvsGDV_ProblemModel problemData)
         {
             var allSolutions = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())

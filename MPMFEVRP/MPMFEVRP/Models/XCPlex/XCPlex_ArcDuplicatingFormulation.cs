@@ -28,10 +28,10 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] delta;
         INumVar[] epsilon;
 
-        public XCPlex_ArcDuplicatingFormulation(ProblemModelBase problemModel, XCPlexParameters xCplexParam)
-            : base(problemModel, xCplexParam)
+        public XCPlex_ArcDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
+            : base(theProblemModel, xCplexParam)
         {
-            rechargingDuration_status = problemModel.RechargingDuration_status;
+            rechargingDuration_status = theProblemModel.RechargingDuration_status;
         }
         protected override void DefineDecisionVariables()
         {
