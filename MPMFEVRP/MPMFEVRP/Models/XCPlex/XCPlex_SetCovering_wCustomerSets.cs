@@ -68,6 +68,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             allVariables_list = new List<INumVar>();
             obj = LinearNumExpr();
+            VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
 
             string[][] z_name = new string[nCustomerSets][];
             z = new INumVar[nCustomerSets][];
@@ -79,7 +80,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
                     z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
-                    obj.AddTerm(customerSetArray[i].RouteOptimizationOutcome.OFV[v], z[i][v]);
+                    obj.AddTerm(problemModel.CalculateObjectiveFunctionValue(customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage()), z[i][v]);
                     allVariables_list.Add(z[i][v]);
                 }
             }
