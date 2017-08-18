@@ -7,6 +7,7 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
     {
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
         ObjectiveFunctions ObjectiveFunction { get; }
+        ObjectiveFunctionCoefficientsPackage ObjectiveFunctionCoefficientsPackage { get; }
 
         ProblemDataPackage PDP { get; }
         InputOrOutputParameterSet ProblemCharacteristics { get; }
