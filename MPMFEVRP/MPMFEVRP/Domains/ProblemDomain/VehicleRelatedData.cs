@@ -1,4 +1,8 @@
-﻿namespace MPMFEVRP.Domains.ProblemDomain
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace MPMFEVRP.Domains.ProblemDomain
 {
     public class VehicleRelatedData
     {
@@ -9,6 +13,27 @@
         public int NumVehicleCategories { get { return numVehicleCategories; } set { numVehicleCategories = value; } }
         //public int[] NumVehicles { get { return numVehicles; } set { numVehicles = value; } }
         public Vehicle[] VehicleArray { get { return vehicleArray; } set { vehicleArray = value; } }
+        public List<Vehicle> GetVehiclesOfCategory(VehicleCategories vehicleCategory)
+        {
+            List<Vehicle> outcome = new List<Vehicle>();
+            foreach (Vehicle v in vehicleArray)
+                if (v.Category == vehicleCategory)
+                    outcome.Add(v);
+            return outcome;
+        }
+        public Vehicle GetTheVehicleOfCategory(VehicleCategories vehicleCategory, bool returnFirstIfMultiple = true)
+        {
+            List<Vehicle> theList = GetVehiclesOfCategory(vehicleCategory);
+            if (theList.Count == 0)
+                return null;
+            if (theList.Count == 1)
+                return theList.First();
+            //if we're here, the list contains multiple elements
+            if (returnFirstIfMultiple)
+                return theList.First();
+            else
+                throw new Exception("VehicleRelatedData.GetTheVehicleOfCategory invoked with returnFirstIfMultiple = false, but there are multiple vehicles of the desired category and the method can't choose which one to return!");
+        }
 
         public VehicleRelatedData() { }
         public VehicleRelatedData(int numVehicleCategories, int[] numVehicles, Vehicle[] vehicleArray)

@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="MPMFEVRP.Implementations.Problems.Interfaces_and_Bases.ProblemBase" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAgAACBIAAAEAAAAAAAEACAAAAAAAAAAAAAEBAQ=</HashCode>
+      <FileName>Implementations\Problems\Interfaces_and_Bases\ProblemBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.Problems.Interfaces_and_Bases.EVvsGDV_Problem" Collapsed="true">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAEAAAAIABAA=</HashCode>
+      <FileName>Implementations\Problems\Interfaces_and_Bases\EVvsGDV_Problem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.Problems.EVvsGDV_MaxProfit_VRP" Collapsed="true">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Implementations\Problems\EVvsGDV_MaxProfit_VRP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.Problems.EVvsGDV_MinCost_VRP" Collapsed="true">
+    <Position X="2" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Implementations\Problems\EVvsGDV_MinCost_VRP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases.ProblemModelBase" Collapsed="true">
+    <Position X="5.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KgQACAgAACEIABBQKAkAQAAFoCSMBAAAAAgAAQIEBBQ=</HashCode>
+      <FileName>Implementations\ProblemModels\Interfaces_and_Bases\ProblemModelBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases.EVvsGDV_ProblemModel" Collapsed="true">
+    <Position X="5.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>JAgQAAQQACAAAABAAAAAAAAAICACAABEAEAAIIAAAAA=</HashCode>
+      <FileName>Implementations\ProblemModels\Interfaces_and_Bases\EVvsGDV_ProblemModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.ProblemModels.EVvsGDV_MaxProfit_VRP_Model" Collapsed="true">
+    <Position X="5.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAABQKAAAAAAAAAAAAAAAAAACAQAEBEA=</HashCode>
+      <FileName>Implementations\ProblemModels\EVvsGDV_MaxProfit_VRP_Model.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MPMFEVRP.Implementations.ProblemModels.EVvsGDV_MinCost_VRP_Model" Collapsed="true">
+    <Position X="6.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABQKAAAAAAAAAAAAAAAAAAAAQAEBAA=</HashCode>
+      <FileName>Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
