@@ -14,13 +14,14 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double[,] timeConsumption;  //[numNodes,numNodes]
         double[,,] energyConsumption;    //[numNodes,numNodes,numVehicleTypes]
 
+        //TODO: The following are all public and what's even more dangerous is that they all have setters (only used by ProblemDataPackage). This must be corrected by forcing the ProblemDataPackage to use the full constructor below from its internally kept data. As for giving these fields to outside, the public Get...() methods below must be used as the only way.
         public int NumCustomers { get { return numCustomers; } set { numCustomers = value; } } 
         public int NumES { get { return numES; } set { numES = value; } }  
         public int NumNodes { get { return numNodes;  } set { numNodes = value; } }   
         public Site[] SiteArray { get { return siteArray; } set { siteArray = value; } }
         public double[,] Distance { get { return distance; } set { distance = value; } }
         public double[,] TimeConsumption { get { return timeConsumption; } set { timeConsumption = value; } }
-        public double[,,] EnergyConsumption{ get { return energyConsumption; } set { energyConsumption = value; } }
+        public double[,,] EnergyConsumption { get { return energyConsumption; } set { energyConsumption = value; } }
 
         public SiteRelatedData() { }
         public SiteRelatedData(int numCustomers, int numES, int numNodes, Site[] siteArray, double[,] distance, double[,] timeConsumption, double[,,] energyConsumption)
@@ -93,16 +94,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
             return toReturn;
         }
 
-        public double GetDistance(string currentNode, string nextNode)
+        public double GetDistance(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
             double distance = 0.0;
 
             for (int i = 0; i < siteArray.Length; i++)
             {
-                if (siteArray[i].ID == currentNode)
+                if (siteArray[i].ID == currentNodeID)
                     currentIndex = i;
-                if (siteArray[i].ID == nextNode)
+                if (siteArray[i].ID == nextNodeID)
                     nextIndex = i;
             }
 
@@ -110,16 +111,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
             return distance;
         }
-        public double GetTravelTime(string currentNode, string nextNode)
+        public double GetTravelTime(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
             double travelTime = 0.0;
 
             for (int i = 0; i < siteArray.Length; i++)
             {
-                if (siteArray[i].ID == currentNode)
+                if (siteArray[i].ID == currentNodeID)
                     currentIndex = i;
-                if (siteArray[i].ID == nextNode)
+                if (siteArray[i].ID == nextNodeID)
                     nextIndex = i;
             }
 
@@ -127,16 +128,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
             return travelTime;
         }
-        public double GetEVEnergyConsumption(string currentNode, string nextNode)
+        public double GetEVEnergyConsumption(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
             double eVenergyConsumption = 0.0;
 
             for (int i = 0; i < siteArray.Length; i++)
             {
-                if (siteArray[i].ID == currentNode)
+                if (siteArray[i].ID == currentNodeID)
                     currentIndex = i;
-                if (siteArray[i].ID == nextNode)
+                if (siteArray[i].ID == nextNodeID)
                     nextIndex = i;
             }
 
@@ -146,7 +147,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         }
 
 
-        public int GetSiteIndex(string siteID)
+        public int GetSiteIndex(string siteID)//TODO: Delete this method. Its only mission is to convert siteID to siteIndex, which will never be used after SiteArray is no longer given out.
         {
             for (int i = 0; i < siteArray.Length; i++)
                 if (SiteArray[i].ID == siteID)
