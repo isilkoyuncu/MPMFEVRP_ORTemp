@@ -29,6 +29,7 @@ namespace MPMFEVRP.Implementations.Solutions
         {
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
+            ofidp = new ObjectiveFunctionInputDataPackage();
             upperBound = double.MaxValue;
             lowerBound = double.MinValue;
         }
@@ -38,6 +39,7 @@ namespace MPMFEVRP.Implementations.Solutions
             this.model = theProblemModel;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
+            ofidp = new ObjectiveFunctionInputDataPackage();
             upperBound = double.MaxValue;
             lowerBound = double.MinValue;
         }
@@ -50,9 +52,9 @@ namespace MPMFEVRP.Implementations.Solutions
             assigned2GDV = new CustomerSetList();
             twinCSBasedSolution.assigned2EV.ForEach((item) => { AddCustomerSet2EVList(new CustomerSet(item)); });
             twinCSBasedSolution.assigned2GDV.ForEach((item) => { AddCustomerSet2GDVList(new CustomerSet(item)); });
+            ofidp = new ObjectiveFunctionInputDataPackage(twinCSBasedSolution.OFIDP);
             isComplete = twinCSBasedSolution.isComplete;
             lowerBound = twinCSBasedSolution.lowerBound;
-            ofidp = new ObjectiveFunctionInputDataPackage( twinCSBasedSolution.OFIDP);
             status = twinCSBasedSolution.status;
             upperBound = twinCSBasedSolution.upperBound;
         }
@@ -63,6 +65,7 @@ namespace MPMFEVRP.Implementations.Solutions
             this.zSetTo1 = zSetTo1;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
+            ofidp = new ObjectiveFunctionInputDataPackage();
             for (int i = 0; i < customerSetArray.Length; i++)
             {
                 if (zSetTo1[i, 0] == 1)
@@ -83,6 +86,7 @@ namespace MPMFEVRP.Implementations.Solutions
             this.random = random;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
+            ofidp = new ObjectiveFunctionInputDataPackage();
         }
 
         public void AddCustomerSet2EVList(CustomerSet currentCS)

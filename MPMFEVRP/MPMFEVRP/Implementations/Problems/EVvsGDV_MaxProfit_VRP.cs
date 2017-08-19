@@ -18,7 +18,7 @@ namespace MPMFEVRP.Implementations.Problems
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
             objectiveFunction = ObjectiveFunctions.MaximizeProfit;
-            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 1, 1, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
+            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
 

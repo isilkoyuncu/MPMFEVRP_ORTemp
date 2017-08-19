@@ -45,11 +45,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public ObjectiveFunctionInputDataPackage GetObjectiveFunctionInputDataPackage()
         {
-            return new ObjectiveFunctionInputDataPackage(vehicleCategory,
-                                                         vsOptimizedRoute.NumberOfCustomersVisited,
-                                                         vsOptimizedRoute.GetPrizeCollected(),
-                                                         1,
-                                                         vsOptimizedRoute.GetVehicleMilesTraveled());
+            if (vsOptimizedRoute != null)
+                return new ObjectiveFunctionInputDataPackage(vehicleCategory,
+                                                             vsOptimizedRoute.NumberOfCustomersVisited,
+                                                             vsOptimizedRoute.GetPrizeCollected(),
+                                                             1,
+                                                             vsOptimizedRoute.GetVehicleMilesTraveled());
+            else
+                return new ObjectiveFunctionInputDataPackage();
         }
 
     }

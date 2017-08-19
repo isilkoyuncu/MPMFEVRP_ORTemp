@@ -90,6 +90,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)
                 {
                     // Do not try to optimize for EV
+                    vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Infeasible);
                 }
                 else
                 {

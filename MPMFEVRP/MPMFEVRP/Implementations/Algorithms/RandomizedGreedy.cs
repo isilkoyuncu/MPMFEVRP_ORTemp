@@ -319,7 +319,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         bool AddCustomerSet2Soln(CustomerSetBasedSolution solution, CustomerSet CS)
         {
             //if ((CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ObjectiveFunctionValue <= 0) && (CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ObjectiveFunctionValue <= 0))
-            if ((theProblemModel.CalculateObjectiveFunctionValue( CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).GetObjectiveFunctionInputDataPackage()) <= 0) && (theProblemModel.CalculateObjectiveFunctionValue( CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).GetObjectiveFunctionInputDataPackage()) <= 0))//The route is a negative profit for either vehicle category!
+           if ((theProblemModel.CalculateObjectiveFunctionValue( CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).GetObjectiveFunctionInputDataPackage()) <= 0) && (theProblemModel.CalculateObjectiveFunctionValue( CS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).GetObjectiveFunctionInputDataPackage()) <= 0))//The route is a negative profit for either vehicle category!
                 return false;
 
             //If we're here, we know at least one of the profits is a positive! And that's all we need, if this is a sub-optimal decision, we can still recover from it later, no worries.
