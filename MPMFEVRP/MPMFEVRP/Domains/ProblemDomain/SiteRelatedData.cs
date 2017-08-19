@@ -40,12 +40,18 @@ namespace MPMFEVRP.Domains.ProblemDomain
             numCustomers = twinSRD.NumCustomers;
             numES = twinSRD.NumES;
             numNodes = twinSRD.NumNodes;
-            siteArray = twinSRD.SiteArray;
+            siteArray = twinSRD.GetAllSitesArray();
             distance = twinSRD.Distance;
             timeConsumption = twinSRD.TimeConsumption;
             energyConsumption = twinSRD.EnergyConsumption;
         }
-        
+        Site[] GetAllSitesArray() // TODO unit test and make sure we need this method ow delete this
+        {
+            Site[] outcome = new Site[siteArray.Length];
+            for (int v = 0; v < siteArray.Length; v++)
+                outcome[v] = siteArray[v];
+            return outcome;
+        }
         public List<string> GetCustomerIDs()
         {
             List<string> outcome = new List<string>();

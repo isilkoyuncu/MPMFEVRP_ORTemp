@@ -169,28 +169,28 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 minValue_T[j] = problemModel.SRD.TimeConsumption[0, depotPlusCustomerSiteNodeIndices[j]];
                 maxValue_T[j] = problemModel.CRD.TMax - problemModel.SRD.TimeConsumption[depotPlusCustomerSiteNodeIndices[j], 0];
-                if (problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].SiteType == SiteTypes.Customer)
-                    maxValue_T[j] -= problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].ServiceDuration;
-
+                if (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[j])).SiteType == SiteTypes.Customer) {
+                    maxValue_T[j] -= problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[j])).ServiceDuration;
+                    maxValue_epsilon[j] = Math.Min(1.0, problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[j])).ServiceDuration * Math.Min(problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[j])).RechargingRate, problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);//TODO: Use the utility function instead!
+                }
+                else
+                    maxValue_epsilon[j] = 1.0;
                 //TODO Fine-tune the min and max values of delta
                 if (j == 0)
                 {
                     minValue_delta[j] = 0;
                     maxValue_delta[j] = 0;
+
+                    minValue_epsilon[j] = 1;
                 }
                 else
                 {
                     minValue_delta[j] = 0.0;
                     maxValue_delta[j] = 1.0;
-                }
-                if (j == 0)
-                    minValue_epsilon[j] = 1;
-                else
+
                     minValue_epsilon[j] = 0.0;
-                if (problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].SiteType == SiteTypes.Customer)
-                    maxValue_epsilon[j] = Math.Min(1.0, problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].ServiceDuration * Math.Min(problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].RechargingRate, problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);//TODO: Use the utility function instead!
-                else
-                    maxValue_epsilon[j] = 1.0;
+                }
+                
             }
         }
         public override string GetDescription_AllVariables_Array()
@@ -214,7 +214,7 @@ namespace MPMFEVRP.Models.XCPlex
             //First term: prize collection
             for (int j = 1; j <= numCustomers; j++)
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    objFunction.AddTerm(problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[j]].Prize[v], U[j][v]);
+                    objFunction.AddTerm(problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[j])).Prize[v], U[j][v]);
             //Second term Part I: distance-based costs from customer to customer directly
             for (int i = 0; i <= numCustomers; i++)
                 for (int j = 0; j <= numCustomers; j++)
@@ -360,7 +360,7 @@ namespace MPMFEVRP.Models.XCPlex
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
                         for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                            TimeDifference.AddTerm(-1.0 * (problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[i]].ServiceDuration + problemModel.SRD.TimeConsumption[depotPlusCustomerSiteNodeIndices[i], depotPlusCustomerSiteNodeIndices[j]] + (maxValue_T[i] - minValue_T[j])), X[i][j][v]);
+                            TimeDifference.AddTerm(-1.0 * (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[i])).ServiceDuration + problemModel.SRD.TimeConsumption[depotPlusCustomerSiteNodeIndices[i], depotPlusCustomerSiteNodeIndices[j]] + (maxValue_T[i] - minValue_T[j])), X[i][j][v]);
                         string constraint_name = "Time_Regulation_for_Direct_Arc_From_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                     }
@@ -399,9 +399,9 @@ namespace MPMFEVRP.Models.XCPlex
                         ILinearNumExpr TimeDifference = LinearNumExpr();
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
-                        TimeDifference.AddTerm(-1.0 * (problemModel.SRD.SiteArray[depotPlusCustomerSiteNodeIndices[i]].ServiceDuration + problemModel.SRD.TimeConsumption[depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r]] + problemModel.SRD.TimeConsumption[ESSiteNodeIndices[r], depotPlusCustomerSiteNodeIndices[j]] + (maxValue_T[i] - minValue_T[j] + (1.0+ problemModel.SRD.EnergyConsumption[depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r],0]) / problemModel.SRD.SiteArray[ESSiteNodeIndices[r]].RechargingRate)), Y[i][r][j]);//This assumes vehicle type 0 is the EV, and only it is the EV
-                        TimeDifference.AddTerm(1.0 / problemModel.SRD.SiteArray[ESSiteNodeIndices[r]].RechargingRate, delta[i]);
-                        TimeDifference.AddTerm(1.0 / problemModel.SRD.SiteArray[ESSiteNodeIndices[r]].RechargingRate, epsilon[i]);
+                        TimeDifference.AddTerm(-1.0 * (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(depotPlusCustomerSiteNodeIndices[i])).ServiceDuration + problemModel.SRD.TimeConsumption[depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r]] + problemModel.SRD.TimeConsumption[ESSiteNodeIndices[r], depotPlusCustomerSiteNodeIndices[j]] + (maxValue_T[i] - minValue_T[j] + (1.0+ problemModel.SRD.EnergyConsumption[depotPlusCustomerSiteNodeIndices[i], ESSiteNodeIndices[r],0]) / problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(ESSiteNodeIndices[r])).RechargingRate)), Y[i][r][j]);//This assumes vehicle type 0 is the EV, and only it is the EV
+                        TimeDifference.AddTerm(1.0 / problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(ESSiteNodeIndices[r])).RechargingRate, delta[i]);
+                        TimeDifference.AddTerm(1.0 / problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(ESSiteNodeIndices[r])).RechargingRate, epsilon[i]);
                         string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_Customer_node_" + j.ToString()+"_through_ES_node_" + r.ToString();
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (maxValue_T[i] - minValue_T[j]), constraint_name));
                     }

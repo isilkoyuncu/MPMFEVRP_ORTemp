@@ -112,7 +112,7 @@ namespace MPMFEVRP.Utils
 
             for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.NumNodes; orgSiteIndex++)
             {
-                switch (problemModel.SRD.SiteArray[orgSiteIndex].SiteType)
+                switch (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(orgSiteIndex)).SiteType)
                 {
                     case SiteTypes.Depot:
                         depotPlusCustomerSiteNodeIndices.Add(orgSiteIndex);

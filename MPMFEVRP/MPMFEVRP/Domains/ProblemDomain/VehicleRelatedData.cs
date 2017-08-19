@@ -27,7 +27,14 @@ namespace MPMFEVRP.Domains.ProblemDomain
             numVehicleCategories = twinVRD.NumVehicleCategories;
             //numVehicles = twinVRD.NumVehicles;
             vehicleArray = new Vehicle[numVehicleCategories];
-            
+            vehicleArray = twinVRD.GetAllVehiclesArray();
+        }
+        Vehicle[] GetAllVehiclesArray() // TODO unit test and make sure we need this method ow delete this
+        {
+            Vehicle[] outcome = new Vehicle[vehicleArray.Length];
+            for (int v = 0; v < vehicleArray.Length; v++)
+                outcome[v] = vehicleArray[v];
+            return outcome;
         }
         public List<Vehicle> GetVehiclesOfCategory(VehicleCategories vehicleCategory)
         {

@@ -33,18 +33,18 @@ namespace MPMFEVRP.Forms
             x = new float[numNodes];
             for (int i = 0; i < numNodes - 1; i++)
             {
-                x[i] = (float)(10 * theProblem.PDP.SRD.SiteArray[i].X);
+                x[i] = (float)(10 * theProblem.PDP.SRD.GetSiteByID(theProblem.PDP.SRD.GetSiteID(i)).X);
             }
             x[numNodes - 1] = x[0];
             y = new float[numNodes];
             for (int i = 0; i < numNodes - 1; i++)
             {
-                y[i] = (float)(10 * theProblem.PDP.SRD.SiteArray[i].Y);
+                y[i] = (float)(10 * theProblem.PDP.SRD.GetSiteByID(theProblem.PDP.SRD.GetSiteID(i)).Y);
             }
             y[numNodes - 1] = y[0];
 
             InitializeComponent();
-            panel_Paint(this, null);
+            Panel_Paint(this, null);
             panel_problemViewer.Show();
         }
 
@@ -53,7 +53,7 @@ namespace MPMFEVRP.Forms
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void panel_Paint(object sender, PaintEventArgs e)
+        private void Panel_Paint(object sender, PaintEventArgs e)
         {
             Pen penG = new Pen(Color.Green, 3);
             Pen penGL = new Pen(Color.LightGreen, 3);

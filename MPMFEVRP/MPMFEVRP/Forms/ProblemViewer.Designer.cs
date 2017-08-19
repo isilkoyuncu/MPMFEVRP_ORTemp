@@ -37,7 +37,7 @@
             this.panel_problemViewer.Name = "panel_problemViewer";
             this.panel_problemViewer.Size = new System.Drawing.Size(360, 303);
             this.panel_problemViewer.TabIndex = 0;
-            this.panel_problemViewer.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_Paint);
+            this.panel_problemViewer.Paint += new System.Windows.Forms.PaintEventHandler(this.Panel_Paint);
             // 
             // ProblemViewer
             // 

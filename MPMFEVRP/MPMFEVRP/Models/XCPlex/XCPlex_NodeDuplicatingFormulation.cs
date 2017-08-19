@@ -109,9 +109,9 @@ namespace MPMFEVRP.Models.XCPlex
 
             nodeToOriginalSiteNumberMap = new int[numNodes];
             int nodeCounter = 0;
-            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.SiteArray.Length; orgSiteIndex++)
+            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.NumNodes; orgSiteIndex++)
             {
-                switch (problemModel.SRD.SiteArray[orgSiteIndex].SiteType)
+                switch (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(orgSiteIndex)).SiteType)
                 {
                     case SiteTypes.Depot:
                         nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
@@ -174,7 +174,7 @@ namespace MPMFEVRP.Models.XCPlex
             //No arc between a non-ES node and an ES node can be traversed by a GDV
             for (int i = 0; i < numNodes; i++)
             {
-                if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[i]].SiteType == SiteTypes.ExternalStation)
+                if (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[i])).SiteType == SiteTypes.ExternalStation)
                     continue;
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
@@ -198,7 +198,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 minValue_T[j] = TravelTime(0,j);
                 maxValue_T[j] = problemModel.CRD.TMax - TravelTime(j,0);
-                if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
+                if (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).SiteType == SiteTypes.Customer)
                     maxValue_T[j] -= ServiceDuration(j);
 
                 //TODO Fine-tune the min and max values of delta
@@ -206,7 +206,7 @@ namespace MPMFEVRP.Models.XCPlex
                 maxValue_delta[j] = 1.0;
 
                 minValue_epsilon[j] = 0.0;
-                if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
+                if (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).SiteType == SiteTypes.Customer)
                     maxValue_epsilon[j] = Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j),problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate)/problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);//TODO: Use the utility function instead!
                 else
                     maxValue_epsilon[j] = 1.0;
@@ -553,7 +553,7 @@ namespace MPMFEVRP.Models.XCPlex
             
             for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)
             {
-                if(CS.Customers.Contains(problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ID))
+                if(CS.Customers.Contains(problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).ID))
                 {
                     U[j][VCIndex].LB = 1.0;
                     U[j][VCIndex].UB = 1.0;
@@ -588,15 +588,15 @@ namespace MPMFEVRP.Models.XCPlex
         }
         double ServiceDuration(int j)
         {
-            return problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].ServiceDuration;
+            return problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).ServiceDuration;
         }
         double RechargingRate(int j)
         {
-            return problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].RechargingRate;
+            return problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).RechargingRate;
         }
         double Prize(int j, int v)
         {
-            return problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].Prize[v];
+            return problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).Prize[v];
         }
     }
 }
