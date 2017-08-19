@@ -252,5 +252,23 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             }
             throw new Exception("Check the file long-lat or X-Y is not specified!");
         }
+        public double[] GetXcoordidates()
+        {
+            double[] xCoords = new double[siteArray.Length];
+            for(int s=0;s<siteArray.Length;s++)
+            {
+                xCoords[s] = siteArray[s].X;
+            }
+            return xCoords;
+        }
+        public double[] GetYcoordidates()
+        {
+            double[] yCoords = new double[siteArray.Length];
+            for (int s = 0; s < siteArray.Length; s++)
+            {
+                yCoords[s] = siteArray[s].Y;
+            }
+            return yCoords;
+        }
     }
 }

@@ -106,24 +106,7 @@ namespace MPMFEVRP.Implementations.Solutions
             status = Domains.AlgorithmDomain.AlgorithmSolutionStatus.Feasible;
         }
 
-        public double GetTotalVehicleFixedCost()
-        {
-            double outcome = 0.0;
-            foreach (Vehicle v in model.VRD.VehicleArray)
-                if (v.Category == VehicleCategories.EV)
-                    outcome += NumCS_assigned2EV * v.FixedCost;
-                else if (v.Category == VehicleCategories.GDV)
-                    outcome += NumCS_assigned2GDV * v.FixedCost;
-                else
-                    throw new Exception("We encountered a vehicle type other than EV or GDV.");  
-            return outcome;
-        }
-        //public double GetTotalVehicleMilesTraveled()
-        //{
-        //    double outcome = 0.0;
-        //    foreach(CustomerSet cs in assigned2EV)
-        //    return outcome;
-        //}
+        
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {
             throw new NotImplementedException();

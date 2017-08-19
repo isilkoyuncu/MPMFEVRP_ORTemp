@@ -13,6 +13,22 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public int NumVehicleCategories { get { return numVehicleCategories; } set { numVehicleCategories = value; } }
         //public int[] NumVehicles { get { return numVehicles; } set { numVehicles = value; } }
         //public Vehicle[] VehicleArray { get { return vehicleArray; } set { vehicleArray = value; } }
+
+        public VehicleRelatedData() { }
+        public VehicleRelatedData(int numVehicleCategories, Vehicle[] vehicleArray)
+        {
+            this.numVehicleCategories = numVehicleCategories;
+            //this.numVehicles = numVehicles;
+            this.vehicleArray = vehicleArray;
+        }
+
+        public VehicleRelatedData(VehicleRelatedData twinVRD)
+        {
+            numVehicleCategories = twinVRD.NumVehicleCategories;
+            //numVehicles = twinVRD.NumVehicles;
+            vehicleArray = new Vehicle[numVehicleCategories];
+            
+        }
         public List<Vehicle> GetVehiclesOfCategory(VehicleCategories vehicleCategory)
         {
             List<Vehicle> outcome = new List<Vehicle>();
@@ -33,21 +49,6 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 return theList.First();
             else
                 throw new Exception("VehicleRelatedData.GetTheVehicleOfCategory invoked with returnFirstIfMultiple = false, but there are multiple vehicles of the desired category and the method can't choose which one to return!");
-        }
-
-        public VehicleRelatedData() { }
-        public VehicleRelatedData(int numVehicleCategories, int[] numVehicles, Vehicle[] vehicleArray)
-        {
-            this.numVehicleCategories = numVehicleCategories;
-            //this.numVehicles = numVehicles;
-            this.vehicleArray = vehicleArray;
-        }
-
-        public VehicleRelatedData(VehicleRelatedData twinVRD)
-        {
-            numVehicleCategories = twinVRD.NumVehicleCategories;
-            //numVehicles = twinVRD.NumVehicles;
-            //vehicleArray = twinVRD.VehicleArray;
         }
     }
 }

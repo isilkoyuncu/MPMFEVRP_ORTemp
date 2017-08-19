@@ -13,8 +13,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         // Input related fields
         EVvsGDV_ProblemModel theProblemModel;
-        int vehicleCategoryIndex;//TODO: vehicleCategory shouldn't be an integer! We should use the VehicleCategories enum here
-        public int VehicleCategoryIndex { get { return vehicleCategoryIndex; } }
+        VehicleCategories vehicleCategory;//TODO: vehicleCategory shouldn't be an integer! We should use the VehicleCategories enum here
+
+        public VehicleCategories VehicleCategoryIndex { get { return vehicleCategory; } }
         // Output related fields
         List<int> sitesVisited;
         public List<int> SitesVisited { get { return sitesVisited; } }
@@ -57,7 +58,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public AssignedRoute(AssignedRoute twinAR)// twin copy constructor
         {
             theProblemModel = twinAR.theProblemModel;
-            vehicleCategoryIndex = twinAR.vehicleCategoryIndex;
+            vehicleCategory = twinAR.vehicleCategory;
             sitesVisited = twinAR.sitesVisited;
             totalDistance = twinAR.totalDistance;
             totalCollectedPrize = twinAR.totalCollectedPrize;
@@ -71,30 +72,30 @@ namespace MPMFEVRP.Domains.SolutionDomain
             feasible = twinAR.feasible;
         }
 
-        public AssignedRoute(EVvsGDV_ProblemModel theProblemModel, int vehicleCategoryIndex)
+        public AssignedRoute(EVvsGDV_ProblemModel theProblemModel, VehicleCategories vehicleCategory)
         {
             this.theProblemModel = theProblemModel;
-            this.vehicleCategoryIndex = vehicleCategoryIndex;
-            sitesVisited = new List<int>(); sitesVisited.Add(0);//The depot is the only visited site, this is how we get the route going
+            this.vehicleCategory = vehicleCategory;
+            sitesVisited = new List<int>{ 0 };//The depot is the only visited site, this is how we get the route going
             totalDistance = 0.0;
             totalCollectedPrize = 0.0;
-            fixedCost = theProblemModel.VRD.VehicleArray[vehicleCategoryIndex].FixedCost;
+            fixedCost = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).FixedCost;
             totalVariableTravelCost = 0.0;
             totalProfit = -fixedCost;
-            arrivalTime = new List<double>(); arrivalTime.Add(0.0);//Starting at the depot at time 0
-            departureTime = new List<double>(); departureTime.Add(0.0);//Starting at the depot at time 0
-            arrivalSOC = new List<double>(); arrivalSOC.Add(1.0);//Starting at the depot with full charge
-            departureSOC = new List<double>(); departureSOC.Add(1.0);//Starting at the depot with full charge
-            feasible = new List<bool>(); feasible.Add(true);//Starting at the depot with full charge
+            arrivalTime = new List<double> { 0.0 };//Starting at the depot at time 0
+            departureTime = new List<double> { 0.0 };//Starting at the depot at time 0
+            arrivalSOC = new List<double>{1.0};//Starting at the depot with full charge
+            departureSOC = new List<double>{1.0};//Starting at the depot with full charge
+            feasible = new List<bool>{true};//Starting at the depot with full charge
         }
         public void Extend(int nextSite)
         {
             int lastSite = sitesVisited.Last();
             sitesVisited.Add(nextSite);
             totalDistance += theProblemModel.SRD.Distance[lastSite, nextSite];
-            totalCollectedPrize += theProblemModel.SRD.SiteArray[nextSite].Prize[vehicleCategoryIndex];
-            totalVariableTravelCost += theProblemModel.SRD.Distance[lastSite, nextSite] * theProblemModel.VRD.VehicleArray[vehicleCategoryIndex].VariableCostPerMile;
-            totalProfit += theProblemModel.SRD.SiteArray[nextSite].Prize[vehicleCategoryIndex] - theProblemModel.SRD.Distance[lastSite, nextSite] * theProblemModel.VRD.VehicleArray[vehicleCategoryIndex].VariableCostPerMile;
+            totalCollectedPrize += theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).GetPrize(vehicleCategory);
+            totalVariableTravelCost += theProblemModel.SRD.Distance[lastSite, nextSite] * theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).VariableCostPerMile;
+            totalProfit += theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).GetPrize(vehicleCategory) - theProblemModel.SRD.Distance[lastSite, nextSite] * theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).VariableCostPerMile;
             double nextArrivalTime;
             double nextDepartureTime;
             double nextArrivalSOC;
@@ -102,25 +103,25 @@ namespace MPMFEVRP.Domains.SolutionDomain
             bool nextFeasible;
 
             nextArrivalTime = departureTime.Last() + theProblemModel.SRD.TimeConsumption[lastSite, nextSite];
-            nextArrivalSOC = departureSOC.Last() - theProblemModel.SRD.EnergyConsumption[lastSite, nextSite, vehicleCategoryIndex];
-            double batteryCapacity = theProblemModel.VRD.VehicleArray[vehicleCategoryIndex].BatteryCapacity;
-            double rechargingRate = theProblemModel.SRD.SiteArray[nextSite].RechargingRate;
-            double serviceDuration = theProblemModel.SRD.SiteArray[nextSite].ServiceDuration;
-            switch (theProblemModel.SRD.SiteArray[nextSite].SiteType)
+            nextArrivalSOC = departureSOC.Last() - theProblemModel.SRD.GetEVEnergyConsumption(theProblemModel.SRD.GetSiteID(lastSite), theProblemModel.SRD.GetSiteID(nextSite));
+            double batteryCapacity = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).BatteryCapacity;
+            double rechargingRate = theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).RechargingRate;
+            double serviceDuration = theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).ServiceDuration;
+            switch (theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).SiteType)
             {
                 case SiteTypes.Depot:
                     nextDepartureTime = nextArrivalTime;
                     nextDepartureSOC = nextArrivalSOC;
                     break;
                 case SiteTypes.Customer:
-                    nextDepartureTime = nextArrivalTime + theProblemModel.SRD.SiteArray[nextSite].ServiceDuration;
+                    nextDepartureTime = nextArrivalTime + theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).ServiceDuration;
                     if (batteryCapacity != 0)
                         nextDepartureSOC = Math.Min(1, nextArrivalSOC + serviceDuration * rechargingRate / batteryCapacity);//Math.Min(1.0, nextArrivalSOC + problemModel.SRD.SiteArray[nextSite].RechargingRate * problemModel.SRD.SiteArray[nextSite].ServiceDuration);
                     else
                         nextDepartureSOC = 1.0;
                     break;
                 case SiteTypes.ExternalStation:
-                    nextDepartureTime = nextArrivalTime + ((1.0 - nextArrivalSOC) / theProblemModel.SRD.SiteArray[nextSite].RechargingRate);
+                    nextDepartureTime = nextArrivalTime + ((1.0 - nextArrivalSOC) / theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nextSite)).RechargingRate);
                     nextDepartureSOC = 1.0;
                     break;
                 default:
@@ -142,7 +143,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public static AssignedRoute EvaluateOrderedListOfCustomers(EVvsGDV_ProblemModel theProblemModel, List<string> customers)
         {
-            AssignedRoute outcome = new AssignedRoute(theProblemModel, 1);//I hope 1 is the index of GDV
+            AssignedRoute outcome = new AssignedRoute(theProblemModel, VehicleCategories.GDV);
             foreach (string c in customers)
                 outcome.Extend(theProblemModel.SRD.GetSiteIndex(c));
             outcome.Extend(0);//I hope this is the index of the depot

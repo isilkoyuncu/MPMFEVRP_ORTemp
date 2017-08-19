@@ -7,6 +7,7 @@ using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Implementations.Solutions
 {
@@ -19,13 +20,14 @@ namespace MPMFEVRP.Implementations.Solutions
         }
         public RouteBasedSolution(EVvsGDV_ProblemModel theProblemModel, List<Tuple<int,int,int>> XSetTo1)
         {
+            VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
             routes = new List<AssignedRoute>();
             //first determining the number of routes
             List<Tuple<int, int, int>> tobeRemoved = new List<Tuple<int, int, int>>();
             foreach (Tuple<int,int,int> x in XSetTo1)
                 if (x.Item1 == 0)
                 {
-                    routes.Add(new AssignedRoute(theProblemModel, x.Item3));
+                    routes.Add(new AssignedRoute(theProblemModel, vc[x.Item3]));
                     routes.Last().Extend(x.Item2);
                     tobeRemoved.Add(x);
                 }

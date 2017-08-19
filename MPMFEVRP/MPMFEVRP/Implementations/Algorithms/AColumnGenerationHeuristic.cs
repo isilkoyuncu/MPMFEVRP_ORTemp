@@ -43,14 +43,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
             int nCustomers = theProblemModel.SRD.NumCustomers;
-            foreach(Site s in theProblemModel.SRD.SiteArray)
+            foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
             {
-                if(s.SiteType == SiteTypes.Customer)
-                {
-                    CustomerSet candidate = new CustomerSet(s.ID);
-                    candidate.Optimize(theProblemModel);
-                    unexploredCustomerSets.ConsiderForAddition(candidate);
-                }
+                CustomerSet candidate = new CustomerSet(customerID);
+                candidate.Optimize(theProblemModel);
+                unexploredCustomerSets.ConsiderForAddition(candidate);
             }
 
             children = new CustomerSetList();//this was necessary to avoid a null reference

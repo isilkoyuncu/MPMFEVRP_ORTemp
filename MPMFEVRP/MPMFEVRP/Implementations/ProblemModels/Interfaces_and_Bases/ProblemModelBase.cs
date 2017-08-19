@@ -43,11 +43,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
         public List<string> GetAllCustomerIDs()
         {
-            List<string> outcome = new List<string>();
-            foreach (Site s in SRD.SiteArray)
-                if (s.SiteType == SiteTypes.Customer)
-                    outcome.Add(s.ID);
-            return outcome;
+            return SRD.GetCustomerIDs();
         }
         protected AssignedRoute ExtractTheSingleRouteFromSolution(RouteBasedSolution ncs)
         {

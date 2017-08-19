@@ -110,7 +110,7 @@ namespace MPMFEVRP.Utils
             depotPlusCustomerSiteNodeIndices = new List<int>();
             ESSiteNodeIndices = new List<int>();
 
-            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.SiteArray.Length; orgSiteIndex++)
+            for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.NumNodes; orgSiteIndex++)
             {
                 switch (problemModel.SRD.SiteArray[orgSiteIndex].SiteType)
                 {

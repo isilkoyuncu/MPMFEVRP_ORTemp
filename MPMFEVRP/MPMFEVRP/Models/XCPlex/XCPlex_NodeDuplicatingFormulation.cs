@@ -19,6 +19,7 @@ namespace MPMFEVRP.Models.XCPlex
         int[] nodeToOriginalSiteNumberMap;
         int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;//There is a single depot and it is always node #0
         double[] minValue_T, maxValue_T, minValue_delta, maxValue_delta, minValue_epsilon, maxValue_epsilon;
+        VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
 
         INumVar[][][] X;
         INumVar[][] U;
@@ -30,6 +31,7 @@ namespace MPMFEVRP.Models.XCPlex
             : base(theProblemModel, xCplexParam)
         {
             rechargingDuration_status = theProblemModel.RechargingDuration_status;
+            if (problemModel.VRD.NumVehicleCategories != vc.Length) { throw new System.Exception("XCPlex_NodeDuplicatingFormulation number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
         }
         protected override void DefineDecisionVariables()
         {
@@ -156,7 +158,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                        if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                        if (vc[v] == VehicleCategories.EV)
                         {
                             if (EnergyConsumption(i,j,v) > 1)
                                 X[i][j][v].UB = 0.0;
@@ -176,7 +178,7 @@ namespace MPMFEVRP.Models.XCPlex
                     continue;
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                        if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.GDV)
+                        if (vc[v] == VehicleCategories.GDV)
                         {
                             X[i][j][v].UB = 0.0;
                             X[j][i][v].UB = 0.0;
@@ -205,7 +207,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                 minValue_epsilon[j] = 0.0;
                 if (problemModel.SRD.SiteArray[nodeToOriginalSiteNumberMap[j]].SiteType == SiteTypes.Customer)
-                    maxValue_epsilon[j] = Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j),problemModel.VRD.VehicleArray[0].MaxChargingRate)/problemModel.VRD.VehicleArray[0].BatteryCapacity);//TODO: Use the utility function instead!
+                    maxValue_epsilon[j] = Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j),problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate)/problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);//TODO: Use the utility function instead!
                 else
                     maxValue_epsilon[j] = 1.0;
             }
@@ -241,11 +243,11 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                        objFunction.AddTerm(-1.0 * problemModel.VRD.VehicleArray[v].VariableCostPerMile * Distance(i,j), X[i][j][v]);
+                        objFunction.AddTerm(-1.0 * problemModel.VRD.GetTheVehicleOfCategory(vc[v]).VariableCostPerMile * Distance(i,j), X[i][j][v]);
             //Third term: vehicle fixed costs
             for (int j = 0; j < numNodes; j++)
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    objFunction.AddTerm(-1.0 * problemModel.VRD.VehicleArray[v].FixedCost, X[0][j][v]);
+                    objFunction.AddTerm(-1.0 * problemModel.VRD.GetTheVehicleOfCategory(vc[v]).FixedCost, X[0][j][v]);
             //Now adding the objective function to the model
             AddMaximize(objFunction);
         }
@@ -256,11 +258,11 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNodes; i++)
                 for (int j = 0; j < numNodes; j++)
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                        objFunction.AddTerm(problemModel.VRD.VehicleArray[v].VariableCostPerMile * Distance(i,j), X[i][j][v]);
+                        objFunction.AddTerm(problemModel.VRD.GetTheVehicleOfCategory(vc[v]).VariableCostPerMile * Distance(i,j), X[i][j][v]);
             //Third term: vehicle fixed costs
             for (int j = 0; j < numNodes; j++)
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    objFunction.AddTerm(problemModel.VRD.VehicleArray[v].FixedCost, X[0][j][v]);
+                    objFunction.AddTerm(problemModel.VRD.GetTheVehicleOfCategory(vc[v]).FixedCost, X[0][j][v]);
             //Now adding the objective function to the model
             AddMinimize(objFunction);
         }
@@ -367,7 +369,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.GDV)
+                    if (vc[v] == VehicleCategories.GDV)
                         NumberOfGDVsVisitingTheNode.AddTerm(1.0, U[j][v]);
                 string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
@@ -453,7 +455,7 @@ namespace MPMFEVRP.Models.XCPlex
                     SOCDifference.AddTerm(-1.0, delta[i]);
                     SOCDifference.AddTerm(-1.0, epsilon[i]);
                     for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                        if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                        if (vc[v] == VehicleCategories.EV)
                             SOCDifference.AddTerm(EnergyConsumption(i,j,v) + maxValue_delta[j] - minValue_delta[i], X[i][j][v]);
                     string constraint_name = "SOC_Regulation_from_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddLe(SOCDifference, maxValue_delta[j] - minValue_delta[i], constraint_name));
@@ -467,7 +469,7 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, delta[j]);
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                    if (vc[v] == VehicleCategories.EV)
                         SOCDifference.AddTerm(EnergyConsumption(0, j, v), X[0][j][v]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, 1.0, constraint_name));
@@ -480,7 +482,7 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr RechargeAtCustomer = LinearNumExpr();
                 RechargeAtCustomer.AddTerm(1.0, epsilon[j]);
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                    if (vc[v] == VehicleCategories.EV)
                         RechargeAtCustomer.AddTerm(-1.0 * maxValue_epsilon[j], U[j][v]);
                 string constraint_name = "Max_Recharge_At_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(RechargeAtCustomer, 0.0, constraint_name));
@@ -494,7 +496,7 @@ namespace MPMFEVRP.Models.XCPlex
                 DepartureSOCFromCustomer.AddTerm(1.0, delta[j]);
                 DepartureSOCFromCustomer.AddTerm(1.0, epsilon[j]);
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                    if (vc[v] == VehicleCategories.EV)
                         DepartureSOCFromCustomer.AddTerm(-1.0, U[j][v]);
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, 0.0, constraint_name));
@@ -509,7 +511,7 @@ namespace MPMFEVRP.Models.XCPlex
                 DepartureSOCFromES.AddTerm(1.0, delta[j]);
                 DepartureSOCFromES.AddTerm(1.0, epsilon[j]);
                 for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
-                    if (problemModel.VRD.VehicleArray[v].Category == VehicleCategories.EV)
+                    if (vc[v] == VehicleCategories.EV)
                         DepartureSOCFromES.AddTerm(-1.0 * maxValue_epsilon[j], U[j][v]);
                 string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
                 if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)

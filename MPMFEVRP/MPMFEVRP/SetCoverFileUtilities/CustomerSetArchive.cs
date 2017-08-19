@@ -57,7 +57,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
 
         public static PartitionedCustomerSetList RecreateFromFile(string filename, EVvsGDV_ProblemModel theProblemModel)
         {
-            Domains.ProblemDomain.Vehicle theGDV = theProblemModel.VRD.VehicleArray[1];
+            Domains.ProblemDomain.Vehicle theGDV = theProblemModel.VRD.GetTheVehicleOfCategory(Domains.ProblemDomain.VehicleCategories.GDV);
             PartitionedCustomerSetList outcome = new PartitionedCustomerSetList();
             StreamReader sr = new StreamReader(filename);
             sr.ReadLine();//This is the header row, won't use for anything

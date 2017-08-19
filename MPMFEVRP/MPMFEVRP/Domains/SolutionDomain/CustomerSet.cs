@@ -85,7 +85,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(customer);
                 customers.Sort();
-                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.VehicleArray[1]);
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV));
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
                 if (vsroo_GDV.Status==VehicleSpecificRouteOptimizationStatus.Infeasible)
                 {
@@ -93,7 +93,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 }
                 else
                 {
-                    vsroo_EV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.VehicleArray[0], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                    vsroo_EV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }

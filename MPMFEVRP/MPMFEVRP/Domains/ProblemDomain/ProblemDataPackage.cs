@@ -1,5 +1,6 @@
 ﻿using MPMFEVRP.Implementations.Problems.Readers;
 using MPMFEVRP.Utils;
+using System.Collections.Generic;
 
 namespace MPMFEVRP.Domains.ProblemDomain
 {
@@ -8,95 +9,53 @@ namespace MPMFEVRP.Domains.ProblemDomain
         string inputFileName;   //For record only
         public string InputFileName { get { return inputFileName; } set { inputFileName = value; } }
         SiteRelatedData srd;
-        public SiteRelatedData SRD { get { return srd; } set { srd = value; } }
+        public SiteRelatedData SRD { get { return srd; } }
         VehicleRelatedData vrd;
-        public VehicleRelatedData VRD { get { return vrd; } set { vrd = value; } }
+        public VehicleRelatedData VRD { get { return vrd; } }
         ContextRelatedData crd;
-        public ContextRelatedData CRD { get { return crd; } set { crd = value; } }
+        public ContextRelatedData CRD { get { return crd; } }
 
         public ProblemDataPackage() { }
         public ProblemDataPackage(KoyuncuYavuzReader reader)
         {
             inputFileName = reader.GetRecommendedOutputFileFullName();
-            srd = new SiteRelatedData();
-            vrd = new VehicleRelatedData();
-            crd = new ContextRelatedData();
+            int numNodes = reader.GetSiteArray().Length;
+            int numVehicleCategories = reader.GetVehicleArray().Length;
 
-            srd.NumCustomers = reader.GetNumberOfCustomers();
-            srd.NumES = reader.GetNumberOfES();
-            srd.NumNodes = srd.NumCustomers + srd.NumES + 1;
-            vrd.NumVehicleCategories = reader.GetVehicleArray().Length;
-
-            srd.SiteArray = new Site[srd.NumNodes];
-            for (int s = 0; s < srd.NumNodes; s++)
-            {
-                srd.SiteArray[s] = new Site(reader.GetSiteArray()[s]);
-            }
-
-            //vrd.VehicleArray = new Vehicle[vrd.NumVehicleCategories];
-            //for (int v = 0; v < vrd.NumVehicleCategories; v++)
-            //{
-            //    vrd.VehicleArray[v] = new Vehicle(reader.GetVehicleArray()[v]);
-            //}
-
-            //Assign travel speed
-            crd.TravelSpeed = reader.GetTravelSpeed();
-
-            //Assign Distance matrix if any
-            srd.Distance = new double[srd.NumNodes, srd.NumNodes];
-            if (reader.GetDistanceMatrix() != null)//This is the case when distances are given in the data file (asymmetric, or whatever)
-            {
-                srd.Distance = (double[,])reader.GetDistanceMatrix().Clone();
-            }
-            else//The distances are not given in the data file, but they have to be calculated
+            double[,] distance = new double[numNodes, numNodes];
+            if (reader.GetDistanceMatrix() != null)
+            { distance = (double[,])reader.GetDistanceMatrix().Clone(); }//This is the case when distances are given in the data file (asymmetric, or whatever)
+            else
             {
                 if (reader.IsLongLat())//Haversine calculations
                 {
-                    for (int i = 0; i < srd.NumNodes; i++)
-                    {
-                        for (int j = 0; j < srd.NumNodes; j++)
-                        {
-                            srd.Distance[i, j] = Calculators.HaversineDistance(srd.SiteArray[i].X, srd.SiteArray[i].Y, srd.SiteArray[j].X, srd.SiteArray[j].Y);
-                        }
-                    }
+                    distance = Calculators.HaversineDistance(reader.GetXcoordidates(), reader.GetYcoordidates());
                 }
                 else//Euclidean calculations
                 {
-                    for (int i = 0; i < srd.NumNodes; i++)
-                    {
-                        for (int j = 0; j < srd.NumNodes; j++)
-                        {
-                            srd.Distance[i, j] = Calculators.EuclideanDistance(srd.SiteArray[i].X, srd.SiteArray[j].X, srd.SiteArray[i].Y, srd.SiteArray[j].Y);
-                        }
-                    }
+                    distance = Calculators.EuclideanDistance(reader.GetXcoordidates(), reader.GetYcoordidates());
                 }
-            }
+            }//This is the case when distances have not been given in the data file, but they were calculated
 
-            crd.TMax = -1;
-            for (int s = 0; s < srd.NumNodes; s++)
-            {
-                if (crd.TMax < srd.SiteArray[s].DueDate)
-                    crd.TMax = srd.SiteArray[s].DueDate;
-            }
-
-            srd.EnergyConsumption = new double[srd.NumNodes, srd.NumNodes, vrd.NumVehicleCategories];
-            srd.TimeConsumption = new double[srd.NumNodes, srd.NumNodes];
-
-            for (int i = 0; i < srd.NumNodes; i++)
-                for (int j = 0; j < srd.NumNodes; j++)
+            double[,] timeConsumption = new double[numNodes, numNodes];
+            double[,,] energyConsumption = new double[numNodes, numNodes, numVehicleCategories];
+            VehicleCategories[] vcArray = new VehicleCategories[numVehicleCategories];
+            for (int i = 0; i < numNodes; i++)
+                for (int j = 0; j < numNodes; j++)
                 {
-                    for (int vc = 0; vc < vrd.NumVehicleCategories; vc++)
+                    for (int v = 0; v < numVehicleCategories; v++)
                     {
-                        if (vrd.GetTheVehicleOfCategory(VehicleCategories.EV))
-                            srd.EnergyConsumption[i, j, vc] = srd.Distance[i, j] / (vrd.VehicleArray[vc].BatteryCapacity / vrd.VehicleArray[vc].ConsumptionRate);
+                        vcArray[v] = reader.GetVehicleArray()[v].Category;
+                        if (vcArray[v] == VehicleCategories.EV)
+                            energyConsumption[i, j, v] = distance[i, j] / (reader.GetVehicleArray()[v].BatteryCapacity / reader.GetVehicleArray()[v].ConsumptionRate);
                         else
-                            srd.EnergyConsumption[i, j, vc] = 0.0;
+                            energyConsumption[i, j, v] = 0.0;
                     }
-                    srd.TimeConsumption[i, j] = srd.Distance[i, j] / crd.TravelSpeed;
+                    timeConsumption[i, j] = distance[i, j] / reader.GetTravelSpeed();
                 }
-
-            crd.Lambda = 2;//TODO We entered 2 for now; we'd love to experiment on it.
-
+            srd = new SiteRelatedData(reader.GetNumberOfCustomers(), reader.GetNumberOfES(), numNodes, reader.GetSiteArray(), distance,timeConsumption,energyConsumption);
+            vrd = new VehicleRelatedData(numVehicleCategories, reader.GetVehicleArray());
+            crd = new ContextRelatedData(reader.GetTravelSpeed(), srd.GetSingleDepotSite().DueDate, 2); //TODO For LAMBDA we entered 2 for now; we'd love to experiment on it.
         }
         public ProblemDataPackage(ProblemDataPackage twinPDP)
         {

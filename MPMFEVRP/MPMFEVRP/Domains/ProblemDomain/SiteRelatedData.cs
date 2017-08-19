@@ -9,19 +9,20 @@ namespace MPMFEVRP.Domains.ProblemDomain
         int numCustomers;    //Number of Customers, not all of which must be served
         int numES;  // Number of ES may or may not include a replica of the depot
         int numNodes;   //This is numCustomers+nES+1 = siteArray.Length
+
         Site[] siteArray;
         double[,] distance;   //[numNodes,numNodes]  
         double[,] timeConsumption;  //[numNodes,numNodes]
         double[,,] energyConsumption;    //[numNodes,numNodes,numVehicleTypes]
 
-        //TODO: The following are all public and what's even more dangerous is that they all have setters (only used by ProblemDataPackage). This must be corrected by forcing the ProblemDataPackage to use the full constructor below from its internally kept data. As for giving these fields to outside, the public Get...() methods below must be used as the only way.
-        public int NumCustomers { get { return numCustomers; } set { numCustomers = value; } } 
-        public int NumES { get { return numES; } set { numES = value; } }  
-        public int NumNodes { get { return numNodes;  } set { numNodes = value; } }   
-        public Site[] SiteArray { get { return siteArray; } set { siteArray = value; } }
-        public double[,] Distance { get { return distance; } set { distance = value; } }
-        public double[,] TimeConsumption { get { return timeConsumption; } set { timeConsumption = value; } }
-        public double[,,] EnergyConsumption { get { return energyConsumption; } set { energyConsumption = value; } }
+        //TODO: The following are all public however as for giving these fields to outside, the public Get...() methods below must be used as the only way.
+        public int NumCustomers { get { return numCustomers; } } 
+        public int NumES { get { return numES; } }  
+        public int NumNodes { get { return numNodes;  } }   
+        //public Site[] SiteArray { get { return siteArray; } }
+        public double[,] Distance { get { return distance; } }
+        public double[,] TimeConsumption { get { return timeConsumption; } }
+        public double[,,] EnergyConsumption { get { return energyConsumption; } }
 
         public SiteRelatedData() { }
         public SiteRelatedData(int numCustomers, int numES, int numNodes, Site[] siteArray, double[,] distance, double[,] timeConsumption, double[,,] energyConsumption)
@@ -34,7 +35,6 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.timeConsumption = timeConsumption;
             this.energyConsumption = energyConsumption;
         }
-
         public SiteRelatedData(SiteRelatedData twinSRD)
         {
             numCustomers = twinSRD.NumCustomers;
@@ -45,7 +45,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             timeConsumption = twinSRD.TimeConsumption;
             energyConsumption = twinSRD.EnergyConsumption;
         }
-
+        
         public List<string> GetCustomerIDs()
         {
             List<string> outcome = new List<string>();
@@ -150,9 +150,14 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public int GetSiteIndex(string siteID)//TODO: Delete this method. Its only mission is to convert siteID to siteIndex, which will never be used after SiteArray is no longer given out.
         {
             for (int i = 0; i < siteArray.Length; i++)
-                if (SiteArray[i].ID == siteID)
+                if (siteArray[i].ID == siteID)
                     return i;
             throw new Exception("SiteRelatedData.GetSiteIndex can't find the site with the given ID!");
+        }
+        public string GetSiteID(int siteIndex)//TODO: Delete this method. Its only mission is to convert siteIndex to siteID, which will never be used after SiteArray is no longer given out.
+        {
+                    return siteArray[siteIndex].ID;
+            throw new Exception("SiteRelatedData.GetSiteID can't find the site with the given index!");
         }
     }
 }

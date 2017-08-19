@@ -5,11 +5,43 @@ namespace MPMFEVRP.Utils
 {
     class Calculators
     {
+        //TODO this EuclideanDistance calculators can be further simplified by combining the following two.
+        public static double[,] EuclideanDistance(double[] x, double[] y)
+        {
+            if (x.Length != y.Length)
+                throw new Exception("Calculators.EuclideanDistance invoked with different lengths of x and y coordinates.");
+
+            double[,] distance = new double[x.Length, y.Length];
+            for (int i = 0; i < x.Length; i++)
+            {
+                for (int j = 0; j < x.Length; j++)
+                {
+                    distance[i, j] = EuclideanDistance(x[i], x[j], y[i], y[j]);
+                }
+            }
+            return distance;
+        }
         public static double EuclideanDistance(double x0, double x1, double y0, double y1)
         {
             return Math.Round(Math.Sqrt(Math.Pow((x0 - x1), 2) + Math.Pow((y0 - y1), 2)), 5);
         }
 
+        //TODO this HaversineDistance calculators can be further simplified by combining the following two.
+        public static double[,] HaversineDistance(double[] x, double[] y)
+        {
+            if (x.Length != y.Length)
+                throw new Exception("Calculators.HaversineDistance invoked with different lengths of x and y coordinates.");
+
+            double[,] distance = new double[x.Length, x.Length];
+            for (int i = 0; i < x.Length; i++)
+            {
+                for (int j = 0; j < x.Length; j++)
+                {
+                    distance[i, j] = HaversineDistance(x[i], y[i], x[j], y[j]);
+                }
+            }
+            return distance;
+        }
         public static double HaversineDistance(double LonA, double LatA, double LonB, double LatB)
         {
             return Math.Round(2.0 * 4182.44949 * Math.Asin(Math.Sqrt(Math.Pow(Math.Sin(((LatA * Math.PI / 180.0) - (LatB * Math.PI / 180.0)) / 2.0), 2.0) + Math.Cos((LatB * Math.PI / 180.0)) * Math.Cos((LatA * Math.PI / 180.0)) * Math.Pow(Math.Sin(((LonA * Math.PI / 180.0) - (LonB * Math.PI / 180.0)) / 2.0), 2.0))), 5);

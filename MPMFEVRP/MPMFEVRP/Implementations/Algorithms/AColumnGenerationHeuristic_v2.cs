@@ -42,7 +42,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             ofvType = Utils.ProblemUtil.CreateProblemByName(model.GetNameOfProblemOfModel()).ObjectiveFunctionType;//TODO Eliminate creating problem by name just to get the objective function type of an existing problem, this should be much simpler!
 
-            theGDV = model.VRD.VehicleArray.Where(x => x.Category == VehicleCategories.GDV).ToArray()[0];//Technically this returns the first GDV, but there shouldn't be more than one anyways
+            theGDV = model.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV);//Technically this returns the first GDV, but there shouldn't be more than one anyways
 
             //These are the important characteristics that will have to be tied to the form
             beamWidth = 1;
@@ -80,13 +80,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                 else//the archive file doesn't exist, we'll simply ignore the unexplored file even if it exists
                 {
                     int nCustomers = theProblemModel.SRD.NumCustomers;
-                    foreach (Site s in theProblemModel.SRD.SiteArray)
+                    foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
                     {
-                        if (s.SiteType == SiteTypes.Customer)
-                        {
-                            CustomerSet candidate = new CustomerSet(s.ID);//The customer set is not TSP-optimized
-                            EvaluateForGDV(candidate, theGDV);//Now it is optimized and added to proper lists
-                        }
+                        CustomerSet candidate = new CustomerSet(customerID);//The customer set is not TSP-optimized
+                        EvaluateForGDV(candidate, theGDV);//Now it is optimized and added to proper lists
                     }
                 }
 

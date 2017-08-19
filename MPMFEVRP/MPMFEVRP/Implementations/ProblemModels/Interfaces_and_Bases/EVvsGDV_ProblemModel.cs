@@ -155,7 +155,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
         public override RouteOptimizationOutcome RouteOptimize(CustomerSet CS)
         {
-            return RouteOptimize(CS, VRD.VehicleArray.ToList());
+            //TODO unit thes: the following should combine all EV and GDVs with Concat, Concat works as long as the lists are not null. Since we create new instances here, even though the GetVehiclesOfCategory method returns nothing, they shouldn't be null.
+            List<Vehicle> EVvehicles = new List<Vehicle>(VRD.GetVehiclesOfCategory(VehicleCategories.EV));
+            List<Vehicle> GDVvehicles = new List<Vehicle>(VRD.GetVehiclesOfCategory(VehicleCategories.GDV));
+            return RouteOptimize(CS, EVvehicles.Concat(GDVvehicles).ToList());
         }
         public override RouteOptimizationOutcome RouteOptimize(CustomerSet CS, List<Vehicle> vehicles)
         {
@@ -245,7 +248,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 if ((x.Item1 == 0) && (x.Item3 == vehicleCategoryIndex))
                 {
                     lastSiteIndex = x.Item2;
-                    lastSiteID = SRD.SiteArray[lastSiteIndex].ID;
+                    lastSiteID = SRD.GetSiteID(lastSiteIndex);
                     nondepotSiteIDsInOrder.Add(lastSiteID);
                     tobeRemoved.Add(x);
                 }
@@ -268,7 +271,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                     if (x.Item1 == lastSiteIndex_2)
                     {
                         lastSiteIndex = x.Item2;
-                        lastSiteID = SRD.SiteArray[lastSiteIndex].ID;
+                        lastSiteID = SRD.GetSiteID(lastSiteIndex);
                         if(lastSiteID!=SRD.GetSingleDepotID())
                             nondepotSiteIDsInOrder.Add(lastSiteID);
                         allXSetTo1.Remove(x);

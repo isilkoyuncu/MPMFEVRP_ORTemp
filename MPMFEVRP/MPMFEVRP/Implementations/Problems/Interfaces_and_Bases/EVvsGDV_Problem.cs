@@ -21,12 +21,13 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
 
             //This code is extremely strict, for sake of simplicity!
             //First, we must be given exactly 2 vehicles
-            if (PDP.VRD.VehicleArray.Length != 2)
-                throw new ArgumentException("Reader had the wrong number of vehicle categories!");
-            //Then, the first (0) must be an EV, and the other (1) must be a GDV!
-            if ((PDP.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
-                (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
-                throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
+            // TODO do we still have to check this??
+            //if (PDP.VRD.vehicleArray.Length != 2)
+            //    throw new ArgumentException("Reader had the wrong number of vehicle categories!");
+            ////Then, the first (0) must be an EV, and the other (1) must be a GDV!
+            //if ((PDP.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
+            //    (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
+            //    throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
         }
 
         void AddProblemCharacteristics()
