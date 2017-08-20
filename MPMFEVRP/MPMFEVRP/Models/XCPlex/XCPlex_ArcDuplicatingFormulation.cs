@@ -35,6 +35,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             ProblemModelUtil.ArrangeNodesIntoLists(problemModel, out numCustomers, out numES,out customerSiteNodeIndices, out depotPlusCustomerSiteNodeIndices, out ESSiteNodeIndices);
             allVariables_list = new List<INumVar>();
+
+
+            //TODO after making sure that the above decision variable definitions are working, DELETE the following.
+            /*****************************************************************************************************************************/
             //X
             string[][][] X_name = new string[numCustomers+1][][];
             X = new INumVar[numCustomers + 1][][];
@@ -114,6 +118,7 @@ namespace MPMFEVRP.Models.XCPlex
                 epsilon[j] = NumVar(minValue_epsilon[j], maxValue_epsilon[j], NumVarType.Float, epsilon_name[j]);
                 allVariables_list.Add(epsilon[j]);
             }
+            /*****************************************************************************************************************************/
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
