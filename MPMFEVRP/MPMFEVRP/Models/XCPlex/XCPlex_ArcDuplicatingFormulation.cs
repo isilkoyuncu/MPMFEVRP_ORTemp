@@ -10,6 +10,7 @@ using System.Collections.Generic;
 namespace MPMFEVRP.Models.XCPlex
 {
     // TODO apply all the changes that are done in node based formulation!!!
+    //TODO get all sites here and then use the mapping we coded
     public class XCPlex_ArcDuplicatingFormulation : XCPlexBase
     {
         RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;

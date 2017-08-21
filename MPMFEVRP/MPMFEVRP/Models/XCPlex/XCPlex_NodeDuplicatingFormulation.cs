@@ -11,16 +11,18 @@ using System.Collections.Generic;
 
 namespace MPMFEVRP.Models.XCPlex
 {
+    //TODO get all sites here and then use the mapping we coded
+
     public class XCPlex_NodeDuplicatingFormulation : XCPlexBase
     {
         RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
         int numNodes;
         int[] nodeToOriginalSiteNumberMap;
+        string[] nodeToOriginalSiteIDmap;
         int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;//There is a single depot and it is always node #0
         double[] minValue_T, maxValue_T, minValue_delta, maxValue_delta, minValue_epsilon, maxValue_epsilon;
         VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
-
         INumVar[][][] X;
         INumVar[][] U;
         INumVar[] T;
@@ -107,26 +109,33 @@ namespace MPMFEVRP.Models.XCPlex
             int numES = problemModel.CRD.Lambda * problemModel.NumVehicles[0] * problemModel.SRD.NumES;
             numNodes = 1 + numCustomers + numES;
 
+            nodeToOriginalSiteIDmap = new string[numNodes];
             nodeToOriginalSiteNumberMap = new int[numNodes];
             int nodeCounter = 0;
             for (int orgSiteIndex = 0; orgSiteIndex < problemModel.SRD.NumNodes; orgSiteIndex++)
             {
-                switch (problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(orgSiteIndex)).SiteType)
+                Site s = problemModel.SRD.GetSiteByID(problemModel.SRD.GetSiteID(orgSiteIndex));
+                switch (s.SiteType)
                 {
                     case SiteTypes.Depot:
+                        nodeToOriginalSiteIDmap[nodeCounter] = s.ID;
                         nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
                         break;
                     case SiteTypes.Customer:
                         if (firstCustomerNodeIndex == 0)
                             firstCustomerNodeIndex = nodeCounter;
                         lastCustomerNodeIndex = nodeCounter;
+                        nodeToOriginalSiteIDmap[nodeCounter] = s.ID;
                         nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
                         break;
                     case SiteTypes.ExternalStation:
                         if (firstESNodeIndex == 0)
                             firstESNodeIndex = nodeCounter;
                         for (int i = 0; i < problemModel.CRD.Lambda * problemModel.NumVehicles[0]; i++)
+                        {
+                            nodeToOriginalSiteIDmap[nodeCounter] = s.ID;
                             nodeToOriginalSiteNumberMap[nodeCounter++] = orgSiteIndex;
+                        }
                         lastESNodeIndex = nodeCounter - 1;
                         break;
                     default:

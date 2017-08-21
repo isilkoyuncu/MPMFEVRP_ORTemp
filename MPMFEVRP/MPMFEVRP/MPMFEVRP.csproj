@@ -91,7 +91,6 @@
     <Compile Include="Domains\ProblemDomain\SiteRelatedData.cs" />
     <Compile Include="Domains\ProblemDomain\Vehicle.cs" />
     <Compile Include="Domains\ProblemDomain\VehicleRelatedData.cs" />
-    <Compile Include="Domains\SolutionDomain\AssignedRoute.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
     <Compile Include="Domains\SolutionDomain\ObjectiveFunctionInputDataPackage.cs" />

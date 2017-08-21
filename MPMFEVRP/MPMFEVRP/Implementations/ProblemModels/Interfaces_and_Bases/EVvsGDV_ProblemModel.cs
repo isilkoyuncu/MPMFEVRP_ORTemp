@@ -234,7 +234,64 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             else//optimal
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVSRFromFlowVariables(vehicle,solver.GetXVariablesSetTo1()));
         }
+        //TODO relocate this into CPLEX! 
+        public List<VehicleSpecificRoute> GetVSRFromFlowVariables(List<Vehicle> vehicles, List<Tuple<int, int, int>> allXSetTo1)
+        {
+            if (vehicles.Count != 2)
+                throw new Exception("GetVSRFromFlowVariables(List<Vehicle> vehicles...) invoked with number of vehicles categories other than 2!");
+            if (vehicles[0].Category == VehicleCategories.GDV)
+            {
+                vehicles.Add(vehicles.First());
+                vehicles.RemoveAt(0);
+            }
+            //Now we're sure that the EV is vehicles[0] and the GDV is vehicles[1]
+            throw new NotImplementedException();
 
+            List<List<string>> nondepotSiteIDsInOrder = new List<List<string>>();
+            VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
+            List<VehicleSpecificRoute>  routes = new List<VehicleSpecificRoute>();
+            //first determining the number of routes
+            List<Tuple<int, int, int>> tobeRemoved = new List<Tuple<int, int, int>>();
+            foreach (Tuple<int, int, int> x in allXSetTo1)
+                if (x.Item1 == 0)
+                {
+                    routes.Add(new VehicleSpecificRoute(theProblemModel, vc[x.Item3]));
+                    routes.Last().Extend(x.Item2);
+                    tobeRemoved.Add(x);
+                }
+            foreach (Tuple<int, int, int> x in tobeRemoved)
+            {
+                allXSetTo1.Remove(x);
+            }
+            tobeRemoved.Clear();
+            //Next, completeing the routes one-at-a-time
+            int lastSite = -1;
+            bool extensionDetected = false;
+            foreach (VehicleSpecificRoute r in routes)
+            {
+                while ((!r.Complete) && (allXSetTo1.Count > 0))
+                {
+                    lastSite = r.LastVisitedSite;
+                    extensionDetected = false;
+                    foreach (Tuple<int, int, int> x in allXSetTo1)
+                    {
+                        if (x.Item1 == lastSite)
+                        {
+                            r.Extend(x.Item2);
+                            allXSetTo1.Remove(x);
+                            extensionDetected = true;
+                            break;
+                        }
+                    }
+                    if (!extensionDetected)
+                        throw new Exception("Infeasible complete solution due to an incomplete route!");
+                }
+            }
+            if (allXSetTo1.Count > 0)
+                throw new Exception("Infeasible complete solution due to subtours or routes that don't start/end at the depot");
+
+            //TODO this method should return the collection of all routes coming from the below method.
+        }
         public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1)
         {
             List<string> nondepotSiteIDsInOrder = new List<string>();
