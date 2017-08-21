@@ -21,7 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlex_SetCovering_wCustomerSets(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
         {
-            this.problemModel = theProblemModel;
+            this.theProblemModel = theProblemModel;
             this.xCplexParam = xCplexParam;
             XCPlexRelaxation relaxation;
             relaxation = xCplexParam.Relaxation;
@@ -77,7 +77,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
                     z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
-                    obj.AddTerm(problemModel.CalculateObjectiveFunctionValue(customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage()), z[i][v]);
+                    obj.AddTerm(theProblemModel.CalculateObjectiveFunctionValue(customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage()), z[i][v]);
                     allVariables_list.Add(z[i][v]);
                 }
             }
@@ -87,7 +87,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void AddTheObjectiveFunction()
         {
             //created already in DefineDecisionVariables()
-            ObjectiveFunctionTypes objectiveFunctionType = problemModel.ObjectiveFunctionType;
+            ObjectiveFunctionTypes objectiveFunctionType = theProblemModel.ObjectiveFunctionType;
             if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
                 AddMaximize(obj);
             else
@@ -104,9 +104,9 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddCustomerCoverageConstraints()
         {
-            List<string> customerIDs = problemModel.SRD.GetCustomerIDs();
+            List<string> customerIDs = theProblemModel.SRD.GetCustomerIDs();
             int nCustomers = customerIDs.Count;
-            CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType = problemModel.CoverConstraintType;
+            CustomerCoverageConstraint_EachCustomerMustBeCovered coverConstraintType = theProblemModel.CoverConstraintType;
 
             foreach (string customerID in customerIDs)
             {
@@ -151,15 +151,15 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][0]);
             }//for i
-            string constraint_name = "Vehicle type 0 can be used at most" + problemModel.NumVehicles[0] + "times";
-            allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, problemModel.NumVehicles[0], constraint_name));
+            string constraint_name = "Vehicle type 0 can be used at most" + theProblemModel.NumVehicles[0] + "times";
+            allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, theProblemModel.NumVehicles[0], constraint_name));
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
-            return new CustomerSetBasedSolution(problemModel, GetZVariablesSetTo1(), customerSetArray);
+            return new CustomerSetBasedSolution(theProblemModel, GetZVariablesSetTo1(), customerSetArray);
         }
         public override string GetDescription_AllVariables_Array()
         {
@@ -168,9 +168,9 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public int[,] GetZVariablesSetTo1()
         {
-            int[,] outcome = new int[nCustomerSets, problemModel.VRD.NumVehicleCategories];
+            int[,] outcome = new int[nCustomerSets, theProblemModel.VRD.NumVehicleCategories];
             for (int cs = 0; cs < nCustomerSets; cs++)
-                for (int v = 0; v < problemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
                     if (GetValue(z[cs][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                         outcome[cs, v] = 1;
 

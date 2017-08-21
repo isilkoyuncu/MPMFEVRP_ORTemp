@@ -44,7 +44,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             timeConsumption = twinSRD.TimeConsumption;
             energyConsumption = twinSRD.EnergyConsumption;
         }
-        public Site[] GetAllSitesArray() // TODO make sure we need this method ow delete this
+        public Site[] GetAllSitesArray()
         {
             return siteArray;
         }

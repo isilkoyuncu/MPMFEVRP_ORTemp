@@ -1,6 +1,7 @@
 ﻿using ILOG.Concert;
 using ILOG.CPLEX;
 using MPMFEVRP.Domains.AlgorithmDomain;
+using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
@@ -12,7 +13,7 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public abstract class XCPlexBase : Cplex
     {
-        protected EVvsGDV_ProblemModel problemModel;
+        protected EVvsGDV_ProblemModel theProblemModel;
         protected XCPlexParameters xCplexParam;
         protected NumVarType variable_type = NumVarType.Int;
         protected List<INumVar> allVariables_list;
@@ -40,12 +41,18 @@ namespace MPMFEVRP.Models.XCPlex
         public double UpperBound_XCPlex { get { return upperBound; } }
         public double CPUtime { get { return cpuTime; } }
 
+        protected Site[] preprocessedSites;//Ready-to-use
+        protected List<Site> depots;
+        protected List<Site> customers;
+        protected List<Site> externalStations;//Proprocessed, Ready-to-use
+        protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
+
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
         public XCPlexBase() { }
-        public XCPlexBase(EVvsGDV_ProblemModel problemModel, XCPlexParameters xCplexParam)
+        public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
         {
-            this.problemModel = problemModel;
+            this.theProblemModel = theProblemModel;
             this.xCplexParam = xCplexParam;
             XCPlexRelaxation relaxation;
             relaxation = xCplexParam.Relaxation;
