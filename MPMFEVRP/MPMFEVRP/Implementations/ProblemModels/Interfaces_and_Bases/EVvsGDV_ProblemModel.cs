@@ -352,6 +352,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             NumVehicles[0] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
             NumVehicles[1] = problemCharacteristics.GetParameter(ParameterID.PRB_NUM_GDV).GetIntValue();
         }
+        public int GetNumVehicles(VehicleCategories vc)
+        {
+            if(vc==VehicleCategories.EV)
+            return NumVehicles[0];
+            else
+                return NumVehicles[1];
+        }
         void PopulateCompatibleSolutionTypes()
         {
             compatibleSolutions = new List<Type>()

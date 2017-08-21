@@ -18,6 +18,7 @@ namespace MPMFEVRP.Models.XCPlex
         int numCustomers, numES;
         double[] minValue_T, maxValue_T, minValue_delta, maxValue_delta, minValue_epsilon, maxValue_epsilon;
         VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
+        List<Site> sistes = new List<Site>();
 
         INumVar[][][] X;
         INumVar[][][] Y;

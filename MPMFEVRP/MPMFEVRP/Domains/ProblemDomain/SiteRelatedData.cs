@@ -19,7 +19,6 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public int NumCustomers { get { return numCustomers; } } 
         public int NumES { get { return numES; } }  
         public int NumNodes { get { return numNodes;  } }   
-        //public Site[] SiteArray { get { return siteArray; } }
         public double[,] Distance { get { return distance; } }
         public double[,] TimeConsumption { get { return timeConsumption; } }
         public double[,,] EnergyConsumption { get { return energyConsumption; } }
@@ -45,12 +44,9 @@ namespace MPMFEVRP.Domains.ProblemDomain
             timeConsumption = twinSRD.TimeConsumption;
             energyConsumption = twinSRD.EnergyConsumption;
         }
-        Site[] GetAllSitesArray() // TODO unit test and make sure we need this method ow delete this
+        public Site[] GetAllSitesArray() // TODO make sure we need this method ow delete this
         {
-            Site[] outcome = new Site[siteArray.Length];
-            for (int v = 0; v < siteArray.Length; v++)
-                outcome[v] = siteArray[v];
-            return outcome;
+            return siteArray;
         }
         public List<string> GetCustomerIDs()
         {

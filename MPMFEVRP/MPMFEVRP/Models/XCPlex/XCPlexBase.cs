@@ -95,13 +95,26 @@ namespace MPMFEVRP.Models.XCPlex
             }
             DecisionVariables.Add(name, dv);
         }
-
         protected void AddTwoDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int[] length2)
         {
             var dv = new INumVar[length1][];
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = NumVarArray(length2[i], lowerBound, upperBound, type);
+            }
+            DecisionVariables.Add(name, dv);
+        }
+
+        protected void AddThreeDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, int length3)
+        {
+            var dv = new INumVar[length1][][];
+            for (int i = 0; i < length1; i++)
+            {
+                dv[i] = new INumVar[length2][];
+                for (int j = 0; j < length2; j++)
+                {
+                    dv[i][j] = NumVarArray(length3, lowerBound, upperBound, type);
+                }
             }
             DecisionVariables.Add(name, dv);
         }
@@ -121,7 +134,7 @@ namespace MPMFEVRP.Models.XCPlex
                     .ToArray())
                 .ToArray();
         }
-
+       
         protected INumVar[] GetOneDimensionalDecisionVariableValue(String name)
         {
             return ((INumVar[])DecisionVariables[name]);
@@ -132,6 +145,11 @@ namespace MPMFEVRP.Models.XCPlex
             return ((INumVar[][])DecisionVariables[name]);
         }
 
+        protected INumVar[][][] GetThreeDimensionalDecisionVariableValue(String name)
+        {
+            return ((INumVar[][][])DecisionVariables[name]);
+        }
+      
         // Shortcuts
         // DV1D : Decision Variable 1-Dimensional etc.
         protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1)
