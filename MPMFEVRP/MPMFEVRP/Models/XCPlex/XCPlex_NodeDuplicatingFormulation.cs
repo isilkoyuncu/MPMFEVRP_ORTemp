@@ -7,6 +7,7 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace MPMFEVRP.Models.XCPlex
@@ -574,24 +575,67 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
-        public List<Tuple<int,int,int>> GetXVariablesSetTo1()
+        public List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
-            List < Tuple <int, int, int>> outcome = new List<Tuple<int, int, int>>();
-            for (int i = 0; i < numDuplicatedNodes; i++)
-                for (int j = 0; j < numDuplicatedNodes; j++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (GetValue(X[i][j][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                            outcome.Add(new Tuple<int, int, int>(nodeToOriginalSiteNumberMap[i], nodeToOriginalSiteNumberMap[j], v));
+            List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
+            foreach (VehicleCategories vc in vehicleCategories)
+                outcome.AddRange(GetVehicleSpecificRoutes(vc));
             return outcome;
         }
-        public List<double> GetDeltaVariables()
+        public List<VehicleSpecificRoute> GetVehicleSpecificRoutes(VehicleCategories vehicleCategory)
         {
-            if (solutionStatus != XCPlexSolutionStatus.Optimal)
-                return null;
-            List<double> outcome = new List<double>();
-            for (int i = 0; i < numDuplicatedNodes; i++)
-                outcome.Add(GetValue(delta[i]));
+            Vehicle theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory);//Pulling the vehicle infor from the Problem Model. Not exactly flexible, but works as long as we have only two categories of vehicles and no more than one of each
+            List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
+            foreach (List<string> nonDepotSiteIDs in GetListsOfNonDepotSiteIDs(vehicleCategory))
+                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, nonDepotSiteIDs));
             return outcome;
+        }
+        List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
+        {
+            int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+
+            //We first determine the route start points
+            List<string> firstSites = new List<string>();
+            for (int j = 0; j < numDuplicatedNodes; j++)
+                if (GetValue(X[0][j][vc]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                    firstSites.Add(preprocessedSites[j].ID);
+            //Then, populate the whole routes (actually, not routes yet)
+            List<List<string>> outcome = new List<List<string>>();
+            foreach (string firstSiteID in firstSites)
+                outcome.Add(GetNonDepotSiteIDs(firstSiteID, vehicleCategory));
+            return outcome;
+        }
+        List<string> GetNonDepotSiteIDs(string firstSiteID, VehicleCategories vehicleCategory)
+        {
+            int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+            List<string> outcome = new List<string>();
+            for (int j=0;j<numDuplicatedNodes;j++)
+                if(preprocessedSites[j].ID== firstSiteID)
+                {
+                    if (GetValue(X[0][j][vc]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                    {
+                        throw new System.Exception("XCPlex_NodeDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteID,vehicleCategory) pair that doesn't correspond to a flow from the depot!");
+                    }
+                    string currentSiteID = firstSiteID;
+                    int currentSiteIndex = j;
+                    string nextSiteID = "";
+                    do
+                    {
+                        outcome.Add(currentSiteID);
+                        for(int nextSiteIndex = 0; nextSiteIndex<numDuplicatedNodes;nextSiteIndex++)
+                            if(GetValue(X[currentSiteIndex][nextSiteIndex][vc])>= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                            {
+                                currentSiteIndex = nextSiteIndex;
+                                currentSiteID = preprocessedSites[currentSiteIndex].ID;
+                                continue;
+                            }
+                        if (currentSiteID == outcome.Last())
+                            throw new System.Exception("Flow ended before returning to the depot!");
+                    }
+                    while (nextSiteID != theDepot.ID);
+                }
+            return outcome;
+
         }
 
         public void RefineDecisionVariables(CustomerSet CS)
@@ -600,7 +644,7 @@ namespace MPMFEVRP.Models.XCPlex
             
             for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)
             {
-                if(CS.Customers.Contains(theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetSiteID(nodeToOriginalSiteNumberMap[j])).ID))
+                if(CS.Customers.Contains(preprocessedSites[j].ID))
                 {
                     U[j][VCIndex].LB = 1.0;
                     U[j][VCIndex].UB = 1.0;
