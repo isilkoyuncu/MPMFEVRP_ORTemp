@@ -12,8 +12,6 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    //TODO get all sites here and then use the mapping we coded
-
     public class XCPlex_NodeDuplicatingFormulation : XCPlexBase
     {
         RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
@@ -37,12 +35,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             rechargingDuration_status = theProblemModel.RechargingDuration_status;
             numVehCategories = base.theProblemModel.VRD.NumVehicleCategories;
-            if (numVehCategories <= vehicleCategories.Length) { throw new System.Exception("XCPlex_NodeDuplicatingFormulation number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
+            if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlex_NodeDuplicatingFormulation number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
         }
         protected override void DefineDecisionVariables()
         {
             DuplicateAndOrganizeSites();
-            SetMinAndMaxValuesOfAllVariables();//TODO: Expand this (and rename) to all variables, not just the aux
+            SetMinAndMaxValuesOfAllVariables();
 
             allVariables_list = new List<INumVar>();
             //dvs: X_ijv and U_jv
@@ -103,12 +101,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             //No arc from a node to itself
             for (int j = 0; j < numDuplicatedNodes; j++)
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                     X[j][j][v].UB = 0.0;
             //No arc from one ES to another
             for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-                    for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                    for (int v = 0; v < numVehCategories; v++)
                     {
                         X[i][j][v].UB = 0.0;
                     }
@@ -119,13 +117,13 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int j = 0; j < numDuplicatedNodes; j++)
                 {
                     Site sTo = preprocessedSites[j];
-                    for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                    for (int v = 0; v < numVehCategories; v++)
                         if (EnergyConsumption(sFrom, sTo, vehicleCategories[v]) > 1)
                             X[i][j][v].UB = 0.0;
                 }
             }
             //No arc from depot to its duplicate
-            for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+            for (int v = 0; v < numVehCategories; v++)
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
                     if((preprocessedSites[j].X==theDepot.X)&&(preprocessedSites[j].Y== theDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
                     {
@@ -135,7 +133,7 @@ namespace MPMFEVRP.Models.XCPlex
             //No arc from or to an ES node can be traversed by a GDV
             for (int i = 0; i < numDuplicatedNodes; i++)
                 for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-                    for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                    for (int v = 0; v < numVehCategories; v++)
                         if (vehicleCategories[v] == VehicleCategories.GDV)
                         {
                             X[i][j][v].UB = 0.0;
@@ -237,9 +235,8 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
             //Third term: vehicle fixed costs
-            for (int j = 0; j < numDuplicatedNodes; j++)
                 for (int v = 0; v < numVehCategories; v++)
-                    objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+                    objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[v]), U[0][v]);
             //Now adding the objective function to the model
             AddMaximize(objFunction);
         }
@@ -291,7 +288,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_IncomingXtoDepotTotalEqualsU()
         {
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                 {
                     ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
                     for (int i = 0; i < numDuplicatedNodes; i++)
@@ -303,7 +300,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_OutgoingXfromDepotTotalEqualsU()
         {
-            for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+            for (int v = 0; v < numVehCategories; v++)
             {
                 ILinearNumExpr OutgoingXTotalMinusU = LinearNumExpr();
                 for (int k = 0; k < numDuplicatedNodes; k++)
@@ -316,7 +313,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_IncomingXTotalEqualsU()
         {
             for(int j=1; j < numDuplicatedNodes; j++)
-                for(int v=0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for(int v=0; v < numVehCategories; v++)
                 {
                     ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
                     for (int i = 0; i < numDuplicatedNodes; i++)
@@ -329,7 +326,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_OutgoingXTotalEqualsU()
         {
             for (int j = 1; j < numDuplicatedNodes; j++)
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                 {
                     ILinearNumExpr OutgoingXTotalMinusU = LinearNumExpr();
                     for (int k = 0; k < numDuplicatedNodes; k++)
@@ -394,7 +391,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 numVehicles = theProblemModel.NumVehicles;
             }
-            for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+            for (int v = 0; v < numVehCategories; v++)
             {
                 ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
                 for (int k = 0; k < numDuplicatedNodes; k++)
@@ -476,7 +473,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sTo = preprocessedSites[j];
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, Delta[j]);
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                     if (vehicleCategories[v] == VehicleCategories.EV)
                         SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo, vehicleCategories[v]), X[0][j][v]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
@@ -489,7 +486,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 ILinearNumExpr RechargeAtCustomer = LinearNumExpr();
                 RechargeAtCustomer.AddTerm(1.0, Epsilon[j]);
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                     if (vehicleCategories[v] == VehicleCategories.EV)
                         RechargeAtCustomer.AddTerm(-1.0 * maxValue_Epsilon[j], U[j][v]);
                 string constraint_name = "Max_Recharge_At_Customer_" + j.ToString();
@@ -503,7 +500,7 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
                 DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
                 DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                     if (vehicleCategories[v] == VehicleCategories.EV)
                         DepartureSOCFromCustomer.AddTerm(-1.0, U[j][v]);
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
@@ -517,7 +514,7 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                 DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                 DepartureSOCFromES.AddTerm(1.0, Epsilon[j]);
-                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                for (int v = 0; v < numVehCategories; v++)
                     if (vehicleCategories[v] == VehicleCategories.EV)
                         DepartureSOCFromES.AddTerm(-1.0 * maxValue_Epsilon[j], U[j][v]);
                 string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
@@ -623,40 +620,5 @@ namespace MPMFEVRP.Models.XCPlex
             //return new RouteBasedSolution(theProblemModel, GetXVariablesSetTo1());
         }
 
-        double Distance(Site from, Site to)
-        {
-            return theProblemModel.SRD.GetDistance(from.ID, to.ID);
-        }
-        double EnergyConsumption(Site from, Site to, VehicleCategories vehicleCategory)
-        {
-            if (vehicleCategory == VehicleCategories.GDV)
-                return 0;
-            return theProblemModel.SRD.GetEVEnergyConsumption(from.ID, to.ID);
-        }
-        double TravelTime(Site from, Site to)
-        {
-            return theProblemModel.SRD.GetTravelTime(from.ID, to.ID);
-        }
-        double ServiceDuration(Site site)
-        {
-            return site.ServiceDuration;
-        }
-        double RechargingRate(Site site)
-        {
-            return site.RechargingRate;
-        }
-        double Prize(Site site, VehicleCategories vehicleCategory)
-        {
-            return site.GetPrize(vehicleCategory);
-        }
-
-        double GetVarCostPerMile(VehicleCategories vehicleCategory)
-        {
-            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).VariableCostPerMile;
-        }
-        double GetVehicleFixedCost(VehicleCategories vehicleCategory)
-        {
-            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).FixedCost;
-        }
     }
 }

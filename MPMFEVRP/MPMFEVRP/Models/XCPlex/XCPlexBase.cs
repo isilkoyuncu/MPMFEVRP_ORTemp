@@ -374,5 +374,43 @@ namespace MPMFEVRP.Models.XCPlex
                     return false;
             return true;
         }
+
+        protected double Distance(Site from, Site to)
+        {
+            return theProblemModel.SRD.GetDistance(from.ID, to.ID);
+        }
+        protected double EnergyConsumption(Site from, Site to, VehicleCategories vehicleCategory)
+        {
+            if (vehicleCategory == VehicleCategories.GDV)
+                return 0;
+            return theProblemModel.SRD.GetEVEnergyConsumption(from.ID, to.ID);
+        }
+        protected double TravelTime(Site from, Site to)
+        {
+            return theProblemModel.SRD.GetTravelTime(from.ID, to.ID);
+        }
+        protected double ServiceDuration(Site site)
+        {
+            return site.ServiceDuration;
+        }
+        protected double RechargingRate(Site site)
+        {
+            return site.RechargingRate;
+        }
+        protected double Prize(Site site, VehicleCategories vehicleCategory)
+        {
+            return site.GetPrize(vehicleCategory);
+        }
+
+        protected double GetVarCostPerMile(VehicleCategories vehicleCategory)
+        {
+            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).VariableCostPerMile;
+        }
+        protected double GetVehicleFixedCost(VehicleCategories vehicleCategory)
+        {
+            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).FixedCost;
+        }
+
+
     }
 }
