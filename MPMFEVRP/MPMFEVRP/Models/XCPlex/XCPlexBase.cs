@@ -86,44 +86,119 @@ namespace MPMFEVRP.Models.XCPlex
         protected abstract void AddAllConstraints();
         public abstract string GetDescription_AllVariables_Array();
         public abstract SolutionBase GetCompleteSolution(Type SolutionType);//TODO Figure out how to make this work with a run-time-selected Solution type
-
-        protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1)
+        protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
         {
-            var dv = NumVarArray(length1, lowerBound, upperBound, type);
-            DecisionVariables.Add(name, dv);
-        }
-
-        protected void AddTwoDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2)
-        {
-            var dv = new INumVar[length1][];
+            String dv_name = name;
+            dv = new INumVar[length1];
             for (int i = 0; i < length1; i++)
             {
-                dv[i] = NumVarArray(length2, lowerBound, upperBound, type);
+                dv_name = name + "_(" + i.ToString() + ")";
+                dv[i] = NumVar(lowerBound, upperBound, type, dv_name);
+                allVariables_list.Add(dv[i]);
+            }
+            DecisionVariables.Add(dv_name, dv);
+        }
+        protected void AddOneDimensionalDecisionVariable(String name, double[] lowerBound, double[] upperBound, NumVarType type, int length1, out INumVar[] dv)
+        {
+            String dv_name = name;
+            dv = new INumVar[length1];
+            for (int i = 0; i < length1; i++)
+            {
+                dv_name = name + "_(" + i.ToString() + ")";
+                dv[i] = NumVar(lowerBound[i], upperBound[i], type, dv_name);
+                allVariables_list.Add(dv[i]);
+            }
+            DecisionVariables.Add(dv_name, dv);
+        }
+
+        protected void AddTwoDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int[] length2, out INumVar[][] dv)
+        {
+            String dv_name = name;
+            dv = new INumVar[length1][];
+            for (int i = 0; i < length1; i++)
+            {
+                dv[i] = new INumVar[length2[i]];
+                for (int j = 0; j < length2[i]; j++)
+                {
+                    dv_name = name + "_(" + i.ToString() + "," + j.ToString() + ")";
+                    dv[i][j] = NumVar(lowerBound, upperBound, type, dv_name);
+                    allVariables_list.Add(dv[i][j]);
+                }
             }
             DecisionVariables.Add(name, dv);
         }
-        protected void AddTwoDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int[] length2)
+        protected void AddTwoDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, out INumVar[][] dv)
         {
-            var dv = new INumVar[length1][];
+            String dv_name = name;
+            dv = new INumVar[length1][];
             for (int i = 0; i < length1; i++)
             {
-                dv[i] = NumVarArray(length2[i], lowerBound, upperBound, type);
+                dv[i] = new INumVar[length2];
+                for (int j = 0; j < length2; j++)
+                {
+                    dv_name = name + "_(" + i.ToString() + "," + j.ToString() + ")";
+                    dv[i][j] = NumVar(lowerBound, upperBound, type, dv_name);
+                    allVariables_list.Add(dv[i][j]);
+                }
             }
-            DecisionVariables.Add(name, dv);
+            DecisionVariables.Add(dv_name, dv);
+        }
+        protected void AddTwoDimensionalDecisionVariable(String name, double[][] lowerBound, double[][] upperBound, NumVarType type, int length1, int length2, out INumVar[][] dv)
+        {
+            String dv_name = name;
+            dv = new INumVar[length1][];
+            for (int i = 0; i < length1; i++)
+            {
+                dv[i] = new INumVar[length2];
+                for (int j = 0; j < length2; j++)
+                {
+                    dv_name = name + "_(" + i.ToString() + "," + j.ToString() + ")";
+                    dv[i][j] = NumVar(lowerBound[i][j], upperBound[i][j], type, dv_name);
+                    allVariables_list.Add(dv[i][j]);
+                }
+            }
+            DecisionVariables.Add(dv_name, dv);
         }
 
-        protected void AddThreeDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, int length3)
+        protected void AddThreeDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, int length3, out INumVar[][][] dv)
         {
-            var dv = new INumVar[length1][][];
+            String dv_name = name;
+            dv = new INumVar[length1][][];
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = new INumVar[length2][];
                 for (int j = 0; j < length2; j++)
                 {
-                    dv[i][j] = NumVarArray(length3, lowerBound, upperBound, type);
+                    dv[i][j] = new INumVar[length3];
+                    for (int v = 0; v < length3; v++)
+                    {
+                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
+                        dv[i][j][v] = NumVar(lowerBound, upperBound, type, dv_name);
+                        allVariables_list.Add(dv[i][j][v]);
+                    }
                 }
             }
-            DecisionVariables.Add(name, dv);
+            DecisionVariables.Add(dv_name, dv);
+        }
+        protected void AddThreeDimensionalDecisionVariable(String name, double[][][] lowerBound, double[][][] upperBound, NumVarType type, int length1, int length2, int length3, out INumVar[][][] dv)
+        {
+            String dv_name = name;
+            dv = new INumVar[length1][][];
+            for (int i = 0; i < length1; i++)
+            {
+                dv[i] = new INumVar[length2][];
+                for (int j = 0; j < length2; j++)
+                {
+                    dv[i][j] = new INumVar[length3];
+                    for (int v = 0; v < length3; v++)
+                    {
+                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
+                        dv[i][j][v] = NumVar(lowerBound[i][j][v], upperBound[i][j][v], type, dv_name);
+                        allVariables_list.Add(dv[i][j][v]);
+                    }
+                }
+            }
+            DecisionVariables.Add(dv_name, dv);
         }
 
         public T[] GetOneDimensionalDecisionVariableResult<T>(String name)
@@ -159,14 +234,14 @@ namespace MPMFEVRP.Models.XCPlex
       
         // Shortcuts
         // DV1D : Decision Variable 1-Dimensional etc.
-        protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1)
+        protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
         {
-            AddOneDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1);
+            AddOneDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1,out dv);
         }
 
-        protected void AddDV2D(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2)
+        protected void AddDV2D(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, out INumVar[][] dv)
         {
-            AddTwoDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, length2);
+            AddTwoDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, length2, out dv);
         }
 
         public T[] DV1DResult<T>(String name)

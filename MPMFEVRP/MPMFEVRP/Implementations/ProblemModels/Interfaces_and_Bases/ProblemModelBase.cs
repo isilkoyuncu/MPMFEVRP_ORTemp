@@ -45,7 +45,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         {
             return SRD.GetCustomerIDs();
         }
-        protected AssignedRoute ExtractTheSingleRouteFromSolution(RouteBasedSolution ncs)
+        protected VehicleSpecificRoute ExtractTheSingleRouteFromSolution(RouteBasedSolution ncs)
         {
             if (ncs.Routes.Count != 1)
             {

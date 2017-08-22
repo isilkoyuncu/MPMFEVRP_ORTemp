@@ -86,7 +86,8 @@ public RouteBasedSolution(List<VehicleSpecificRoute> VSRs)
             {
                 for (int r = 0; r < Routes.Count; r++)
                 {
-                    list.Add(String.Join("-", Routes[r].SitesVisited) + "\t" + Routes[r].VehicleCategoryIndex.ToString() + "\t" + Routes[r].TotalCollectedPrize + "\t" + (Routes[r].FixedCost + Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit + "\t" + Routes[r].DepartureTime.Last().ToString());
+                    //TODO this is not necessary to fix, we need to code a converter that will convert all the solutions into meaningful text files.
+                    //list.Add(String.Join("-", Routes[r].SitesVisited) + "\t" + Routes[r].VehicleCategoryIndex.ToString() + "\t" + Routes[r].TotalCollectedPrize + "\t" + (Routes[r].FixedCost + Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit + "\t" + Routes[r].DepartureTime.Last().ToString());
                 }
             }
             string[] toReturn = new string[list.Count];
