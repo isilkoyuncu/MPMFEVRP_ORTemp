@@ -14,10 +14,7 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlex_NodeDuplicatingFormulation : XCPlexBase
     {
-        RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
-
         int numDuplicatedNodes;
-        int numVehCategories;
           
         Site theDepot;
 
@@ -31,12 +28,8 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
 
         public XCPlex_NodeDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam)
-        {
-            rechargingDuration_status = theProblemModel.RechargingDuration_status;
-            numVehCategories = base.theProblemModel.VRD.NumVehicleCategories;
-            if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlex_NodeDuplicatingFormulation number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
-        }
+            : base(theProblemModel, xCplexParam){}
+
         protected override void DefineDecisionVariables()
         {
             DuplicateAndOrganizeSites();

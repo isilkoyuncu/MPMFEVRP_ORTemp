@@ -46,6 +46,9 @@ namespace MPMFEVRP.Models.XCPlex
         protected List<Site> customers;
         protected List<Site> externalStations;//Proprocessed, Ready-to-use
         protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
+        protected int numVehCategories;
+        protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
+
 
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
@@ -53,6 +56,9 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
         {
             this.theProblemModel = theProblemModel;
+            numVehCategories = theProblemModel.VRD.NumVehicleCategories;
+            if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlexBase number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
+            rechargingDuration_status = theProblemModel.RechargingDuration_status;
             this.xCplexParam = xCplexParam;
             XCPlexRelaxation relaxation;
             relaxation = xCplexParam.Relaxation;

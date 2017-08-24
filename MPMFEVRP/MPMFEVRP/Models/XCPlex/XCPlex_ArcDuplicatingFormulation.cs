@@ -15,9 +15,7 @@ namespace MPMFEVRP.Models.XCPlex
     //TODO get all sites here and then use the mapping we coded
     public class XCPlex_ArcDuplicatingFormulation : XCPlexBase
     {
-        RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
         int numNonESNodes;
-        int numVehCategories;
         int numCustomers, numES;
 
         Site theDepot;
@@ -30,12 +28,8 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
 
         public XCPlex_ArcDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam)
-        {
-            rechargingDuration_status = theProblemModel.RechargingDuration_status;
-            numVehCategories = base.theProblemModel.VRD.NumVehicleCategories;
-            if (base.theProblemModel.VRD.NumVehicleCategories < vehicleCategories.Length) { throw new System.Exception("XCPlex_ArcDuplicatingFormulation number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
-        }
+            : base(theProblemModel, xCplexParam){}
+
         protected override void DefineDecisionVariables()
         {
             OrganizeSites();
