@@ -32,6 +32,7 @@ namespace MPMFEVRP.Forms
         public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();
+            groupBox_algorithms.Enabled = false;
 
             comboBox_problems.Items.AddRange(ProblemUtil.GetAllProblemNames().ToArray());
             comboBox_problems.SelectedIndexChanged += ComboBox_problems_SelectedIndexChanged;
@@ -126,6 +127,7 @@ namespace MPMFEVRP.Forms
                 theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem);
                 UpdateProblemLabels();
                 Log("Problem model is created.");
+                groupBox_algorithms.Enabled = true;
             }
             catch (Exception)
             {
