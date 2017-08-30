@@ -539,12 +539,12 @@ namespace MPMFEVRP.Models.XCPlex
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
         {
-            int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+            int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
 
             //We first determine the route start points
             List<int> firstSiteIndices = new List<int>();
             for (int j = 0; j < numDuplicatedNodes; j++)
-                if (GetValue(X[0][j][vc]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                if (GetValue(X[0][j][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                 {
                     firstSiteIndices.Add(j);
                 }
@@ -558,43 +558,30 @@ namespace MPMFEVRP.Models.XCPlex
         }
         List<string> GetNonDepotSiteIDs(int firstSiteIndex, VehicleCategories vehicleCategory)
         {
-            int[,,] xValues = GetXValues();
             int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
             List<string> outcome = new List<string>();
-            int j = firstSiteIndex;
-            if (GetValue(X[0][j][vc_int]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
+            if (GetValue(X[0][firstSiteIndex][vc_int]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
             {
-                double x = GetValue(X[0][j][vc_int]);
                 throw new System.Exception("XCPlex_NodeDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteIndex,vehicleCategory) pair that doesn't correspond to a flow from the depot!");
             }
-            string currentSiteID = preprocessedSites[j].ID;
-            int currentSiteIndex = j;
+            string currentSiteID = preprocessedSites[firstSiteIndex].ID;
+            int currentSiteIndex = firstSiteIndex;
             int nextSiteIndex = -1;
             do
             {
                 outcome.Add(currentSiteID);
                 nextSiteIndex = GetNextSiteIndex(currentSiteIndex, vc_int);
-                currentSiteIndex = nextSiteIndex;
-                currentSiteID = preprocessedSites[currentSiteIndex].ID;
-                if (currentSiteID == theDepot.ID)
+                if (preprocessedSites[nextSiteIndex].ID == theDepot.ID)
                 {
                     return outcome;
                 }
+                currentSiteIndex = nextSiteIndex;
+                currentSiteID = preprocessedSites[currentSiteIndex].ID;
             }
             while (currentSiteID != theDepot.ID);
 
             return outcome;
 
-        }
-        public int[,,]GetXValues()
-        {
-            
-            int[,,] outcome = new int[numDuplicatedNodes, numDuplicatedNodes, numVehCategories];
-            for (int i = 0; i < numDuplicatedNodes; i++)
-                for (int j = 0; j < numDuplicatedNodes; j++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        outcome[i, j, v] = (int)GetValue(X[i][j][v]);
-            return outcome;
         }
         public void RefineDecisionVariables(CustomerSet CS)
         {

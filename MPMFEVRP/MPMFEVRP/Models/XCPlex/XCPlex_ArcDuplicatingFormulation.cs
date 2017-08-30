@@ -598,7 +598,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public List<VehicleSpecificRoute> GetVehicleSpecificRoutes(VehicleCategories vehicleCategory)
         {
-            Vehicle theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory);//Pulling the vehicle info from the Problem Model. Not exactly flexible, but works as long as we have only two categories of vehicles and no more than one of each
+            Vehicle theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory);//Pulling the vehicle infor from the Problem Model. Not exactly flexible, but works as long as we have only two categories of vehicles and no more than one of each
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
             foreach (List<string> nonDepotSiteIDs in GetListsOfNonDepotSiteIDs(vehicleCategory))
                 outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, nonDepotSiteIDs));
@@ -606,50 +606,91 @@ namespace MPMFEVRP.Models.XCPlex
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
         {
-            int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+            int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
 
             //We first determine the route start points
-            List<string> firstSites = new List<string>();
+            List<List<int>> listOfFirstSiteIndices = new List<List<int>>();
             for (int j = 0; j < numNonESNodes; j++)
-                if (GetValue(X[0][j][vc]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                    firstSites.Add(preprocessedSites[j].ID);
+                if (GetValue(X[0][j][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                {
+                    listOfFirstSiteIndices.Add(new List<int>() { j });
+                }
+            for(int r=0;r<numES;r++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    if (GetValue(Y[0][r][j]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                    {
+                        listOfFirstSiteIndices.Add(new List<int>() { r, j });
+                    }
             //Then, populate the whole routes (actually, not routes yet)
             List<List<string>> outcome = new List<List<string>>();
-            foreach (string firstSiteID in firstSites)
-                outcome.Add(GetNonDepotSiteIDs(firstSiteID, vehicleCategory));
+            foreach (List<int> firstSiteIndices in listOfFirstSiteIndices)
+            {
+                outcome.Add(GetNonDepotSiteIDs(firstSiteIndices, vehicleCategory));
+            }
             return outcome;
         }
-        List<string> GetNonDepotSiteIDs(string firstSiteID, VehicleCategories vehicleCategory)
-        {
-            int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
-            List<string> outcome = new List<string>();
-            for (int j = 0; j < numNonESNodes; j++)
-                if (preprocessedSites[j].ID == firstSiteID)
-                {
-                    if (GetValue(X[0][j][vc]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                    {
-                        throw new System.Exception("XCPlex_NodeDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteID,vehicleCategory) pair that doesn't correspond to a flow from the depot!");
-                    }
-                    string currentSiteID = firstSiteID;
-                    int currentSiteIndex = j;
-                    string nextSiteID = "";
-                    do
-                    {
-                        outcome.Add(currentSiteID);
-                        for (int nextSiteIndex = 0; nextSiteIndex < numNonESNodes; nextSiteIndex++)
-                            if (GetValue(X[currentSiteIndex][nextSiteIndex][vc]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                            {
-                                currentSiteIndex = nextSiteIndex;
-                                currentSiteID = preprocessedSites[currentSiteIndex].ID;
-                                continue;
-                            }
-                        if (currentSiteID == outcome.Last())
-                            throw new System.Exception("Flow ended before returning to the depot!");
-                    }
-                    while (nextSiteID != theDepot.ID);
-                }
-            return outcome;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="firstSiteIndices"></param>Can contain one or two elements. If one, it's for an X arc; if two, it's for a Y arc; nothing else is possible!
+        /// <param name="vehicleCategory"></param>Obviously if GDV, there won't be any Y arcs
+        /// <returns></returns>
+        List<string> GetNonDepotSiteIDs(List<int> firstSiteIndices, VehicleCategories vehicleCategory)
+        {
+            if ((firstSiteIndices.Count > 2) || ((vehicleCategory == VehicleCategories.GDV) && (firstSiteIndices.Count > 1)))
+                throw new System.Exception("XCPlex_ArcDuplicatingFormulation.GetNonDepotSiteIDs called with too many firstSiteIndices!");
+
+            int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+            List<string> outcome = new List<string>();
+
+            if(firstSiteIndices.Count==1)
+                if (GetValue(X[0][firstSiteIndices.Last()][vc_int]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                {
+                    throw new System.Exception("XCPlex_ArcDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteIndices,vehicleCategory) pair that doesn't correspond to an X-flow from the depot!");
+                }
+            if (firstSiteIndices.Count == 2)
+                if (GetValue(Y[0][firstSiteIndices.First()][firstSiteIndices.Last()]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                {
+                    throw new System.Exception("XCPlex_ArcDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteIndices,vehicleCategory) pair that doesn't correspond to a Y-flow from the depot!");
+                }
+
+            List<int> currentSiteIndices = firstSiteIndices;
+            List<int> nextSiteIndices;
+
+            do
+            {
+                if(currentSiteIndices.Count==2)
+                    outcome.Add(externalStations[currentSiteIndices.First()].ID);
+                outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);
+
+                nextSiteIndices = GetNextSiteIndices(currentSiteIndices.Last(), vehicleCategory);
+                if(preprocessedSites[nextSiteIndices.Last()].ID == theDepot.ID)
+                {
+                    if(nextSiteIndices.Count==2)
+                        outcome.Add(externalStations[nextSiteIndices.First()].ID);
+                    return outcome;
+                }
+                currentSiteIndices = nextSiteIndices;
+            }
+            while (preprocessedSites[currentSiteIndices.Last()].ID != theDepot.ID);
+
+            return outcome;
+        }
+        List<int> GetNextSiteIndices(int currentSiteIndex, VehicleCategories vehicleCategory)
+        {
+            int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+            for (int nextCustomerIndex = 0; nextCustomerIndex < numNonESNodes; nextCustomerIndex++)
+                if (GetValue(X[currentSiteIndex][nextCustomerIndex][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                {
+                    return new List<int>() { nextCustomerIndex };
+                }
+            if (vehicleCategory == VehicleCategories.EV)
+                for (int nextESIndex = 0; nextESIndex < numES; nextESIndex++)
+                    for (int nextCustomerIndex = 0; nextCustomerIndex < numNonESNodes; nextCustomerIndex++)
+                        if (GetValue(Y[currentSiteIndex][nextESIndex][nextCustomerIndex]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                            return new List<int>() { nextESIndex, nextCustomerIndex };
+            throw new System.Exception("Flow ended before returning to the depot!");
         }
 
         public override SolutionBase GetCompleteSolution(Type SolutionType)
