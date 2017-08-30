@@ -542,57 +542,47 @@ namespace MPMFEVRP.Models.XCPlex
             int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
 
             //We first determine the route start points
-            List<string> firstSites = new List<string>();
-            for (int j = 0; j < numDuplicatedNodes; j++) 
+            List<int> firstSiteIndices = new List<int>();
+            for (int j = 0; j < numDuplicatedNodes; j++)
                 if (GetValue(X[0][j][vc]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                 {
-                    double x = GetValue(X[0][j][vc]);
-                firstSites.Add(preprocessedSites[j].ID); }
+                    firstSiteIndices.Add(j);
+                }
             //Then, populate the whole routes (actually, not routes yet)
             List<List<string>> outcome = new List<List<string>>();
-            foreach (string firstSiteID in firstSites)
+            foreach (int firstSiteIndex in firstSiteIndices)
             {
-                outcome.Add(GetNonDepotSiteIDs(firstSiteID, vehicleCategory));
+                outcome.Add(GetNonDepotSiteIDs(firstSiteIndex, vehicleCategory));
             }
             return outcome;
         }
-        List<string> GetNonDepotSiteIDs(string firstSiteID, VehicleCategories vehicleCategory)
+        List<string> GetNonDepotSiteIDs(int firstSiteIndex, VehicleCategories vehicleCategory)
         {
-            if (firstSiteID == "BD20")
-                System.Windows.Forms.MessageBox.Show("Suspicious instance");
             int[,,] xValues = GetXValues();
-            int vc = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
+            int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
             List<string> outcome = new List<string>();
-            for (int j=0;j<numDuplicatedNodes;j++)
-                if(preprocessedSites[j].ID== firstSiteID)
+            int j = firstSiteIndex;
+            if (GetValue(X[0][j][vc_int]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
+            {
+                double x = GetValue(X[0][j][vc_int]);
+                throw new System.Exception("XCPlex_NodeDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteIndex,vehicleCategory) pair that doesn't correspond to a flow from the depot!");
+            }
+            string currentSiteID = preprocessedSites[j].ID;
+            int currentSiteIndex = j;
+            int nextSiteIndex = -1;
+            do
+            {
+                outcome.Add(currentSiteID);
+                nextSiteIndex = GetNextSiteIndex(currentSiteIndex, vc_int);
+                currentSiteIndex = nextSiteIndex;
+                currentSiteID = preprocessedSites[currentSiteIndex].ID;
+                if (currentSiteID == theDepot.ID)
                 {
-                    if (GetValue(X[0][j][vc]) < 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                    {
-                        double x = GetValue(X[0][j][vc]);
-                        throw new System.Exception("XCPlex_NodeDuplicatingFormulation.GetNonDepotSiteIDs called for a (firstSiteID,vehicleCategory) pair that doesn't correspond to a flow from the depot!");
-                    }
-                    string currentSiteID = firstSiteID;
-                    int currentSiteIndex = j;
-                    do
-                    {
-                        outcome.Add(currentSiteID);
-                        for (int nextSiteIndex = 0; nextSiteIndex < numDuplicatedNodes; nextSiteIndex++)
-                            if (GetValue(X[currentSiteIndex][nextSiteIndex][vc]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                            {
-                                currentSiteIndex = nextSiteIndex;
-                                currentSiteID = preprocessedSites[currentSiteIndex].ID;
-                                if (currentSiteID == theDepot.ID)
-                                {
-                                    return outcome;
-                                }
-                                else
-                                    continue;
-                            }
-                        if (currentSiteID == outcome.Last())
-                            throw new System.Exception("Flow ended before returning to the depot!");
-                    }
-                    while (currentSiteID != theDepot.ID);
+                    return outcome;
                 }
+            }
+            while (currentSiteID != theDepot.ID);
+
             return outcome;
 
         }
@@ -634,5 +624,14 @@ namespace MPMFEVRP.Models.XCPlex
             //return new RouteBasedSolution(theProblemModel, GetXVariablesSetTo1());
         }
 
+        int GetNextSiteIndex(int currentSiteIndex, int vc_int)
+        {
+            for (int nextSiteIndex = 0; nextSiteIndex < numDuplicatedNodes; nextSiteIndex++)
+                if (GetValue(X[currentSiteIndex][nextSiteIndex][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                {
+                    return nextSiteIndex;
+                }
+            throw new System.Exception("Flow ended before returning to the depot!");
+        }
     }
 }

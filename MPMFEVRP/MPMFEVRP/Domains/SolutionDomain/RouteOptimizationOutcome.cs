@@ -171,7 +171,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             foreach (VehicleSpecificRouteOptimizationOutcome vsroo in theListofVSROOs)
             {
                 if (vsroo.VehicleCategory == vehCategory)
-                    return vsroo.VSOptimizedRoute.Feasible;
+                {
+                    if (vsroo.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
+                        return false;
+                    else
+                        return vsroo.VSOptimizedRoute.Feasible;
+                }
             }
             return false; //TODO this is not correct, false means it is not feasible; we cannot distinguish between not yet optimized and feasible.
             throw new Exception("There is no" + vehCategory.ToString() + "in theList hence we couldn't retrieve it's feasibility status");
