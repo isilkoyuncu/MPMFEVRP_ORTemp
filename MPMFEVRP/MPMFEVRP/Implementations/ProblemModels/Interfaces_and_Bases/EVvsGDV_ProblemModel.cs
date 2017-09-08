@@ -100,29 +100,6 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //If none of the previous conditions worked, we must solve an EV-TSP
             return RouteOptimize(CS, vehicle);
         }
-        bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRouteOptimizationOutcome GDVOptimalRoute)
-        {
-            //Return true if and only if the GDV-Optimal Route is AFV-Feasible (in which case it's known to be AFV-Optimal as well
-
-            if (GDVOptimalRoute == null)//The GDVOptimalRoute that was not provided cannot be feasible
-                return false;
-
-            return false;//TODO Do the actual checking here!
-        }
-        VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
-        {
-            if (vehicle.Category != VehicleCategories.EV)
-                throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
-            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
-        }
-        bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
-        {
-            //Return true if and only if the GDV-Optimal route must be AFV-infeasible based on the data
-            //This method may be a little confusing because it returns true when infeasible
-            //For now we ignore this method //TODO: Develop the analytically provable conditions of AFV-infeasibility of a given GDV-feasible route
-
-            return false;
-        }
         VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
             XCPlex_NodeDuplicatingFormulation solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver); //TODO this needs to be fixed: if GDV infeasible, then we shouldn't try to optimize it for EV here
@@ -133,7 +110,35 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             else//optimal
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
         }
-        public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1)
+        VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
+        {
+            if (GDVOptimalRoute == null)//The GDVOptimalRoute was not provided
+                throw new Exception("The GDVOptimalRoute was not provided to FitGDVOptimalRouteToEV!");
+            else if (vehicle.Category != VehicleCategories.EV)
+                throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
+            else
+                return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
+        }
+        bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
+        {
+            //Return true if and only if the GDV-Optimal route must be AFV-infeasible based on the data
+            //This method may be a little confusing because it returns true when infeasible
+            //For now we ignore this method //TODO: Develop the analytically provable conditions of AFV-infeasibility of a given GDV-feasible route
+
+            return false;
+        }
+        
+        /* We never use the following two methods?? */
+        bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRouteOptimizationOutcome GDVOptimalRoute) //TODO either delete or update: we never use this method, actually we need the fitted route to check the feasibility
+        {
+            //Return true if and only if the GDV-Optimal Route is AFV-Feasible (in which case it's known to be AFV-Optimal as well
+
+            if (GDVOptimalRoute == null)//The GDVOptimalRoute that was not provided cannot be feasible
+                return false;
+
+            return false;//TODO Do the actual checking here!
+        }
+        public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1) //TODO this is never used
         {
             List<string> nondepotSiteIDsInOrder = new List<string>();
             int vehicleCategoryIndex = (vehicle.Category == VehicleCategories.EV ? 0 : 1);

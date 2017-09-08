@@ -17,8 +17,10 @@ namespace MPMFEVRP.Implementations.ProblemModels
             coverConstraintType = problem.CoverConstraintType;
             rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
         }//empty constructor
-        public EMH_ProblemModel(EMH_Problem problem) : base(problem) { }
-        public void ModifyNumVehicles()
+        public EMH_ProblemModel(EMH_Problem problem) : base(problem)
+        {
+        }
+        public void ModifyNumVehicles() //TODO this can be used when there is onl EVs no GDVs.
         {
             NumVehicles[1] = 0;
         }
@@ -29,7 +31,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
         }
         public override string GetName()
         {
-            return "Erdogan & Miller - Hooks Problem Model";
+            return "Erdogan & Miller-Hooks Problem Model";
         }
         public override string GetNameOfProblemOfModel()
         {
@@ -68,13 +70,14 @@ namespace MPMFEVRP.Implementations.ProblemModels
             throw new NotImplementedException();
 
             //bool outcome = true;
-            ////TODO check for any infeasibility and return false as soon as one is found!
+            //TODO check for any infeasibility and return false as soon as one is found!
             //return outcome;
         }
 
         public override double CalculateObjectiveFunctionValue(ISolution solution) //TODO unit test this also check the structure
         {
-            return solution.OFIDP.GetTotalVMT();
+            return (VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.EV)
+                + VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.GDV));
         }
 
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)

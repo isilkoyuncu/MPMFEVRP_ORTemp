@@ -15,8 +15,8 @@ namespace MPMFEVRP.Implementations.Problems
 
         public EMH_Problem()
         {
-            objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = Models.ObjectiveFunctions.MinimizeCost;
+            objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
+            objectiveFunction = ObjectiveFunctions.MinimizeVMT;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
@@ -25,8 +25,7 @@ namespace MPMFEVRP.Implementations.Problems
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
             objectiveFunction = ObjectiveFunctions.MinimizeVMT;
-            //TODO fix the following line based on EMH problem characteristics!!!
-            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 0, 0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
+            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
 
