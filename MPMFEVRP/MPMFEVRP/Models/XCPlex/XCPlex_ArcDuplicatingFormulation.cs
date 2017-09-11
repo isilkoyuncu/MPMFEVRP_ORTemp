@@ -135,7 +135,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 Y_LB[i] = new double[numVehCategories][];
                 Y_UB[i] = new double[numVehCategories][];
-                for (int r = 0; r < numNonESNodes; r++)
+                for (int r = 0; r < numVehCategories; r++)
                 {
                     Y_LB[i][r] = new double[numNonESNodes];
                     Y_UB[i][r] = new double[numNonESNodes];
@@ -262,7 +262,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     Site sTo = preprocessedSites[j];
                     for (int v = 0; v < numVehCategories; v++)
-                        objFunction.AddTerm(GetVarCostPerMile(base.vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
+                        objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
                 }
             }
             //Second term Part II: distance-based costs from customer to customer through an ES
@@ -281,7 +281,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             //Third term: vehicle fixed costs
             for (int v = 0; v < numVehCategories; v++)
-                objFunction.AddTerm(-1.0 * GetVehicleFixedCost(base.vehicleCategories[v]), U[0][v]);
+                objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), U[0][v]);
             //Now adding the objective function to the model
             AddMinimize(objFunction);
         }
@@ -695,8 +695,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
-            throw new NotImplementedException();
-            //return new RouteBasedSolution(theProblemModel, XVariablesSetTo1);
+            return new RouteBasedSolution(GetVehicleSpecificRoutes());
         }
     }
 }

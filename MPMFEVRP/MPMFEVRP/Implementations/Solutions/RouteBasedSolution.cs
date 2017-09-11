@@ -18,7 +18,7 @@ namespace MPMFEVRP.Implementations.Solutions
         public RouteBasedSolution()
         {
         }
-public RouteBasedSolution(List<VehicleSpecificRoute> VSRs)
+        public RouteBasedSolution(List<VehicleSpecificRoute> VSRs)
         {
             routes = VSRs;
         }

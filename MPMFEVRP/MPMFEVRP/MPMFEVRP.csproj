@@ -157,6 +157,7 @@
     <Compile Include="Implementations\Problems\Interfaces_and_Bases\EVvsGDV_Problem.cs" />
     <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\EVvsGDV_ProblemModel.cs" />
     <Compile Include="Models\ObjectiveFunctionCoefficientsPackage.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woUvariables.cs" />
     <Compile Include="SupplementaryInterfaces\IWriter.cs" />
     <Compile Include="Implementations\Problems\Interfaces_and_Bases\ProblemBase.cs" />
     <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\ProblemModelBase.cs" />

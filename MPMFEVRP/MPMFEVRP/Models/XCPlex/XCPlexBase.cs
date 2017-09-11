@@ -391,6 +391,10 @@ namespace MPMFEVRP.Models.XCPlex
                 return 0;
             return theProblemModel.SRD.GetEVEnergyConsumption(from.ID, to.ID);
         }
+        protected double BatteryCapacity(VehicleCategories vehicleCategory)
+        {
+            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).BatteryCapacity;
+        }
         protected double TravelTime(Site from, Site to)
         {
             return theProblemModel.SRD.GetTravelTime(from.ID, to.ID);

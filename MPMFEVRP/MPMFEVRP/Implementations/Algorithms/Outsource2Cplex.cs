@@ -50,6 +50,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 case XCPlex_Formulation.NodeDuplicating:
                     CPlexExtender = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
+                    //CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicating:
                     CPlexExtender = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);

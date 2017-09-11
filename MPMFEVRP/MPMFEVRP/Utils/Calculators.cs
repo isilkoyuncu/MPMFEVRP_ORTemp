@@ -50,7 +50,7 @@ namespace MPMFEVRP.Utils
         public static double MaxSOCGainAtSite(Site s, Vehicle v, double maxStayDuration = double.MaxValue)
         {
             if (v.BatteryCapacity != 0)
-                return Math.Min(1, Math.Min(s.RechargingRate, v.MaxChargingRate) * maxStayDuration / v.BatteryCapacity);//TODO: (unit)test to make sure this works as intended in a variety of situations
+                return Math.Min(1, Math.Min(s.RechargingRate, v.MaxChargingRate) * maxStayDuration);//TODO: (unit)test to make sure this works as intended in a variety of situations
             else
                 throw new DivideByZeroException("Vehicle battery capacity is 0.");
         }

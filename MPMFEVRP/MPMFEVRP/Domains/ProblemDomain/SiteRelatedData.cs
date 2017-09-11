@@ -148,15 +148,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             return eVenergyConsumption;
         }
 
-
-        //public int GetSiteIndex(string siteID)//TODO: Delete this method. Its only mission is to convert siteID to siteIndex, which will never be used after SiteArray is no longer given out.
-        //{
-        //    for (int i = 0; i < siteArray.Length; i++)
-        //        if (siteArray[i].ID == siteID)
-        //            return i;
-        //    throw new Exception("SiteRelatedData.GetSiteIndex can't find the site with the given ID!");
-        //}
-        public string GetSiteID(int siteIndex)//TODO: Delete this method. Its only mission is to convert siteIndex to siteID, which will never be used after SiteArray is no longer given out.
+        public string GetSiteID(int siteIndex)//TODO: Its only mission is to convert siteIndex to siteID, which will never be used after SiteArray is no longer given out.
         {
                     return siteArray[siteIndex].ID;
             throw new Exception("SiteRelatedData.GetSiteID can't find the site with the given index!");
