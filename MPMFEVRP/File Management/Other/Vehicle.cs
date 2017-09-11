@@ -30,12 +30,12 @@ namespace Instance_Generation.Other
             switch (v)
             {
                 case Vehicles.EMH_60KWH:
-                    id = "EMH AVF 50kWh 0.4kWh/mile";
+                    id = "EMH AVF 50kWh 0.2kWh/mile";
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
                     batteryCapacity = 60.0;
                     consumptionRate = 0.20;
-                    fixedCost = 40.0;
+                    fixedCost = 0.0;//40
                     variableCostPerMile = 0.0388;
                     maxChargingRate = 60.0/60.0;
                     break;
@@ -45,7 +45,7 @@ namespace Instance_Generation.Other
                     loadCapacity = 200;
                     batteryCapacity = 0;
                     consumptionRate = 0;
-                    fixedCost = 30.0;
+                    fixedCost = 0.0;//30
                     variableCostPerMile = 0.0656;
                     maxChargingRate = 0.0;
                     break;
