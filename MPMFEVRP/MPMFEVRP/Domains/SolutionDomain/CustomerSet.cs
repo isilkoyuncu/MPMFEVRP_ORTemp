@@ -36,16 +36,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
             routeOptimizationOutcome = new RouteOptimizationOutcome();
             this.retrievedFromArchive = retrievedFromArchive;
         }
-        public CustomerSet(List<string> customerIDs, RouteOptimizationOutcome ROO = null, bool retrievedFromArchive = false)
-        {
-            customers = customerIDs;//Note that where we gather the list of customers, we must make sure that they are all customers! Since we don't want to pass problemModel here, we have no way of checking here!!!
-            customers.Sort();//just in case
-            if (ROO != null)
-                routeOptimizationOutcome = ROO;
-            else
-                routeOptimizationOutcome = new RouteOptimizationOutcome();
-            this.retrievedFromArchive = retrievedFromArchive;
-        }
+        //TODO uncomment this if needed, right now it is not used by any other class
+        //public CustomerSet(List<string> customerIDs, RouteOptimizationOutcome ROO = null, bool retrievedFromArchive = false)
+        //{
+        //    customers = customerIDs;//Note that where we gather the list of customers, we must make sure that they are all customers! Since we don't want to pass problemModel here, we have no way of checking here!!!
+        //    customers.Sort();//just in case
+        //    if (ROO != null)
+        //        routeOptimizationOutcome = ROO;
+        //    else
+        //        routeOptimizationOutcome = new RouteOptimizationOutcome();
+        //    this.retrievedFromArchive = retrievedFromArchive;
+        //}
         public CustomerSet(CustomerSet twinCS, bool copyROO = false)
         {
             customers = new List<string>();
