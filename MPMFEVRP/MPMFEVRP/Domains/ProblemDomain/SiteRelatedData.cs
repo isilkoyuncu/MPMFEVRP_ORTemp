@@ -95,7 +95,32 @@ namespace MPMFEVRP.Domains.ProblemDomain
             var sortedDict = from entry in preOrder orderby entry.Key ascending select entry;
             return toReturn;
         }
-
+        public string GetSiteIdRequiresMinimumEnergyFromSite(string nodeID)
+        {
+            double minimumEnergy = double.MaxValue;
+            string nextNodeID = "";
+            foreach (Site s in siteArray)
+                if (s.ID != nodeID)
+                    if (minimumEnergy > GetEVEnergyConsumption(nodeID, s.ID))
+                    {
+                        minimumEnergy = GetEVEnergyConsumption(nodeID, s.ID);
+                        nextNodeID = s.ID;
+                    }
+            return nextNodeID;
+        }
+        public string GetSiteIdRequiresMinimumEnergyToSite(string nodeID)
+        {
+            double minimumEnergy = double.MaxValue;
+            string previousNodeID = "";
+            foreach (Site s in siteArray)
+                if (s.ID != nodeID)
+                    if (minimumEnergy > GetEVEnergyConsumption(s.ID, nodeID))
+                    {
+                        minimumEnergy = GetEVEnergyConsumption(s.ID, nodeID);
+                        previousNodeID = s.ID;
+                    }
+            return previousNodeID;
+        }
         public double GetDistance(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
