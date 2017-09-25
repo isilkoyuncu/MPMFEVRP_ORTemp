@@ -299,7 +299,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j = firstCustomerNodeIndex; j < lastCustomerNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfVehiclesVisitingTheCustomerNode = LinearNumExpr();
-                for (int i = 1; i < numDuplicatedNodes; i++)
+                for (int i = 0; i < numDuplicatedNodes; i++)
                     for (int v = 0; v < numVehCategories; v++)
                     NumberOfVehiclesVisitingTheCustomerNode.AddTerm(1.0, X[i][j][v]);
 
