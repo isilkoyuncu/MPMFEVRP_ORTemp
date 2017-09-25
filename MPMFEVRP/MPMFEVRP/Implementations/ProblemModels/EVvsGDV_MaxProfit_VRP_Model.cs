@@ -4,15 +4,14 @@ using MPMFEVRP.Implementations.Problems;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
+using MPMFEVRP.Models.XCPlex;
+
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MaxProfit_VRP_Model: EVvsGDV_ProblemModel
     {
-
-
-
-        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem) : base(problem){ }
+        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem, XCPlexBase TSPModel) : base(problem, TSPModel){ }
 
         public EVvsGDV_MaxProfit_VRP_Model()
         {

@@ -4,6 +4,7 @@ using MPMFEVRP.Implementations.Problems;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
+using MPMFEVRP.Models.XCPlex;
 
 namespace MPMFEVRP.Implementations.ProblemModels
 {
@@ -17,7 +18,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
             coverConstraintType = problem.CoverConstraintType;
             rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
         }//empty constructor
-        public EVvsGDV_MinCost_VRP_Model(EVvsGDV_MinCost_VRP problem):base (problem){ }
+        public EVvsGDV_MinCost_VRP_Model(EVvsGDV_MinCost_VRP problem, XCPlexBase TSPModel) : base(problem, TSPModel) { }
 
         public override string GetDescription()
         {

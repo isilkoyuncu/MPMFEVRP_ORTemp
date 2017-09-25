@@ -5,6 +5,7 @@ using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MPMFEVRP.Models.XCPlex;
 
 namespace MPMFEVRP.Utils
 {
@@ -90,6 +91,30 @@ namespace MPMFEVRP.Utils
                 if (problemModel == theProblemModelType)
                 {
                     createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel, problem);
+                    if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
+                    {
+                        return createdProblemModel;
+                    }
+                }
+
+            return null;
+        }
+
+        public static EVvsGDV_ProblemModel CreateProblemModelByProblem(Type theProblemModelType, IProblem problem, XCPlexBase TSPModel)
+        {
+            var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(p))
+                .Where(type => typeof(EVvsGDV_ProblemModel).IsAssignableFrom(type))
+                .Where(t => !t.IsAbstract)
+                .ToList();
+
+            EVvsGDV_ProblemModel createdProblemModel;
+
+            foreach (var problemModel in allProblemModels)
+                if (problemModel == theProblemModelType)
+                {
+                    createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel, problem, TSPModel);
                     if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
                     {
                         return createdProblemModel;

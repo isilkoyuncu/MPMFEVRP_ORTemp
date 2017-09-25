@@ -423,5 +423,6 @@ namespace MPMFEVRP.Models.XCPlex
 
         public abstract string GetModelName();
         public abstract bool IsTSPModel();
+        public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
     }
 }

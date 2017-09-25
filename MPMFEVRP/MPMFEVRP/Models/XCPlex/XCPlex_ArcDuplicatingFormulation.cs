@@ -589,7 +589,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
-        public List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
+        public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
             foreach (VehicleCategories vc in vehicleCategories)

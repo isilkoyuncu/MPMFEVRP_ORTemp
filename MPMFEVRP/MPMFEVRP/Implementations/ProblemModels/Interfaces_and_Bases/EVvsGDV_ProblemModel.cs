@@ -127,7 +127,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //else//optimal
             //    return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
 
-            XCPlex_NodeDuplicatingFormulation_woUvariables solver_woU = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver_woUvariables : EV_TSPSolver);
+            XCPlexBase solver_woU = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
             solver_woU.Solve_and_PostProcess();
             if (solver_woU.SolutionStatus == XCPlexSolutionStatus.Infeasible)
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);

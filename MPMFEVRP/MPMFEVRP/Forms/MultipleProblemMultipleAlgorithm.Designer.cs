@@ -30,6 +30,10 @@
         {
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.comboBox_multi_problemModels = new System.Windows.Forms.ComboBox();
+            this.label_problemModel = new System.Windows.Forms.Label();
+            this.label_problem = new System.Windows.Forms.Label();
+            this.comboBox_multi_problems = new System.Windows.Forms.ComboBox();
             this.button_openDataManager = new System.Windows.Forms.Button();
             this.button_addProblem = new System.Windows.Forms.Button();
             this.button_viewProblem = new System.Windows.Forms.Button();
@@ -45,10 +49,6 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button_report = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.comboBox_multi_problemModels = new System.Windows.Forms.ComboBox();
-            this.label_problemModel = new System.Windows.Forms.Label();
-            this.label_problem = new System.Windows.Forms.Label();
-            this.comboBox_multi_problems = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -73,6 +73,46 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Problems";
+            // 
+            // comboBox_multi_problemModels
+            // 
+            this.comboBox_multi_problemModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_multi_problemModels.FormattingEnabled = true;
+            this.comboBox_multi_problemModels.Location = new System.Drawing.Point(8, 88);
+            this.comboBox_multi_problemModels.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_multi_problemModels.Name = "comboBox_multi_problemModels";
+            this.comboBox_multi_problemModels.Size = new System.Drawing.Size(240, 24);
+            this.comboBox_multi_problemModels.TabIndex = 18;
+            // 
+            // label_problemModel
+            // 
+            this.label_problemModel.AutoSize = true;
+            this.label_problemModel.Location = new System.Drawing.Point(8, 69);
+            this.label_problemModel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_problemModel.Name = "label_problemModel";
+            this.label_problemModel.Size = new System.Drawing.Size(102, 17);
+            this.label_problemModel.TabIndex = 20;
+            this.label_problemModel.Text = "Problem Model";
+            // 
+            // label_problem
+            // 
+            this.label_problem.AutoSize = true;
+            this.label_problem.Location = new System.Drawing.Point(8, 19);
+            this.label_problem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_problem.Name = "label_problem";
+            this.label_problem.Size = new System.Drawing.Size(60, 17);
+            this.label_problem.TabIndex = 19;
+            this.label_problem.Text = "Problem";
+            // 
+            // comboBox_multi_problems
+            // 
+            this.comboBox_multi_problems.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_multi_problems.FormattingEnabled = true;
+            this.comboBox_multi_problems.Location = new System.Drawing.Point(8, 39);
+            this.comboBox_multi_problems.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_multi_problems.Name = "comboBox_multi_problems";
+            this.comboBox_multi_problems.Size = new System.Drawing.Size(240, 24);
+            this.comboBox_multi_problems.TabIndex = 17;
             // 
             // button_openDataManager
             // 
@@ -111,7 +151,7 @@
             // linkLabel_deleteSelectedProblem
             // 
             this.linkLabel_deleteSelectedProblem.AutoSize = true;
-            this.linkLabel_deleteSelectedProblem.Location = new System.Drawing.Point(140, 188);
+            this.linkLabel_deleteSelectedProblem.Location = new System.Drawing.Point(140, 262);
             this.linkLabel_deleteSelectedProblem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabel_deleteSelectedProblem.Name = "linkLabel_deleteSelectedProblem";
             this.linkLabel_deleteSelectedProblem.Size = new System.Drawing.Size(108, 17);
@@ -124,10 +164,10 @@
             // 
             this.listBox_problems.FormattingEnabled = true;
             this.listBox_problems.ItemHeight = 16;
-            this.listBox_problems.Location = new System.Drawing.Point(9, 219);
+            this.listBox_problems.Location = new System.Drawing.Point(9, 283);
             this.listBox_problems.Margin = new System.Windows.Forms.Padding(4);
             this.listBox_problems.Name = "listBox_problems";
-            this.listBox_problems.Size = new System.Drawing.Size(239, 340);
+            this.listBox_problems.Size = new System.Drawing.Size(239, 276);
             this.listBox_problems.TabIndex = 0;
             // 
             // groupBox2
@@ -236,46 +276,6 @@
             this.button_report.Text = "Report";
             this.button_report.UseVisualStyleBackColor = true;
             this.button_report.Click += new System.EventHandler(this.Button_report_click);
-            // 
-            // comboBox_multi_problemModels
-            // 
-            this.comboBox_multi_problemModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_multi_problemModels.FormattingEnabled = true;
-            this.comboBox_multi_problemModels.Location = new System.Drawing.Point(8, 88);
-            this.comboBox_multi_problemModels.Margin = new System.Windows.Forms.Padding(4);
-            this.comboBox_multi_problemModels.Name = "comboBox_multi_problemModels";
-            this.comboBox_multi_problemModels.Size = new System.Drawing.Size(240, 24);
-            this.comboBox_multi_problemModels.TabIndex = 18;
-            // 
-            // label_problemModel
-            // 
-            this.label_problemModel.AutoSize = true;
-            this.label_problemModel.Location = new System.Drawing.Point(8, 69);
-            this.label_problemModel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_problemModel.Name = "label_problemModel";
-            this.label_problemModel.Size = new System.Drawing.Size(102, 17);
-            this.label_problemModel.TabIndex = 20;
-            this.label_problemModel.Text = "Problem Model";
-            // 
-            // label_problem
-            // 
-            this.label_problem.AutoSize = true;
-            this.label_problem.Location = new System.Drawing.Point(8, 19);
-            this.label_problem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_problem.Name = "label_problem";
-            this.label_problem.Size = new System.Drawing.Size(60, 17);
-            this.label_problem.TabIndex = 19;
-            this.label_problem.Text = "Problem";
-            // 
-            // comboBox_multi_problems
-            // 
-            this.comboBox_multi_problems.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_multi_problems.FormattingEnabled = true;
-            this.comboBox_multi_problems.Location = new System.Drawing.Point(8, 39);
-            this.comboBox_multi_problems.Margin = new System.Windows.Forms.Padding(4);
-            this.comboBox_multi_problems.Name = "comboBox_multi_problems";
-            this.comboBox_multi_problems.Size = new System.Drawing.Size(240, 24);
-            this.comboBox_multi_problems.TabIndex = 17;
             // 
             // MultipleProblemMultipleAlgorithm
             // 
