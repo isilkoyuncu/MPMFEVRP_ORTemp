@@ -177,10 +177,8 @@ namespace MPMFEVRP.Models.XCPlex
                         maxValue_Epsilon[j] = BatteryCapacity(VehicleCategories.EV); //TODO this has to be double indexed since the max energy gain depends on the vehicle as well.
 
                 }
-
-            }
-            for (int j = 0; j<numDuplicatedNodes;j++)
-                RHS_forCustomerCoverage[j] = 1.0;
+                RHS_forCustomerCoverage[i] = 1.0;
+            }                
         }
         void SetBigMvalues()
         {
