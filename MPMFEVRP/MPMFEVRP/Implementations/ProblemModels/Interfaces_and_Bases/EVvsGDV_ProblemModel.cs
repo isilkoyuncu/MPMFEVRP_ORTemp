@@ -17,16 +17,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
     {
         protected string problemName;
 
-        //protected XCPlex_NodeDuplicatingFormulation EV_TSPSolver;
-        //protected XCPlex_NodeDuplicatingFormulation GDV_TSPSolver;
-
-        protected XCPlex_NodeDuplicatingFormulation_woUvariables EV_TSPSolver_woUvariables;
-        protected XCPlex_NodeDuplicatingFormulation_woUvariables GDV_TSPSolver_woUvariables;
+        protected XCPlexBase EV_TSPSolver;
+        protected XCPlexBase GDV_TSPSolver;
 
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
         public EVvsGDV_ProblemModel() { }
-        public EVvsGDV_ProblemModel(EVvsGDV_Problem problem)
+        public EVvsGDV_ProblemModel(EVvsGDV_Problem problem, XCPlexBase TSPModel)
         {
             pdp = new ProblemDataPackage(problem.PDP);
             problemCharacteristics = problem.ProblemCharacteristics;
@@ -40,16 +37,29 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
 
-            //EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            //GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
-
-            EV_TSPSolver_woUvariables = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            GDV_TSPSolver_woUvariables = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
-
+            CreateTSPSolvers(TSPModel.GetType());
+            
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
         }
-
+        void CreateTSPSolvers(Type TSPModelType)
+        {
+            if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
+            {
+                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+                GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            }
+            else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation))
+            {
+                EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+                GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            }
+            else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation_woUvariables))
+            {
+                EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+                GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            }
+        }
         double GetWorstCaseOFV()
         {
             if (objectiveFunctionType == ObjectiveFunctionTypes.Maximize)
@@ -117,7 +127,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //else//optimal
             //    return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
 
-            XCPlex_NodeDuplicatingFormulation_woUvariables solver_woU = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver_woUvariables : EV_TSPSolver_woUvariables);
+            XCPlex_NodeDuplicatingFormulation_woUvariables solver_woU = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver_woUvariables : EV_TSPSolver);
             solver_woU.Solve_and_PostProcess();
             if (solver_woU.SolutionStatus == XCPlexSolutionStatus.Infeasible)
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);

@@ -22,10 +22,9 @@ namespace MPMFEVRP.Utils
 
             foreach (var xcplexModel in allXCPlexModels)
             {
-                if (xcplexModel.GetMethod("IsTSPModel").Invoke(Activator.CreateInstance(xcplexModel), null).ToString()=="true")
-                    result.Add(xcplexModel.GetMethod("GetName").Invoke(Activator.CreateInstance(xcplexModel), null).ToString());
+                if (xcplexModel.GetMethod("IsTSPModel").Invoke(Activator.CreateInstance(xcplexModel), null).ToString()=="True")
+                    result.Add(xcplexModel.GetMethod("GetModelName").Invoke(Activator.CreateInstance(xcplexModel), null).ToString());
             }
-
             return result;
         }
     }

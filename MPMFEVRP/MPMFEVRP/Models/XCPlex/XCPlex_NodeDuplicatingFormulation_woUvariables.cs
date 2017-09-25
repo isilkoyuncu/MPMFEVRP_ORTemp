@@ -26,6 +26,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         double[] RHS_forCustomerCoverage;
         int numCustomers;
+        public XCPlex_NodeDuplicatingFormulation_woUvariables() { }
         public XCPlex_NodeDuplicatingFormulation_woUvariables(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam){ }
 

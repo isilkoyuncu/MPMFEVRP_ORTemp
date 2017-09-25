@@ -63,8 +63,6 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected List<Type> compatibleSolutions;
         public List<Type> GetCompatibleSolutions() { return compatibleSolutions; }
 
-        //public abstract RouteOptimizationOutcome OptimizeForSingleVehicle(CustomerSet CS);
-
         public abstract VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute = null);
         public abstract RouteOptimizationOutcome RouteOptimize(CustomerSet CS);
         public abstract RouteOptimizationOutcome RouteOptimize(CustomerSet CS, List<Vehicle> vehicles);

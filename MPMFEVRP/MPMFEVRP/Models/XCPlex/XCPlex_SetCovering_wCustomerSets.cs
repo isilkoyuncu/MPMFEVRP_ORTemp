@@ -18,7 +18,7 @@ namespace MPMFEVRP.Models.XCPlex
         int nCustomerSets;
         CustomerSet[] customerSetArray;
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
-
+        public XCPlex_SetCovering_wCustomerSets() { }
         public XCPlex_SetCovering_wCustomerSets(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
         {
             this.theProblemModel = theProblemModel;

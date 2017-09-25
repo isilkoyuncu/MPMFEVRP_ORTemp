@@ -25,7 +25,7 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] T; double[] minValue_T, maxValue_T;
         INumVar[] Delta; double[] minValue_Delta, maxValue_Delta;
         INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
-
+        public XCPlex_NodeDuplicatingFormulation() { }
         public XCPlex_NodeDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam){}
 

@@ -26,7 +26,7 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] T; double[] minValue_T, maxValue_T;
         INumVar[] Delta; double[] minValue_Delta, maxValue_Delta;
         INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
-
+        public XCPlex_ArcDuplicatingFormulation() { }
         public XCPlex_ArcDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam){}
 
