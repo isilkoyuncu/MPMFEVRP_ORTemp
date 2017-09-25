@@ -697,5 +697,14 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return new RouteBasedSolution(GetVehicleSpecificRoutes());
         }
+
+        public override string GetModelName()
+        {
+            return "Arc Duplicating";
+        }
+        public override bool IsTSPModel()
+        {
+            return true;
+        }
     }
 }

@@ -421,6 +421,7 @@ namespace MPMFEVRP.Models.XCPlex
             return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).FixedCost;
         }
 
-
+        public abstract string GetModelName();
+        public abstract bool IsTSPModel();
     }
 }

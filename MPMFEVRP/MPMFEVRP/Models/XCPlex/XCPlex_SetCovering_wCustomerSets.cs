@@ -176,5 +176,13 @@ namespace MPMFEVRP.Models.XCPlex
 
             return outcome;
         }
+        public override string GetModelName()
+        {
+            return "Set Covering";
+        }
+        public override bool IsTSPModel()
+        {
+            return false;
+        }
     }
 }

@@ -612,5 +612,14 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             throw new System.Exception("Flow ended before returning to the depot!");
         }
+
+        public override string GetModelName()
+        {
+            return "Node Duplicating wo U";
+        }
+        public override bool IsTSPModel()
+        {
+            return true;
+        }
     }
 }

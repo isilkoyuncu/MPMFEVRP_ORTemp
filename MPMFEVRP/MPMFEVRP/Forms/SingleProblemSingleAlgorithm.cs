@@ -42,6 +42,10 @@ namespace MPMFEVRP.Forms
             comboBox_algorithms.SelectedIndexChanged += ComboBox_algorithms_SelectedIndexChanged;
             comboBox_algorithms.SelectedIndex = 0;
 
+            comboBox_TSPModel.Items.AddRange(ProblemModelUtil.GetCompatibleProblemModelNames(theProblem).ToArray());
+            comboBox_TSPModel.SelectedIndexChanged += ComboBox_problemModels_SelectedIndexChanged;
+            comboBox_TSPModel.SelectedIndex = 0;
+
             Log("Program started.");
         }
 
@@ -170,6 +174,11 @@ namespace MPMFEVRP.Forms
             new TestInstanceGenerator().ShowDialog();
         }
 
-        
+        private void ComboBox_TSPModel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBox_TSPModel.Items.AddRange(ProblemModelUtil.GetCompatibleProblemModelNames(theProblem).ToArray());
+            comboBox_TSPModel.SelectedIndexChanged += ComboBox_problemModels_SelectedIndexChanged;
+            comboBox_TSPModel.SelectedIndex = 0;
+        }
     }
 }
