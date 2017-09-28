@@ -180,9 +180,5 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "Set Covering";
         }
-        public override bool IsTSPModel()
-        {
-            return false;
-        }
-    }
+   }
 }

@@ -11,7 +11,7 @@ namespace MPMFEVRP.Implementations.ProblemModels
 {
     public class EVvsGDV_MaxProfit_VRP_Model: EVvsGDV_ProblemModel
     {
-        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem, XCPlexBase TSPModel) : base(problem, TSPModel){ }
+        public EVvsGDV_MaxProfit_VRP_Model(EVvsGDV_MaxProfit_VRP problem, Type TSPModelType) : base(problem, TSPModelType) { }
 
         public EVvsGDV_MaxProfit_VRP_Model()
         {

@@ -100,7 +100,7 @@ namespace MPMFEVRP.Utils
             return null;
         }
 
-        public static EVvsGDV_ProblemModel CreateProblemModelByProblem(Type theProblemModelType, IProblem problem, XCPlexBase TSPModel)
+        public static EVvsGDV_ProblemModel CreateProblemModelByProblem(Type theProblemModelType, IProblem problem, Type TSPModelType)
         {
             var allProblemModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
@@ -114,7 +114,7 @@ namespace MPMFEVRP.Utils
             foreach (var problemModel in allProblemModels)
                 if (problemModel == theProblemModelType)
                 {
-                    createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel, problem, TSPModel);
+                    createdProblemModel = (EVvsGDV_ProblemModel)Activator.CreateInstance(problemModel, problem, TSPModelType);
                     if (createdProblemModel.GetNameOfProblemOfModel() == problem.GetName())
                     {
                         return createdProblemModel;

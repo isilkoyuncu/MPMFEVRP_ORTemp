@@ -15,36 +15,34 @@ namespace MPMFEVRP.Utils
 
             var allXCPlexModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(XCPlexBase).IsAssignableFrom(p))
-                .Where(type => typeof(XCPlexBase).IsAssignableFrom(type))
+                .Where(p => typeof(XCPlexVRPBase).IsAssignableFrom(p))
+                .Where(type => typeof(XCPlexVRPBase).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
             foreach (var xcplexModel in allXCPlexModels)
             {
-                if (xcplexModel.GetMethod("IsTSPModel").Invoke(Activator.CreateInstance(xcplexModel), null).ToString()=="True")
-                    result.Add(xcplexModel.GetMethod("GetModelName").Invoke(Activator.CreateInstance(xcplexModel), null).ToString());
+                result.Add(xcplexModel.GetMethod("GetModelName").Invoke(Activator.CreateInstance(xcplexModel), null).ToString());
             }
             return result;
         }
 
-        public static XCPlexBase CreateXCPlexModelByName(String XCPlexModelName)
+        public static Type GetXCPlexModelTypeByName(String XCPlexModelName)
         {
             var allXCPlexModels = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(XCPlexBase).IsAssignableFrom(p))
-                .Where(type => typeof(XCPlexBase).IsAssignableFrom(type))
+                .Where(p => typeof(XCPlexVRPBase).IsAssignableFrom(p))
+                .Where(type => typeof(XCPlexVRPBase).IsAssignableFrom(type))
                 .Where(t => !t.IsAbstract)
                 .ToList();
 
-            XCPlexBase createdXCPlexModel;
-
             foreach (var XCPlexModel in allXCPlexModels)
             {
-                createdXCPlexModel = (XCPlexBase)Activator.CreateInstance(XCPlexModel);
-                if (createdXCPlexModel.GetName() == XCPlexModelName)
+                XCPlexVRPBase createdXCPlexModel = (XCPlexVRPBase)(Activator.CreateInstance(XCPlexModel));
+                string name = createdXCPlexModel.GetModelName();
+                if (createdXCPlexModel.GetModelName() == XCPlexModelName)
                 {
-                    return createdXCPlexModel;
+                    return createdXCPlexModel.GetType();
                 }
             }
 

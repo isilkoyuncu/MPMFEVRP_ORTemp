@@ -13,7 +13,7 @@ namespace MPMFEVRP.Models.XCPlex
 {
     // TODO apply all the changes that are done in node based formulation!!!
     //TODO get all sites here and then use the mapping we coded
-    public class XCPlex_ArcDuplicatingFormulation : XCPlexBase
+    public class XCPlex_ArcDuplicatingFormulation : XCPlexVRPBase
     {
         int numNonESNodes;
         int numCustomers, numES;
@@ -701,10 +701,6 @@ namespace MPMFEVRP.Models.XCPlex
         public override string GetModelName()
         {
             return "Arc Duplicating";
-        }
-        public override bool IsTSPModel()
-        {
-            return true;
         }
     }
 }

@@ -27,7 +27,8 @@ namespace MPMFEVRPTests.TestUtility_DefaultGetters
 
         public static EVvsGDV_MaxProfit_VRP_Model GetDefaultProblemModel(EVvsGDV_MaxProfit_VRP problem)
         {
-            return new EVvsGDV_MaxProfit_VRP_Model(problem);
+            throw new NotImplementedException();
+            //return new EVvsGDV_MaxProfit_VRP_Model(problem);
         }
 
         public static XCPlexParameters GetXcplexParam()

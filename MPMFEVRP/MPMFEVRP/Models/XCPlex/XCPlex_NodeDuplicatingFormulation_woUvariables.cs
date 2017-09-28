@@ -1,5 +1,4 @@
 ﻿using ILOG.Concert;
-using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
@@ -11,7 +10,7 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    public class XCPlex_NodeDuplicatingFormulation_woUvariables : XCPlexBase
+    public class XCPlex_NodeDuplicatingFormulation_woUvariables : XCPlexVRPBase
     {
         int numDuplicatedNodes;
 
@@ -617,10 +616,6 @@ namespace MPMFEVRP.Models.XCPlex
         public override string GetModelName()
         {
             return "Node Duplicating wo U";
-        }
-        public override bool IsTSPModel()
-        {
-            return true;
         }
     }
 }

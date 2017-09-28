@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    public class XCPlex_NodeDuplicatingFormulation : XCPlexBase
+    public class XCPlex_NodeDuplicatingFormulation : XCPlexVRPBase
     {
         int numDuplicatedNodes;
           
@@ -622,10 +622,6 @@ namespace MPMFEVRP.Models.XCPlex
         public override string GetModelName()
         {
             return "Node Duplicating";
-        }
-        public override bool IsTSPModel()
-        {
-            return true;
         }
     }
 }

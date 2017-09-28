@@ -17,13 +17,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
     {
         protected string problemName;
 
-        protected XCPlexBase EV_TSPSolver;
-        protected XCPlexBase GDV_TSPSolver;
+        protected XCPlexVRPBase EV_TSPSolver;
+        protected XCPlexVRPBase GDV_TSPSolver;
 
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
         public EVvsGDV_ProblemModel() { }
-        public EVvsGDV_ProblemModel(EVvsGDV_Problem problem, XCPlexBase TSPModel)
+        public EVvsGDV_ProblemModel(EVvsGDV_Problem problem, Type TSPModelType)
         {
             pdp = new ProblemDataPackage(problem.PDP);
             problemCharacteristics = problem.ProblemCharacteristics;
@@ -37,7 +37,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
 
-            CreateTSPSolvers(TSPModel.GetType());
+            CreateTSPSolvers(TSPModelType);
             
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
@@ -127,7 +127,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //else//optimal
             //    return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
 
-            XCPlexBase solver_woU = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
+            XCPlexVRPBase solver_woU = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
             solver_woU.Solve_and_PostProcess();
             if (solver_woU.SolutionStatus == XCPlexSolutionStatus.Infeasible)
                 return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);

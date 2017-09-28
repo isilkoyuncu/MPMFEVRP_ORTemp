@@ -30,7 +30,7 @@ namespace MPMFEVRP.Forms
         EVvsGDV_ProblemModel theProblemModel;
         IAlgorithm theAlgorithm;
         //ISolution theSolution;
-        XCPlexBase TSPModel;
+        Type TSPModelType;
         public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();
@@ -130,7 +130,8 @@ namespace MPMFEVRP.Forms
         {
             try
             {
-                theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem, TSPModel);
+                TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_TSPModel.SelectedItem.ToString());
+                theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem, TSPModelType);
                 UpdateProblemLabels();
                 Log("Problem model is created.");
                 groupBox_algorithms.Enabled = true;
@@ -178,7 +179,7 @@ namespace MPMFEVRP.Forms
 
         private void ComboBox_TSPModel_SelectedIndexChanged(object sender, EventArgs e)
         {
-            TSPModel = XCPlexUtil.CreateXCPlexModelByName(comboBox_algorithms.SelectedItem.ToString());
+            TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_TSPModel.SelectedItem.ToString());
         }
     }
 }
