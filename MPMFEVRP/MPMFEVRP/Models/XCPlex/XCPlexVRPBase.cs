@@ -23,12 +23,9 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlexVRPBase(){ }
 
-        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam):base(xCplexParam)
+        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam):base(theProblemModel, xCplexParam)
         {
-            this.theProblemModel = theProblemModel;
-            numVehCategories = theProblemModel.VRD.NumVehicleCategories;
-            if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlexBase number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
-            rechargingDuration_status = theProblemModel.RechargingDuration_status;
+                        rechargingDuration_status = theProblemModel.RechargingDuration_status;
         }
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();

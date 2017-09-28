@@ -43,9 +43,17 @@ namespace MPMFEVRP.Models.XCPlex
 
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
+        protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
+        protected int numVehCategories;
+
         public XCPlexBase() { }
-        public XCPlexBase(XCPlexParameters xCplexParam)
+        public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
         {
+            this.theProblemModel = theProblemModel;
+
+            numVehCategories = theProblemModel.VRD.NumVehicleCategories;
+            if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlexBase number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
+
             this.xCplexParam = xCplexParam;
             XCPlexRelaxation relaxation;
             relaxation = xCplexParam.Relaxation;
