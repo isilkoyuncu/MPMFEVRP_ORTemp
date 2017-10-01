@@ -13,21 +13,24 @@ namespace MPMFEVRP.Models.XCPlex
     public class XCPlex_NodeDuplicatingFormulation_woUvariables : XCPlexVRPBase
     {
         int numDuplicatedNodes;
-
-        Site theDepot;
-
-        int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;//There is a single depot and it is always node #0
-
-        INumVar[][][] X; double[][][] X_LB, X_UB;
-        INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
-        INumVar[] Delta; double[] minValue_Delta, maxValue_Delta; double[][] BigDelta;
-        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon; double[][] BigEpsilon;
-
-        double[] RHS_forCustomerCoverage;
         int numCustomers;
-        public XCPlex_NodeDuplicatingFormulation_woUvariables() { }
+
+        int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;
+        Site theDepot; //There is a single depot
+
+        double[] RHS_forCustomerCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
+
+        //DVs, upper and lower bounds
+        INumVar[][][] X; double[][][] X_LB, X_UB;
+
+        //Auxiliaries, upper and lower bounds
+        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon; double[][] BigEpsilon;
+        INumVar[] Delta; double[] minValue_Delta, maxValue_Delta; double[][] BigDelta;
+        INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
+
+        public XCPlex_NodeDuplicatingFormulation_woUvariables() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woUvariables(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam){ }
+            : base(theProblemModel, xCplexParam){ } //XCPlex VRP Constructor
 
         protected override void DefineDecisionVariables()
         {
@@ -36,12 +39,12 @@ namespace MPMFEVRP.Models.XCPlex
             SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
-            //dvs: X_ijv and U_jv
+            //dvs: X_ijv
             AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numDuplicatedNodes, numDuplicatedNodes, numVehCategories, out X);
-            //auxiliaries (T_j, Delta_j, Epsilon_j)
-            AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numDuplicatedNodes, out T);
-            AddOneDimensionalDecisionVariable("Delta", minValue_Delta, maxValue_Delta, NumVarType.Float, numDuplicatedNodes, out Delta);
+            //auxiliaries (Epsilon_j, Delta_j, T_j)
             AddOneDimensionalDecisionVariable("Epsilon", minValue_Epsilon, maxValue_Epsilon, NumVarType.Float, numDuplicatedNodes, out Epsilon);
+            AddOneDimensionalDecisionVariable("Delta", minValue_Delta, maxValue_Delta, NumVarType.Float, numDuplicatedNodes, out Delta);
+            AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numDuplicatedNodes, out T);
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
@@ -136,12 +139,13 @@ namespace MPMFEVRP.Models.XCPlex
         {
             X_LB = new double[numDuplicatedNodes][][];
             X_UB = new double[numDuplicatedNodes][][];
-            minValue_T = new double[numDuplicatedNodes];
-            maxValue_T = new double[numDuplicatedNodes];
-            minValue_Delta = new double[numDuplicatedNodes];
-            maxValue_Delta = new double[numDuplicatedNodes];
+
             minValue_Epsilon = new double[numDuplicatedNodes];
             maxValue_Epsilon = new double[numDuplicatedNodes];
+            minValue_Delta = new double[numDuplicatedNodes];
+            maxValue_Delta = new double[numDuplicatedNodes];
+            minValue_T = new double[numDuplicatedNodes];
+            maxValue_T = new double[numDuplicatedNodes];
 
             RHS_forCustomerCoverage = new double[numDuplicatedNodes];
 
@@ -160,22 +164,24 @@ namespace MPMFEVRP.Models.XCPlex
                         X_UB[i][j][v] = 1.0;
                     }
 
-                    minValue_T[j] = TravelTime(theDepot, s);
-                    maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
-                    if (s.SiteType == SiteTypes.Customer || theProblemModel.RechargingDuration_status==RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
-                        maxValue_T[j] -= ServiceDuration(s);
-
-                    //TODO Fine-tune the min and max values of delta
-                    minValue_Delta[j] = 0.0;
-                    maxValue_Delta[j] = BatteryCapacity(VehicleCategories.EV); //TODO this has to be double indexed since the max energy gain depends on the vehicle as well.
-
+                    //UB - LB on Epsilon
                     minValue_Epsilon[j] = 0.0;
 
-                    if (s.SiteType == SiteTypes.Customer)//TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
-                        maxValue_Epsilon[j] = Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
-                    else
-                        maxValue_Epsilon[j] = BatteryCapacity(VehicleCategories.EV); //TODO this has to be double indexed since the max energy gain depends on the vehicle as well.
+                    if (s.SiteType == SiteTypes.Customer)
+                        maxValue_Epsilon[j] = Math.Min(BatteryCapacity(VehicleCategories.EV), s.ServiceDuration * RechargingRate(s)); //Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
+                    else //TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
+                        maxValue_Epsilon[j] = BatteryCapacity(VehicleCategories.EV); //TODO fine tune this. It needs to be the same as the paper.
 
+                    //TODO Fine-tune the min and max values of delta using label setting algorithm
+                    minValue_Delta[j] = 0.0;
+                    maxValue_Delta[j] = BatteryCapacity(VehicleCategories.EV);
+
+                    minValue_T[j] = TravelTime(theDepot, s);
+                    maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
+                    if (s.SiteType == SiteTypes.Customer)
+                        maxValue_T[j] -= ServiceDuration(s);
+                    else if (s.SiteType == SiteTypes.ExternalStation && theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                        maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
                 }
                 RHS_forCustomerCoverage[i] = 1.0;
             }                
