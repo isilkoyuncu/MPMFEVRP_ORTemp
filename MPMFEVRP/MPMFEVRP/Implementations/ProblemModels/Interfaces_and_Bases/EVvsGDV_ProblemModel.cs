@@ -325,7 +325,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                         outcome += objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
                     }
                     break;
-                case ObjectiveFunctions.MinimizeCost:
+                case ObjectiveFunctions.MinimizeTotalCost:
                     foreach (VehicleCategories vc in vcList)
                     {
                         outcome += objectiveFunctionCoefficientsPackage.GetFixedCostPerVehicle(vc) * OFIDP.GetNumberOfVehiclesUsed(vc);

@@ -208,11 +208,11 @@ namespace MPMFEVRP.Models.XCPlex
             return
                 "for (int i = 0; i < numNodes; i++)\nfor (int j = 0; j < numNodes; j++)\nfor (int v = 0; v < fromProblem.NumVehicleCategories; v++)\nX[i][j][v]"
                 + "then\n"
-                + "for (int j = 0; j < numNodes; j++)\nT[j]\n"
+                + "for (int j = 0; j < numNodes; j++)\nepsilon[j]\n"
                 + "then\n"
                 + "for (int j = 0; j < numNodes; j++)\ndelta[j]\n"
                 + "then\n"
-                + "for (int j = 0; j < numNodes; j++)\nepsilon[j]\n";
+                + "for (int j = 0; j < numNodes; j++)\nT[j]\n";
         }
         protected override void AddTheObjectiveFunction()
         {
@@ -253,7 +253,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            //Second term: distance-based costs
+            //First term: distance-based costs
             for (int i = 0; i < numDuplicatedNodes; i++)
             {
                 Site sFrom = preprocessedSites[i];
@@ -264,11 +264,14 @@ namespace MPMFEVRP.Models.XCPlex
                         objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
                 }
             }
-            //Third term: vehicle fixed costs
-            for (int j = 0; j < numDuplicatedNodes; j++)
-                for (int v = 0; v < numVehCategories; v++)
-                    objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
-            //Now adding the objective function to the model
+            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeTotalCost)
+            {
+                //Second term: vehicle fixed costs
+                for (int j = 0; j < numDuplicatedNodes; j++)
+                    for (int v = 0; v < numVehCategories; v++)
+                        objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+
+            }//Now adding the objective function to the model
             AddMinimize(objFunction);
         }
         protected override void AddAllConstraints()
