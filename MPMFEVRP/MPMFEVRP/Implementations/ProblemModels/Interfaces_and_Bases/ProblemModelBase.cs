@@ -37,6 +37,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         public ContextRelatedData CRD { get { return pdp.CRD; } }
 
         protected int[] numVehicles; public int[] NumVehicles { get { return numVehicles; } set { numVehicles = value; } }
+        protected int lambda; public int Lambda { get { return lambda; } set { lambda = value; } }
 
         protected bool archiveAllCustomerSets; public bool ArchiveAllCustomerSets { get { return archiveAllCustomerSets; } }
         protected CustomerSetList customerSetArchive; public CustomerSetList CustomerSetArchive { get { return customerSetArchive; } }

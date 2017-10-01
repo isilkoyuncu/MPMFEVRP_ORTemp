@@ -36,6 +36,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             coverConstraintType = problem.CoverConstraintType;
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
+            lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
 
             CreateTSPSolvers(TSPModelType);
             

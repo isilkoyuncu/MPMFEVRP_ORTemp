@@ -51,7 +51,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             Site[] originalSites = theProblemModel.SRD.GetAllSitesArray();
             int numCustomers = theProblemModel.SRD.NumCustomers;
-            int numDuplicationsForeachES = theProblemModel.CRD.Lambda * theProblemModel.NumVehicles[0];
+            int numDuplicationsForeachES = theProblemModel.Lambda * theProblemModel.NumVehicles[0];
             numDuplicatedNodes = 1 + (numDuplicationsForeachES * theProblemModel.SRD.NumES) + numCustomers;
             preprocessedSites = new Site[numDuplicatedNodes];
             depots = new List<Site>();

@@ -29,7 +29,8 @@
         PRB_NUM_GDV,
         PRB_USE_EXACTLY_NUM_EV_AVAILABLE,
         PRB_USE_EXACTLY_NUM_GDV_AVAILABLE,
-        PRB_RECHARGING_ASSUMPTION
+        PRB_RECHARGING_ASSUMPTION,
+        PRB_LAMBDA
 
         //TODO put solution statistics, things you need select from the form in order to show them to user.
     }
