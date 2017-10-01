@@ -24,7 +24,7 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[][][] X; double[][][] X_LB, X_UB;
 
         //Auxiliaries, upper and lower bounds
-        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon; double[][] BigEpsilon;
+        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
         INumVar[] Delta; double[] minValue_Delta, maxValue_Delta; double[][] BigDelta;
         INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
 
@@ -188,21 +188,18 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void SetBigMvalues()
         {
-            BigT = new double[numDuplicatedNodes][];
             BigDelta = new double[numDuplicatedNodes][];
-            BigEpsilon = new double[numDuplicatedNodes][];
+            BigT = new double[numDuplicatedNodes][];
 
             for (int i = 0; i < numDuplicatedNodes; i++)
             {
-                BigT[i] = new double[numDuplicatedNodes];
                 BigDelta[i] = new double[numDuplicatedNodes];
-                BigEpsilon[i] = new double[numDuplicatedNodes];
+                BigT[i] = new double[numDuplicatedNodes];
 
                 for (int j = 0; j < numDuplicatedNodes; j++)
                 {
+                    BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] -minValue_Epsilon[i];
                     BigT[i][j] = maxValue_T[i] - minValue_T[j];
-                    BigDelta[i][j] = maxValue_Delta[i] - minValue_Delta[j];
-                    BigEpsilon[i][j] = maxValue_Epsilon[i] - minValue_Epsilon[j];
                 }
             }
         }
