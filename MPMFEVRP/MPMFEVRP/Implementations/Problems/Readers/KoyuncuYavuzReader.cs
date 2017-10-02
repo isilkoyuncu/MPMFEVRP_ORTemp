@@ -2,6 +2,7 @@
 using MPMFEVRP.Interfaces;
 using MPMFEVRP.Utils;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MPMFEVRP.Implementations.Problems.Readers
@@ -85,7 +86,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         {
             string[] allRows = wholeFile.Split(new char[] { '\n' });
             int blankRowPosition = 0;
-            while (allRows[blankRowPosition] != "\r")
+            while (!RowIsBlank(allRows[blankRowPosition]))
                 blankRowPosition++;
 
             int nTabularRows = blankRowPosition - 1;
@@ -100,7 +101,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             rechargingRate = new double[nTabularRows];
             prize = new double[nTabularRows][];
 
-        char[] cellSeparator = new char[] { '\t', '\r'};
+            char[] cellSeparator = new char[] { '\t', '\r' };
             string[] cellsInCurrentRow;
             for (int r = 1; r <= nTabularRows; r++)
             {
@@ -126,7 +127,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             PopulateSiteArray();
 
             int blankRowPosition2 = blankRowPosition+1;
-            while (allRows[blankRowPosition2] != "\r")
+            while (!RowIsBlank(allRows[blankRowPosition2]))
                 blankRowPosition2++;
             int nTabularRows2 = blankRowPosition2 - 1;
             vehID = new string[nTabularRows2- nTabularRows - 2];
@@ -177,7 +178,11 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 }
             }
         }
-
+        bool RowIsBlank(string theRow)
+        {
+            List<string> endOfLineStrings = new List<string>() { "\n", "\r", "\r\n" };
+            return (endOfLineStrings.Contains(theRow.Replace("\t", "").Replace(" ", "")));
+        }
 
         public string GetRecommendedOutputFileFullName()
         {
