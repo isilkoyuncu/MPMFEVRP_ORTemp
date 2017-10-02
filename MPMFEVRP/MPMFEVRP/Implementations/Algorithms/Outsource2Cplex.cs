@@ -20,7 +20,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating }, XCPlex_Formulation.ArcDuplicating, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU }, XCPlex_Formulation.NodeDuplicatingwoU, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             //algorithmParameters.AddParameter(new Parameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
         }
@@ -55,7 +55,14 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case XCPlex_Formulation.ArcDuplicating:
                     CPlexExtender = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
+                case XCPlex_Formulation.NodeDuplicatingwoU:
+                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
+                    //CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
+                    break;
+                case XCPlex_Formulation.ArcDuplicatingwoU:
+                    throw new NotImplementedException("ArcDuplicatingwoU still needs to be implemented.");
             }
+
             //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString()+"model.lp");
             CPlexExtender.Solve_and_PostProcess();
         }

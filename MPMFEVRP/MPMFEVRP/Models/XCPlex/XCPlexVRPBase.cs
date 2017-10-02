@@ -17,15 +17,14 @@ namespace MPMFEVRP.Models.XCPlex
         protected List<Site> depots;
         protected List<Site> customers;
         protected List<Site> externalStations;//Preprocessed, Ready-to-use
-        protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
-        protected int numVehCategories;
+        
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
         public XCPlexVRPBase(){ }
 
-        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam):base(theProblemModel, xCplexParam)
+        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam)
         {
-                        rechargingDuration_status = theProblemModel.RechargingDuration_status;
+            rechargingDuration_status = theProblemModel.RechargingDuration_status;
         }
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();

@@ -69,12 +69,14 @@ namespace MPMFEVRP.Implementations.ProblemModels
             ////TODO check for any infeasibility and return false as soon as one is found!
             //return outcome;
         }
-        public override double CalculateObjectiveFunctionValue(ISolution solution) //TODO unit test this also check the structure
-        {
-            double totalVehicleFixedCost = solution.OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.EV) * VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost + solution.OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.GDV) * VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost;
-            double totalVariableCost = solution.OFIDP.GetVMT(VehicleCategories.EV) * VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile + solution.OFIDP.GetVMT(VehicleCategories.GDV) * VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile;
-            return solution.OFIDP.GetTotalPrizeCollected() - totalVehicleFixedCost - totalVariableCost;
-        }
+
+        // TODO make sure that we do not need the following method here. Since the EV vs GDV problem model can handle all different objective function types it is better to give that task to it.
+        //public override double CalculateObjectiveFunctionValue(ISolution solution) //TODO unit test this also check the structure
+        //{
+        //    double totalVehicleFixedCost = solution.OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.EV) * VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost + solution.OFIDP.GetNumberOfVehiclesUsed(VehicleCategories.GDV) * VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost;
+        //    double totalVariableCost = solution.OFIDP.GetVMT(VehicleCategories.EV) * VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile + solution.OFIDP.GetVMT(VehicleCategories.GDV) * VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile;
+        //    return solution.OFIDP.GetTotalPrizeCollected() - totalVehicleFixedCost - totalVariableCost;
+        //}
 
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {

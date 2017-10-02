@@ -47,7 +47,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
                     {
                         vcArray[v] = reader.GetVehicleArray()[v].Category;
                         if (vcArray[v] == VehicleCategories.EV)
-                            energyConsumption[i, j, v] = distance[i, j] / reader.GetVehicleArray()[v].ConsumptionRate;
+                            energyConsumption[i, j, v] = distance[i, j] * reader.GetVehicleArray()[v].ConsumptionRate;
                         else
                             energyConsumption[i, j, v] = 0.0;
                     }

@@ -21,9 +21,9 @@ namespace MPMFEVRP.Implementations.ProblemModels
         public EMH_ProblemModel(EMH_Problem problem, Type TSPModelType) : base(problem, TSPModelType)
         {
         }
-        public void ModifyNumVehicles() //TODO this can be used when there is onl EVs no GDVs.
+        public void ModifyNumVehicles() //TODO this can be used when there is only EVs no GDVs.
         {
-            NumVehicles[1] = 0;
+            //NumVehicles[1] = 0;
         }
 
         public override string GetDescription()
@@ -75,11 +75,13 @@ namespace MPMFEVRP.Implementations.ProblemModels
             //return outcome;
         }
 
-        public override double CalculateObjectiveFunctionValue(ISolution solution) //TODO unit test this also check the structure
-        {
-            return (VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.EV)
-                + VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.GDV));
-        }
+        // TODO delete the following if evvsgdvprobmodel handles this job.
+
+        //public override double CalculateObjectiveFunctionValue(ISolution solution) //TODO unit test this also check the structure
+        //{
+        //    return (VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.EV)
+        //        + VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.GDV));
+        //}
 
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {

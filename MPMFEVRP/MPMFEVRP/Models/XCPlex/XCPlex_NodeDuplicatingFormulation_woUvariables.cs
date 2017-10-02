@@ -198,7 +198,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                 for (int j = 0; j < numDuplicatedNodes; j++)
                 {
-                    BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] -minValue_Epsilon[i];
+                    BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] - minValue_Epsilon[i];
                     BigT[i][j] = maxValue_T[i] - minValue_T[j];
                 }
             }
@@ -279,49 +279,82 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerCustomerNode();//1
-            AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//2
-            AddConstraint_MaxNumberOfVehiclesPerCategory();//3
-            AddConstraint_NumberOfEvVisitsPerESNode();//4
-            AddConstraint_NoGDVVisitToESNodes();//5
-            AddConstraint_TimeRegulationFollowingACustomerVisit();//6
-            AddConstraint_TimeRegulationFollowingAnESVisit();//7
-            AddConstraint_SOCRegulationFollowingNondepot();//8
-            AddConstraint_SOCRegulationFollowingDepot();//9
-            AddConstraint_MaxRechargeAtCustomerNode();//10
-            AddConstraint_MaxDepartureSOCFromCustomerNode();//11
-            AddConstraint_DepartureSOCFromESNode();//12
-            if(xCplexParam.TSP)
-            {
+            AddConstraint_NumberOfEvVisitsPerESNode();//2
+            AddConstraint_NoGDVVisitToESNodes();//3
+            AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//4
+            AddConstraint_MaxNumberOfVehiclesPerCategory();//5
+            AddConstraint_MaxEnergyGainAtNonDepotSite();//6
+            AddConstraint_DepartureSOCFromCustomerNode();//7
+            AddConstraint_DepartureSOCFromESNode();//8
+            AddConstraint_SOCRegulationFollowingNondepot();//9
+            AddConstraint_SOCRegulationFollowingDepot();//10
+            AddConstraint_TimeRegulationFollowingACustomerVisit();//11
+            AddConstraint_TimeRegulationFollowingAnESVisit();//12
 
-            }
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
 
         void AddConstraint_NumberOfVisitsPerCustomerNode()//1
         {
-            for (int j = firstCustomerNodeIndex; j < lastCustomerNodeIndex; j++)
+            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfVehiclesVisitingTheCustomerNode = LinearNumExpr();
                 for (int i = 0; i < numDuplicatedNodes; i++)
                     for (int v = 0; v < numVehCategories; v++)
-                    NumberOfVehiclesVisitingTheCustomerNode.AddTerm(1.0, X[i][j][v]);
+                        NumberOfVehiclesVisitingTheCustomerNode.AddTerm(1.0, X[i][j][v]);
 
                 string constraint_name;
 
-                if ((theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce) && !xCplexParam.TSP)
+                if (xCplexParam.TSP)
                 {
-                    constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
-                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, 1.0, constraint_name));
+                    constraint_name = "The_customer_node_" + j.ToString()+"_must_be_visited";
+                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, RHS_forCustomerCoverage[j], constraint_name));
                 }
                 else
                 {
-                    constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
-                    allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheCustomerNode, RHS_forCustomerCoverage[j], constraint_name));
+                    if (theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
+                    {
+                        constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
+                        allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, 1.0, constraint_name));
+                    }
+                    else
+                    {
+                        constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
+                        allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheCustomerNode, 1.0, constraint_name));
+                    }
                 }
             }
         }
-        void AddConstraint_IncomingXTotalEqualsOutgoingXTotal()//2
+        void AddConstraint_NumberOfEvVisitsPerESNode()//2
+        {
+            for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
+            {
+                ILinearNumExpr NumberOfEvVisitToTheESNode = LinearNumExpr();
+                for (int i = 0; i < numDuplicatedNodes; i++)
+                    for (int v = 0; v < numVehCategories; v++)
+                        if (vehicleCategories[v] == VehicleCategories.EV)
+                            NumberOfEvVisitToTheESNode.AddTerm(1.0, X[i][j][v]);
+
+                string constraint_name = "At_most_one_EV_can_visit_the_ES_node_" + j.ToString();
+                allConstraints_list.Add(AddLe(NumberOfEvVisitToTheESNode, 1.0, constraint_name));
+            }
+        }
+        void AddConstraint_NoGDVVisitToESNodes()//3
+        {
+            for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
+            {
+                ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
+                for (int i = 0; i < numDuplicatedNodes; i++)
+                    for (int v = 0; v < numVehCategories; v++)
+                        if (vehicleCategories[v] == VehicleCategories.GDV)
+                            NumberOfGDVsVisitingTheNode.AddTerm(1.0, X[i][j][v]);
+
+                string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
+                allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
+            }
+        }
+        void AddConstraint_IncomingXTotalEqualsOutgoingXTotal()//4
         {
             for (int j = 0; j < numDuplicatedNodes; j++)
                 for (int v = 0; v < numVehCategories; v++)
@@ -335,7 +368,7 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddEq(IncomingXTotalMinusOutgoingXTotal, 0.0, constraint_name));
                 }
         }
-        void AddConstraint_MaxNumberOfVehiclesPerCategory()//3
+        void AddConstraint_MaxNumberOfVehiclesPerCategory()//5
         {
             int[] numVehicles;
             if (xCplexParam.TSP)
@@ -365,82 +398,58 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
             }
         }
-        void AddConstraint_NumberOfEvVisitsPerESNode()//4
+        void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
         {
-            for (int j = firstESNodeIndex; j < lastESNodeIndex; j++)
+            for (int j = 1; j < numDuplicatedNodes; j++)
             {
-                ILinearNumExpr NumberOfEvVisitToTheESNode = LinearNumExpr();
+                ILinearNumExpr EnergyGainAtNonDepotSite = LinearNumExpr();
+                EnergyGainAtNonDepotSite.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
                     for (int v = 0; v < numVehCategories; v++)
                         if (vehicleCategories[v] == VehicleCategories.EV)
-                            NumberOfEvVisitToTheESNode.AddTerm(1.0, X[i][j][v]);
-
-                string constraint_name = "At_most_one_EV_can_visit_the_ES_node_" + j.ToString();
-                allConstraints_list.Add(AddLe(NumberOfEvVisitToTheESNode, 1.0, constraint_name)); 
+                            EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][v]);
+                string constraint_name = "Max_Energy_Gain_At_NonDepot_Site_" + j.ToString();
+                allConstraints_list.Add(AddLe(EnergyGainAtNonDepotSite, 0.0, constraint_name));
             }
         }
-        void AddConstraint_NoGDVVisitToESNodes()//5
+        void AddConstraint_DepartureSOCFromCustomerNode()//7
+        {
+            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
+            {
+                ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
+                DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
+                DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
+                for (int i = 0; i < numDuplicatedNodes; i++)
+                    for (int v = 0; v < numVehCategories; v++)
+                        if (vehicleCategories[v] == VehicleCategories.EV)
+                            DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][v]);
+                string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
+                allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, minValue_Delta[j], constraint_name));
+            }
+        }
+        void AddConstraint_DepartureSOCFromESNode()//8
         {
             for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
             {
-                ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
+                ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
+                DepartureSOCFromES.AddTerm(1.0, Delta[j]);
+                DepartureSOCFromES.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
                     for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.GDV)
-                            NumberOfGDVsVisitingTheNode.AddTerm(1.0, X[i][j][v]);
-                string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
-                allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
-            }
-        }
-        void AddConstraint_TimeRegulationFollowingACustomerVisit()//6
-        {
-            for (int i = firstCustomerNodeIndex; i <= lastCustomerNodeIndex; i++)
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                        if (vehicleCategories[v] == VehicleCategories.EV)
+                            DepartureSOCFromES.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][v]);
+                string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
+                if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
                 {
-                    Site sFrom = preprocessedSites[i];
-                    Site sTo = preprocessedSites[j];
-                    ILinearNumExpr TimeDifference = LinearNumExpr();
-                    TimeDifference.AddTerm(1.0, T[j]);
-                    TimeDifference.AddTerm(-1.0, T[i]);
-                    for (int v = 0; v < numVehCategories; v++)
-                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, sTo) + theProblemModel.CRD.TMax), X[i][j][v]); //bigtij
-                    string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * theProblemModel.CRD.TMax, constraint_name));
+                    allConstraints_list.Add(AddLe(DepartureSOCFromES, minValue_Delta[j], constraint_name));
                 }
-        }
-        void AddConstraint_TimeRegulationFollowingAnESVisit()//7 
-        {
-            for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
-            {
-                Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                else
                 {
-                    Site sTo = preprocessedSites[j];
-                    ILinearNumExpr TimeDifference = LinearNumExpr();
-                    TimeDifference.AddTerm(1.0, T[j]);
-                    TimeDifference.AddTerm(-1.0, T[i]);
-                    
-                    // Here we decide whether recharging duration is fixed or depends on the arrival SOC
-                    if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
-                    {
-                        for (int v = 0; v < numVehCategories; v++)
-                            TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][v]);
-                        // If the recharging duration is fixed, then it is enough for RHS to be Tmax 
-                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
-                    }
-                    else
-                    {
-                        throw new NotImplementedException("Anything other than RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full is not finished");
-                        // If the recharging duration depends on the arrival SOC, then we need to add the possible maximum duration to the RHS
-                        TimeDifference.AddTerm(-1.0 / RechargingRate(sFrom), Delta[i]);
-                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigT[i][j] + 1.0 / RechargingRate(sFrom)), constraint_name));
-                    }
+                    allConstraints_list.Add(AddEq(DepartureSOCFromES, minValue_Delta[j], constraint_name));
                 }
             }
         }
-        void AddConstraint_SOCRegulationFollowingNondepot()//8
+        void AddConstraint_SOCRegulationFollowingNondepot()//9
         {
             for (int i = 1; i < numDuplicatedNodes; i++)
             {
@@ -460,7 +469,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void AddConstraint_SOCRegulationFollowingDepot()//9
+        void AddConstraint_SOCRegulationFollowingDepot()//10
         {
             for (int j = 0; j < numDuplicatedNodes; j++)
             {
@@ -474,60 +483,69 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddLe(SOCDifference, BatteryCapacity(VehicleCategories.EV), constraint_name));
             }
         }
-        void AddConstraint_MaxRechargeAtCustomerNode()//10
+        void AddConstraint_TimeRegulationFollowingACustomerVisit()//11
         {
-            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
-            {
-                ILinearNumExpr RechargeAtCustomer = LinearNumExpr();
-                RechargeAtCustomer.AddTerm(1.0, Epsilon[j]);
-                for(int i=0;i<numDuplicatedNodes;i++)
-                for (int v = 0; v < numVehCategories; v++)
-                    if (vehicleCategories[v] == VehicleCategories.EV)
-                        RechargeAtCustomer.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][v]);
-                string constraint_name = "Max_Recharge_At_Customer_" + j.ToString();
-                allConstraints_list.Add(AddLe(RechargeAtCustomer, 0.0, constraint_name));
-            }
-        }
-        void AddConstraint_MaxDepartureSOCFromCustomerNode()//11
-        {
-            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
-            {
-                ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
-                DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
-                DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
-                for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            DepartureSOCFromCustomer.AddTerm(-1.0 * BatteryCapacity(VehicleCategories.EV), X[i][j][v]);
-                string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
-                allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, 0.0, constraint_name));
-            }
-        }
-        void AddConstraint_DepartureSOCFromESNode()//12
-        {
-            for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-            {
-                ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
-                DepartureSOCFromES.AddTerm(1.0, Delta[j]);
-                DepartureSOCFromES.AddTerm(1.0, Epsilon[j]);
-                for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            DepartureSOCFromES.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][v]);
-                string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
-                if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
+            for (int i = firstCustomerNodeIndex; i <= lastCustomerNodeIndex; i++)
+                for (int j = 1; j < numDuplicatedNodes; j++)
                 {
-                    allConstraints_list.Add(AddLe(DepartureSOCFromES, 0.0, constraint_name));
+                    Site sFrom = preprocessedSites[i];
+                    Site sTo = preprocessedSites[j];
+                    ILinearNumExpr TimeDifference = LinearNumExpr();
+                    TimeDifference.AddTerm(1.0, T[j]);
+                    TimeDifference.AddTerm(-1.0, T[i]);
+                    for (int v = 0; v < numVehCategories; v++)
+                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][v]);
+                    string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
+                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                 }
-                else
+        }
+        void AddConstraint_TimeRegulationFollowingAnESVisit()//12 
+        {
+            for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
+            {
+                Site sFrom = preprocessedSites[i];
+                for (int j = 0; j < numDuplicatedNodes; j++)
                 {
-                    allConstraints_list.Add(AddEq(DepartureSOCFromES, 0.0, constraint_name));
+                    Site sTo = preprocessedSites[j];
+                    ILinearNumExpr TimeDifference = LinearNumExpr();
+                    TimeDifference.AddTerm(1.0, T[j]);
+                    TimeDifference.AddTerm(-1.0, T[i]);
+
+                    // Here we decide whether recharging duration is fixed or depends on the arrival SOC
+                    if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                    {
+                        for (int v = 0; v < numVehCategories; v++)
+                            TimeDifference.AddTerm(-1.0 * ((BatteryCapacity(VehicleCategories.EV)/RechargingRate(sFrom)) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][v]);
+                        // If the recharging duration is fixed, then it is enough for RHS to be Tmax 
+                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("Anything other than RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full is not finished");
+                        // If the recharging duration depends on the arrival SOC, then we need to add the possible maximum duration to the RHS
+                        TimeDifference.AddTerm(-1.0 / RechargingRate(sFrom), Delta[i]);
+                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigT[i][j] + 1.0 / RechargingRate(sFrom)), constraint_name));
+                    }
                 }
             }
         }
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
+            List<string> activeX = new List<string>();
+            List<string> allX = new List<string>();
+
+            for (int i = 0; i < numDuplicatedNodes; i++)
+                for (int j = 0; j < numDuplicatedNodes; j++)
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        allX.Add(preprocessedSites[i].ID + "," + preprocessedSites[j].ID + "," + v.ToString() + "->" + GetValue(X[i][j][v]).ToString());
+                        if (GetValue(X[i][j][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                            activeX.Add(preprocessedSites[i].ID + "," + preprocessedSites[j].ID + "," + v.ToString()+"->"+ GetValue(X[i][j][v]).ToString());
+                    }
+
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
             foreach (VehicleCategories vc in vehicleCategories)
                 outcome.AddRange(GetVehicleSpecificRoutes(vc));
