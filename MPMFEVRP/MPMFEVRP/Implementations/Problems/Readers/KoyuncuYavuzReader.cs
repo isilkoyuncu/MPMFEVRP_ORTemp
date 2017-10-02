@@ -84,7 +84,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
 
         public void ProcessRawDataFromFile(string wholeFile)
         {
-            string[] allRows = wholeFile.Split(new char[] { '\n' });
+            string[] allRows = wholeFile.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
             int blankRowPosition = 0;
             while (!RowIsBlank(allRows[blankRowPosition]))
                 blankRowPosition++;
@@ -101,7 +101,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             rechargingRate = new double[nTabularRows];
             prize = new double[nTabularRows][];
 
-            char[] cellSeparator = new char[] { '\t', '\r' };
+            char[] cellSeparator = new char[] { '\t' };
             string[] cellsInCurrentRow;
             for (int r = 1; r <= nTabularRows; r++)
             {
@@ -181,7 +181,8 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         bool RowIsBlank(string theRow)
         {
             List<string> endOfLineStrings = new List<string>() { "\n", "\r", "\r\n" };
-            return (endOfLineStrings.Contains(theRow.Replace("\t", "").Replace(" ", "")));
+            string cleanedRow = theRow.Replace("\t", "").Replace(" ", "");
+            return ((endOfLineStrings.Contains(cleanedRow))||(cleanedRow==""));
         }
 
         public string GetRecommendedOutputFileFullName()
