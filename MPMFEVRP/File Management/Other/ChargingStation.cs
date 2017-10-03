@@ -19,7 +19,7 @@ namespace Instance_Generation.Other
                     return 6.5 / 60.0;
                     //break;
                 case ChargingLevels.L3:
-                    return 60.0 / 60.0;
+                    return 60.0 / 30.0;
                     //break;
                 default:
                     return 0.0;

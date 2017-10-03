@@ -15,19 +15,9 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
 
         public EVvsGDV_Problem(ProblemDataPackage PDP)
         {
-            AddProblemCharacteristics();
-            base.PDP = new ProblemDataPackage(PDP);
-            //The following are the problem characteristics. Each problem will have these fixed here, and they have nothing to do with data!
+            AddProblemCharacteristics(); //Add the problem characteristics. Each problem will have these fixed here, and they have nothing to do with data!
 
-            //This code is extremely strict, for sake of simplicity!
-            //First, we must be given exactly 2 vehicles
-            // TODO do we still have to check this??
-            //if (PDP.VRD.vehicleArray.Length != 2)
-            //    throw new ArgumentException("Reader had the wrong number of vehicle categories!");
-            ////Then, the first (0) must be an EV, and the other (1) must be a GDV!
-            //if ((PDP.VRD.VehicleArray[0].Category != VehicleCategories.EV) ||
-            //    (PDP.VRD.VehicleArray[1].Category != VehicleCategories.GDV))
-            //    throw new ArgumentException("Reader had the wrong composition or ordering of vehicle categories!");
+            base.PDP = new ProblemDataPackage(PDP);
         }
 
         void AddProblemCharacteristics()
@@ -37,7 +27,7 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
             problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_GDV, "Available # of GDVs", "0"));
             problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_RECHARGING_ASSUMPTION, "Recharging Assumption", new List<object>() { RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial }, RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full, UserInputObjectType.ComboBox));
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_LAMBDA, "Max # of ES Visit", "1"));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_LAMBDA, "Max # of ES Visit", "3"));
         }
 
         public override string GetName() { return "EV vs GDV VRP"; }

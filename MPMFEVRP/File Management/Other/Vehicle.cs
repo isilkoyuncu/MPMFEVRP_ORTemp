@@ -36,8 +36,8 @@ namespace Instance_Generation.Other
                     batteryCapacity = 60.0;
                     consumptionRate = 0.20;
                     fixedCost = 0.0;//40
-                    variableCostPerMile = 0.0388;
-                    maxChargingRate = 60.0/60.0;
+                    variableCostPerMile = 1.0;// 0.0388;
+                    maxChargingRate = 60.0/30.0;
                     break;
                 case Vehicles.EMH_1_6L_4cyl_Automatic:
                     id = "EMH 1.6L 4cyl Automatic";
@@ -46,7 +46,7 @@ namespace Instance_Generation.Other
                     batteryCapacity = 0;
                     consumptionRate = 0;
                     fixedCost = 0.0;//30
-                    variableCostPerMile = 0.0656;
+                    variableCostPerMile = 1.0;// 0.0656;
                     maxChargingRate = 0.0;
                     break;
                 case Vehicles.Ford_Focus_Electric_2016_23KWH:

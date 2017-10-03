@@ -121,7 +121,7 @@ namespace Instance_Generation.Forms
             comboBox_EV.SelectedItem = comboBox_EV.Items[0];
             comboBox_GDV.SelectedItem = comboBox_GDV.Items[0];
         }
-        private void button_SelectInputFile_Click(object sender, EventArgs e)
+        private void Button_SelectInputFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Text Files (.txt)|*.txt|All Files (*.*)|*.*";
@@ -130,7 +130,7 @@ namespace Instance_Generation.Forms
             openFileDialog1.ShowDialog();
             tiFilenames = openFileDialog1.FileNames;
         }
-        private void comboBox_FileType_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox_FileType_SelectedIndexChanged(object sender, EventArgs e)
         {
             bool fileNameSelected = (tiFilenames != null);
             switch (comboBox_FileType.Text)
@@ -174,9 +174,9 @@ namespace Instance_Generation.Forms
             if (reader != null)
             {
                 reader.Read();
-                button_SelectInputFile.Enabled = false;
-                label_FileType.Enabled = false;
-                comboBox_FileType.Enabled = false;
+                //button_SelectInputFile.Enabled = false;
+                //label_FileType.Enabled = false;
+                //comboBox_FileType.Enabled = false;
                 checkBox_NeedToShuffleCustomers.Checked = reader.needToShuffleCustomers();
                 checkBoxDistanceMatrixReadFromFile.Checked = (reader.getDistanceMatrix() != null);
                 label_Source.Text = StringOperations.SeparateFullFileName(tiFilenames[0])[1];//TODO When we allow selecting multiple files, this textbox will look awful, will have to do something
