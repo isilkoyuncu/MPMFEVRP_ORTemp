@@ -28,5 +28,6 @@ namespace MPMFEVRP.Models.XCPlex
         }
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
+        public abstract void RefineDecisionVariables(CustomerSet cS);
     }
 }

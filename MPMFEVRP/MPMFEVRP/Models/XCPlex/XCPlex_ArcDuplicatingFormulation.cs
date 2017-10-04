@@ -702,5 +702,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "Arc Duplicating";
         }
+
+        public override void RefineDecisionVariables(CustomerSet cS)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

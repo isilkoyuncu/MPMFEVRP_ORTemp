@@ -309,7 +309,7 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime beginTime = new DateTime();
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
-            //ExportModel("mmmmodel.lp");
+            ExportModel("mmmmodel.lp");
             Solve();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;

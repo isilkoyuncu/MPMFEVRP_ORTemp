@@ -582,7 +582,7 @@ namespace MPMFEVRP.Models.XCPlex
             return outcome;
 
         }
-        public void RefineDecisionVariables(CustomerSet CS)
+        public override void RefineDecisionVariables(CustomerSet CS)
         {
             int VCIndex = (int)xCplexParam.VehCategory;
             

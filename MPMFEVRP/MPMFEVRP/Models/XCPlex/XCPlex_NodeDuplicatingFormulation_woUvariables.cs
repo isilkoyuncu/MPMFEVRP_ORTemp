@@ -6,7 +6,6 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -18,7 +17,7 @@ namespace MPMFEVRP.Models.XCPlex
         int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;
         Site theDepot; //There is a single depot
 
-        double[] RHS_forCustomerCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
+        double[] RHS_forNodeCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
 
         //DVs, upper and lower bounds
         INumVar[][][] X; double[][][] X_LB, X_UB;
@@ -27,6 +26,8 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
         INumVar[] Delta; double[] minValue_Delta, maxValue_Delta; double[][] BigDelta;
         INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
+
+        int firstCustomerVisitationConstraintIndex=-1;
 
         public XCPlex_NodeDuplicatingFormulation_woUvariables() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woUvariables(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
@@ -147,7 +148,7 @@ namespace MPMFEVRP.Models.XCPlex
             minValue_T = new double[numDuplicatedNodes];
             maxValue_T = new double[numDuplicatedNodes];
 
-            RHS_forCustomerCoverage = new double[numDuplicatedNodes];
+            RHS_forNodeCoverage = new double[numDuplicatedNodes];
 
             for (int i = 0; i < numDuplicatedNodes; i++)
             {
@@ -183,7 +184,7 @@ namespace MPMFEVRP.Models.XCPlex
                     else if (s.SiteType == SiteTypes.ExternalStation && theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                         maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
                 }
-                RHS_forCustomerCoverage[i] = 1.0;
+                RHS_forNodeCoverage[i] = 1.0;
             }                
         }
         void SetBigMvalues()
@@ -297,6 +298,8 @@ namespace MPMFEVRP.Models.XCPlex
 
         void AddConstraint_NumberOfVisitsPerCustomerNode()//1
         {
+            firstCustomerVisitationConstraintIndex = allConstraints_list.Count;
+
             for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfVehiclesVisitingTheCustomerNode = LinearNumExpr();
@@ -309,7 +312,7 @@ namespace MPMFEVRP.Models.XCPlex
                 if (xCplexParam.TSP)
                 {
                     constraint_name = "The_customer_node_" + j.ToString()+"_must_be_visited";
-                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, RHS_forCustomerCoverage[j], constraint_name));
+                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, RHS_forNodeCoverage[j], constraint_name));
                 }
                 else
                 {
@@ -605,23 +608,7 @@ namespace MPMFEVRP.Models.XCPlex
             return outcome;
 
         }
-        public void RefineRHSofCustomerCoverage(CustomerSet CS)
-        {
-            RHS_forCustomerCoverage = new double[numDuplicatedNodes];
-            int VCIndex = (int)xCplexParam.VehCategory;
-            for (int i = 0; i < numDuplicatedNodes; i++)
-                for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
-                {
-                    if (CS.Customers.Contains(preprocessedSites[j].ID))
-                    {
-                        RHS_forCustomerCoverage[j] = 1.0;
-                    }
-                    else
-                    {
-                        RHS_forCustomerCoverage[j] = 0.0;
-                    }
-                }
-        }
+
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             return new RouteBasedSolution(GetVehicleSpecificRoutes());
@@ -640,6 +627,44 @@ namespace MPMFEVRP.Models.XCPlex
         public override string GetModelName()
         {
             return "Node Duplicating wo U";
+        }
+
+        public override void RefineDecisionVariables(CustomerSet cS)
+        {
+            RHS_forNodeCoverage = new double[numDuplicatedNodes];
+            int VCIndex = (int)xCplexParam.VehCategory;
+            for (int i = 0; i < numDuplicatedNodes; i++)
+                for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
+                {
+                    if (cS.Customers.Contains(preprocessedSites[j].ID))
+                    {
+                        RHS_forNodeCoverage[j] = 1.0;
+                    }
+                    else
+                    {
+                        RHS_forNodeCoverage[j] = 0.0;
+                    }
+                }
+            RefineRightHandSidesOfCustomerVisitationConstraints();
+        }
+        void RefineRightHandSidesOfCustomerVisitationConstraints()
+        {
+            int c = firstCustomerVisitationConstraintIndex;
+
+            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
+            {
+                if (RHS_forNodeCoverage[j] == 1)
+                {
+                    allConstraints_array[c].UB = RHS_forNodeCoverage[j];
+                    allConstraints_array[c].LB = RHS_forNodeCoverage[j];
+                }
+                else//RHS_forNodeCoverage[j] == 0
+                {
+                    allConstraints_array[c].LB = RHS_forNodeCoverage[j];
+                    allConstraints_array[c].UB = RHS_forNodeCoverage[j];
+                }
+                c++;
+            }
         }
     }
 }
