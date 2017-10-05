@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.groupBox_problem = new System.Windows.Forms.GroupBox();
+            this.comboBox_TSPModel = new System.Windows.Forms.ComboBox();
+            this.label_TSPModel = new System.Windows.Forms.Label();
             this.button_createProblemModel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -49,8 +51,6 @@
             this.button_viewSolution = new System.Windows.Forms.Button();
             this.groupBox_status = new System.Windows.Forms.GroupBox();
             this.textBox_log = new System.Windows.Forms.TextBox();
-            this.label_TSPModel = new System.Windows.Forms.Label();
-            this.comboBox_TSPModel = new System.Windows.Forms.ComboBox();
             this.groupBox_problem.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox_algorithms.SuspendLayout();
@@ -78,6 +78,29 @@
             this.groupBox_problem.TabIndex = 0;
             this.groupBox_problem.TabStop = false;
             this.groupBox_problem.Text = "The \"Problem\" Side (problem, model, data, etc.)";
+            // 
+            // comboBox_TSPModel
+            // 
+            this.comboBox_TSPModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_TSPModel.FormattingEnabled = true;
+            this.comboBox_TSPModel.Location = new System.Drawing.Point(8, 659);
+            this.comboBox_TSPModel.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_TSPModel.Name = "comboBox_TSPModel";
+            this.comboBox_TSPModel.Size = new System.Drawing.Size(571, 24);
+            this.comboBox_TSPModel.TabIndex = 21;
+            this.comboBox_TSPModel.SelectedIndexChanged += new System.EventHandler(this.ComboBox_TSPModel_SelectedIndexChanged);
+            // 
+            // label_TSPModel
+            // 
+            this.label_TSPModel.AutoSize = true;
+            this.label_TSPModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_TSPModel.ForeColor = System.Drawing.Color.Black;
+            this.label_TSPModel.Location = new System.Drawing.Point(78, 624);
+            this.label_TSPModel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_TSPModel.Name = "label_TSPModel";
+            this.label_TSPModel.Size = new System.Drawing.Size(188, 20);
+            this.label_TSPModel.TabIndex = 20;
+            this.label_TSPModel.Text = "TSP Model for Solver";
             // 
             // button_createProblemModel
             // 
@@ -298,34 +321,12 @@
             this.textBox_log.Size = new System.Drawing.Size(425, 712);
             this.textBox_log.TabIndex = 14;
             // 
-            // label_TSPModel
-            // 
-            this.label_TSPModel.AutoSize = true;
-            this.label_TSPModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label_TSPModel.ForeColor = System.Drawing.Color.Black;
-            this.label_TSPModel.Location = new System.Drawing.Point(78, 624);
-            this.label_TSPModel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_TSPModel.Name = "label_TSPModel";
-            this.label_TSPModel.Size = new System.Drawing.Size(188, 20);
-            this.label_TSPModel.TabIndex = 20;
-            this.label_TSPModel.Text = "TSP Model for Solver";
-            // 
-            // comboBox_TSPModel
-            // 
-            this.comboBox_TSPModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_TSPModel.FormattingEnabled = true;
-            this.comboBox_TSPModel.Location = new System.Drawing.Point(8, 659);
-            this.comboBox_TSPModel.Margin = new System.Windows.Forms.Padding(4);
-            this.comboBox_TSPModel.Name = "comboBox_TSPModel";
-            this.comboBox_TSPModel.Size = new System.Drawing.Size(571, 24);
-            this.comboBox_TSPModel.TabIndex = 21;
-            this.comboBox_TSPModel.SelectedIndexChanged += new System.EventHandler(this.ComboBox_TSPModel_SelectedIndexChanged);
-            // 
             // SingleProblemSingleAlgorithm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1584, 826);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(1567, 826);
             this.Controls.Add(this.groupBox_status);
             this.Controls.Add(this.groupBox_algorithms);
             this.Controls.Add(this.groupBox_problem);
