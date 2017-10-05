@@ -56,6 +56,21 @@ namespace MPMFEVRP.Domains.ProblemDomain
                     outcome.Add(s.ID);
             return outcome;
         }
+        public double GetTotalCustomerServiceTime()
+        {
+            double outcome = 0;
+            foreach (Site s in siteArray)
+                if (s.SiteType == SiteTypes.Customer)
+                    outcome += s.ServiceDuration;
+            return outcome;
+        }
+        public double GetTotalCustomerServiceTime(List<string> customers)
+        {
+            double outcome = 0;
+            foreach (string cID in customers)
+                    outcome += GetSiteByID(cID).ServiceDuration;
+            return outcome;
+        }
         public string GetSingleDepotID()
         {
             foreach (Site s in siteArray)

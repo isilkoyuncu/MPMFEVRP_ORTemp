@@ -28,6 +28,7 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
 
         int firstCustomerVisitationConstraintIndex=-1;
+        int totalTravelTimeConstraintIndex = -1;
 
         public XCPlex_NodeDuplicatingFormulation_woUvariables() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woUvariables(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
@@ -292,6 +293,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationFollowingACustomerVisit();//11
             AddConstraint_TimeRegulationFollowingAnESVisit();//12
             AddConstraint_ArrivalTimeLimits();
+            AddConstraint_TotalTravelTime();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -569,6 +571,24 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddGe(TimeDifference, maxValue_T[j], constraint_name));
             }
         }
+        void AddConstraint_TotalTravelTime()
+        {
+            totalTravelTimeConstraintIndex = allConstraints_list.Count;
+
+            ILinearNumExpr TotalTravelTime = LinearNumExpr();
+            for (int i = 0; i < numDuplicatedNodes; i++)
+                for (int j = 0; j < numDuplicatedNodes; j++)
+                {
+                    Site sFrom = preprocessedSites[i];
+                    Site sTo = preprocessedSites[j];
+                    for (int v = 0; v < numVehCategories; v++)
+                        TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][v]);
+                }
+            string constraint_name = "Total_Travel_Time";
+            double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
+            rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
+            allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+        }
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
@@ -681,6 +701,9 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
+
+            allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
+
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
@@ -700,6 +723,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
                 c++;
             }
+
         }
     }
 }

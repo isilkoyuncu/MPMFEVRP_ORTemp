@@ -45,8 +45,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             theGDV = model.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV);//Technically this returns the first GDV, but there shouldn't be more than one anyways
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 1;
-            popStrategy = CustomerSetList.CustomerListPopStrategy.First;//This is too tightly coupled! Will cause issues in generalizing to tree search
+            beamWidth = 20;
+            popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);

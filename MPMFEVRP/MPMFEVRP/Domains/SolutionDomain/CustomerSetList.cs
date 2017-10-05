@@ -164,6 +164,20 @@ namespace MPMFEVRP.Domains.SolutionDomain
             //            }
             //}
 
+
+            //Hardcoded to see for now
+            double bestVMT = double.MaxValue;
+            int besti = -1;
+            for (int i = 0; i < Count; i++)
+            {
+                if (this[i].OFIDP.GetVMT(ProblemDomain.VehicleCategories.GDV) < bestVMT)
+                {
+                    bestVMT = this[i].OFIDP.GetVMT(ProblemDomain.VehicleCategories.GDV);
+                    besti = i;
+                }
+            }
+            outcome = besti;
+
             return outcome;
         }
 
