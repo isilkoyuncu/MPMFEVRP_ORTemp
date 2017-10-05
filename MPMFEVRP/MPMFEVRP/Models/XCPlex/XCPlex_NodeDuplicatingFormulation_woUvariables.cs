@@ -291,6 +291,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//10
             AddConstraint_TimeRegulationFollowingACustomerVisit();//11
             AddConstraint_TimeRegulationFollowingAnESVisit();//12
+            AddConstraint_ArrivalTimeLimits();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -553,6 +554,19 @@ namespace MPMFEVRP.Models.XCPlex
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigT[i][j] + 1.0 / RechargingRate(sFrom)), constraint_name));
                     }
                 }
+            }
+        }
+        void AddConstraint_ArrivalTimeLimits()//11
+        {
+            for (int j = 1; j < numDuplicatedNodes; j++)
+            {
+                ILinearNumExpr TimeDifference = LinearNumExpr();
+                TimeDifference.AddTerm(1.0, T[j]);
+                for (int i = 0; i < numDuplicatedNodes; i++)
+                    for (int v = 0; v < numVehCategories; v++)
+                        TimeDifference.AddTerm((maxValue_T[j] - minValue_T[j]), X[i][j][v]);
+                string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
+                allConstraints_list.Add(AddGe(TimeDifference, maxValue_T[j], constraint_name));
             }
         }
 
