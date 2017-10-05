@@ -17,6 +17,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected List<Site> depots;
         protected List<Site> customers;
         protected List<Site> externalStations;//Preprocessed, Ready-to-use
+
         
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 

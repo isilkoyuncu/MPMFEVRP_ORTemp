@@ -27,6 +27,10 @@ namespace MPMFEVRP.Models.XCPlex
         protected double lowerBound;
         protected double upperBound;
         protected double cpuTime;
+        protected int numberOfTimesSolveMethodCalled;
+        protected double totalTimeInSolve;
+        protected Dictionary<string, int> numberOfTimesSolveFoundStatus;
+        protected Dictionary<string, double> totalTimeInSolveOnStatus;
         public double[] AllValues { get { return GetValues(allVariables_array); } }
         public double[] AllReducedCosts { get { return GetReducedCosts(allVariables_array); } }
         public Cplex.BasisStatus[] AllVariableBasisStatuses { get { return GetBasisStatuses(allVariables_array); } }
@@ -39,16 +43,27 @@ namespace MPMFEVRP.Models.XCPlex
         public bool ReducedCostsObtained { get { return reducedCostsObtained; } }
         public double LowerBound_XCPlex { get { return lowerBound; } }
         public double UpperBound_XCPlex { get { return upperBound; } }
-        public double CPUtime { get { return cpuTime; } }
+        public double CPUtime { get { return cpuTime; } }//seconds
+        public int NumberOfTimesSolveMethodCalled { get { return numberOfTimesSolveMethodCalled; } }
+        public double TotalTimeInSolve { get { return totalTimeInSolve; } }
+        public Dictionary<string, int> NumberOfTimesSolveFoundStatus { get { return numberOfTimesSolveFoundStatus; } }
+        public Dictionary<string, double> TotalTimeInSolveOnStatus { get { return totalTimeInSolveOnStatus; } }
 
         Dictionary<String, Object> DecisionVariables = new Dictionary<string, object>();
 
         protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
         protected int numVehCategories;
 
-        public XCPlexBase() { }
+        public XCPlexBase()
+        {
+            numberOfTimesSolveFoundStatus = new Dictionary<string, int>();
+            totalTimeInSolveOnStatus = new Dictionary<string, double>();
+        }
         public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
         {
+            numberOfTimesSolveFoundStatus = new Dictionary<string, int>();
+            totalTimeInSolveOnStatus = new Dictionary<string, double>();
+
             this.theProblemModel = theProblemModel;
 
             numVehCategories = theProblemModel.VRD.NumVehicleCategories;
@@ -58,7 +73,7 @@ namespace MPMFEVRP.Models.XCPlex
             XCPlexRelaxation relaxation;
             relaxation = xCplexParam.Relaxation;
             if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
-               //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
+                //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
                 )
                 variable_type = NumVarType.Float;
 
@@ -74,7 +89,7 @@ namespace MPMFEVRP.Models.XCPlex
             //output variables
             InitializeOutputVariables();
         }
-        
+
         protected void Initialize() // TODO this has no references, i.e. we never use this initialize 
         {
             DefineDecisionVariables();
@@ -217,7 +232,7 @@ namespace MPMFEVRP.Models.XCPlex
                     .ToArray())
                 .ToArray();
         }
-       
+
         protected INumVar[] GetOneDimensionalDecisionVariableValue(String name)
         {
             return ((INumVar[])DecisionVariables[name]);
@@ -232,12 +247,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return ((INumVar[][][])DecisionVariables[name]);
         }
-      
+
         // Shortcuts
         // DV1D : Decision Variable 1-Dimensional etc.
         protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
         {
-            AddOneDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1,out dv);
+            AddOneDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, out dv);
         }
 
         protected void AddDV2D(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, out INumVar[][] dv)
@@ -309,17 +324,19 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime beginTime = new DateTime();
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
-            ExportModel("mmmmodel.lp");
+            //ExportModel("mmmmodel.lp");
             Solve();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
+            numberOfTimesSolveMethodCalled++;
+            totalTimeInSolve += cpuTime;
             Status originalCplexStatus = GetStatus();
             string originalCplexStatus_string = originalCplexStatus.ToString();
             switch (originalCplexStatus_string)
             {
                 case "Infeasible":
                     solutionStatus = XCPlexSolutionStatus.Infeasible;
-                    return;
+                    break;
                 //break;//unreachable because of the "return" in the previous line
                 case "Unknown":
                     solutionStatus = XCPlexSolutionStatus.NoFeasibleSolutionFound;
@@ -334,6 +351,16 @@ namespace MPMFEVRP.Models.XCPlex
                     System.Windows.Forms.MessageBox.Show("Cplex didn't throw an exception, but got an unrecognized status!");
                     break;
             }
+            //now updating the statistics per status
+            if (!numberOfTimesSolveFoundStatus.ContainsKey(originalCplexStatus_string))
+            {
+                numberOfTimesSolveFoundStatus.Add(originalCplexStatus_string, 0);
+                totalTimeInSolveOnStatus.Add(originalCplexStatus_string, 0.0);
+            }
+            numberOfTimesSolveFoundStatus[originalCplexStatus_string]++;
+            totalTimeInSolveOnStatus[originalCplexStatus_string] += cpuTime;
+            if (originalCplexStatus_string == "Infeasible")
+                return;
 
             if (xCplexParam.Relaxation == XCPlexRelaxation.None)
             {
