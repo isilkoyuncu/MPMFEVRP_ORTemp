@@ -36,6 +36,7 @@ namespace MPMFEVRP.Forms
         IAlgorithm theAlgorithm;
         ISolution theSolution;
         IWriter writer;
+        Type TSPModelType;
 
         List<string[]> solutionSummaryList;
         string[] solutionSummary;
@@ -58,11 +59,16 @@ namespace MPMFEVRP.Forms
             listBox_algorithms.MouseMove += ListBox_algorithms_MouseMove;
             comboBox_algorithms.Items.AddRange(AlgorithmUtil.GetAllAlgorithmNames().ToArray());
             comboBox_algorithms.SelectedIndex = 0;
+
+            comboBox_multi_TSPModel.Items.AddRange(XCPlexUtil.GetTSPModelNamesForSolver().ToArray());
+            comboBox_multi_TSPModel.SelectedIndexChanged += ComboBox_multi_TSPModel_SelectedIndexChanged;
+            comboBox_multi_TSPModel.SelectedIndex = 0;
         }
 
         private void ComboBox_multi_problems_SelectedIndexChanged(object sender, EventArgs e)
         {
             theProblem = ProblemUtil.CreateProblemByName(comboBox_multi_problems.SelectedItem.ToString());
+            ParamUtil.DrawParameters(panel_multi_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
             if (theProblem == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
@@ -223,13 +229,15 @@ namespace MPMFEVRP.Forms
                     for (int i = 0; i < dialog.FileNames.Length; i++)
                     {
                         theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileNames[i]);
-                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem);
+                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem, TSPModelType);
 
                         problems.Add(theProblem);
                         problemModels.Add(theProblemModel);
 
                         Log("Problem loaded from file "+theProblem.PDP.InputFileName);
                     }
+
+
                 }
                 catch (Exception)
                 {
@@ -254,6 +262,27 @@ namespace MPMFEVRP.Forms
         private void Button_openDataManager_Click(object sender, EventArgs e)
         {
             new TestInstanceGenerator().ShowDialog();
+        }
+
+        private void ComboBox_multi_TSPModel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_multi_TSPModel.SelectedItem.ToString());
+        }
+
+        private void Button_multi_createProblemModel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_multi_TSPModel.SelectedItem.ToString());
+                theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem, TSPModelType);
+                UpdateProblemLabels();
+                Log("Problem model is created.");
+                comboBox_algorithms.Enabled = true;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("There is something wrong while loading problem from the whole data!", "Problem loading error!");
+            }
         }
     }
 }
