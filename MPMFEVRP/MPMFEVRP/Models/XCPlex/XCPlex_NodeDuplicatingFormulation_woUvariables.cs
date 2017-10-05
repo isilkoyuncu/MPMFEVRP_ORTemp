@@ -127,10 +127,10 @@ namespace MPMFEVRP.Models.XCPlex
                         X[j][0][v].UB = 0.0;
                     }
             //No arc from or to an ES node can be traversed by a GDV
-            for (int i = 0; i < numDuplicatedNodes; i++)
-                for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.GDV)
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.GDV)
+                    for (int i = 0; i < numDuplicatedNodes; i++)
+                        for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
                         {
                             X[i][j][v].UB = 0.0;
                             X[j][i][v].UB = 0.0;
@@ -309,7 +309,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                 string constraint_name;
 
-                if (xCplexParam.TSP)
+                if (xCplexParam.TSP)//TODO: I don't think we should be checking for "TSP" separately, isn't it the same thing as "exactly once"?
                 {
                     constraint_name = "The_customer_node_" + j.ToString()+"_must_be_visited";
                     allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, RHS_forNodeCoverage[j], constraint_name));
@@ -331,13 +331,16 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_NumberOfEvVisitsPerESNode()//2
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfEvVisitToTheESNode = LinearNumExpr();
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            NumberOfEvVisitToTheESNode.AddTerm(1.0, X[i][j][v]);
+                    NumberOfEvVisitToTheESNode.AddTerm(1.0, X[i][j][vIndex]);
 
                 string constraint_name = "At_most_one_EV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(NumberOfEvVisitToTheESNode, 1.0, constraint_name));
@@ -345,13 +348,16 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_NoGDVVisitToESNodes()//3
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.GDV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.GDV)
-                            NumberOfGDVsVisitingTheNode.AddTerm(1.0, X[i][j][v]);
+                            NumberOfGDVsVisitingTheNode.AddTerm(1.0, X[i][j][vIndex]);
 
                 string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
@@ -403,44 +409,53 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int j = 1; j < numDuplicatedNodes; j++)
             {
                 ILinearNumExpr EnergyGainAtNonDepotSite = LinearNumExpr();
                 EnergyGainAtNonDepotSite.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][v]);
+                            EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][vIndex]);
                 string constraint_name = "Max_Energy_Gain_At_NonDepot_Site_" + j.ToString();
                 allConstraints_list.Add(AddLe(EnergyGainAtNonDepotSite, 0.0, constraint_name));
             }
         }
         void AddConstraint_DepartureSOCFromCustomerNode()//7
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
             {
                 ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
                 DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
                 DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][v]);
+                            DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][vIndex]);
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, minValue_Delta[j], constraint_name));
             }
         }
         void AddConstraint_DepartureSOCFromESNode()//8
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
             {
                 ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                 DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                 DepartureSOCFromES.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            DepartureSOCFromES.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][v]);
+                            DepartureSOCFromES.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][vIndex]);
                 string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
                 if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
                 {
@@ -454,6 +469,11 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_SOCRegulationFollowingNondepot()//9
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int i = 1; i < numDuplicatedNodes; i++)
             {
                 Site sFrom = preprocessedSites[i];
@@ -464,9 +484,7 @@ namespace MPMFEVRP.Models.XCPlex
                     SOCDifference.AddTerm(1.0, Delta[j]);
                     SOCDifference.AddTerm(-1.0, Delta[i]);
                     SOCDifference.AddTerm(-1.0, Epsilon[i]);
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (vehicleCategories[v] == VehicleCategories.EV)
-                            SOCDifference.AddTerm(EnergyConsumption(sFrom, sTo, vehicleCategories[v]) + BigDelta[i][j], X[i][j][v]);
+                            SOCDifference.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV) + BigDelta[i][j], X[i][j][vIndex]);
                     string constraint_name = "SOC_Regulation_from_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddLe(SOCDifference, BigDelta[i][j], constraint_name));
                 }
@@ -474,14 +492,17 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_SOCRegulationFollowingDepot()//10
         {
+            int vIndex = -1;
+            for (int v = 0; v < numVehCategories; v++)
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex = v;
+            //Separated finding vIndex to the preprocess above so we don't have to loop on v every time below
             for (int j = 0; j < numDuplicatedNodes; j++)
             {
                 Site sTo = preprocessedSites[j];
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, Delta[j]);
-                for (int v = 0; v < numVehCategories; v++)
-                    if (vehicleCategories[v] == VehicleCategories.EV)
-                        SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo, vehicleCategories[v]), X[0][j][v]);
+                        SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo,VehicleCategories.EV), X[0][j][vIndex]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, BatteryCapacity(VehicleCategories.EV), constraint_name));
             }
@@ -489,7 +510,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_TimeRegulationFollowingACustomerVisit()//11
         {
             for (int i = firstCustomerNodeIndex; i <= lastCustomerNodeIndex; i++)
-                for (int j = 1; j < numDuplicatedNodes; j++)
+                for (int j = 0; j < numDuplicatedNodes; j++)
                 {
                     Site sFrom = preprocessedSites[i];
                     Site sTo = preprocessedSites[j];

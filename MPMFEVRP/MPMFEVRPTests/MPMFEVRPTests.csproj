@@ -63,6 +63,7 @@
     <Compile Include="SetCoverFileUtilities\CustomerSetArchiveTests.cs" />
     <Compile Include="TestUtility-DefaultGetters\ProblemRelated.cs" />
     <Compile Include="TestUtility-DefaultGetters\SolutionRelated.cs" />
+    <Compile Include="TSPSolverTests\NodeDuplicatingWithoutU.cs" />
     <Compile Include="Utils\DeepCopierTests.cs" />
   </ItemGroup>
   <ItemGroup>
