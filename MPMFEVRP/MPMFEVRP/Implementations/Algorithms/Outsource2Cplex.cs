@@ -50,14 +50,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 case XCPlex_Formulation.NodeDuplicating:
                     CPlexExtender = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
-                    //CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicating:
                     CPlexExtender = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.NodeDuplicatingwoU:
                     CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
-                    //CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
                     throw new NotImplementedException("ArcDuplicatingwoU still needs to be implemented.");
@@ -116,7 +114,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             bestSolutionFound.Status = status;
             bestSolutionFound.UpperBound = CPlexExtender.UpperBound_XCPlex;
             bestSolutionFound.LowerBound = CPlexExtender.LowerBound_XCPlex;
-        }
+       }
 
         public override void SpecializedReset()
         {

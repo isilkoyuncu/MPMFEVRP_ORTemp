@@ -292,8 +292,8 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//10
             AddConstraint_TimeRegulationFollowingACustomerVisit();//11
             AddConstraint_TimeRegulationFollowingAnESVisit();//12
-            AddConstraint_ArrivalTimeLimits();
-            AddConstraint_TotalTravelTime();
+            //AddConstraint_ArrivalTimeLimits();
+            //AddConstraint_TotalTravelTime();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -571,7 +571,7 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddGe(TimeDifference, maxValue_T[j], constraint_name));
             }
         }
-        void AddConstraint_TotalTravelTime()
+        void AddConstraint_TotalTravelTime()//12
         {
             totalTravelTimeConstraintIndex = allConstraints_list.Count;
 
