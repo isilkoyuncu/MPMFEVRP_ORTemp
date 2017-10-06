@@ -20,7 +20,6 @@ namespace MPMFEVRP.Models.XCPlex
 
         Site theDepot;
 
-        int firstCustomerVisitationConstraintIndex = -1;
         int totalTravelTimeConstraintIndex = -1;
 
         INumVar[][][] X; double[][][] X_LB, X_UB;
@@ -301,7 +300,23 @@ namespace MPMFEVRP.Models.XCPlex
         {
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
-            
+            AddConstraint_NumberOfVisitsPerCustomerNode();//1
+            AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//2
+            AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
+            AddConstraint_MaxNumberOfEVs();//4
+            AddConstraint_MaxNumberOfGDvs();//5
+            AddConstraint_MaxEnergyGainAtNonDepotSite();//6
+            AddConstraint_DepartureSOCFromCustomerNode();//7
+            AddConstraint_DepartureSOCFromESNodeUB();//8
+            AddConstraint_DepartureSOCFromESNodeLB();//9
+            AddConstraint_SOCRegulationFollowingNondepot();//10
+            AddConstraint_SOCRegulationFollowingDepot();//11
+            AddConstraint_TimeRegulationFollowingACustomerVisit();//12
+            AddConstraint_TimeRegulationFollowingAnESVisit();//13
+            AddConstraint_ArrivalTimeLimits();//14
+            AddConstraint_TotalTravelTimeEV();//15
+            AddConstraint_TotalTravelTimeGDV();//16
+
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
