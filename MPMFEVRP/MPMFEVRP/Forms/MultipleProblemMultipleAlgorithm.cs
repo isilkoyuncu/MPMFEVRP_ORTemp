@@ -229,15 +229,10 @@ namespace MPMFEVRP.Forms
                     for (int i = 0; i < dialog.FileNames.Length; i++)
                     {
                         theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileNames[i]);
-                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem, TSPModelType);
-
                         problems.Add(theProblem);
-                        problemModels.Add(theProblemModel);
-
                         Log("Problem loaded from file "+theProblem.PDP.InputFileName);
                     }
-
-
+                    ParamUtil.DrawParameters(panel_multi_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
                 }
                 catch (Exception)
                 {
@@ -273,11 +268,15 @@ namespace MPMFEVRP.Forms
         {
             try
             {
-                TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_multi_TSPModel.SelectedItem.ToString());
-                theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), theProblem, TSPModelType);
+                for (int i = 0; i < problems.Count; i++)
+                {
+                    TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_multi_TSPModel.SelectedItem.ToString());
+                    theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), problems[i], TSPModelType);
+                    problemModels.Add(theProblemModel);
+                    Log("Problem model is created from problem " + problems[i].PDP.InputFileName);
+                }
                 UpdateProblemLabels();
-                Log("Problem model is created.");
-                comboBox_algorithms.Enabled = true;
+                Log("All problem models are created.");
             }
             catch (Exception)
             {
