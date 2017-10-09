@@ -180,5 +180,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "Set Covering";
         }
-   }
+
+        protected override void Initialize()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

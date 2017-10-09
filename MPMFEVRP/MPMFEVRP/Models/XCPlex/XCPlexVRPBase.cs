@@ -26,8 +26,18 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam)
         {
+            
+        }
+
+
+        public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
+        public abstract void RefineDecisionVariables(CustomerSet cS);
+
+        protected override void Initialize()
+        {
             rechargingDuration_status = theProblemModel.RechargingDuration_status;
-            for (int v = 0; v < numVehCategories; v++) {
+            for (int v = 0; v < numVehCategories; v++)
+            {
                 if (vehicleCategories[v] == VehicleCategories.EV)
                     vIndex_EV = v;
                 else if (vehicleCategories[v] == VehicleCategories.GDV)
@@ -35,6 +45,7 @@ namespace MPMFEVRP.Models.XCPlex
                 else
                     throw new System.Exception("EV category could not found!");
             }
+            //If you change v index above, change the following num vehicles for a TSP as well
             if (xCplexParam.TSP)
             {
                 switch (xCplexParam.VehCategory)
@@ -55,7 +66,35 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
-        public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
-        public abstract void RefineDecisionVariables(CustomerSet cS);
+        protected double Distance(Site from, Site to)
+        {
+            return theProblemModel.SRD.GetDistance(from.ID, to.ID);
+        }
+        protected double EnergyConsumption(Site from, Site to, VehicleCategories vehicleCategory)
+        {
+            if (vehicleCategory == VehicleCategories.GDV)
+                return 0;
+            return theProblemModel.SRD.GetEVEnergyConsumption(from.ID, to.ID);
+        }
+        protected double BatteryCapacity(VehicleCategories vehicleCategory)
+        {
+            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).BatteryCapacity;
+        }
+        protected double TravelTime(Site from, Site to)
+        {
+            return theProblemModel.SRD.GetTravelTime(from.ID, to.ID);
+        }
+        protected double ServiceDuration(Site site)
+        {
+            return site.ServiceDuration;
+        }
+        protected double RechargingRate(Site site)
+        {
+            return site.RechargingRate;
+        }
+        protected double Prize(Site site, VehicleCategories vehicleCategory)
+        {
+            return site.GetPrize(vehicleCategory);
+        }
     }
 }

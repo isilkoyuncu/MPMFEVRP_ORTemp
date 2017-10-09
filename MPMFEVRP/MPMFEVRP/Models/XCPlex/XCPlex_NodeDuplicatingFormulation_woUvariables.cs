@@ -292,8 +292,8 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//10
             AddConstraint_TimeRegulationFollowingACustomerVisit();//11
             AddConstraint_TimeRegulationFollowingAnESVisit();//12
-            //AddConstraint_ArrivalTimeLimits();
-            //AddConstraint_TotalTravelTime();
+            AddConstraint_ArrivalTimeLimits();
+            AddConstraint_TotalTravelTime();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -350,7 +350,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                            NumberOfGDVsVisitingTheNode.AddTerm(1.0, X[i][j][vIndex_GDV]);
+                    NumberOfGDVsVisitingTheNode.AddTerm(1.0, X[i][j][vIndex_GDV]);
 
                 string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
@@ -401,7 +401,7 @@ namespace MPMFEVRP.Models.XCPlex
                 DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
                 DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                            DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][vIndex_EV]);
+                    DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][vIndex_EV]);
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, minValue_Delta[j], constraint_name));
             }
@@ -414,7 +414,7 @@ namespace MPMFEVRP.Models.XCPlex
                 DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                 DepartureSOCFromES.AddTerm(1.0, Epsilon[j]);
                 for (int i = 0; i < numDuplicatedNodes; i++)
-                            DepartureSOCFromES.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][vIndex_EV]);
+                    DepartureSOCFromES.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][vIndex_EV]);
                 string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
                 if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
                 {
@@ -438,7 +438,7 @@ namespace MPMFEVRP.Models.XCPlex
                     SOCDifference.AddTerm(1.0, Delta[j]);
                     SOCDifference.AddTerm(-1.0, Delta[i]);
                     SOCDifference.AddTerm(-1.0, Epsilon[i]);
-                            SOCDifference.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV) + BigDelta[i][j], X[i][j][vIndex_EV]);
+                    SOCDifference.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV) + BigDelta[i][j], X[i][j][vIndex_EV]);
                     string constraint_name = "SOC_Regulation_from_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddLe(SOCDifference, BigDelta[i][j], constraint_name));
                 }
@@ -451,7 +451,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sTo = preprocessedSites[j];
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, Delta[j]);
-                        SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo,VehicleCategories.EV), X[0][j][vIndex_EV]);
+                SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo,VehicleCategories.EV), X[0][j][vIndex_EV]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, BatteryCapacity(VehicleCategories.EV), constraint_name));
             }
@@ -483,24 +483,22 @@ namespace MPMFEVRP.Models.XCPlex
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
                     TimeDifference.AddTerm(-1.0, T[i]);
-
+                    string constraint_name;
                     // Here we decide whether recharging duration is fixed or depends on the arrival SOC
                     if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                     {
-                        for (int v = 0; v < numVehCategories; v++)
-                            TimeDifference.AddTerm(-1.0 * ((BatteryCapacity(VehicleCategories.EV)/RechargingRate(sFrom)) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][v]);
+                        TimeDifference.AddTerm(-1.0 * ((BatteryCapacity(VehicleCategories.EV)/RechargingRate(sFrom)) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][vIndex_EV]);
                         // If the recharging duration is fixed, then it is enough for RHS to be Tmax 
-                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
+                        constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     }
                     else
                     {
-                        throw new NotImplementedException("Anything other than RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full is not finished");
+                        TimeDifference.AddTerm(-1.0 / RechargingRate(sFrom), Epsilon[i]);
+                        TimeDifference.AddTerm(-1.0 * (TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][vIndex_EV]);
                         // If the recharging duration depends on the arrival SOC, then we need to add the possible maximum duration to the RHS
-                        TimeDifference.AddTerm(-1.0 / RechargingRate(sFrom), Delta[i]);
-                        string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigT[i][j] + 1.0 / RechargingRate(sFrom)), constraint_name));
+                        constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     }
+                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                 }
             }
         }
@@ -523,15 +521,17 @@ namespace MPMFEVRP.Models.XCPlex
 
             ILinearNumExpr TotalTravelTime = LinearNumExpr();
             for (int i = 0; i < numDuplicatedNodes; i++)
+            {
+                Site sFrom = preprocessedSites[i];
                 for (int j = 0; j < numDuplicatedNodes; j++)
                 {
-                    Site sFrom = preprocessedSites[i];
                     Site sTo = preprocessedSites[j];
                     for (int v = 0; v < numVehCategories; v++)
                         TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][v]);
                 }
+            }
             string constraint_name = "Total_Travel_Time";
-            double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
+            double rhs = (numVehicles[vIndex_EV]+numVehicles[vIndex_GDV]) * theProblemModel.CRD.TMax;
             rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
         }

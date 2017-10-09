@@ -725,7 +725,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         public override string GetModelName()
         {
-            return "Arc Duplicating";
+            return "Arc Duplicating without U";
         }
 
         public override void RefineDecisionVariables(CustomerSet cS)

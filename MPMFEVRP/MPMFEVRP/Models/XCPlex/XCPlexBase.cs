@@ -53,6 +53,8 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
         protected int numVehCategories;
+        public System.IO.TextWriter TWoutput;
+
 
         public XCPlexBase()
         {
@@ -77,6 +79,9 @@ namespace MPMFEVRP.Models.XCPlex
                 )
                 variable_type = NumVarType.Float;
 
+            //Model Specific Initialization
+            Initialize();
+
             //now we are ready to put the model together and then solve it
             //Define the variables
             DefineDecisionVariables();
@@ -90,12 +95,7 @@ namespace MPMFEVRP.Models.XCPlex
             InitializeOutputVariables();
         }
 
-        protected void Initialize() // TODO this has no references, i.e. we never use this initialize 
-        {
-            DefineDecisionVariables();
-            AddTheObjectiveFunction();
-            AddAllConstraints();
-        }
+        protected abstract void Initialize();
 
         protected abstract void DefineDecisionVariables();
         protected abstract void AddTheObjectiveFunction();
@@ -302,7 +302,6 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected void SetCplexParameters()
         {
-            //SetOut(null);
             if (xCplexParam.LimitComputationTime)
                 SetParam(Cplex.DoubleParam.TiLim, xCplexParam.RuntimeLimit_Seconds);
             if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_MIP_EMPHASIS))
@@ -325,7 +324,9 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             //ExportModel("mmmmodel.lp");
+            SetOut(TWoutput = System.IO.File.CreateText("C:/Users/ikoyuncu/Desktop/CplexOutput.txt"));
             Solve();
+            TWoutput.Close();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
             numberOfTimesSolveMethodCalled++;
@@ -401,37 +402,6 @@ namespace MPMFEVRP.Models.XCPlex
                 if (Math.Min(Math.Abs(allVariables_array[dvInd].UB - allValues[dvInd]), Math.Abs(allValues[dvInd] - allVariables_array[dvInd].LB)) > xCplexParam.ErrorTolerance)
                     return false;
             return true;
-        }
-
-        protected double Distance(Site from, Site to)
-        {
-            return theProblemModel.SRD.GetDistance(from.ID, to.ID);
-        }
-        protected double EnergyConsumption(Site from, Site to, VehicleCategories vehicleCategory)
-        {
-            if (vehicleCategory == VehicleCategories.GDV)
-                return 0;
-            return theProblemModel.SRD.GetEVEnergyConsumption(from.ID, to.ID);
-        }
-        protected double BatteryCapacity(VehicleCategories vehicleCategory)
-        {
-            return theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory).BatteryCapacity;
-        }
-        protected double TravelTime(Site from, Site to)
-        {
-            return theProblemModel.SRD.GetTravelTime(from.ID, to.ID);
-        }
-        protected double ServiceDuration(Site site)
-        {
-            return site.ServiceDuration;
-        }
-        protected double RechargingRate(Site site)
-        {
-            return site.RechargingRate;
-        }
-        protected double Prize(Site site, VehicleCategories vehicleCategory)
-        {
-            return site.GetPrize(vehicleCategory);
         }
 
         protected double GetVarCostPerMile(VehicleCategories vehicleCategory)
