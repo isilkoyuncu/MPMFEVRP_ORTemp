@@ -323,10 +323,10 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime beginTime = new DateTime();
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
-            //ExportModel("mmmmodel.lp");
-            SetOut(TWoutput = System.IO.File.CreateText("C:/Users/ikoyuncu/Desktop/CplexOutput.txt"));
+            ExportModel("mmmmodel.lp");
+//            SetOut(TWoutput = System.IO.File.CreateText("C:/Users/ikoyuncu/Desktop/CplexOutput.txt"));
             Solve();
-            TWoutput.Close();
+      //      TWoutput.Close();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
             numberOfTimesSolveMethodCalled++;
