@@ -1,4 +1,5 @@
 ﻿using BestRandom;
+using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
@@ -138,7 +139,26 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public override string[] GetWritableSolution()
         {
-            throw new NotImplementedException();
+            List<string> list = new List<string>
+            {
+                "Route\tVehicle\tPrizeCollected\tCostIncurred\tProfit\tTime2ReturnDepot",
+            };
+            if (status == AlgorithmSolutionStatus.Feasible || status == AlgorithmSolutionStatus.Optimal)
+            {
+                for (int r = 0; r < assigned2EV.Count; r++)
+                {
+                    //TODO this is not necessary to fix, we need to code a converter that will convert all the solutions into meaningful text files.
+                    list.Add(String.Join("-", assigned2EV[r].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedSiteIncludingDepotIDs) + "\t" + VehicleCategories.EV.ToString() + "\t" + "-" + "\t" + assigned2EV[r].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetVehicleMilesTraveled().ToString() + "\t" + "-" + "\t" + "-");
+                }
+                for (int r = 0; r < assigned2GDV.Count; r++)
+                {
+                    //TODO this is not necessary to fix, we need to code a converter that will convert all the solutions into meaningful text files.
+                    list.Add(String.Join("-", assigned2GDV[r].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.ListOfVisitedSiteIncludingDepotIDs) + "\t" + VehicleCategories.GDV.ToString() + "\t" + "-" + "\t" + assigned2GDV[r].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetVehicleMilesTraveled().ToString() + "\t" + "-" + "\t" + "-");
+                }
+            }
+            string[] toReturn = new string[list.Count];
+            toReturn = list.ToArray();
+            return toReturn;
         }
 
         public override void TriggerSpecification()

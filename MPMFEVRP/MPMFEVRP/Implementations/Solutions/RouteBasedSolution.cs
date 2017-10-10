@@ -87,7 +87,7 @@ namespace MPMFEVRP.Implementations.Solutions
                 for (int r = 0; r < Routes.Count; r++)
                 {
                     //TODO this is not necessary to fix, we need to code a converter that will convert all the solutions into meaningful text files.
-                    //list.Add(String.Join("-", Routes[r].SitesVisited) + "\t" + Routes[r].VehicleCategoryIndex.ToString() + "\t" + Routes[r].TotalCollectedPrize + "\t" + (Routes[r].FixedCost + Routes[r].TotalVariableTravelCost).ToString() + "\t" + Routes[r].TotalProfit + "\t" + Routes[r].DepartureTime.Last().ToString());
+                    list.Add(String.Join("-", Routes[r].ListOfVisitedSiteIncludingDepotIDs) + "\t" + Routes[r].VehicleCategory.ToString() + "\t" + "-" + "\t" + Routes[r].GetVehicleMilesTraveled().ToString() + "\t" + "-" + "\t" + "-");
                 }
             }
             string[] toReturn = new string[list.Count];
