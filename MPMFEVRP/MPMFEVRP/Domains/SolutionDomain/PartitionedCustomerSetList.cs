@@ -99,5 +99,25 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     outcome.Add(cs);
             return outcome;
         }
+        public CustomerSetList GetAFVFeasibles()
+        {
+            List<RouteOptimizationStatus> desiredStatuses = new List<RouteOptimizationStatus>() { RouteOptimizationStatus.OptimizedForBothGDVandEV };
+            CustomerSetList outcome = new CustomerSetList();
+            for (int l = 0; l <= deepestLevel; l++)
+                foreach (CustomerSet cs in CSLList[l])
+                    if (desiredStatuses.Contains(cs.RouteOptimizationOutcome.Status))
+                        outcome.Add(cs);
+            return outcome;
+        }
+        public CustomerSetList GetGDVFeasibles()
+        {
+            List<RouteOptimizationStatus> desiredStatuses = new List<RouteOptimizationStatus>() { RouteOptimizationStatus.OptimizedForBothGDVandEV, RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV };
+            CustomerSetList outcome = new CustomerSetList();
+            for (int l = 0; l <= deepestLevel; l++)
+                foreach (CustomerSet cs in CSLList[l])
+                    if (desiredStatuses.Contains(cs.RouteOptimizationOutcome.Status))
+                        outcome.Add(cs);
+            return outcome;
+        }
     }
 }

@@ -39,14 +39,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             this.problemModel = problemModel;
             this.vehicle = vehicle;
+            double batteryCapacity = (vehicle.Category == VehicleCategories.EV ? vehicle.BatteryCapacity : 1.0);
             this.alwaysClosedLoop = alwaysClosedLoop;
 
             siteVisits = new List<SiteVisit>();
             if (alwaysClosedLoop)
-                siteVisits.Add(new SiteVisit(problemModel.SRD.GetSingleDepotSite()));
+                siteVisits.Add(new SiteVisit(problemModel.SRD.GetSingleDepotSite(), batteryCapacity));
         }
         public VehicleSpecificRoute(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, List<string> nondepotSiteIDsInOrder, List<double> ESStayDurations = null, bool alwaysClosedLoop = true) : this(theProblemModel, vehicle, alwaysClosedLoop: alwaysClosedLoop)
         {
+            double batteryCapacity = (vehicle.Category == VehicleCategories.EV ? vehicle.BatteryCapacity : 1.0);
             //nondepotSiteIDsInOrder is named this way as a constant reminder that the sites are not just in an arbitrary list (like customer set) but are in fact in a route!
             //nondepotSiteIDsInOrder CANNOT contain the depot!
             if ((nondepotSiteIDsInOrder != null) && (nondepotSiteIDsInOrder.Contains(theProblemModel.SRD.GetSingleDepotID())))
@@ -81,7 +83,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if ((nondepotSiteIDsInOrder == null) || (nondepotSiteIDsInOrder.Count == 0))
                 return;
             if (!alwaysClosedLoop)
-                siteVisits.Add(new SiteVisit(theProblemModel.SRD.GetSingleDepotSite()));
+                siteVisits.Add(new SiteVisit(theProblemModel.SRD.GetSingleDepotSite(), batteryCapacity));
 
             //Finally, we can start populating the route
             ESCounter = 0;

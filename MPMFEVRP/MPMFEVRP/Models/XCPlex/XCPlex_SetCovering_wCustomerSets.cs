@@ -146,20 +146,27 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddUseLimitedNumberOfVehiclesConstraints()
         {
-            ILinearNumExpr numTimesVehicleTypeIsUsed = LinearNumExpr();
-            for (int i = 0; i < nCustomerSets; i++)
+            //TODO:This constraint was defined for vehicle type 0 only, assuming unlimited GDVs in a mixed-fleet, we better constrain both numbers of vehicles to what's specified in the problem. The code was revised to make set partition work for EMH for now but will have to be revisited
+            for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
             {
-                numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][0]);
-            }//for i
-            string constraint_name = "Vehicle type 0 can be used at most" + theProblemModel.NumVehicles[0] + "times";
-            allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, theProblemModel.NumVehicles[0], constraint_name));
+                ILinearNumExpr numTimesVehicleTypeIsUsed = LinearNumExpr();
+                for (int i = 0; i < nCustomerSets; i++)
+                {
+                    numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][v]);
+                }//for i
+                string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + theProblemModel.NumVehicles[v] + "times";
+                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, theProblemModel.NumVehicles[v], constraint_name));
+            }
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
-            return new CustomerSetBasedSolution(theProblemModel, GetZVariablesSetTo1(), customerSetArray);
+            if ((solutionStatus == XCPlexSolutionStatus.Feasible) || (solutionStatus == XCPlexSolutionStatus.Optimal))
+                return new CustomerSetBasedSolution(theProblemModel, GetZVariablesSetTo1(), customerSetArray);
+            else
+                return null;
         }
         public override string GetDescription_AllVariables_Array()
         {

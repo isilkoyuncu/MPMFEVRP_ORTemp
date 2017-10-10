@@ -28,16 +28,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         //Constructors
         //public SiteVisit() { }//empty constructor, make accessible when needed, hopefully never
-        public SiteVisit(Site depot)
+        public SiteVisit(Site depot, double batteryCapacity)
         {
             if (depot.SiteType != SiteTypes.Depot)
                 throw new Exception("SiteVisit special constructor for depot invoked for a non-depot site!");
             site = depot;
             arrivalTime = 0.0;
-            arrivalSOC = 1.0;
+            arrivalSOC = batteryCapacity;
             socGain = 0.0;
             departureTime = 0.0;
-            departureSOC = 1.0;
+            departureSOC = batteryCapacity;
             cumulativeTravelDistance = 0.0;
         }
         public SiteVisit(SiteVisit previousSV, Site currentSite, double travelDistance, double travelTime, Vehicle vehicle, double energyConsumption = 0.0, double stayDuration = double.MaxValue)
@@ -52,9 +52,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             departureTime = arrivalTime + stayDuration;
             if (vehicle.Category == VehicleCategories.GDV)
             {
-                arrivalSOC = 1.0;
+                arrivalSOC = previousSV.departureSOC;
                 socGain = 0.0;
-                departureSOC = 1.0;
+                departureSOC = arrivalSOC;
             }
             else
             {
@@ -75,6 +75,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             departureSOC = twinSiteVisit.departureSOC;
 
             cumulativeTravelDistance = twinSiteVisit.cumulativeTravelDistance;
+        }
     }
-}
 }

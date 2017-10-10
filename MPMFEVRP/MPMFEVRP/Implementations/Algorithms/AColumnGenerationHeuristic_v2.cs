@@ -61,7 +61,17 @@ namespace MPMFEVRP.Implementations.Algorithms
             bool ArchiveFileExists = System.IO.File.Exists(GDVEvaluatedCustomerSetArchiveFileName);
             bool UnexploredFileExists = System.IO.File.Exists(GDVFeasibleCustomerSetUnexploredFileName);
             bool UnexploredFileEmpty = (UnexploredFileExists ? (new System.IO.FileInfo(GDVFeasibleCustomerSetUnexploredFileName).Length == 0) : true);
+            if (ArchiveFileExists)
+            {
+                //If the archive file exists, it must be read
+                //the archive file doesn't exist, we'll simply ignore the unexplored file even if it exists
+                allCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVEvaluatedCustomerSetArchiveFileName, theProblemModel);
+                if (UnexploredFileExists)
+                    unexploredCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVFeasibleCustomerSetUnexploredFileName, theProblemModel);
+            }
             bool phase1Completed = (ArchiveFileExists && UnexploredFileEmpty);
+
+
 
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
@@ -71,19 +81,14 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (!phase1Completed)
             {
                 //Pre-process
-                //If the archive file exists, it must be read
-                if (ArchiveFileExists)//This means the unexplored file is not empty
-                {
-                    allCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVEvaluatedCustomerSetArchiveFileName, theProblemModel);
-                    unexploredCustomerSets = SetCoverFileUtilities.CustomerSetArchive.RecreateFromFile(GDVFeasibleCustomerSetUnexploredFileName, theProblemModel);
-                }
-                else//the archive file doesn't exist, we'll simply ignore the unexplored file even if it exists
+
+                if (!ArchiveFileExists)
                 {
                     int nCustomers = theProblemModel.SRD.NumCustomers;
                     foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
                     {
                         CustomerSet candidate = new CustomerSet(customerID);//The customer set is not TSP-optimized
-                        EvaluateForGDV(candidate, theGDV);//Now it is optimized and added to proper lists
+                        GDVOptimizeCustomerSetAndEvaluateForLists(candidate, theGDV);//Now it is optimized and added to proper lists
                     }
                 }
 
@@ -211,7 +216,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
         }
-        void EvaluateForGDV(CustomerSet customerSet, Vehicle vehicle)//TODO: Re-think this method's name. If it's for GDV only, why does it take vehicle as an input and not verify it's a GDV?
+        void GDVOptimizeCustomerSetAndEvaluateForLists(CustomerSet customerSet, Vehicle vehicle)//TODO: Re-think this method's name. If it's for GDV only, why does it take vehicle as an input and not verify it's a GDV?
         {
             //Evaluate is not to be mistaken with explore
             //Evaluate is for a newly created node
