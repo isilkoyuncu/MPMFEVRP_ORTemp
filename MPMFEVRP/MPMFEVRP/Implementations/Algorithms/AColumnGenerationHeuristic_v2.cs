@@ -174,7 +174,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void SpecializedReset()
         {
-            throw new NotImplementedException();
+            CPlexExtender.ClearModel();
         }
 
         void PopulateChildren()

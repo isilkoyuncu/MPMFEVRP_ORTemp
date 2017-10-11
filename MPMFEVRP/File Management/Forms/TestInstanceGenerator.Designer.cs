@@ -109,6 +109,12 @@
             this.button_SelectInputFile = new System.Windows.Forms.Button();
             this.groupBox_AsIsDataFromFile = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBox_L3kwhPerMin = new System.Windows.Forms.TextBox();
+            this.textBox_L2kwhPerMin = new System.Windows.Forms.TextBox();
+            this.textBox_L1kwhPerMin = new System.Windows.Forms.TextBox();
+            this.label_level3 = new System.Windows.Forms.Label();
+            this.label_level2 = new System.Windows.Forms.Label();
+            this.label_level1 = new System.Windows.Forms.Label();
             this.textBox_nInstances = new System.Windows.Forms.TextBox();
             this.label_nInstances = new System.Windows.Forms.Label();
             this.textBox_Seed = new System.Windows.Forms.TextBox();
@@ -871,6 +877,12 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.textBox_L3kwhPerMin);
+            this.groupBox2.Controls.Add(this.textBox_L2kwhPerMin);
+            this.groupBox2.Controls.Add(this.textBox_L1kwhPerMin);
+            this.groupBox2.Controls.Add(this.label_level3);
+            this.groupBox2.Controls.Add(this.label_level2);
+            this.groupBox2.Controls.Add(this.label_level1);
             this.groupBox2.Controls.Add(this.label_EVPrizeCoef);
             this.groupBox2.Controls.Add(this.textBox_nEVPremiumPayingCustomers);
             this.groupBox2.Controls.Add(this.textBox_EVPrizeCoef);
@@ -899,12 +911,64 @@
             this.groupBox2.Controls.Add(this.textBox_nESS_L2);
             this.groupBox2.Controls.Add(this.comboBox_ChargingLevelAtDepot);
             this.groupBox2.Controls.Add(this.textBox_nESS_L3);
-            this.groupBox2.Location = new System.Drawing.Point(288, 257);
+            this.groupBox2.Location = new System.Drawing.Point(13, 257);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(261, 304);
+            this.groupBox2.Size = new System.Drawing.Size(536, 304);
             this.groupBox2.TabIndex = 80;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Type, Gamma and Prize related data";
+            // 
+            // textBox_L3kwhPerMin
+            // 
+            this.textBox_L3kwhPerMin.Location = new System.Drawing.Point(332, 109);
+            this.textBox_L3kwhPerMin.Name = "textBox_L3kwhPerMin";
+            this.textBox_L3kwhPerMin.Size = new System.Drawing.Size(59, 20);
+            this.textBox_L3kwhPerMin.TabIndex = 93;
+            this.textBox_L3kwhPerMin.Text = "4";
+            this.textBox_L3kwhPerMin.TextChanged += new System.EventHandler(this.textBox_L3kwhPerMin_TextChanged);
+            // 
+            // textBox_L2kwhPerMin
+            // 
+            this.textBox_L2kwhPerMin.Location = new System.Drawing.Point(331, 83);
+            this.textBox_L2kwhPerMin.Name = "textBox_L2kwhPerMin";
+            this.textBox_L2kwhPerMin.Size = new System.Drawing.Size(59, 20);
+            this.textBox_L2kwhPerMin.TabIndex = 92;
+            this.textBox_L2kwhPerMin.Text = "0.25";
+            // 
+            // textBox_L1kwhPerMin
+            // 
+            this.textBox_L1kwhPerMin.Location = new System.Drawing.Point(331, 57);
+            this.textBox_L1kwhPerMin.Name = "textBox_L1kwhPerMin";
+            this.textBox_L1kwhPerMin.Size = new System.Drawing.Size(59, 20);
+            this.textBox_L1kwhPerMin.TabIndex = 91;
+            this.textBox_L1kwhPerMin.Text = "0.0625";
+            // 
+            // label_level3
+            // 
+            this.label_level3.AutoSize = true;
+            this.label_level3.Location = new System.Drawing.Point(272, 112);
+            this.label_level3.Name = "label_level3";
+            this.label_level3.Size = new System.Drawing.Size(42, 13);
+            this.label_level3.TabIndex = 90;
+            this.label_level3.Text = "Level 3";
+            // 
+            // label_level2
+            // 
+            this.label_level2.AutoSize = true;
+            this.label_level2.Location = new System.Drawing.Point(272, 86);
+            this.label_level2.Name = "label_level2";
+            this.label_level2.Size = new System.Drawing.Size(42, 13);
+            this.label_level2.TabIndex = 89;
+            this.label_level2.Text = "Level 2";
+            // 
+            // label_level1
+            // 
+            this.label_level1.AutoSize = true;
+            this.label_level1.Location = new System.Drawing.Point(272, 60);
+            this.label_level1.Name = "label_level1";
+            this.label_level1.Size = new System.Drawing.Size(42, 13);
+            this.label_level1.TabIndex = 88;
+            this.label_level1.Text = "Level 1";
             // 
             // textBox_nInstances
             // 
@@ -1087,5 +1151,11 @@
         private System.Windows.Forms.Label label_Source;
         private System.Windows.Forms.GroupBox groupBox_ExperimentRelated;
         private System.Windows.Forms.Label label_separatorLine1;
+        private System.Windows.Forms.TextBox textBox_L3kwhPerMin;
+        private System.Windows.Forms.TextBox textBox_L2kwhPerMin;
+        private System.Windows.Forms.TextBox textBox_L1kwhPerMin;
+        private System.Windows.Forms.Label label_level3;
+        private System.Windows.Forms.Label label_level2;
+        private System.Windows.Forms.Label label_level1;
     }
 }

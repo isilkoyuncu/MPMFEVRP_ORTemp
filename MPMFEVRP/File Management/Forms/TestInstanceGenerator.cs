@@ -32,6 +32,7 @@ namespace Instance_Generation.Forms
         int nEVPremPayCustomers;
         double tMax;
         double travelSpeed;
+        double l1kWhPerMinute, l2kWhPerMinute, l3kWhPerMinute;
         int xMax, yMax;
         int nISS, nISS_L1, nISS_L2, nISS_L3;
         int nESS, nESS_L1, nESS_L2, nESS_L3;
@@ -72,6 +73,10 @@ namespace Instance_Generation.Forms
             nESS_L2 = int.Parse(textBox_nESS_L2.Text);
             nESS_L3 = int.Parse(textBox_nESS_L3.Text);
             update_nESS();
+
+            l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
+            l2kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
+            l3kWhPerMinute = double.Parse(textBox_L3kwhPerMin.Text); //L3 charging speed
 
             foreach (DepotLocations dl in Enum.GetValues(typeof(DepotLocations)))
             {
@@ -222,6 +227,20 @@ namespace Instance_Generation.Forms
             nESS_L1 = int.Parse(textBox_nESS_L1.Text);
             update_nESS();
         }
+
+        private void textBox_L3kwhPerMin_TextChanged(object sender, EventArgs e)
+        {
+            l1kWhPerMinute = double.Parse(textBox_L3kwhPerMin.Text); //L3 charging speed
+        }
+        private void textBox_L2kwhPerMin_TextChanged(object sender, EventArgs e)
+        {
+            l1kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
+        }
+        private void textBox_L1kwhPerMin_TextChanged(object sender, EventArgs e)
+        {
+            l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
+        }
+
         private void textBox_nESS_L2_TextChanged(object sender, EventArgs e)
         {
             nESS_L2 = int.Parse(textBox_nESS_L2.Text);
@@ -341,6 +360,9 @@ namespace Instance_Generation.Forms
                     yMax = int.Parse(textBox_YMax.Text);
                     tMax = double.Parse(textBox_TMax.Text); //workday length
                     travelSpeed = double.Parse(textBox_TravelSpeed.Text); //travel speed
+                    l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
+                    l2kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
+                    l3kWhPerMinute = double.Parse(textBox_L3kwhPerMin.Text); //L3 charging speed
                 }
                 else
                 {
@@ -422,6 +444,7 @@ namespace Instance_Generation.Forms
             TypeGammaPrize_RelatedData TGPData = new FormSections.TypeGammaPrize_RelatedData(nEVPremPayCustomers,
                 nISS_L1, nISS_L2, nISS_L3,
                 nESS_L1, nESS_L2, nESS_L3,
+                l1kWhPerMinute,l2kWhPerMinute,l3kWhPerMinute,
                 selectedDepotChargingLvl,
                 basePricingPol, basePricingDollar,
                 tripChargePol, tripChargeDollar,
@@ -434,31 +457,6 @@ namespace Instance_Generation.Forms
             writer = new KoyuncuYavuzFileWriter(filename, fc.NumberOfNodes, VehData, CCData,
                 fc.NodeID, fc.NodeType, fc.X, fc.Y, fc.Demand, fc.TimeWindowStart, fc.TimeWindowEnd, fc.CustomerServiceDuration, fc.Gamma, fc.Prize, fc.TravelSpeed, fc.UseGeogPosition ,fc.Distance);
             writer.Write();
-
-
-            //The remainde is old stuff, we'll come back to delete it all
-            //Main process
-            //RandomInstanceGenerator generator = new RandomInstanceGenerator();
-            //for (int seed = minSeed; seed <= maxSeed; seed++)
-            //{
-            //    //create
-            //    generator.Generate(seed, nCustomers, customerDistribution, nEVPremPayCustomers,
-            //        nISS_L1, nISS_L2, nISS_L3,
-            //        nESS, nESS_L1, nESS_L2, nESS_L3,
-            //        tMax, travelSpeed,
-            //        xMax, yMax,
-            //        depotLocation,
-            //        serviceDurationDistribution,
-            //        selectedEV, selectedGDV,
-            //        selectedDepotChargingLvl,
-            //        basePricingPol, basePricingDollar,
-            //        tripChargePol, tripChargeDollar,
-            //        EVPrizeCoef
-            //        );
-            //    //Save
-            //    filename += "_" + seed.ToString("D2");
-            //    generator.SaveToFile(filename);
-            //}//for (int seed = minSeed; seed <= maxSeed; seed++)
             System.Windows.Forms.MessageBox.Show("Files were written successfully!");
         }
         bool VerifyUserInput()

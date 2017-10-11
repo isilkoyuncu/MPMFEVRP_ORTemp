@@ -65,6 +65,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             CPlexExtender.Solve_and_PostProcess();
         }
 
+
         public override void SpecializedConclude()
         {
             //Given that the instance is solved, we need to update status and statistics from it
@@ -118,6 +119,10 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
+            CPlexExtender.ClearModel();
+            CPlexExtender.Dispose();
+            CPlexExtender.End();
+            GC.Collect();
         }
 
         public override string[] GetOutputSummary()

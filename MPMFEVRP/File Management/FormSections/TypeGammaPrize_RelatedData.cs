@@ -24,6 +24,11 @@ namespace Instance_Generation.FormSections
         public int NESS_L2 { get { return nESS_L2; } }
         public int NESS_L3 { get { return nESS_L3; } }
 
+        double l1kWhPerMinute, l2kWhPerMinute, l3kWhPerMinute;
+        public double L1kWhPerMinute { get { return l1kWhPerMinute; } }
+        public double L2kWhPerMinute { get { return l2kWhPerMinute; } }
+        public double L3kWhPerMinute { get { return l3kWhPerMinute; } }
+
         ChargingLevels selectedDepotChargingLvl;
         public ChargingLevels SelectedDepotChargingLvl { get { return selectedDepotChargingLvl; } }
 
@@ -50,6 +55,9 @@ namespace Instance_Generation.FormSections
             int nESS_L1,
             int nESS_L2,
             int nESS_L3,
+            double l1kWhPerMinute,
+            double l2kWhPerMinute,
+            double l3kWhPerMinute,
             ChargingLevels selectedDepotChargingLvl,
             BasePricingPolicy basePricingPol,
             double basePricingDollar,
@@ -67,13 +75,15 @@ namespace Instance_Generation.FormSections
             this.nESS_L2 = nESS_L2;
             this.nESS_L3 = nESS_L3;
             nESS = nESS_L1 + nESS_L2 + nESS_L3;
+            this.l1kWhPerMinute = l1kWhPerMinute;
+            this.l2kWhPerMinute = l2kWhPerMinute;
+            this.l3kWhPerMinute = l3kWhPerMinute;
             this.selectedDepotChargingLvl = selectedDepotChargingLvl;
             this.basePricingPol = basePricingPol;
             this.basePricingDollar = basePricingDollar;
             this.tripChargePol = tripChargePol;
             this.tripChargeDollar = tripChargeDollar;
             this.evPrizeCoefficient = evPrizeCoefficient;
-
         }
     }
 }

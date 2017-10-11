@@ -294,7 +294,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationFollowingAnESVisit();//12
             AddConstraint_ArrivalTimeLimits();
             AddConstraint_TotalTravelTime();
-
+            
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
@@ -330,6 +330,7 @@ namespace MPMFEVRP.Models.XCPlex
                         allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheCustomerNode, 1.0, constraint_name));
                     }
                 }
+                NumberOfVehiclesVisitingTheCustomerNode.Clear();
             }
         }
         void AddConstraint_NumberOfEvVisitsPerESNode()//2
@@ -342,6 +343,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                 string constraint_name = "At_most_one_EV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(NumberOfEvVisitToTheESNode, 1.0, constraint_name));
+                NumberOfEvVisitToTheESNode.Clear();
             }
         }
         void AddConstraint_NoGDVVisitToESNodes()//3
@@ -354,6 +356,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                 string constraint_name = "No_GDV_can_visit_the_ES_node_" + j.ToString();
                 allConstraints_list.Add(AddEq(NumberOfGDVsVisitingTheNode, 0.0, constraint_name));
+                NumberOfGDVsVisitingTheNode.Clear();
             }
         }
         void AddConstraint_IncomingXTotalEqualsOutgoingXTotal()//4
@@ -368,6 +371,7 @@ namespace MPMFEVRP.Models.XCPlex
                         IncomingXTotalMinusOutgoingXTotal.AddTerm(-1.0, X[j][k][v]);
                     string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_incoming_to_node_" + j.ToString() + "_equals_to_outgoing_vehicles";
                     allConstraints_list.Add(AddEq(IncomingXTotalMinusOutgoingXTotal, 0.0, constraint_name));
+                    IncomingXTotalMinusOutgoingXTotal.Clear();
                 }
         }
         void AddConstraint_MaxNumberOfVehiclesPerCategory()//5
@@ -379,6 +383,7 @@ namespace MPMFEVRP.Models.XCPlex
                     NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
                 string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[v].ToString();
                 allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
+                NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
             }
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
@@ -391,6 +396,7 @@ namespace MPMFEVRP.Models.XCPlex
                     EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][vIndex_EV]);
                 string constraint_name = "Max_Energy_Gain_At_NonDepot_Site_" + j.ToString();
                 allConstraints_list.Add(AddLe(EnergyGainAtNonDepotSite, 0.0, constraint_name));
+                EnergyGainAtNonDepotSite.Clear();
             }
         }
         void AddConstraint_DepartureSOCFromCustomerNode()//7
@@ -404,6 +410,7 @@ namespace MPMFEVRP.Models.XCPlex
                     DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][vIndex_EV]);
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
                 allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, minValue_Delta[j], constraint_name));
+                DepartureSOCFromCustomer.Clear();
             }
         }
         void AddConstraint_DepartureSOCFromESNode()//8
@@ -424,6 +431,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     allConstraints_list.Add(AddEq(DepartureSOCFromES, minValue_Delta[j], constraint_name));
                 }
+                DepartureSOCFromES.Clear();
             }
         }
         void AddConstraint_SOCRegulationFollowingNondepot()//9
@@ -441,6 +449,7 @@ namespace MPMFEVRP.Models.XCPlex
                     SOCDifference.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV) + BigDelta[i][j], X[i][j][vIndex_EV]);
                     string constraint_name = "SOC_Regulation_from_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddLe(SOCDifference, BigDelta[i][j], constraint_name));
+                    SOCDifference.Clear();
                 }
             }
         }
@@ -454,6 +463,7 @@ namespace MPMFEVRP.Models.XCPlex
                 SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo,VehicleCategories.EV), X[0][j][vIndex_EV]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, BatteryCapacity(VehicleCategories.EV), constraint_name));
+                SOCDifference.Clear();
             }
         }
         void AddConstraint_TimeRegulationFollowingACustomerVisit()//11
@@ -470,6 +480,7 @@ namespace MPMFEVRP.Models.XCPlex
                         TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][v]);
                     string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
+                    TimeDifference.Clear();
                 }
         }
         void AddConstraint_TimeRegulationFollowingAnESVisit()//12 
@@ -499,6 +510,7 @@ namespace MPMFEVRP.Models.XCPlex
                         constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     }
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
+                    TimeDifference.Clear();
                 }
             }
         }
@@ -513,6 +525,7 @@ namespace MPMFEVRP.Models.XCPlex
                         TimeDifference.AddTerm((maxValue_T[j] - minValue_T[j]), X[i][j][v]);
                 string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
                 allConstraints_list.Add(AddGe(TimeDifference, maxValue_T[j], constraint_name));
+                TimeDifference.Clear();
             }
         }
         void AddConstraint_TotalTravelTime()//14
@@ -534,7 +547,56 @@ namespace MPMFEVRP.Models.XCPlex
             double rhs = (numVehicles[vIndex_EV]+numVehicles[vIndex_GDV]) * theProblemModel.CRD.TMax;
             rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+            TotalTravelTime.Clear();
         }
+        //void AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs()
+        //{
+        //    for (int i = 0; i < numDuplicatedNodes; i++)
+        //    {
+        //        Site from = preprocessedSites[i];
+        //        for (int k = 0; k < numDuplicatedNodes; k++)
+        //        {
+        //            Site through = preprocessedSites[k];
+        //            for (int j = 0; j < numDuplicatedNodes; j++)
+        //            {
+        //                Site to = preprocessedSites[j];
+        //                if (minValue_T[i]+TravelTime(from,through)+TravelTime(through,to)>maxValue_T[j])
+        //                {
+        //                    ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+        //                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
+        //                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
+        //                    string constraint_name = "No_arc_from_node_"+i.ToString()+"_through_node_" + k.ToString()+"to_node_"+j.ToString();
+        //                    allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+        //                    TimeFeasibilityOfTwoConsecutiveArcs.Clear();
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+        //void AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs()
+        //{
+        //    for (int i = 0; i < numDuplicatedNodes; i++)
+        //    {
+        //        Site from = preprocessedSites[i];
+        //        for (int k = 0; k < numDuplicatedNodes; k++)
+        //        {
+        //            Site through = preprocessedSites[k];
+        //            for (int j = 0; j < numDuplicatedNodes; j++)
+        //            {
+        //                Site to = preprocessedSites[j];
+        //                if (EnergyConsumption(from, through,VehicleCategories.EV) + EnergyConsumption(through, to,VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
+        //                {
+        //                    ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+        //                    EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
+        //                    EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
+        //                    string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
+        //                    allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+        //                    EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
