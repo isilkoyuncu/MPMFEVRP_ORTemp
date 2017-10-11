@@ -324,6 +324,7 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             ExportModel("mmmmodel.lp");
+            Output();
             Solve();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
