@@ -161,6 +161,7 @@
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woUvariables.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="SupplementaryInterfaces\IWriter.cs" />
     <Compile Include="Implementations\Problems\Interfaces_and_Bases\ProblemBase.cs" />
     <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\ProblemModelBase.cs" />
