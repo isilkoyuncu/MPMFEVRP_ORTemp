@@ -52,15 +52,14 @@ namespace Instance_Generation.FileConverters
             this.VehData = VehData;
             if (reader == null)
                 numCustomers = CCData.NCustomers;
+            else
+                numCustomers = reader.getNumCustomers();
+
             if (reader != null)
                 this.reader = reader;
 
             //Intermediate
-            if (reader != null)
-                numCustomers = reader.getNumCustomers();
-            //else
-            //    numCustomers = CCData.NumCustomers;//TODO Remove commenting when CCData is functional
-            numNodes = CCData.NCustomers + TGPData.NESS + 1;
+            numNodes = numCustomers + TGPData.NESS + 1;
 
             //RIG
             RIG = new NewRandomInstanceGenerator(ExpData.Seed);
@@ -220,11 +219,11 @@ namespace Instance_Generation.FileConverters
             for (int i = 0; i < numNodes; i++)
             {
                 if (nodeType[i].Contains("L3"))
-                    gamma[i] = ChargingStation.RechargingRate(ChargingLevels.L3);
+                    gamma[i] = TGPData.L3kWhPerMinute;
                 else if (nodeType[i].Contains("L2"))
-                    gamma[i] = ChargingStation.RechargingRate(ChargingLevels.L2);
+                    gamma[i] = TGPData.L2kWhPerMinute;
                 else if (nodeType[i].Contains("L1"))
-                    gamma[i] = ChargingStation.RechargingRate(ChargingLevels.L1);
+                    gamma[i] = TGPData.L1kWhPerMinute;
             }
         }
         void PopulatePrizeColumn()

@@ -11,8 +11,6 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    // TODO apply all the changes that are done in node based formulation!!!
-    //TODO get all sites here and then use the mapping we coded
     public class XCPlex_ArcDuplicatingFormulation_woU : XCPlexVRPBase
     {
         int numNonESNodes;
@@ -37,7 +35,7 @@ namespace MPMFEVRP.Models.XCPlex
             SetMinAndMaxValuesOfAllVariables();
             allVariables_list = new List<INumVar>();
 
-            //dvs: X_ijv, Y_irj and U_jv
+            //dvs: X_ijv and Y_irj
             AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numNonESNodes, numNonESNodes, numVehCategories, out X);
             AddThreeDimensionalDecisionVariable("Y", Y_LB, Y_UB, NumVarType.Int, numNonESNodes, numES, numNonESNodes, out Y);
 

@@ -146,7 +146,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
-            throw new NotImplementedException();
+            CPlexExtender.ClearModel();
         }
 
         public override string[] GetOutputSummary()

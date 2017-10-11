@@ -29,6 +29,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList unexploredCustomerSets;
         CustomerSetList parents;
 
+        XCPlex_SetCovering_wCustomerSets CPlexExtender;
+
         public override void AddSpecializedParameters()
         {
         }
@@ -74,7 +76,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
-            throw new NotImplementedException();
+            CPlexExtender.ClearModel();
         }
 
         public override void SpecializedRun()
@@ -149,7 +151,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         void RunSetPartition()
         {
-            XCPlex_SetCovering_wCustomerSets CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles());
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles());
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
         }

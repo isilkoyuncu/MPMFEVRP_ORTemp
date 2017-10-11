@@ -181,5 +181,20 @@ namespace MPMFEVRP.Forms
         {
             TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_TSPModel.SelectedItem.ToString());
         }
+
+        private void button_exportDistances_Click(object sender, EventArgs e)
+        {
+            theProblemModel.ExportDistancesAsTxt();
+        }
+
+        private void button_exportEnergyConsmp_Click(object sender, EventArgs e)
+        {
+            theProblemModel.ExportEnergyConsumpionAsTxt();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            theProblemModel.ExportTravelDurationAsTxt();
+        }
     }
 }

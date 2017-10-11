@@ -122,11 +122,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             XCPlexVRPBase solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
             solver.RefineDecisionVariables(CS);
             solver.Solve_and_PostProcess();
+            VehicleSpecificRouteOptimizationOutcome vsroo;
             if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
-                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
-                return new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
-
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
+            solver.ClearModel();
+            return vsroo;
         }
         VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
         {
@@ -328,6 +330,60 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             }
             return outcome;
         }
-
+        // These following 3 methods exports calculated information as a text file
+        public void ExportDistancesAsTxt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_distances.txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("Instance Name", inputFileName);
+            for (int i = 0; i < pdp.SRD.NumNodes; i++)
+            {
+                sw.WriteLine();
+                for (int j = 0; j < pdp.SRD.NumNodes; j++)
+                {
+                    sw.Write(pdp.SRD.Distance[i, j] + " ");
+                }
+            }
+            sw.Close();
+        }
+        public void ExportTravelDurationAsTxt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_travelDurations.txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("Instance Name", inputFileName);
+            for (int i = 0; i < pdp.SRD.NumNodes; i++)
+            {
+                sw.WriteLine();
+                for (int j = 0; j < pdp.SRD.NumNodes; j++)
+                {
+                    sw.Write(pdp.SRD.TimeConsumption[i, j] + " ");
+                }
+            }
+            sw.Close();
+        }
+        public void ExportEnergyConsumpionAsTxt()
+        {
+            System.IO.StreamWriter sw;
+            String fileName = inputFileName;
+            fileName = fileName.Replace(".txt", "");
+            string outputFileName = fileName + "_energies.txt";
+            sw = new System.IO.StreamWriter(outputFileName);
+            sw.WriteLine("Instance Name", inputFileName);
+            for (int i = 0; i < pdp.SRD.NumNodes; i++)
+            {
+                sw.WriteLine();
+                for (int j = 0; j < pdp.SRD.NumNodes; j++)
+                {
+                    sw.Write(pdp.SRD.EnergyConsumption[i, j, 0] + " ");
+                }
+            }
+            sw.Close();
+        }
     }
 }
