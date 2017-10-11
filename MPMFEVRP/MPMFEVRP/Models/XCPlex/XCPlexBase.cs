@@ -8,7 +8,6 @@ using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics.Tracing;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -325,9 +324,7 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             ExportModel("mmmmodel.lp");
-            //            SetOut(TWoutput = System.IO.File.CreateText("C:/Users/ikoyuncu/Desktop/CplexOutput.txt"));
             Solve();
-            //      TWoutput.Close();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
             numberOfTimesSolveMethodCalled++;
