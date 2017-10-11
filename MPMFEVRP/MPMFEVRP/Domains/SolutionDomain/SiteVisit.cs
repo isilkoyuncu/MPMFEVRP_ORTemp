@@ -60,7 +60,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 arrivalSOC = previousSV.departureSOC - energyConsumption;
                 socGain = Utils.Calculators.MaxSOCGainAtSite(currentSite, vehicle, stayDuration);
-                departureSOC = arrivalSOC + socGain;
+                departureSOC = Math.Min(arrivalSOC + socGain, vehicle.BatteryCapacity);
             }
             cumulativeTravelDistance = previousSV.cumulativeTravelDistance + travelDistance;
         }

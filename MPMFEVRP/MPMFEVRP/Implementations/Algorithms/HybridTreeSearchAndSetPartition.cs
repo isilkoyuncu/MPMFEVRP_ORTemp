@@ -55,7 +55,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             xCplexParam = new XCPlexParameters();
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 10;
+            beamWidth = 1;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
             allCustomerSets = new PartitionedCustomerSetList();
@@ -93,7 +93,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
-                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth);
+                    parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
 
                     //populate children from parents
                     PopulateAndPlaceChildren();
