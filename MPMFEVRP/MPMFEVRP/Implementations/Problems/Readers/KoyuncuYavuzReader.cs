@@ -184,6 +184,30 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             string cleanedRow = theRow.Replace("\t", "").Replace(" ", "");
             return ((endOfLineStrings.Contains(cleanedRow))||(cleanedRow==""));
         }
+        bool customerInfeasible(int c)
+        {
+            if (customerDirectRouteExceedsWorkdayLength(c))//11-hour day (660 minutes)
+                return true;
+            if (customerCantBeReachedWithAtMostOneESVisit(c))
+                return true;
+            return false;
+        }
+        bool customerDirectRouteExceedsWorkdayLength(int c)
+        {
+            return (2 * distance[0, c] / travelSpeed + constantJobProcessingTime > workdayLength);
+        }
+        bool customerCantBeReachedWithAtMostOneESVisit(int c)
+        {
+            if (distance[0, c] <= 0.5 * AFVRange)
+                return false;
+            for (int e = nCustomers + 1; e <= nCustomers + nNonDepotExternalStations; e++)
+                if (distance[0, e] <= AFVRange)
+                    if (distance[e, c] + distance[c, 0] <= AFVRange)
+                        if ((distance[0, e] + distance[e, c] + distance[c, 0]) / travelSpeed + constantJobProcessingTime + 15.0 <= workdayLength)
+                            return false;
+            return true;
+        }
+
 
         public string GetRecommendedOutputFileFullName()
         {
