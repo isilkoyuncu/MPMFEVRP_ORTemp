@@ -127,7 +127,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
-            solver.ClearModel();
+//            solver.ClearModel();
             return vsroo;
         }
         VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)

@@ -66,6 +66,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     return level;
             return -1;
         }
+        public int[] CountByLevel()
+        {
+            int[] outcome = new int[deepestLevel + 1];
+            for (int l = 0; l < outcome.Length; l++)
+                outcome[l] = CSLList[l].Count;
+            return outcome;
+        }
         public int TotalCount
         {
             get

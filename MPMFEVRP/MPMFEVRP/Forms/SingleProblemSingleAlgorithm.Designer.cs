@@ -45,6 +45,7 @@
             this.button_viewProblem = new System.Windows.Forms.Button();
             this.groupBox_algorithms = new System.Windows.Forms.GroupBox();
             this.button_run = new System.Windows.Forms.Button();
+            this.BackgroundWorker_algorithmRunner = new System.ComponentModel.BackgroundWorker();
             this.panel_parameters = new System.Windows.Forms.Panel();
             this.label9 = new System.Windows.Forms.Label();
             this.comboBox_algorithms = new System.Windows.Forms.ComboBox();
@@ -330,6 +331,14 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // BackgroundWorker_algorithmRunner
+            // 
+            this.BackgroundWorker_algorithmRunner.WorkerReportsProgress = true;
+            this.BackgroundWorker_algorithmRunner.WorkerSupportsCancellation = true;
+            this.BackgroundWorker_algorithmRunner.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BackgroundWorker_algorithmRunner_DoWork);
+            this.BackgroundWorker_algorithmRunner.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.BackgroundWorker_algorithmRunner_ProgressChanged);
+            this.BackgroundWorker_algorithmRunner.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker_algorithmRunner_RunWorkerCompleted);
+            // 
             // SingleProblemSingleAlgorithm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -383,5 +392,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button_exportEnergyConsmp;
         private System.Windows.Forms.Button button_exportDistances;
+        private System.ComponentModel.BackgroundWorker BackgroundWorker_algorithmRunner;
+
     }
 }

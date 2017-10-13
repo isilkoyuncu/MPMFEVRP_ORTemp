@@ -31,6 +31,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         XCPlex_SetCovering_wCustomerSets CPlexExtender;
 
+        Forms.HybridTreeSearchAndSetPartitionCharts charts;
+        SupplementaryInterfaces.Listeners.CustomerSetTreeSearchListener customerSetTreeSearchListener;
+
         public override void AddSpecializedParameters()
         {
         }
@@ -42,12 +45,13 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string[] GetOutputSummary()
         {
-            throw new NotImplementedException();
+            System.Windows.Forms.MessageBox.Show("Not yet implemented!");
+            return null;
         }
 
         public override void SpecializedConclude()
         {
-            throw new NotImplementedException();
+            System.Windows.Forms.MessageBox.Show("Not yet implemented!");
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -63,6 +67,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
             PopulateAndPlaceInitialCustomerSets();
+
+            charts = new Forms.HybridTreeSearchAndSetPartitionCharts();
+            customerSetTreeSearchListener = charts;
+            InformCustomerSetTreeSearchListener();
+            charts.Show();
         }
         void PopulateAndPlaceInitialCustomerSets()
         {
@@ -76,7 +85,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
-            CPlexExtender.ClearModel();
+            CPlexExtender.Dispose();
         }
 
         public override void SpecializedRun()
@@ -95,10 +104,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
-                    parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
+                    parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=-3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
 
                     //populate children from parents
                     PopulateAndPlaceChildren();
+
+                //    InformCustomerSetTreeSearchListener();
 
                     //end of the level, moving on to the next level
                     currentLevel++;
@@ -133,6 +144,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             }//foreach (CustomerSet cs in parents)
             parents.Clear();
         }
+        void InformCustomerSetTreeSearchListener()
+        {
+            if (customerSetTreeSearchListener != null)
+                customerSetTreeSearchListener.OnChangeOfNumberOfUnexploredCustomerSets(unexploredCustomerSets.CountByLevel());
+        }
 
         void OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
         {
@@ -146,7 +162,10 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                 return;
             if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
+            {
                 unexploredCustomerSets.Add(candidate);
+                InformCustomerSetTreeSearchListener();
+            }
         }
 
         void RunSetPartition()

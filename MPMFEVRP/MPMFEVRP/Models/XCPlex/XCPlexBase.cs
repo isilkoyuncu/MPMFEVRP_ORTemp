@@ -413,5 +413,29 @@ namespace MPMFEVRP.Models.XCPlex
         }
 
         public abstract string GetModelName();
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    ClearModel();
+                    ClearCallbacks();
+                    ClearCuts();
+                    ClearLazyConstraints();
+                    ClearUserCuts();
+                    End();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
     }
 }
