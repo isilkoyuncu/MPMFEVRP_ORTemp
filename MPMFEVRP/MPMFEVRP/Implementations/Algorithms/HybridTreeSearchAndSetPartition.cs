@@ -143,6 +143,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }//foreach (string customerID in remainingCustomers)
             }//foreach (CustomerSet cs in parents)
             parents.Clear();
+            InformCustomerSetTreeSearchListener();
         }
         void InformCustomerSetTreeSearchListener()
         {
