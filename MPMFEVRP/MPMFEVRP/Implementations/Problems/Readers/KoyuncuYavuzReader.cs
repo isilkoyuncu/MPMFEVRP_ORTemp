@@ -81,7 +81,6 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             ProcessRawDataFromFile(wholeFile);
         }
 
-
         public void ProcessRawDataFromFile(string wholeFile)
         {
             string[] allRows = wholeFile.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
@@ -184,31 +183,36 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             string cleanedRow = theRow.Replace("\t", "").Replace(" ", "");
             return ((endOfLineStrings.Contains(cleanedRow))||(cleanedRow==""));
         }
-        bool customerInfeasible(int c)
+        bool CustomerInfeasible(int c)
         {
-            if (customerDirectRouteExceedsWorkdayLength(c))//11-hour day (660 minutes)
+            if (CustomerDirectRouteExceedsWorkdayLength(c))//11-hour day (660 minutes)
                 return true;
-            if (customerCantBeReachedWithAtMostOneESVisit(c))
+            if (CustomerCannotBeReachedWithAtMostOneESVisit(c))
                 return true;
             return false;
         }
-        bool customerDirectRouteExceedsWorkdayLength(int c)
+        bool CustomerDirectRouteExceedsWorkdayLength(int c)
         {
-            return (2 * distance[0, c] / travelSpeed + constantJobProcessingTime > workdayLength);
+            double minStay = 0.0;
+            if (type[c].Contains("c"))
+            {
+                minStay = serviceDuration[c];
+            }
+            return ((distance[c,0]+distance[0, c]) / travelSpeed + minStay > dueDate[0]); 
         }
-        bool customerCantBeReachedWithAtMostOneESVisit(int c)
+        bool CustomerCannotBeReachedWithAtMostOneESVisit(int c)
         {
-            if (distance[0, c] <= 0.5 * AFVRange)
+            if ((distance[c, 0] + distance[0, c]) <= vehBatteryCap[0]/vehConsumpRate[0])
                 return false;
-            for (int e = nCustomers + 1; e <= nCustomers + nNonDepotExternalStations; e++)
-                if (distance[0, e] <= AFVRange)
-                    if (distance[e, c] + distance[c, 0] <= AFVRange)
-                        if ((distance[0, e] + distance[e, c] + distance[c, 0]) / travelSpeed + constantJobProcessingTime + 15.0 <= workdayLength)
+            for (int r=0; r< id.Length; r++)
+                if(type[r].Contains("e"))
+                if (distance[0, r] <= vehBatteryCap[0] / vehConsumpRate[0])
+                    if (distance[r, c] + distance[c, 0] <= vehBatteryCap[0] / vehConsumpRate[0])
+                        if ((distance[0, r] + distance[r, c] + distance[c, 0]) / travelSpeed + serviceDuration[c] + 15.0 <= dueDate[0])
                             return false;
             return true;
         }
-
-
+        
         public string GetRecommendedOutputFileFullName()
         {
             string output = "";// sourceDirectory;
