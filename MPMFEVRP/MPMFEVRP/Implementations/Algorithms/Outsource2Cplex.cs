@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
-    class Outsource2Cplex : AlgorithmBase
+    public class Outsource2Cplex : AlgorithmBase
     {
         XCPlexParameters XcplexParam;
         XCPlexBase CPlexExtender = null;
