@@ -102,14 +102,18 @@ namespace MPMFEVRP.Models.XCPlex
         protected abstract void AddAllConstraints();
         public abstract string GetDescription_AllVariables_Array();
         public abstract SolutionBase GetCompleteSolution(Type SolutionType);//TODO Figure out how to make this work with a run-time-selected Solution type
+
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
         {
             String dv_name = name;
             dv = new INumVar[length1];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
             for (int i = 0; i < length1; i++)
             {
                 dv_name = name + "_(" + i.ToString() + ")";
-                dv[i] = NumVar(lowerBound, upperBound, type, dv_name);
+                dv[i] = NumVar(lowerBound, upperBound, newType, dv_name);
                 allVariables_list.Add(dv[i]);
             }
             DecisionVariables.Add(dv_name, dv);
@@ -118,10 +122,13 @@ namespace MPMFEVRP.Models.XCPlex
         {
             String dv_name = name;
             dv = new INumVar[length1];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
             for (int i = 0; i < length1; i++)
             {
                 dv_name = name + "_(" + i.ToString() + ")";
-                dv[i] = NumVar(lowerBound[i], upperBound[i], type, dv_name);
+                dv[i] = NumVar(lowerBound[i], upperBound[i], newType, dv_name);
                 allVariables_list.Add(dv[i]);
             }
             DecisionVariables.Add(dv_name, dv);
@@ -131,13 +138,16 @@ namespace MPMFEVRP.Models.XCPlex
         {
             String dv_name = name;
             dv = new INumVar[length1][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = new INumVar[length2[i]];
                 for (int j = 0; j < length2[i]; j++)
                 {
                     dv_name = name + "_(" + i.ToString() + "," + j.ToString() + ")";
-                    dv[i][j] = NumVar(lowerBound, upperBound, type, dv_name);
+                    dv[i][j] = NumVar(lowerBound, upperBound, newType, dv_name);
                     allVariables_list.Add(dv[i][j]);
                 }
             }
@@ -150,10 +160,13 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = new INumVar[length2];
+                NumVarType newType = type;
+                if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                    newType = NumVarType.Float;
                 for (int j = 0; j < length2; j++)
                 {
                     dv_name = name + "_(" + i.ToString() + "," + j.ToString() + ")";
-                    dv[i][j] = NumVar(lowerBound, upperBound, type, dv_name);
+                    dv[i][j] = NumVar(lowerBound, upperBound, newType, dv_name);
                     allVariables_list.Add(dv[i][j]);
                 }
             }
@@ -163,13 +176,16 @@ namespace MPMFEVRP.Models.XCPlex
         {
             String dv_name = name;
             dv = new INumVar[length1][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = new INumVar[length2];
                 for (int j = 0; j < length2; j++)
                 {
                     dv_name = name + "_(" + i.ToString() + "," + j.ToString() + ")";
-                    dv[i][j] = NumVar(lowerBound[i][j], upperBound[i][j], type, dv_name);
+                    dv[i][j] = NumVar(lowerBound[i][j], upperBound[i][j], newType, dv_name);
                     allVariables_list.Add(dv[i][j]);
                 }
             }
@@ -180,6 +196,9 @@ namespace MPMFEVRP.Models.XCPlex
         {
             String dv_name = name;
             dv = new INumVar[length1][][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = new INumVar[length2][];
@@ -189,7 +208,7 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int v = 0; v < length3; v++)
                     {
                         dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
-                        dv[i][j][v] = NumVar(lowerBound, upperBound, type, dv_name);
+                        dv[i][j][v] = NumVar(lowerBound, upperBound, newType, dv_name);
                         allVariables_list.Add(dv[i][j][v]);
                     }
                 }
@@ -200,6 +219,9 @@ namespace MPMFEVRP.Models.XCPlex
         {
             String dv_name = name;
             dv = new INumVar[length1][][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
             for (int i = 0; i < length1; i++)
             {
                 dv[i] = new INumVar[length2][];
@@ -209,7 +231,7 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int v = 0; v < length3; v++)
                     {
                         dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
-                        dv[i][j][v] = NumVar(lowerBound[i][j][v], upperBound[i][j][v], type, dv_name);
+                        dv[i][j][v] = NumVar(lowerBound[i][j][v], upperBound[i][j][v], newType, dv_name);
                         allVariables_list.Add(dv[i][j][v]);
                     }
                 }
@@ -389,11 +411,12 @@ namespace MPMFEVRP.Models.XCPlex
             }//if relaxed
             
         }
+
         bool ValidateCompletenessOfRelaxedSolution()
         {
-            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
-                return ValidateIntegralityOfLPRelaxation();
-            //We should never get here
+            //if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+            //    return ValidateIntegralityOfLPRelaxation();
+            ////We should never get here
             return false;
         }
         bool ValidateIntegralityOfLPRelaxation()

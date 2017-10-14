@@ -562,17 +562,17 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int j = 0; j < numDuplicatedNodes; j++)
                     {
                         Site to = preprocessedSites[j];
-                        if(i!=j&&j!=k&&i!=k)
-                            if(from.SiteType==SiteTypes.Customer&& through.SiteType == SiteTypes.Customer && to.SiteType == SiteTypes.Customer)
-                        if (minValue_T[i] + TravelTime(from, through) + TravelTime(through, to) > maxValue_T[j])
-                        {
-                            ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
-                            TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
-                            TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
-                            string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
-                            allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
-                            TimeFeasibilityOfTwoConsecutiveArcs.Clear();
-                        }
+                        if (i != j && j != k && i != k)
+                            if (from.SiteType == SiteTypes.Customer && through.SiteType == SiteTypes.Customer && to.SiteType == SiteTypes.Customer)
+                                if (minValue_T[i] + ServiceDuration(from)+ TravelTime(from, through) + ServiceDuration(through) + TravelTime(through, to) > maxValue_T[j])
+                                {
+                                    ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
+                                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
+                                    string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
+                                    allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                                    TimeFeasibilityOfTwoConsecutiveArcs.Clear();
+                                }
                     }
                 }
             }

@@ -22,7 +22,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU }, XCPlex_Formulation.NodeDuplicatingwoU, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
-            //algorithmParameters.AddParameter(new Parameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
+            //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RELAXATION, "Cplex Relaxation", new List<object>() { XCPlexRelaxation.None, XCPlexRelaxation.LinearProgramming }, XCPlexRelaxation.None, UserInputObjectType.ComboBox));
         }
 
         public override string GetName()
@@ -37,11 +38,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             base.theProblemModel = theProblemModel;
             status = AlgorithmSolutionStatus.NotYetSolved;
             stats.UpperBound = double.MaxValue;
-            
+
             XcplexParam = new XCPlexParameters(
-                limitComputationTime: true, 
-                runtimeLimit_Seconds:algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue(),
-                optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters));
+                limitComputationTime: true,
+                runtimeLimit_Seconds: algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue(),
+                optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters),
+                relaxation: (XCPlexRelaxation)algorithmParameters.GetParameter(ParameterID.ALG_RELAXATION).Value);
         }
 
         public override void SpecializedRun()
