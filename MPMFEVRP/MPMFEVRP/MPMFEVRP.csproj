@@ -57,6 +57,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Libraries\GanttChart.dll</HintPath>
     </Reference>
+    <Reference Include="Gurobi75.NET">
+      <HintPath>..\..\..\..\..\..\gurobi751\win64\bin\Gurobi75.NET.dll</HintPath>
+    </Reference>
     <Reference Include="ILOG.Concert">
       <HintPath>..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\bin\x64_win64\ILOG.Concert.dll</HintPath>
     </Reference>
@@ -103,6 +106,7 @@
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic_v2.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
+    <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
     <Compile Include="Implementations\ProblemModels\FleetCompositionProblemModelUnderCarbonRegulations.cs" />
@@ -188,7 +192,6 @@
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation.cs" />
     <Compile Include="Models\XCPlex\XCPlex_SetCovering_wCustomerSets.cs" />
     <Compile Include="Models\XGurobi\XGurobiParameters.cs" />
-    <Compile Include="Models\XGurobi\XGurobi_NodeDuplicatingFormulation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetCoverFileUtilities\CustomerSetArchive.cs" />

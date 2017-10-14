@@ -294,6 +294,8 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationFollowingAnESVisit();//12
             AddConstraint_ArrivalTimeLimits();
             AddConstraint_TotalTravelTime();
+            AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs();
+            //AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs();
             
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -549,54 +551,56 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
             TotalTravelTime.Clear();
         }
-        //void AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs()
-        //{
-        //    for (int i = 0; i < numDuplicatedNodes; i++)
-        //    {
-        //        Site from = preprocessedSites[i];
-        //        for (int k = 0; k < numDuplicatedNodes; k++)
-        //        {
-        //            Site through = preprocessedSites[k];
-        //            for (int j = 0; j < numDuplicatedNodes; j++)
-        //            {
-        //                Site to = preprocessedSites[j];
-        //                if (minValue_T[i]+TravelTime(from,through)+TravelTime(through,to)>maxValue_T[j])
-        //                {
-        //                    ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
-        //                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
-        //                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
-        //                    string constraint_name = "No_arc_from_node_"+i.ToString()+"_through_node_" + k.ToString()+"to_node_"+j.ToString();
-        //                    allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
-        //                    TimeFeasibilityOfTwoConsecutiveArcs.Clear();
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-        //void AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs()
-        //{
-        //    for (int i = 0; i < numDuplicatedNodes; i++)
-        //    {
-        //        Site from = preprocessedSites[i];
-        //        for (int k = 0; k < numDuplicatedNodes; k++)
-        //        {
-        //            Site through = preprocessedSites[k];
-        //            for (int j = 0; j < numDuplicatedNodes; j++)
-        //            {
-        //                Site to = preprocessedSites[j];
-        //                if (EnergyConsumption(from, through,VehicleCategories.EV) + EnergyConsumption(through, to,VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
-        //                {
-        //                    ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
-        //                    EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
-        //                    EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
-        //                    string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
-        //                    allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
-        //                    EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
+        void AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs()
+        {
+            for (int i = 0; i < numDuplicatedNodes; i++)
+            {
+                Site from = preprocessedSites[i];
+                for (int k = 0; k < numDuplicatedNodes; k++)
+                {
+                    Site through = preprocessedSites[k];
+                    for (int j = 0; j < numDuplicatedNodes; j++)
+                    {
+                        Site to = preprocessedSites[j];
+                        if(i!=j&&j!=k&&i!=k)
+                            if(from.SiteType==SiteTypes.Customer&& through.SiteType == SiteTypes.Customer && to.SiteType == SiteTypes.Customer)
+                        if (minValue_T[i] + TravelTime(from, through) + TravelTime(through, to) > maxValue_T[j])
+                        {
+                            ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                            TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
+                            TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
+                            string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
+                            allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                            TimeFeasibilityOfTwoConsecutiveArcs.Clear();
+                        }
+                    }
+                }
+            }
+        }
+        void AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs()
+        {
+            for (int i = 0; i < numDuplicatedNodes; i++)
+            {
+                Site from = preprocessedSites[i];
+                for (int k = 0; k < numDuplicatedNodes; k++)
+                {
+                    Site through = preprocessedSites[k];
+                    for (int j = 0; j < numDuplicatedNodes; j++)
+                    {
+                        Site to = preprocessedSites[j];
+                        if (EnergyConsumption(from, through, VehicleCategories.EV) + EnergyConsumption(through, to, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
+                        {
+                            ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                            EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
+                            EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
+                            string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
+                            allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                            EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
+                        }
+                    }
+                }
+            }
+        }
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
