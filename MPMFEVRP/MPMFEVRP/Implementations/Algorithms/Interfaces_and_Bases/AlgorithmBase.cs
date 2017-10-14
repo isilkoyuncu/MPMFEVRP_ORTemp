@@ -6,6 +6,7 @@ using MPMFEVRP.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ComponentModel;
 
 namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 {
@@ -24,6 +25,8 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 
         protected AlgorithmStatistics stats = new AlgorithmStatistics();
         public AlgorithmStatistics Stats { get { return stats; } }
+
+        protected BackgroundWorker backgroundWorker;
 
         public AlgorithmBase()
         {
@@ -61,6 +64,11 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
         }
 
         public abstract void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel);
+
+        public void setBackgroundWorker(BackgroundWorker bg)
+        {
+            backgroundWorker = bg;
+        }
 
         public void Run()
         {

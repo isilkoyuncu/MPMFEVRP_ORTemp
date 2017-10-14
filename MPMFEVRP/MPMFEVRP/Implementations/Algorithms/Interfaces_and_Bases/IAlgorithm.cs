@@ -1,13 +1,14 @@
 ﻿using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
-
+using System.ComponentModel;
 
 namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 {
     public interface IAlgorithm
     {
         void Initialize(EVvsGDV_ProblemModel theProblemModel);
+        void setBackgroundWorker(BackgroundWorker bg);
         void Run();
         void Conclude();
         void Reset();

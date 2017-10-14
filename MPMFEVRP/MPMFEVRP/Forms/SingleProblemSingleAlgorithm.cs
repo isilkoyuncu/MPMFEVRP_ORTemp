@@ -152,12 +152,28 @@ namespace MPMFEVRP.Forms
             {
                 Log("Algorithm initializing.");
                 theAlgorithm.Initialize(theProblemModel);
+                theAlgorithm.setBackgroundWorker(BackgroundWorker_algorithmRunner);
+
                 Log("Algorithm running.");
-                theAlgorithm.Run();
-                Log("Algorithm concluding.");
-                theAlgorithm.Conclude();
-                Log("Algorithm finished.");
+                BackgroundWorker_algorithmRunner.RunWorkerAsync();
+
             }
+        }
+        private void BackgroundWorker_algorithmRunner_DoWork(object sender, DoWorkEventArgs e)
+        {
+            theAlgorithm.Run();
+        }
+
+        private void BackgroundWorker_algorithmRunner_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Log("Algorithm is finished");
+            Log("Algorithm concluding.");
+            theAlgorithm.Conclude();
+            Log("Algorithm finished.");
+        }
+
+        private void BackgroundWorker_algorithmRunner_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
         }
 
         private void Button_viewSolution_Click(object sender, EventArgs e)

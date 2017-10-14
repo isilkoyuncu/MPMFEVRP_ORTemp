@@ -65,6 +65,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -93,6 +94,12 @@
     <Compile Include="Domains\SolutionDomain\SiteVisit.cs" />
     <Compile Include="Domains\SolutionDomain\VehicleSpecificRoute.cs" />
     <Compile Include="Domains\SolutionDomain\VehicleSpecificRouteOptimizationOutcome.cs" />
+    <Compile Include="Forms\HybridTreeSearchAndSetPartitionCharts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\HybridTreeSearchAndSetPartitionCharts.Designer.cs">
+      <DependentUpon>HybridTreeSearchAndSetPartitionCharts.cs</DependentUpon>
+    </Compile>
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic_v2.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
@@ -185,6 +192,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetCoverFileUtilities\CustomerSetArchive.cs" />
+    <Compile Include="SupplementaryInterfaces\Listeners\CustomerSetTreeSearchListener.cs" />
+    <Compile Include="SupplementaryInterfaces\Listeners\UpperBoundListener.cs" />
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />
     <Compile Include="Utils\DeepCopier.cs" />
@@ -200,6 +209,9 @@
     <Compile Include="Utils\XCPlexUtil.cs" />
     <EmbeddedResource Include="Forms\Dashboard.resx">
       <DependentUpon>Dashboard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\HybridTreeSearchAndSetPartitionCharts.resx">
+      <DependentUpon>HybridTreeSearchAndSetPartitionCharts.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MultipleProblemMultipleAlgorithm.resx">
       <DependentUpon>MultipleProblemMultipleAlgorithm.cs</DependentUpon>
