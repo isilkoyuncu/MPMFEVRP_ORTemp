@@ -11,13 +11,14 @@ using MPMFEVRP.SupplementaryInterfaces.Listeners;
 
 namespace MPMFEVRP.Forms
 {
-    public partial class HybridTreeSearchAndSetPartitionCharts : Form, CustomerSetTreeSearchListener
+    public partial class HybridTreeSearchAndSetPartitionCharts : Form, CustomerSetTreeSearchListener, UpperBoundListener
     {
         public HybridTreeSearchAndSetPartitionCharts()
         {
             InitializeComponent();
         }
         delegate void OnChangeOfNumberOfUnexploredCustomerSetsCallback(int[] newNumberUnexplored);
+        delegate void OnUpperBoundUpdateCallBack(double newUpperBound);
 
         public void OnChangeOfNumberOfUnexploredCustomerSets(int newNumberUnexplored)
         {
@@ -33,18 +34,10 @@ namespace MPMFEVRP.Forms
             }
             else if (this.Visible)
             {
-                BarChart.Series[0].Points.Clear();
+                AllCharts.Series[0].Points.Clear();
                 for (int l = newNumberUnexplored.Length-1; l >= 0 ; l--)
-                    BarChart.Series[0].Points.AddXY(l.ToString(), newNumberUnexplored[l]);
-                //if (newNumberUnexplored.Length > BarChart.Series[0].Points.Count)
-                //{
-                //    for (int l = BarChart.Series[0].Points.Count; l < newNumberUnexplored.Length; l++)
-                //        BarChart.Series[0].Points.AddXY(l.ToString(), 0);
-                //}
-                //for (int l = 0; l < newNumberUnexplored.Length; l++)
-                //    BarChart.Series[0].Points[l].SetValueY(newNumberUnexplored[l]);
-                BarChart.Update();
-                //this.Refresh();
+                    AllCharts.Series[0].Points.AddXY(l.ToString(), newNumberUnexplored[l]);
+                AllCharts.Update();
             }
         }
 
@@ -56,6 +49,32 @@ namespace MPMFEVRP.Forms
         public void OnChangeOfNumberOfAllCustomerSets(int[] newNumberAll)
         {
             throw new System.NotImplementedException();
+        }
+
+        public void OnUpperBoundUpdate(double newUpperBound)
+        {
+            if (this.InvokeRequired)
+            {
+                OnUpperBoundUpdateCallBack os = new OnUpperBoundUpdateCallBack(OnUpperBoundUpdate);
+                this.Invoke(os, new object[] { newUpperBound });
+            }
+            else if (this.Visible)
+            {
+                DateTime now = DateTime.Now;
+                this.AllCharts.Series[1].Points.AddXY(now.ToOADate(), Math.Round(newUpperBound, 2));
+
+                SetLastLabelAsValue(1, Math.Round(newUpperBound, 2));
+
+            }
+
+        }
+        private void SetLastLabelAsValue(int seriesIndex, object value)
+        {
+            // Reset previous label
+            if (this.AllCharts.Series[seriesIndex].Points.Count > 2)
+                this.AllCharts.Series[seriesIndex].Points[this.AllCharts.Series[seriesIndex].Points.Count - 2].Label = "";
+            // Set the last label as value
+            this.AllCharts.Series[seriesIndex].Points[this.AllCharts.Series[seriesIndex].Points.Count - 1].Label = value.ToString();
         }
 
     }

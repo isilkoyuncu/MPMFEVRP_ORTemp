@@ -33,6 +33,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         Forms.HybridTreeSearchAndSetPartitionCharts charts;
         SupplementaryInterfaces.Listeners.CustomerSetTreeSearchListener customerSetTreeSearchListener;
+        SupplementaryInterfaces.Listeners.UpperBoundListener upperBoundListener;
 
         public override void AddSpecializedParameters()
         {
@@ -45,13 +46,13 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string[] GetOutputSummary()
         {
-            System.Windows.Forms.MessageBox.Show("Not yet implemented!");
+            System.Windows.Forms.MessageBox.Show("GetOutputSummary Not yet implemented!");
             return null;
         }
 
         public override void SpecializedConclude()
         {
-            System.Windows.Forms.MessageBox.Show("Not yet implemented!");
+            System.Windows.Forms.MessageBox.Show("SpecializedConclude Not yet implemented!");
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -70,6 +71,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             charts = new Forms.HybridTreeSearchAndSetPartitionCharts();
             customerSetTreeSearchListener = charts;
+            upperBoundListener = charts;
             InformCustomerSetTreeSearchListener();
             charts.Show();
         }
@@ -150,6 +152,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (customerSetTreeSearchListener != null)
                 customerSetTreeSearchListener.OnChangeOfNumberOfUnexploredCustomerSets(unexploredCustomerSets.CountByLevel());
         }
+        void InformUpperBoundListener()
+        {
+            if (upperBoundListener != null)
+                upperBoundListener.OnUpperBoundUpdate(stats.UpperBound);
+        }
 
         void OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
         {
@@ -174,6 +181,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles());
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+            //stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
+            stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
+            InformUpperBoundListener();
         }
 
     }
