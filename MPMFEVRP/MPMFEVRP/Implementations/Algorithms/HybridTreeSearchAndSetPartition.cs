@@ -178,11 +178,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         void RunSetPartition()
         {
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles());
+            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
             CPlexExtender.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
-            //stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
-            stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
+            stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
+            //stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
             InformUpperBoundListener();
         }
 

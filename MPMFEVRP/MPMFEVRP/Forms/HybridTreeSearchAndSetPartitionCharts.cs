@@ -13,6 +13,7 @@ namespace MPMFEVRP.Forms
 {
     public partial class HybridTreeSearchAndSetPartitionCharts : Form, CustomerSetTreeSearchListener, UpperBoundListener
     {
+        DateTime chartwideStartTime;
         public HybridTreeSearchAndSetPartitionCharts()
         {
             InitializeComponent();
@@ -61,7 +62,7 @@ namespace MPMFEVRP.Forms
             else if (this.Visible)
             {
                 DateTime now = DateTime.Now;
-                this.AllCharts.Series[1].Points.AddXY(now.ToOADate(), Math.Round(newUpperBound, 2));
+                this.AllCharts.Series[1].Points.AddXY(Math.Round((now-chartwideStartTime).TotalSeconds,0), Math.Round(newUpperBound, 2));
 
                 SetLastLabelAsValue(1, Math.Round(newUpperBound, 2));
 
@@ -77,5 +78,9 @@ namespace MPMFEVRP.Forms
             this.AllCharts.Series[seriesIndex].Points[this.AllCharts.Series[seriesIndex].Points.Count - 1].Label = value.ToString();
         }
 
+        private void HybridTreeSearchAndSetPartitionCharts_Load(object sender, EventArgs e)
+        {
+            chartwideStartTime = DateTime.Now;
+        }
     }
 }
