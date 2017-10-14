@@ -87,6 +87,7 @@ namespace MPMFEVRP.Forms
             this.Controls.Add(this.AllCharts);
             this.Name = "HybridTreeSearchAndSetPartitionCharts";
             this.Text = "HybridTreeSearchAndSetPartitionCharts";
+            this.Load += new System.EventHandler(this.HybridTreeSearchAndSetPartitionCharts_Load);
             ((System.ComponentModel.ISupportInitialize)(this.AllCharts)).EndInit();
             this.ResumeLayout(false);
 
