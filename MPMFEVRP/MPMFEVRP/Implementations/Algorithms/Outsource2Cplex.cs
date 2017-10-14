@@ -46,25 +46,35 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
+            CPlexExtender = BuildXcplexModel(theProblemModel, XcplexParam, algorithmParameters);
+            CPlexExtender.Solve_and_PostProcess();
+        }
+        public static XCPlexBase BuildXcplexModel(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters XcplexParam, InputOrOutputParameterSet algorithmParameters)
+        {
+            XCPlexBase model;
             switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value)
             {
                 case XCPlex_Formulation.NodeDuplicating:
-                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
+                    model = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicating:
-                    CPlexExtender = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
+                    model = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.NodeDuplicatingwoU:
-                    CPlexExtender = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
+                    model = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
-                    throw new NotImplementedException("ArcDuplicatingwoU still needs to be implemented.");
+                    model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam);
+                    break;
+                default:
+                    throw new Exception("XCplex model type does not exist, thus cannot be built.");
+
             }
-
-            //CPlexExtender.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString()+"model.lp");
-            CPlexExtender.Solve_and_PostProcess();
+            //TODO turn the following on and off to export the model 
+            model.ExportModel("model.lp");
+            //model.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString() + "model.lp");
+            return model;
         }
-
 
         public override void SpecializedConclude()
         {

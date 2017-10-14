@@ -312,6 +312,7 @@ namespace MPMFEVRP.Models.XCPlex
                 SetParam(Cplex.DoubleParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_CUTS_FACTOR].Value.ToString()));
             if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_THREADS))
                 SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_THREADS].Value.ToString()));
+            SetParam(Cplex.Param.MIP.Display, 3);
         }
         public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
         {
