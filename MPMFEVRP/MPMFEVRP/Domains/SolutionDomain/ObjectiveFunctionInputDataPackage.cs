@@ -97,6 +97,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
             VMT_EV += theOtherOFIDP.VMT_EV;
             VMT_GDV += theOtherOFIDP.VMT_GDV;
         }
+        public void Add(ObjectiveFunctionInputDataPackage theOtherOFIDP, VehicleCategories vehicleCategory)
+        {
+            if(vehicleCategory== VehicleCategories.EV)
+            {
+                numberOfCustomersServed_EV += theOtherOFIDP.numberOfCustomersServed_EV;
+                prizeCollected_EV += theOtherOFIDP.prizeCollected_EV;
+                numberOfVehiclesUsed_EV += theOtherOFIDP.numberOfVehiclesUsed_EV;
+                VMT_EV += theOtherOFIDP.VMT_EV;
+            }
+            else//GDV
+            {
+                numberOfCustomersServed_GDV += theOtherOFIDP.numberOfCustomersServed_GDV;
+                prizeCollected_GDV += theOtherOFIDP.prizeCollected_GDV;
+                numberOfVehiclesUsed_GDV += theOtherOFIDP.numberOfVehiclesUsed_GDV;
+                VMT_GDV += theOtherOFIDP.VMT_GDV;
+            }
+        }
+
         public static ObjectiveFunctionInputDataPackage AggregateByMerge(List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_EV = null, List<ObjectiveFunctionInputDataPackage> IndividualOFIDPs_GDV = null)
         {
             if ((IndividualOFIDPs_EV == null) && (IndividualOFIDPs_GDV == null))//Return an empty one because the individual inputs are not provided:

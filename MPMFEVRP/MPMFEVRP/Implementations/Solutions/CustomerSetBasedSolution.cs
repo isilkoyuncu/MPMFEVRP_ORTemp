@@ -62,11 +62,11 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public CustomerSetBasedSolution(EVvsGDV_ProblemModel theProblemModel, int[,] zSetTo1, CustomerSet[] customerSetArray)
         {
+            ofidp = new ObjectiveFunctionInputDataPackage();
             this.model = theProblemModel;
             this.zSetTo1 = zSetTo1;
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
-            ofidp = new ObjectiveFunctionInputDataPackage();
             for (int i = 0; i < customerSetArray.Length; i++)
             {
                 if (zSetTo1[i, 0] == 1)
@@ -79,7 +79,7 @@ namespace MPMFEVRP.Implementations.Solutions
                 }
             }
         }
-        
+
         // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing)
         public CustomerSetBasedSolution(EVvsGDV_ProblemModel theProblemModel, Random random)
         {
@@ -93,13 +93,13 @@ namespace MPMFEVRP.Implementations.Solutions
         public void AddCustomerSet2EVList(CustomerSet currentCS)
         {
             assigned2EV.Add(currentCS);
-            ofidp.Add(currentCS.OFIDP);
+            ofidp.Add(currentCS.OFIDP, VehicleCategories.EV);
         }
 
         public void AddCustomerSet2GDVList(CustomerSet currentCS)
         {
             assigned2GDV.Add(currentCS);
-            ofidp.Add(currentCS.OFIDP);
+            ofidp.Add(currentCS.OFIDP, VehicleCategories.GDV);
         }
 
         public void UpdateUpperLowerBoundsAndStatus()

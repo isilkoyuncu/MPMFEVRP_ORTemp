@@ -13,13 +13,15 @@ namespace MPMFEVRP.Models.XCPlex
 {
     class XCPlex_SetCovering_wCustomerSets : XCPlexBase
     {
+        int vIndex_EV = 0;//TODO: Use this in all places
         INumVar[][] z;//[customerSet][2: 0 of EV, 1 for GDV]
         ILinearNumExpr obj;//Because of the enumerative and space consuming nature of the problem with 2 vehicle categories, it's more practical to create the obj expression beforehand and only add it later
         int nCustomerSets;
         CustomerSet[] customerSetArray;
+        int[] overrideNumberOfVehicles;
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
         public XCPlex_SetCovering_wCustomerSets() { }
-        public XCPlex_SetCovering_wCustomerSets(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null)
+        public XCPlex_SetCovering_wCustomerSets(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null, bool noGDVUnlimitedEV = false)
         {
             this.theProblemModel = theProblemModel;
             this.xCplexParam = xCplexParam;
@@ -46,6 +48,12 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     customerSetArray[i] = theProblemModel.CustomerSetArchive[i];
                 }
+            }
+            overrideNumberOfVehicles = new int[2];
+            if (noGDVUnlimitedEV)
+            {
+                overrideNumberOfVehicles[vIndex_EV] = theProblemModel.SRD.NumCustomers;
+                overrideNumberOfVehicles[1 - vIndex_EV] = 0;
             }
 
             //now we are ready to put the model together and then solve it
@@ -155,7 +163,7 @@ namespace MPMFEVRP.Models.XCPlex
                     numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][v]);
                 }//for i
                 string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + theProblemModel.NumVehicles[v] + "times";
-                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, theProblemModel.NumVehicles[v], constraint_name));
+                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, overrideNumberOfVehicles==null? theProblemModel.NumVehicles[v]:overrideNumberOfVehicles[v], constraint_name));
             }
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
