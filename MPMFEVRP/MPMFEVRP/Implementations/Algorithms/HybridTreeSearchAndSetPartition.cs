@@ -30,13 +30,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList unexploredCustomerSets;
         CustomerSetList parents;
 
-        XCPlex_SetCovering_wCustomerSets CPlexExtender;
+        XCPlex_SetCovering_wCustomerSets SetPartitionSolver;
+        Dictionary<string, double> setPartitionCumulativeTimeAccount;
 
         Forms.HybridTreeSearchAndSetPartitionCharts charts;
         CustomerSetTreeSearchListener customerSetTreeSearchListener;
         UpperBoundListener upperBoundListener;
         TimeSpentAccountListener timeSpentAccountListener;
-
 
         public override void AddSpecializedParameters()
         {
@@ -89,7 +89,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
-            CPlexExtender.Dispose();
+            SetPartitionSolver.Dispose();
         }
 
         public override void SpecializedRun()
@@ -168,13 +168,33 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void InformTimeSpentAccountListener()
         {
-            //TODO: The following code is bogus, correct it!
             Dictionary<string, double> timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
-            Random rnd = new Random();
-            for (int i = 0; i <= rnd.Next(4); i++)
-                timeSpentByXCplexSolutionStatus.Add(rnd.Next(100).ToString(), rnd.NextDouble()*100);
+            foreach (string key in theProblemModel.EV_TSP_TimeSpentAccount.Keys)
+                timeSpentByXCplexSolutionStatus.Add("EV_" + key, theProblemModel.EV_TSP_TimeSpentAccount[key]);
+            foreach (string key in theProblemModel.GDV_TSP_TimeSpentAccount.Keys)
+                timeSpentByXCplexSolutionStatus.Add("GDV_" + key, theProblemModel.GDV_TSP_TimeSpentAccount[key]);
+            if (SetPartitionSolver != null)
+            {
+                if (setPartitionCumulativeTimeAccount == null)
+                {
+                    setPartitionCumulativeTimeAccount = new Dictionary<string, double>();
+                }
+                if (setPartitionCumulativeTimeAccount != null)
+                {
+                    foreach (string key in SetPartitionSolver.TotalTimeInSolveOnStatus.Keys)
+                        if (setPartitionCumulativeTimeAccount.ContainsKey(key))
+                            setPartitionCumulativeTimeAccount[key] += SetPartitionSolver.TotalTimeInSolveOnStatus[key];
+                        else
+                            setPartitionCumulativeTimeAccount.Add(key, SetPartitionSolver.TotalTimeInSolveOnStatus[key]);
+                }
+                foreach(string key in setPartitionCumulativeTimeAccount.Keys)
+                    timeSpentByXCplexSolutionStatus.Add("SetPartition_" + key, setPartitionCumulativeTimeAccount[key]);
+            }
+            //TODO: Set partition data is obtained and stored in not an elegant way. Turning it into a singleton just like the EV and GDV TSP solvers may be a good idea.
+            //TODO: Also pass the number of times!
             //The rest is good
-            timeSpentAccountListener.OnChangeOfTimeSpentAccount(timeSpentByXCplexSolutionStatus);
+            if (timeSpentByXCplexSolutionStatus.Count > 0)
+                timeSpentAccountListener.OnChangeOfTimeSpentAccount(timeSpentByXCplexSolutionStatus);
         }
 
         void OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
@@ -198,9 +218,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         void RunSetPartition()
         {
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
-            CPlexExtender.Solve_and_PostProcess();
-            bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+            SetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
+            SetPartitionSolver.Solve_and_PostProcess();
+            bestSolutionFound = (CustomerSetBasedSolution)SetPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
             //stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
             InformUpperBoundListener();

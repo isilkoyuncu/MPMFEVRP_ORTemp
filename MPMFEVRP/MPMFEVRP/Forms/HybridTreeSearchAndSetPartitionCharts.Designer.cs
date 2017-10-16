@@ -96,7 +96,7 @@ namespace MPMFEVRP.Forms
             chartArea2.Position.Y = 2F;
             chartArea3.Name = "PieChartArea";
             chartArea3.Position.Auto = false;
-            chartArea3.Position.Height = 43F;
+            chartArea3.Position.Height = 41F;
             chartArea3.Position.Width = 50F;
             chartArea3.Position.X = 50F;
             chartArea3.Position.Y = 52F;
@@ -140,6 +140,8 @@ namespace MPMFEVRP.Forms
             series3.Name = "UpperBound";
             series4.ChartArea = "PieChartArea";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie;
+            series4.IsValueShownAsLabel = true;
+            series4.LabelFormat = "0.0";
             series4.Legend = "Legend_PieChart";
             series4.Name = "TimeSpent";
             this.AllCharts.Series.Add(series1);
