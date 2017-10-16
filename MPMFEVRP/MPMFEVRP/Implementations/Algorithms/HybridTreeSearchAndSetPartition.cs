@@ -11,6 +11,7 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.SupplementaryInterfaces.Listeners;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -32,8 +33,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         XCPlex_SetCovering_wCustomerSets CPlexExtender;
 
         Forms.HybridTreeSearchAndSetPartitionCharts charts;
-        SupplementaryInterfaces.Listeners.CustomerSetTreeSearchListener customerSetTreeSearchListener;
-        SupplementaryInterfaces.Listeners.UpperBoundListener upperBoundListener;
+        CustomerSetTreeSearchListener customerSetTreeSearchListener;
+        UpperBoundListener upperBoundListener;
+        TimeSpentAccountListener timeSpentAccountListener;
+
 
         public override void AddSpecializedParameters()
         {
@@ -71,6 +74,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             charts = new Forms.HybridTreeSearchAndSetPartitionCharts();
             customerSetTreeSearchListener = charts;
             upperBoundListener = charts;
+            timeSpentAccountListener = charts;
             charts.Show();
         }
         void PopulateAndPlaceInitialCustomerSets()
@@ -93,6 +97,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             //Iteration 0:
             PopulateAndPlaceInitialCustomerSets();
             InformCustomerSetTreeSearchListener();
+            InformTimeSpentAccountListener();
             RunSetPartition();
 
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
@@ -161,6 +166,16 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (upperBoundListener != null)
                 upperBoundListener.OnUpperBoundUpdate(stats.UpperBound);
         }
+        void InformTimeSpentAccountListener()
+        {
+            //TODO: The following code is bogus, correct it!
+            Dictionary<string, double> timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
+            Random rnd = new Random();
+            for (int i = 0; i <= rnd.Next(4); i++)
+                timeSpentByXCplexSolutionStatus.Add(rnd.Next(100).ToString(), rnd.NextDouble()*100);
+            //The rest is good
+            timeSpentAccountListener.OnChangeOfTimeSpentAccount(timeSpentByXCplexSolutionStatus);
+        }
 
         void OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
         {
@@ -176,8 +191,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
             {
                 unexploredCustomerSets.Add(candidate);
-                InformCustomerSetTreeSearchListener();
             }
+            InformCustomerSetTreeSearchListener();
+            InformTimeSpentAccountListener();
         }
 
         void RunSetPartition()
@@ -188,6 +204,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
             //stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
             InformUpperBoundListener();
+            InformTimeSpentAccountListener();
         }
 
     }
