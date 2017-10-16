@@ -31,11 +31,16 @@ namespace MPMFEVRP.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            //colors
+            System.Drawing.ColorConverter colorConverter = new System.Drawing.ColorConverter();
+            System.Drawing.Color tokSari = (System.Drawing.Color)colorConverter.ConvertFromString("#FCB514");
+
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.AllCharts = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.AllCharts)).BeginInit();
@@ -64,17 +69,23 @@ namespace MPMFEVRP.Forms
             this.AllCharts.Location = new System.Drawing.Point(12, 12);
             this.AllCharts.Name = "AllCharts";
             series1.ChartArea = "HorizontalBarArea";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bar;
-            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StackedBar;
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));//koyuKirmizi
             series1.Legend = "Legend1";
             series1.Name = "Unexplored";
-            series2.ChartArea = "TimeSeriesArea";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));
+            series2.ChartArea = "HorizontalBarArea";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StackedBar;
             series2.Legend = "Legend1";
-            series2.Name = "UpperBound";
+            series2.Name = "Explored";
+            series2.Color = tokSari;//tokSari
+            series3.ChartArea = "TimeSeriesArea";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series3.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));
+            series3.Legend = "Legend1";
+            series3.Name = "UpperBound";
             this.AllCharts.Series.Add(series1);
             this.AllCharts.Series.Add(series2);
+            this.AllCharts.Series.Add(series3);
             this.AllCharts.Size = new System.Drawing.Size(779, 556);
             this.AllCharts.TabIndex = 0;
             this.AllCharts.Text = "chart1";

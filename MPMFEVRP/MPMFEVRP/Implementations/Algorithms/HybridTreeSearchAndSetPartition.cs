@@ -153,7 +153,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         void InformCustomerSetTreeSearchListener()
         {
             if (customerSetTreeSearchListener != null)
-                customerSetTreeSearchListener.OnChangeOfNumberOfUnexploredCustomerSets(unexploredCustomerSets.CountByLevel());
+                //customerSetTreeSearchListener.OnChangeOfNumberOfUnexploredCustomerSets(unexploredCustomerSets.CountByLevel());
+                customerSetTreeSearchListener.OnChangeOfNumbersOfUnexploredAndExploredCustomerSets(unexploredCustomerSets.CountByLevel(), allCustomerSets.CountByLevel());
         }
         void InformUpperBoundListener()
         {
