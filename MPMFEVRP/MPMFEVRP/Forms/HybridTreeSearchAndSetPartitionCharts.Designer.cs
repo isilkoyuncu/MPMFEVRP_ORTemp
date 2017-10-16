@@ -49,6 +49,7 @@ namespace MPMFEVRP.Forms
             chartArea1.Position.Width = 45F;
             chartArea1.Position.X = 3F;
             chartArea1.Position.Y = 3F;
+            chartArea2.AxisX.Minimum = 0D;
             chartArea2.Name = "TimeSeriesArea";
             chartArea2.Position.Auto = false;
             chartArea2.Position.Height = 35F;
@@ -64,10 +65,12 @@ namespace MPMFEVRP.Forms
             this.AllCharts.Name = "AllCharts";
             series1.ChartArea = "HorizontalBarArea";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bar;
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));
             series1.Legend = "Legend1";
             series1.Name = "Unexplored";
             series2.ChartArea = "TimeSeriesArea";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));
             series2.Legend = "Legend1";
             series2.Name = "UpperBound";
             this.AllCharts.Series.Add(series1);

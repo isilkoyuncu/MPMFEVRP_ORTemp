@@ -36,7 +36,7 @@ namespace MPMFEVRP.Forms
             else if (this.Visible)
             {
                 AllCharts.Series[0].Points.Clear();
-                for (int l = newNumberUnexplored.Length-1; l >= 0 ; l--)
+                for (int l = newNumberUnexplored.Length-1; l > 0 ; l--)
                     AllCharts.Series[0].Points.AddXY(l.ToString(), newNumberUnexplored[l]);
                 AllCharts.Update();
             }

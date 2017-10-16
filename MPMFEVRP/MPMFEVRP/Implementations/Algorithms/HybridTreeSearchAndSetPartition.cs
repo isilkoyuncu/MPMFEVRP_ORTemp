@@ -67,12 +67,10 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
-            PopulateAndPlaceInitialCustomerSets();
 
             charts = new Forms.HybridTreeSearchAndSetPartitionCharts();
             customerSetTreeSearchListener = charts;
             upperBoundListener = charts;
-            InformCustomerSetTreeSearchListener();
             charts.Show();
         }
         void PopulateAndPlaceInitialCustomerSets()
@@ -92,6 +90,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
+            //Iteration 0:
+            PopulateAndPlaceInitialCustomerSets();
+            InformCustomerSetTreeSearchListener();
+            RunSetPartition();
+
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
             int iter = 0;
