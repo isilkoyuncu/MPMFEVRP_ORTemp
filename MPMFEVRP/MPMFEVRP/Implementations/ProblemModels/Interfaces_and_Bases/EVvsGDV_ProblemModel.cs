@@ -64,10 +64,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
                 GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
             }
-            else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation_woUvariables))
+            else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation_woU))
             {
-                EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-                GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+                EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+                GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
             }
             else
             {

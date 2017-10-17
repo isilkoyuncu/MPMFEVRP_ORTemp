@@ -16,7 +16,7 @@ namespace MPMFEVRPTests.TSPSolverTests
             kyr.Read();
             EMH_Problem theProblem = new EMH_Problem(new MPMFEVRP.Domains.ProblemDomain.ProblemDataPackage(kyr));
             //Create model
-            MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel theProblemModel = new MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel(theProblem, typeof(MPMFEVRP.Models.XCPlex.XCPlex_NodeDuplicatingFormulation_woUvariables));
+            MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel theProblemModel = new MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel(theProblem, typeof(MPMFEVRP.Models.XCPlex.XCPlex_NodeDuplicatingFormulation_woU));
             //Create customer set C6,9,19,20
             MPMFEVRP.Domains.SolutionDomain.CustomerSet theCustomerSet = new MPMFEVRP.Domains.SolutionDomain.CustomerSet(new List<string>() { "C1", "C3", "C5", "C8" });
             //Solve

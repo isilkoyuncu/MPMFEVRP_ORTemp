@@ -64,7 +64,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     model = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.NodeDuplicatingwoU:
-                    model = new XCPlex_NodeDuplicatingFormulation_woUvariables(theProblemModel, XcplexParam);
+                    model = new XCPlex_NodeDuplicatingFormulation_woU(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
                     model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam);

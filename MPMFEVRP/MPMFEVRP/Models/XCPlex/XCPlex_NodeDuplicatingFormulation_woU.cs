@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    public class XCPlex_NodeDuplicatingFormulation_woUvariables : XCPlexVRPBase
+    public class XCPlex_NodeDuplicatingFormulation_woU : XCPlexVRPBase
     {
         int numDuplicatedNodes;
         int numCustomers;
@@ -30,8 +30,8 @@ namespace MPMFEVRP.Models.XCPlex
         int firstCustomerVisitationConstraintIndex=-1;
         int totalTravelTimeConstraintIndex = -1;
 
-        public XCPlex_NodeDuplicatingFormulation_woUvariables() { } //Empty constructor
-        public XCPlex_NodeDuplicatingFormulation_woUvariables(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
+        public XCPlex_NodeDuplicatingFormulation_woU() { } //Empty constructor
+        public XCPlex_NodeDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam){ } //XCPlex VRP Constructor
 
         protected override void DefineDecisionVariables()

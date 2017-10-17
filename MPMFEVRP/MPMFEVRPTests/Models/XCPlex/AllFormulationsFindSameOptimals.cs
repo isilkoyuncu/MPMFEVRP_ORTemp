@@ -20,7 +20,7 @@ namespace MPMFEVRPTests.Models.XCPlex
                 kyr.Read();
                 EMH_Problem theProblem = new EMH_Problem(new MPMFEVRP.Domains.ProblemDomain.ProblemDataPackage(kyr));
                 //Create models
-                MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel theProblemModelUsingNodewoUFormulation = new MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel(theProblem, typeof(MPMFEVRP.Models.XCPlex.XCPlex_NodeDuplicatingFormulation_woUvariables));
+                MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel theProblemModelUsingNodewoUFormulation = new MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel(theProblem, typeof(MPMFEVRP.Models.XCPlex.XCPlex_NodeDuplicatingFormulation_woU));
                 MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel theProblemModelUsingArcwoUFormulation = new MPMFEVRP.Implementations.ProblemModels.EMH_ProblemModel(theProblem, typeof(MPMFEVRP.Models.XCPlex.XCPlex_ArcDuplicatingFormulation_woU));
                 //Create algorithm & run
                 Outsource2Cplex theAlgorithm_node = new Outsource2Cplex();

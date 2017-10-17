@@ -713,12 +713,13 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     listOfFirstSiteIndices.Add(new List<int>() { j });
                 }
-            for (int r = 0; r < numES; r++)
-                for (int j = 0; j < numNonESNodes; j++)
-                    if (GetValue(Y[0][r][j]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
-                    {
-                        listOfFirstSiteIndices.Add(new List<int>() { r, j });
-                    }
+            if (vehicleCategory != VehicleCategories.GDV)
+                for (int r = 0; r < numES; r++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                        if (GetValue(Y[0][r][j]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                        {
+                            listOfFirstSiteIndices.Add(new List<int>() { r, j });
+                        }
             //Then, populate the whole routes (actually, not routes yet)
             List<List<string>> outcome = new List<List<string>>();
             foreach (List<int> firstSiteIndices in listOfFirstSiteIndices)
