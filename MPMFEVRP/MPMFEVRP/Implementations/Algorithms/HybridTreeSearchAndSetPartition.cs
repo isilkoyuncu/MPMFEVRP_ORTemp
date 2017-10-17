@@ -12,6 +12,7 @@ using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
 using MPMFEVRP.SupplementaryInterfaces.Listeners;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -45,13 +46,56 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string GetName()
         {
-            return "Customer Set-based Column Generation Heuristic Version 3: Back-to-back GDV- and AFV-optimization";
+            return "CS Generation Heuristic";
         }
 
         public override string[] GetOutputSummary()
         {
-            System.Windows.Forms.MessageBox.Show("GetOutputSummary Not yet implemented!");
-            return null;
+            List<string> list = new List<string>{
+                 //Algorithm Name has to be the first entry for output file name purposes
+                "Algorithm Name: " + GetName(),
+                //Run time limit has to be the second entry for output file name purposes
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Value.ToString(),
+                
+                //Optional
+                //algorithmParameters.GetAllParameters();
+                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
+                //list.Add(asString);
+                
+                //Necessary statistics
+                "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
+                "Solution Status: " + status.ToString()
+            };
+            switch (status)
+            {
+                case AlgorithmSolutionStatus.NotYetSolved:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        list.Add("UB(Best Int): " + stats.UpperBound.ToString());
+                        list.Add("LB(Relaxed): " + stats.LowerBound.ToString());
+                        break;
+                    }
+            }
+
+            foreach(string s in stats.getOtherStats().Keys)
+            {
+                list.Add(s+"\t"+stats.getOtherStats()[s]);
+            }
+
+            string[] toReturn = new string[list.Count];
+            toReturn = list.ToArray();
+            return toReturn;
         }
 
         public override void SpecializedConclude()
@@ -73,12 +117,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                 stats.addNewStat("GDV_#solved_" + key, theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus[key].ToString());
                 stats.addNewStat("GDV_timespent_" + key, theProblemModel.GDV_TSP_TimeSpentAccount[key].ToString());
             }
-            foreach (string key in setPartitionCumulativeTimeAccount.Keys)
-            {
-                stats.addNewStat("SetPartition_" + key, setPartitionCounterByStatus[key].ToString());
-                stats.addNewStat("SetPartition_" + key, setPartitionCumulativeTimeAccount[key].ToString());
-            }
-
+            if (setPartitionCumulativeTimeAccount != null)
+                foreach (string key in setPartitionCumulativeTimeAccount.Keys)
+                {
+                    stats.addNewStat("SetPartition_" + key, setPartitionCounterByStatus[key].ToString());
+                    stats.addNewStat("SetPartition_" + key, setPartitionCumulativeTimeAccount[key].ToString());
+                }
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -107,6 +151,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedReset()
         {
             SetPartitionSolver.Dispose();
+            stats = new AlgorithmStatistics();
         }
 
         public override void SpecializedRun()
@@ -185,6 +230,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void InformTimeSpentAccountListener()
         {
+            if (timeSpentAccountListener == null)
+                return;
             Dictionary<string, double> timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
             foreach (string key in theProblemModel.EV_TSP_TimeSpentAccount.Keys)
                 timeSpentByXCplexSolutionStatus.Add("EV_" + key, theProblemModel.EV_TSP_TimeSpentAccount[key]);

@@ -134,7 +134,7 @@ namespace MPMFEVRP.Implementations.Solutions
 
         public override string[] GetOutputSummary()
         {
-            throw new NotImplementedException();
+            return GetWritableSolution();//throw new NotImplementedException();
         }
 
         public override string[] GetWritableSolution()
