@@ -196,6 +196,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetCoverFileUtilities\CustomerSetArchive.cs" />
     <Compile Include="SupplementaryInterfaces\Listeners\CustomerSetTreeSearchListener.cs" />
+    <Compile Include="SupplementaryInterfaces\Listeners\TimeSpentAccountListener.cs" />
     <Compile Include="SupplementaryInterfaces\Listeners\UpperBoundListener.cs" />
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />

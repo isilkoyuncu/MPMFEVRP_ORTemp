@@ -11,6 +11,7 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.SupplementaryInterfaces.Listeners;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -29,11 +30,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList unexploredCustomerSets;
         CustomerSetList parents;
 
-        XCPlex_SetCovering_wCustomerSets CPlexExtender;
+        XCPlex_SetCovering_wCustomerSets SetPartitionSolver;
+        Dictionary<string, double> setPartitionCumulativeTimeAccount;
 
         Forms.HybridTreeSearchAndSetPartitionCharts charts;
-        SupplementaryInterfaces.Listeners.CustomerSetTreeSearchListener customerSetTreeSearchListener;
-        SupplementaryInterfaces.Listeners.UpperBoundListener upperBoundListener;
+        CustomerSetTreeSearchListener customerSetTreeSearchListener;
+        UpperBoundListener upperBoundListener;
+        TimeSpentAccountListener timeSpentAccountListener;
 
         public override void AddSpecializedParameters()
         {
@@ -67,12 +70,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
-            PopulateAndPlaceInitialCustomerSets();
 
             charts = new Forms.HybridTreeSearchAndSetPartitionCharts();
             customerSetTreeSearchListener = charts;
             upperBoundListener = charts;
-            InformCustomerSetTreeSearchListener();
+            timeSpentAccountListener = charts;
             charts.Show();
         }
         void PopulateAndPlaceInitialCustomerSets()
@@ -87,11 +89,17 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
-            CPlexExtender.Dispose();
+            SetPartitionSolver.Dispose();
         }
 
         public override void SpecializedRun()
         {
+            //Iteration 0:
+            PopulateAndPlaceInitialCustomerSets();
+            InformCustomerSetTreeSearchListener();
+            InformTimeSpentAccountListener();
+            RunSetPartition();
+
             int currentLevel;//, highestNonemptyLevel, deepestNonemptyLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;//This is for the unexplored, when explored its children will be at the next level which is the number of customers; thus, a CS visiting all customers will be created, TSP-optimized and hence added to the repository for the set cover model but it won't ever be added to the unexplored list
             int iter = 0;
@@ -150,12 +158,43 @@ namespace MPMFEVRP.Implementations.Algorithms
         void InformCustomerSetTreeSearchListener()
         {
             if (customerSetTreeSearchListener != null)
-                customerSetTreeSearchListener.OnChangeOfNumberOfUnexploredCustomerSets(unexploredCustomerSets.CountByLevel());
+                //customerSetTreeSearchListener.OnChangeOfNumberOfUnexploredCustomerSets(unexploredCustomerSets.CountByLevel());
+                customerSetTreeSearchListener.OnChangeOfNumbersOfUnexploredAndExploredCustomerSets(unexploredCustomerSets.CountByLevel(), allCustomerSets.CountByLevel());
         }
         void InformUpperBoundListener()
         {
             if (upperBoundListener != null)
                 upperBoundListener.OnUpperBoundUpdate(stats.UpperBound);
+        }
+        void InformTimeSpentAccountListener()
+        {
+            Dictionary<string, double> timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
+            foreach (string key in theProblemModel.EV_TSP_TimeSpentAccount.Keys)
+                timeSpentByXCplexSolutionStatus.Add("EV_" + key, theProblemModel.EV_TSP_TimeSpentAccount[key]);
+            foreach (string key in theProblemModel.GDV_TSP_TimeSpentAccount.Keys)
+                timeSpentByXCplexSolutionStatus.Add("GDV_" + key, theProblemModel.GDV_TSP_TimeSpentAccount[key]);
+            if (SetPartitionSolver != null)
+            {
+                if (setPartitionCumulativeTimeAccount == null)
+                {
+                    setPartitionCumulativeTimeAccount = new Dictionary<string, double>();
+                }
+                if (setPartitionCumulativeTimeAccount != null)
+                {
+                    foreach (string key in SetPartitionSolver.TotalTimeInSolveOnStatus.Keys)
+                        if (setPartitionCumulativeTimeAccount.ContainsKey(key))
+                            setPartitionCumulativeTimeAccount[key] += SetPartitionSolver.TotalTimeInSolveOnStatus[key];
+                        else
+                            setPartitionCumulativeTimeAccount.Add(key, SetPartitionSolver.TotalTimeInSolveOnStatus[key]);
+                }
+                foreach(string key in setPartitionCumulativeTimeAccount.Keys)
+                    timeSpentByXCplexSolutionStatus.Add("SetPartition_" + key, setPartitionCumulativeTimeAccount[key]);
+            }
+            //TODO: Set partition data is obtained and stored in not an elegant way. Turning it into a singleton just like the EV and GDV TSP solvers may be a good idea.
+            //TODO: Also pass the number of times!
+            //The rest is good
+            if (timeSpentByXCplexSolutionStatus.Count > 0)
+                timeSpentAccountListener.OnChangeOfTimeSpentAccount(timeSpentByXCplexSolutionStatus);
         }
 
         void OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
@@ -172,18 +211,20 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
             {
                 unexploredCustomerSets.Add(candidate);
-                InformCustomerSetTreeSearchListener();
             }
+            InformCustomerSetTreeSearchListener();
+            InformTimeSpentAccountListener();
         }
 
         void RunSetPartition()
         {
-            CPlexExtender = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
-            CPlexExtender.Solve_and_PostProcess();
-            bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+            SetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
+            SetPartitionSolver.Solve_and_PostProcess();
+            bestSolutionFound = (CustomerSetBasedSolution)SetPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
             //stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
             InformUpperBoundListener();
+            InformTimeSpentAccountListener();
         }
 
     }

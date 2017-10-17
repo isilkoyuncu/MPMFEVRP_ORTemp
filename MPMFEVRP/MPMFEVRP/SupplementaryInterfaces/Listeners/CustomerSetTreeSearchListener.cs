@@ -16,5 +16,9 @@ namespace MPMFEVRP.SupplementaryInterfaces.Listeners
 
         void OnChangeOfNumberOfAllCustomerSets(int[] newNumberAll);
 
+        void OnChangeOfNumbersOfUnexploredAndExploredCustomerSets(int newNumberUnexplored, int newNumberAll);
+
+        void OnChangeOfNumbersOfUnexploredAndExploredCustomerSets(int[] newNumberUnexplored, int[] newNumberAll);
+
     }
 }

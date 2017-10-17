@@ -33,6 +33,8 @@ namespace MPMFEVRP.Models.XCPlex
         {
             OrganizeSites();
             SetMinAndMaxValuesOfAllVariables();
+            SetBigMvalues();
+
             allVariables_list = new List<INumVar>();
 
             //dvs: X_ijv and Y_irj
@@ -129,9 +131,9 @@ namespace MPMFEVRP.Models.XCPlex
 
             for (int i = 0; i < numNonESNodes; i++)
             {
-                Y_LB[i] = new double[numVehCategories][];
-                Y_UB[i] = new double[numVehCategories][];
-                for (int r = 0; r < numVehCategories; r++)
+                Y_LB[i] = new double[numES][];
+                Y_UB[i] = new double[numES][];
+                for (int r = 0; r < numES; r++)
                 {
                     Y_LB[i][r] = new double[numNonESNodes];
                     Y_UB[i][r] = new double[numNonESNodes];
@@ -170,7 +172,7 @@ namespace MPMFEVRP.Models.XCPlex
                     minValue_Epsilon[j] = 0.0;
 
                     if (s.SiteType == SiteTypes.Customer)//TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
-                        maxValue_Epsilon[j] = Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration); //Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
+                        maxValue_Epsilon[j] = Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration); //Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
                     else
                         maxValue_Epsilon[j] = 1.0;
                 }
@@ -185,7 +187,6 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 BigDelta[i] = new double[numNonESNodes];
                 BigT[i] = new double[numNonESNodes];
-
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] - minValue_Epsilon[i];
@@ -310,10 +311,12 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingNondepot();//10
             AddConstraint_SOCRegulationFollowingDepot();//11
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
-            AddConstraint_TimeRegulationFollowingAnESVisit();//13
-            AddConstraint_ArrivalTimeLimits();//14
-            AddConstraint_TotalTravelTimeEV();//15
-            AddConstraint_TotalTravelTimeGDV();//16
+            AddConstraint_TimeRegulationThroughAnESVisit();//13
+            //AddConstraint_ArrivalTimeLimits();//14
+            //AddConstraint_TotalTravelTime();//15
+            //AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
+            //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
+            //AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -356,7 +359,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, X[i][j][vIndex_EV]);
                     IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, X[j][i][vIndex_EV]);
-                    for (int r = 0; i < numES; r++)
+                    for (int r = 0; r < numES; r++)
                     {
                         IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, Y[i][r][j]);
                         IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, Y[j][r][i]);
@@ -441,7 +444,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int r = 0; r < numES; r++)
             {
                 Site from = externalStations[r];
-                for (int j = 0; j <= numNonESNodes; j++)
+                for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site to = preprocessedSites[j];
                     ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
@@ -459,7 +462,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int r = 0; r < numES; r++)
             {
                 Site from = externalStations[r];
-                for (int j = 0; j <= numNonESNodes; j++)
+                for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site to = preprocessedSites[j];
                     ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
@@ -509,7 +512,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_TimeRegulationFollowingACustomerVisit()//12
         {
-            for (int i = 1; i <= numCustomers; i++)
+            for (int i = 1; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site sFrom = preprocessedSites[i];
@@ -523,17 +526,21 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                 }
         }
-        void AddConstraint_TimeRegulationFollowingAnESVisit()//13 
+        void AddConstraint_TimeRegulationThroughAnESVisit()//13 
         {
-            for (int r = 0; r < numES; r++)
-            {
-                Site ES = externalStations[r];
-                for (int i = 1; i <= numCustomers; i++)
-                {
-                    Site sFrom = preprocessedSites[i];
+            for (int i = 1; i < numNonESNodes; i++)
+                for (int r = 0; r < numES; r++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
+
+                        Site sFrom = preprocessedSites[i];
+                        //double sd = ServiceDuration(sFrom);
+                        Site ES = externalStations[r];
+                        //double td_ir = TravelTime(sFrom, ES);
                         Site sTo = preprocessedSites[j];
+                        //double td_rj = TravelTime(ES, sTo);
+                        //double cd = BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES);
+                        //double bigt = BigT[i][j];
                         ILinearNumExpr TimeDifference = LinearNumExpr();
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
@@ -541,10 +548,8 @@ namespace MPMFEVRP.Models.XCPlex
                         // Here we decide whether recharging duration is fixed or depends on the arrival SOC
                         if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                         {
-                            for (int v = 0; v < numVehCategories; v++)
-                                TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom)+TravelTime(sFrom,ES)+(BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[i][j]), Y[i][r][j]);
-                            // If the recharging duration is fixed, then it is enough for RHS to be Tmax 
-                            string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
+                            TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[i][j]), Y[i][r][j]);
+                            string constraint_name = "Time_Regulation_from_customer_" + i.ToString() +"_through_ES_" + r.ToString() +"_to_node_" + j.ToString();
                             allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                         }
                         else
@@ -552,8 +557,6 @@ namespace MPMFEVRP.Models.XCPlex
                             throw new NotImplementedException("Anything other than RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full is not finished");
                         }
                     }
-                }
-            }
         }
         void AddConstraint_ArrivalTimeLimits()//14
         {
@@ -572,46 +575,109 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddGe(TimeDifference, maxValue_T[j], constraint_name));
             }
         }
-        void AddConstraint_TotalTravelTimeEV()//15
+        void AddConstraint_TotalTravelTime()//15
         {
             totalTravelTimeConstraintIndex = allConstraints_list.Count;
-
-            ILinearNumExpr TotalTravelTime = LinearNumExpr();
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    Site sFrom = preprocessedSites[i];
-                    Site sTo = preprocessedSites[j];
-                        TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][vIndex_EV]);
-                    for (int r = 0; r < numES; r++)
+            for (int r = 0; r < numES; r++)
+            {
+                ILinearNumExpr TotalTravelTime = LinearNumExpr();
+                for (int i = 0; i < numNonESNodes; i++)
+                    for (int j = 0; j < numNonESNodes; j++)
                     {
+                        Site sFrom = preprocessedSites[i];
+                        Site sTo = preprocessedSites[j];
+                        for (int v = 0; v < numVehCategories; v++)
+                            TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][v]);
+
                         Site ES = externalStations[r];
-                        TotalTravelTime.AddTerm((TravelTime(sFrom, ES)+TravelTime(ES,sTo)), Y[i][r][j]);
+                        TotalTravelTime.AddTerm((TravelTime(sFrom, ES) + TravelTime(ES, sTo)), Y[i][r][j]);
+                    }
+
+                string constraint_name = "Total_Travel_Time";
+                double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
+                rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
+                allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+            }
+        }
+        void AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs()//16
+        {
+            for (int v = 0; v < numVehCategories; v++)
+                for (int i = 1; i < numNonESNodes; i++)
+                {
+                    Site from = preprocessedSites[i];
+                    for (int k = 1; k < numNonESNodes; k++)
+                    {
+                        Site through = preprocessedSites[k];
+                        for (int j = 1; j < numNonESNodes; j++)
+                        {
+                            Site to = preprocessedSites[j];
+                            if (i != j && j != k && i != k)
+                                //if (from.SiteType == SiteTypes.Customer && through.SiteType == SiteTypes.Customer && to.SiteType == SiteTypes.Customer)
+                                    if (minValue_T[i] + ServiceDuration(from) + TravelTime(from, through) + ServiceDuration(through) + TravelTime(through, to) > maxValue_T[j])
+                                    {
+                                        ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][v]);
+                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][v]);
+                                        string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
+                                        allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                                        TimeFeasibilityOfTwoConsecutiveArcs.Clear();
+                                    }
+                        }
                     }
                 }
-            string constraint_name = "Total_Travel_Time";
-            double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
-            rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
-            allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
         }
-        void AddConstraint_TotalTravelTimeGDV()//16
+        void AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs()//17
         {
-            totalTravelTimeConstraintIndex = allConstraints_list.Count;
-
-            ILinearNumExpr TotalTravelTime = LinearNumExpr();
             for (int i = 0; i < numNonESNodes; i++)
+            {
+                Site from = preprocessedSites[i];
+                for (int k = 0; k < numNonESNodes; k++)
+                {
+                    Site through = preprocessedSites[k];
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site to = preprocessedSites[j];
+                        if (EnergyConsumption(from, through, VehicleCategories.EV) + EnergyConsumption(through, to, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
+                        {
+                            ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                            EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
+                            EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
+                            string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
+                            allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                            EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
+                        }
+                    }
+                }
+            }
+        }
+        void AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES()//18
+        {
+            for (int r1 = 0; r1 < numES; r1++)
+            {
+                Site ES1 = externalStations[r1];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    Site sFrom = preprocessedSites[i];
-                    Site sTo = preprocessedSites[j];
-                        TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][vIndex_GDV]);
-                }
-            string constraint_name = "Total_Travel_Time";
-            double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
-            rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
-            allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
-        }
+                    Site customer = preprocessedSites[j];
+                    for (int r2 = 0; r2 < numES; r2++)
+                    {
+                        Site ES2 = externalStations[r2];
+                        if (EnergyConsumption(ES1, customer, VehicleCategories.EV) + EnergyConsumption(customer, ES2, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
+                        {
+                            ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                            for(int i = 0; i < numNonESNodes; i++)
+                            {
+                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Y[i][r1][j]);
+                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Y[j][r1][i]);
+                            }
+                            string constraint_name = "No_arc_from_ES_node_" + r1.ToString() + "_through_customer_" + j.ToString() + "to_ES_node_" + r2.ToString();
+                            allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                            EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
+                        }
 
+                    }
+                }
+            }            
+        }
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
