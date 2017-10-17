@@ -73,7 +73,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             }
             //TODO turn the following on and off to export the model 
-            model.ExportModel("model.lp");
+            //model.ExportModel("model.lp");
             //model.ExportModel(((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString() + "model.lp");
             return model;
         }

@@ -41,6 +41,7 @@ namespace MPMFEVRP.Models.XCPlex
             SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
+
             //dvs: X_ijv
             AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numDuplicatedNodes, numDuplicatedNodes, numVehCategories, out X);
             //auxiliaries (Epsilon_j, Delta_j, T_j)
@@ -551,7 +552,7 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
             TotalTravelTime.Clear();
         }
-        void AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs()
+        void AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs()//15
         {
             for (int i = 0; i < numDuplicatedNodes; i++)
             {
@@ -577,7 +578,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs()
+        void AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs()//16
         {
             for (int i = 0; i < numDuplicatedNodes; i++)
             {

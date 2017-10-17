@@ -346,8 +346,11 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime beginTime = new DateTime();
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
-            ExportModel("mmmmodel.lp");
+            //ExportModel("mmmmodel.lp");
             Output();
+            //TODO: Turn the following two lines on/off if you want to output the log file as a text to the MPMFEVRP directory instead of output window
+            //TWoutput = System.IO.File.CreateText("CplexLog.txt");
+            //SetOut(TWoutput);
             Solve();
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
@@ -409,7 +412,7 @@ namespace MPMFEVRP.Models.XCPlex
                 if (ValidateCompletenessOfRelaxedSolution())
                     optimalCompleteSolutionObtained = true;
             }//if relaxed
-            
+            TWoutput.Close();
         }
 
         bool ValidateCompletenessOfRelaxedSolution()
