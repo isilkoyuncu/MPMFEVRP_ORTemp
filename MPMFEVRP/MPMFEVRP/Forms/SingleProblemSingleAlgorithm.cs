@@ -31,6 +31,8 @@ namespace MPMFEVRP.Forms
         IAlgorithm theAlgorithm;
         //ISolution theSolution;
         Type TSPModelType;
+        HybridTreeSearchAndSetPartitionCharts charts;
+
         public SingleProblemSingleAlgorithm()
         {
             InitializeComponent();
@@ -154,9 +156,11 @@ namespace MPMFEVRP.Forms
                 theAlgorithm.Initialize(theProblemModel);
                 theAlgorithm.setBackgroundWorker(BackgroundWorker_algorithmRunner);
 
+                button_showCharts.Enabled = true;
+                button_showCharts_Click(sender, e);//This assumes the "charts" is compatible with the algorithm
+
                 Log("Algorithm running.");
                 BackgroundWorker_algorithmRunner.RunWorkerAsync();
-
             }
         }
         private void BackgroundWorker_algorithmRunner_DoWork(object sender, DoWorkEventArgs e)
@@ -211,6 +215,20 @@ namespace MPMFEVRP.Forms
         private void button2_Click(object sender, EventArgs e)
         {
             theProblemModel.ExportTravelDurationAsTxt();
+        }
+
+        private void button_showCharts_Click(object sender, EventArgs e)
+        {
+            if (charts != null && charts.Visible)
+            {
+                charts.Focus();
+            }
+            else
+            {
+                charts = new HybridTreeSearchAndSetPartitionCharts();//TODO: Discuss with Huseyin: Is this a good implementation with not much coupling? 
+                theAlgorithm.setListener(charts);
+                charts.Show();
+            }
         }
     }
 }

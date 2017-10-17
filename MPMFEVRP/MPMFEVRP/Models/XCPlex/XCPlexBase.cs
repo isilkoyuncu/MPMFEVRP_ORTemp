@@ -412,7 +412,7 @@ namespace MPMFEVRP.Models.XCPlex
                 if (ValidateCompletenessOfRelaxedSolution())
                     optimalCompleteSolutionObtained = true;
             }//if relaxed
-            TWoutput.Close();
+//            TWoutput.Close();//TODO: Discuss w/ Isil: Why was this needed? From where I arrived at this point, I didn't have TWOutput and got a null reference exception
         }
 
         bool ValidateCompletenessOfRelaxedSolution()

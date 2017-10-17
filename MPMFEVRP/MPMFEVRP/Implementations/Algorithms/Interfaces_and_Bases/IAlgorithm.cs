@@ -2,6 +2,7 @@
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using System.ComponentModel;
+using MPMFEVRP.SupplementaryInterfaces.Listeners;
 
 namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 {
@@ -19,5 +20,8 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
         ISolution Solution { get; }
         string GetName();
         string[] GetOutputSummary();
+
+        void setListener(IListener listener);
+
     }
 }

@@ -2,7 +2,7 @@
 
 namespace MPMFEVRP.SupplementaryInterfaces.Listeners
 {
-    public interface TimeSpentAccountListener
+    public interface TimeSpentAccountListener : IListener
     {
         void OnChangeOfTimeSpentAccount(Dictionary<string,double> newTimeSpentAccount);
     }

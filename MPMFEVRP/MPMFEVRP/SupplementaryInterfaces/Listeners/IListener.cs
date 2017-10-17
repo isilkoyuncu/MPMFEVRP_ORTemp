@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.SupplementaryInterfaces.Listeners
 {
-    public interface UpperBoundListener : IListener
+    public interface IListener
     {
-        void OnUpperBoundUpdate(double newUpperBound);
     }
 }

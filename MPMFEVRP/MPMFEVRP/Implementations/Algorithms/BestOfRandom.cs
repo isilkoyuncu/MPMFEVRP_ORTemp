@@ -3,6 +3,7 @@ using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
+using MPMFEVRP.SupplementaryInterfaces.Listeners;
 using System;
 using System.Collections.Generic;
 
@@ -70,6 +71,11 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
 
         public override string[] GetOutputSummary()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void setListener(IListener listener)
         {
             throw new NotImplementedException();
         }

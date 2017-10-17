@@ -29,6 +29,9 @@
         private void InitializeComponent()
         {
             this.groupBox_problem = new System.Windows.Forms.GroupBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button_exportEnergyConsmp = new System.Windows.Forms.Button();
+            this.button_exportDistances = new System.Windows.Forms.Button();
             this.comboBox_TSPModel = new System.Windows.Forms.ComboBox();
             this.label_TSPModel = new System.Windows.Forms.Label();
             this.button_createProblemModel = new System.Windows.Forms.Button();
@@ -45,16 +48,14 @@
             this.button_viewProblem = new System.Windows.Forms.Button();
             this.groupBox_algorithms = new System.Windows.Forms.GroupBox();
             this.button_run = new System.Windows.Forms.Button();
-            this.BackgroundWorker_algorithmRunner = new System.ComponentModel.BackgroundWorker();
             this.panel_parameters = new System.Windows.Forms.Panel();
             this.label9 = new System.Windows.Forms.Label();
             this.comboBox_algorithms = new System.Windows.Forms.ComboBox();
+            this.BackgroundWorker_algorithmRunner = new System.ComponentModel.BackgroundWorker();
             this.button_viewSolution = new System.Windows.Forms.Button();
             this.groupBox_status = new System.Windows.Forms.GroupBox();
             this.textBox_log = new System.Windows.Forms.TextBox();
-            this.button_exportDistances = new System.Windows.Forms.Button();
-            this.button_exportEnergyConsmp = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.button_showCharts = new System.Windows.Forms.Button();
             this.groupBox_problem.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox_algorithms.SuspendLayout();
@@ -83,6 +84,36 @@
             this.groupBox_problem.TabIndex = 0;
             this.groupBox_problem.TabStop = false;
             this.groupBox_problem.Text = "The \"Problem\" Side (problem, model, data, etc.)";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(323, 576);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(112, 23);
+            this.button2.TabIndex = 24;
+            this.button2.Text = "Export Travel Times";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button_exportEnergyConsmp
+            // 
+            this.button_exportEnergyConsmp.Location = new System.Drawing.Point(144, 576);
+            this.button_exportEnergyConsmp.Name = "button_exportEnergyConsmp";
+            this.button_exportEnergyConsmp.Size = new System.Drawing.Size(153, 23);
+            this.button_exportEnergyConsmp.TabIndex = 23;
+            this.button_exportEnergyConsmp.Text = "Export Energy Consumption";
+            this.button_exportEnergyConsmp.UseVisualStyleBackColor = true;
+            this.button_exportEnergyConsmp.Click += new System.EventHandler(this.button_exportEnergyConsmp_Click);
+            // 
+            // button_exportDistances
+            // 
+            this.button_exportDistances.Location = new System.Drawing.Point(6, 576);
+            this.button_exportDistances.Name = "button_exportDistances";
+            this.button_exportDistances.Size = new System.Drawing.Size(112, 23);
+            this.button_exportDistances.TabIndex = 22;
+            this.button_exportDistances.Text = "Export Distances";
+            this.button_exportDistances.UseVisualStyleBackColor = true;
+            this.button_exportDistances.Click += new System.EventHandler(this.button_exportDistances_Click);
             // 
             // comboBox_TSPModel
             // 
@@ -270,12 +301,20 @@
             this.comboBox_algorithms.Size = new System.Drawing.Size(338, 21);
             this.comboBox_algorithms.TabIndex = 11;
             // 
+            // BackgroundWorker_algorithmRunner
+            // 
+            this.BackgroundWorker_algorithmRunner.WorkerReportsProgress = true;
+            this.BackgroundWorker_algorithmRunner.WorkerSupportsCancellation = true;
+            this.BackgroundWorker_algorithmRunner.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BackgroundWorker_algorithmRunner_DoWork);
+            this.BackgroundWorker_algorithmRunner.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.BackgroundWorker_algorithmRunner_ProgressChanged);
+            this.BackgroundWorker_algorithmRunner.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker_algorithmRunner_RunWorkerCompleted);
+            // 
             // button_viewSolution
             // 
             this.button_viewSolution.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_viewSolution.Location = new System.Drawing.Point(4, 613);
+            this.button_viewSolution.Location = new System.Drawing.Point(168, 613);
             this.button_viewSolution.Name = "button_viewSolution";
-            this.button_viewSolution.Size = new System.Drawing.Size(320, 28);
+            this.button_viewSolution.Size = new System.Drawing.Size(156, 28);
             this.button_viewSolution.TabIndex = 13;
             this.button_viewSolution.Text = "View Solution";
             this.button_viewSolution.UseVisualStyleBackColor = true;
@@ -283,6 +322,7 @@
             // 
             // groupBox_status
             // 
+            this.groupBox_status.Controls.Add(this.button_showCharts);
             this.groupBox_status.Controls.Add(this.textBox_log);
             this.groupBox_status.Controls.Add(this.button_viewSolution);
             this.groupBox_status.Location = new System.Drawing.Point(839, 13);
@@ -301,43 +341,16 @@
             this.textBox_log.Size = new System.Drawing.Size(320, 579);
             this.textBox_log.TabIndex = 14;
             // 
-            // button_exportDistances
+            // button_showCharts
             // 
-            this.button_exportDistances.Location = new System.Drawing.Point(6, 576);
-            this.button_exportDistances.Name = "button_exportDistances";
-            this.button_exportDistances.Size = new System.Drawing.Size(112, 23);
-            this.button_exportDistances.TabIndex = 22;
-            this.button_exportDistances.Text = "Export Distances";
-            this.button_exportDistances.UseVisualStyleBackColor = true;
-            this.button_exportDistances.Click += new System.EventHandler(this.button_exportDistances_Click);
-            // 
-            // button_exportEnergyConsmp
-            // 
-            this.button_exportEnergyConsmp.Location = new System.Drawing.Point(144, 576);
-            this.button_exportEnergyConsmp.Name = "button_exportEnergyConsmp";
-            this.button_exportEnergyConsmp.Size = new System.Drawing.Size(153, 23);
-            this.button_exportEnergyConsmp.TabIndex = 23;
-            this.button_exportEnergyConsmp.Text = "Export Energy Consumption";
-            this.button_exportEnergyConsmp.UseVisualStyleBackColor = true;
-            this.button_exportEnergyConsmp.Click += new System.EventHandler(this.button_exportEnergyConsmp_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(323, 576);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(112, 23);
-            this.button2.TabIndex = 24;
-            this.button2.Text = "Export Travel Times";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // BackgroundWorker_algorithmRunner
-            // 
-            this.BackgroundWorker_algorithmRunner.WorkerReportsProgress = true;
-            this.BackgroundWorker_algorithmRunner.WorkerSupportsCancellation = true;
-            this.BackgroundWorker_algorithmRunner.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BackgroundWorker_algorithmRunner_DoWork);
-            this.BackgroundWorker_algorithmRunner.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.BackgroundWorker_algorithmRunner_ProgressChanged);
-            this.BackgroundWorker_algorithmRunner.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker_algorithmRunner_RunWorkerCompleted);
+            this.button_showCharts.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_showCharts.Location = new System.Drawing.Point(6, 613);
+            this.button_showCharts.Name = "button_showCharts";
+            this.button_showCharts.Size = new System.Drawing.Size(156, 28);
+            this.button_showCharts.TabIndex = 15;
+            this.button_showCharts.Text = "Show Charts";
+            this.button_showCharts.UseVisualStyleBackColor = true;
+            this.button_showCharts.Click += new System.EventHandler(this.button_showCharts_Click);
             // 
             // SingleProblemSingleAlgorithm
             // 
@@ -393,6 +406,6 @@
         private System.Windows.Forms.Button button_exportEnergyConsmp;
         private System.Windows.Forms.Button button_exportDistances;
         private System.ComponentModel.BackgroundWorker BackgroundWorker_algorithmRunner;
-
+        private System.Windows.Forms.Button button_showCharts;
     }
 }

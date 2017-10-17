@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
+using MPMFEVRP.SupplementaryInterfaces.Listeners;
 
 namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 {
@@ -104,5 +105,7 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
         }
 
         public abstract string[] GetOutputSummary();
+
+        public abstract void setListener(IListener listener);
     }
 }

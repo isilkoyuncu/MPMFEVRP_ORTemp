@@ -4,6 +4,7 @@ using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
+using MPMFEVRP.SupplementaryInterfaces.Listeners;
 using System;
 using System.Collections.Generic;
 
@@ -252,6 +253,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             epsilon_value = new double[numCustomers + 1];
             for (int j = 0; j <= numCustomers; j++)
                 epsilon_value[j] = allVariableValues[counter++];
+        }
+
+        public override void setListener(IListener listener)
+        {
+            throw new NotImplementedException();
         }
     }
 }

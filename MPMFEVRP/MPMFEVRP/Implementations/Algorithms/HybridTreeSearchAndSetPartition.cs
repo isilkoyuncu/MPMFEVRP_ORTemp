@@ -34,7 +34,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         Dictionary<string, int> setPartitionCounterByStatus;
         Dictionary<string, double> setPartitionCumulativeTimeAccount;
 
-        Forms.HybridTreeSearchAndSetPartitionCharts charts;
+//        Forms.HybridTreeSearchAndSetPartitionCharts charts;
         CustomerSetTreeSearchListener customerSetTreeSearchListener;
         UpperBoundListener upperBoundListener;
         TimeSpentAccountListener timeSpentAccountListener;
@@ -93,12 +93,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
-
-            charts = new Forms.HybridTreeSearchAndSetPartitionCharts();
-            customerSetTreeSearchListener = charts;
-            upperBoundListener = charts;
-            timeSpentAccountListener = charts;
-            charts.Show();
         }
         void PopulateAndPlaceInitialCustomerSets()
         {
@@ -257,5 +251,14 @@ namespace MPMFEVRP.Implementations.Algorithms
             InformTimeSpentAccountListener();
         }
 
+        public override void setListener(IListener listener)
+        {
+            if (listener is CustomerSetTreeSearchListener)
+                customerSetTreeSearchListener = (CustomerSetTreeSearchListener)listener;
+            if (listener is UpperBoundListener)
+                upperBoundListener = (UpperBoundListener)listener;
+            if (listener is TimeSpentAccountListener)
+                timeSpentAccountListener = (TimeSpentAccountListener)listener;
+        }
     }
 }

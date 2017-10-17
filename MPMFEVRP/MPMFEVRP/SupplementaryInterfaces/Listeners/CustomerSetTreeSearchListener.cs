@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.SupplementaryInterfaces.Listeners
 {
-    public interface CustomerSetTreeSearchListener
+    public interface CustomerSetTreeSearchListener: IListener
     {
         void OnChangeOfNumberOfUnexploredCustomerSets(int newNumberUnexplored);
 
