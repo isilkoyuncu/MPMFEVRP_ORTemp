@@ -31,6 +31,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         CustomerSetList parents;
 
         XCPlex_SetCovering_wCustomerSets SetPartitionSolver;
+        Dictionary<string, int> setPartitionCounterByStatus;
         Dictionary<string, double> setPartitionCumulativeTimeAccount;
 
         Forms.HybridTreeSearchAndSetPartitionCharts charts;
@@ -55,7 +56,29 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedConclude()
         {
-            System.Windows.Forms.MessageBox.Show("SpecializedConclude Not yet implemented!");
+            stats.RunTimeMilliSeconds = (long)(DateTime.Now - startTime).TotalMilliseconds;
+            //assuming the upper bound is properly updated throughout the course of the algorithm
+            if (unexploredCustomerSets.TotalCount == 0)
+                stats.LowerBound = stats.UpperBound;
+
+            stats.addNewStat("Number of unexplored Customer Sets", unexploredCustomerSets.TotalCount.ToString());
+
+            foreach (string key in theProblemModel.EV_TSP_TimeSpentAccount.Keys)
+            {
+                stats.addNewStat("EV_#solved_" + key, theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus[key].ToString());
+                stats.addNewStat("EV_timespent_" + key, theProblemModel.EV_TSP_TimeSpentAccount[key].ToString());
+            }
+            foreach (string key in theProblemModel.GDV_TSP_TimeSpentAccount.Keys)
+            {
+                stats.addNewStat("GDV_#solved_" + key, theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus[key].ToString());
+                stats.addNewStat("GDV_timespent_" + key, theProblemModel.GDV_TSP_TimeSpentAccount[key].ToString());
+            }
+            foreach (string key in setPartitionCumulativeTimeAccount.Keys)
+            {
+                stats.addNewStat("SetPartition_" + key, setPartitionCounterByStatus[key].ToString());
+                stats.addNewStat("SetPartition_" + key, setPartitionCumulativeTimeAccount[key].ToString());
+            }
+
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -177,15 +200,22 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 if (setPartitionCumulativeTimeAccount == null)
                 {
+                    setPartitionCounterByStatus = new Dictionary<string, int>();
                     setPartitionCumulativeTimeAccount = new Dictionary<string, double>();
                 }
                 if (setPartitionCumulativeTimeAccount != null)
                 {
                     foreach (string key in SetPartitionSolver.TotalTimeInSolveOnStatus.Keys)
                         if (setPartitionCumulativeTimeAccount.ContainsKey(key))
+                        {
+                            setPartitionCounterByStatus[key]++;
                             setPartitionCumulativeTimeAccount[key] += SetPartitionSolver.TotalTimeInSolveOnStatus[key];
+                        }
                         else
+                        {
+                            setPartitionCounterByStatus.Add(key, 1);
                             setPartitionCumulativeTimeAccount.Add(key, SetPartitionSolver.TotalTimeInSolveOnStatus[key]);
+                        }
                 }
                 foreach(string key in setPartitionCumulativeTimeAccount.Keys)
                     timeSpentByXCplexSolutionStatus.Add("SetPartition_" + key, setPartitionCumulativeTimeAccount[key]);
