@@ -49,10 +49,15 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void CreateTSPSolvers(Type TSPModelType)
         {
-            if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
+           if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
                 GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            }
+           else if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
+            {
+                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+                GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
             }
             else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation))
             {
@@ -63,6 +68,11 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             {
                 EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
                 GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woUvariables(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
+                throw new Exception("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
             }
         }
         double GetWorstCaseOFV()

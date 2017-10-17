@@ -18,7 +18,11 @@ namespace MPMFEVRP.Models.XCPlex
 
         Site theDepot;
 
+        int firstCustomerVisitationConstraintIndex = -1;
         int totalTravelTimeConstraintIndex = -1;
+
+        double[] RHS_forNodeCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
+
 
         INumVar[][][] X; double[][][] X_LB, X_UB;
         INumVar[][][] Y; double[][][] Y_LB, Y_UB;
@@ -128,6 +132,8 @@ namespace MPMFEVRP.Models.XCPlex
             maxValue_Delta = new double[numNonESNodes];
             minValue_Epsilon = new double[numNonESNodes];
             maxValue_Epsilon = new double[numNonESNodes];
+            RHS_forNodeCoverage = new double[numNonESNodes];
+
 
             for (int i = 0; i < numNonESNodes; i++)
             {
@@ -143,6 +149,7 @@ namespace MPMFEVRP.Models.XCPlex
                         Y_UB[i][r][j] = 1.0;
                     }
                 }
+                RHS_forNodeCoverage[i] = 1.0;
             }
 
             for (int i = 0; i < numNonESNodes; i++)
@@ -324,6 +331,8 @@ namespace MPMFEVRP.Models.XCPlex
 
         void AddConstraint_NumberOfVisitsPerCustomerNode() //1
         {
+            firstCustomerVisitationConstraintIndex = allConstraints_list.Count;
+
             for (int j = 1; j <= numCustomers; j++)//Index 0 is the depot
             {
                 ILinearNumExpr IncomingXandYToCustomerNodes = LinearNumExpr();
@@ -340,7 +349,7 @@ namespace MPMFEVRP.Models.XCPlex
                 if (xCplexParam.TSP || theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
                 {
                     constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
-                    allConstraints_list.Add(AddEq(IncomingXandYToCustomerNodes, 1.0, constraint_name));
+                    allConstraints_list.Add(AddEq(IncomingXandYToCustomerNodes, RHS_forNodeCoverage[j], constraint_name));
                 }
                 else
                 {
@@ -794,7 +803,44 @@ namespace MPMFEVRP.Models.XCPlex
 
         public override void RefineDecisionVariables(CustomerSet cS)
         {
-            throw new NotImplementedException();
+            RHS_forNodeCoverage = new double[numNonESNodes];
+            int VCIndex = (int)xCplexParam.VehCategory;
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 1; j < numNonESNodes; j++)
+                {
+                    if (cS.Customers.Contains(preprocessedSites[j].ID))
+                    {
+                        RHS_forNodeCoverage[j] = 1.0;
+                    }
+                    else
+                    {
+                        RHS_forNodeCoverage[j] = 0.0;
+                    }
+                }
+            RefineRightHandSidesOfCustomerVisitationConstraints();
+
+            if(totalTravelTimeConstraintIndex>=0)
+                allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
+        }
+        void RefineRightHandSidesOfCustomerVisitationConstraints()
+        {
+            int c = firstCustomerVisitationConstraintIndex;
+
+            for (int j = 1; j < numNonESNodes; j++)
+            {
+                if (RHS_forNodeCoverage[j] == 1)
+                {
+                    allConstraints_array[c].UB = RHS_forNodeCoverage[j];
+                    allConstraints_array[c].LB = RHS_forNodeCoverage[j];
+                }
+                else//RHS_forNodeCoverage[j] == 0
+                {
+                    allConstraints_array[c].LB = RHS_forNodeCoverage[j];
+                    allConstraints_array[c].UB = RHS_forNodeCoverage[j];
+                }
+                c++;
+            }
+
         }
     }
 }
