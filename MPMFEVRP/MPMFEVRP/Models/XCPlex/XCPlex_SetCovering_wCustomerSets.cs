@@ -162,8 +162,9 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][v]);
                 }//for i
-                string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + theProblemModel.NumVehicles[v] + "times";
-                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, overrideNumberOfVehicles==null? theProblemModel.NumVehicles[v]:overrideNumberOfVehicles[v], constraint_name));
+                int nv = overrideNumberOfVehicles == null ? theProblemModel.NumVehicles[v] : overrideNumberOfVehicles[v];
+                string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + nv.ToString() + "times";
+                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, nv, constraint_name));
             }
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)

@@ -107,15 +107,18 @@ namespace MPMFEVRP.Models.XCPlex
                         Y[j][r][0].UB = 0.0;
                     }
             //No arc from a node to another if energy consumption is > 1
-            for (int i = 0; i < numNonESNodes; i++)
+            for (int v = 0; v < numVehCategories; v++)
             {
-                Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numNonESNodes; j++)
+                VehicleCategories vehicleCategory = vehicleCategories[v];
+                for (int i = 0; i < numNonESNodes; i++)
                 {
-                    Site sTo = preprocessedSites[j];
-                    for (int v = 0; v < numVehCategories; v++)
-                        if (EnergyConsumption(sFrom, sTo, base.vehicleCategories[v]) > 1)
+                    Site sFrom = preprocessedSites[i];
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sTo = preprocessedSites[j];
+                        if (EnergyConsumption(sFrom, sTo, vehicleCategory) > theProblemModel.VRD.GetVehiclesOfCategory(vehicleCategory)[0].BatteryCapacity)
                             X[i][j][v].UB = 0.0;
+                    }
                 }
             }
 
@@ -174,7 +177,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                     //TODO Fine-tune the min and max values of delta
                     minValue_Delta[j] = 0.0;
-                    maxValue_Delta[j] = 1.0;
+                    maxValue_Delta[j] = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity;
 
                     minValue_Epsilon[j] = 0.0;
 
@@ -460,7 +463,7 @@ namespace MPMFEVRP.Models.XCPlex
                     DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                     for (int i = 0; i < numNonESNodes; i++)
                         DepartureSOCFromES.AddTerm(EnergyConsumption(from,to,VehicleCategories.EV), Y[i][r][j]);
-                    string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
+                    string constraint_name = "Departure_SOC(UB)_From_ES_" + r.ToString() + "_going_to_" + j.ToString();
                     allConstraints_list.Add(AddLe(DepartureSOCFromES, BatteryCapacity(VehicleCategories.EV), constraint_name));
                     
                 }
@@ -477,9 +480,9 @@ namespace MPMFEVRP.Models.XCPlex
                     ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                     DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                     for (int i = 0; i < numNonESNodes; i++)
-                        DepartureSOCFromES.AddTerm((EnergyConsumption(from, to, VehicleCategories.EV)- BatteryCapacity(VehicleCategories.EV)+ minValue_Delta[j]), Y[i][r][j]);
-                    string constraint_name = "Departure_SOC_From_ES_" + j.ToString();
-                    allConstraints_list.Add(AddLe(DepartureSOCFromES, minValue_Delta[j], constraint_name));
+                        DepartureSOCFromES.AddTerm((EnergyConsumption(from, to, VehicleCategories.EV) - BatteryCapacity(VehicleCategories.EV) + minValue_Delta[j]), Y[i][r][j]);
+                    string constraint_name = "Departure_SOC(LB)_From_ES_" + r.ToString() + "_going_to_" + j.ToString();
+                    allConstraints_list.Add(AddGe(DepartureSOCFromES, minValue_Delta[j], constraint_name));
 
                 }
             }

@@ -65,8 +65,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             this.customers = customers;
             this.customers.Sort();//just in case
-            //TODO:Bad-code, the following line causes a runtime error!
-            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { new VehicleSpecificRouteOptimizationOutcome(vehicleSpecificRoute.VehicleCategory, vsros, vehicleSpecificRoute) });
+            VehicleCategories vehicleCategory = (vehicleSpecificRoute == null ? VehicleCategories.GDV : vehicleSpecificRoute.VehicleCategory);
+            VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicleCategory, vsros, vehicleSpecificRoute);
+            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
             retrievedFromArchive = false;
         }
 
