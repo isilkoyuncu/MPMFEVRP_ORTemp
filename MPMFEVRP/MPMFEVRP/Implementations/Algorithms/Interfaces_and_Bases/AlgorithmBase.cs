@@ -106,6 +106,6 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
 
         public abstract string[] GetOutputSummary();
 
-        public abstract void setListener(IListener listener);
+        public abstract bool setListener(IListener listener);
     }
 }

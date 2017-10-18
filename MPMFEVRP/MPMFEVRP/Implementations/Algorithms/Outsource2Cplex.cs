@@ -255,9 +255,9 @@ namespace MPMFEVRP.Implementations.Algorithms
                 epsilon_value[j] = allVariableValues[counter++];
         }
 
-        public override void setListener(IListener listener)
+        public override bool setListener(IListener listener)
         {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }

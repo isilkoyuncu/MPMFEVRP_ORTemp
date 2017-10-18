@@ -238,7 +238,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             throw new NotImplementedException();
         }
 
-        public override void setListener(IListener listener)
+        public override bool setListener(IListener listener)
         {
             throw new NotImplementedException();
         }

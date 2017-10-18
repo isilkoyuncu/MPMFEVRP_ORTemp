@@ -226,8 +226,8 @@ namespace MPMFEVRP.Forms
             else
             {
                 charts = new HybridTreeSearchAndSetPartitionCharts();//TODO: Discuss with Huseyin: Is this a good implementation with not much coupling? 
-                theAlgorithm.setListener(charts);
-                charts.Show();
+                if (theAlgorithm.setListener(charts))
+                    charts.Show();
             }
         }
     }

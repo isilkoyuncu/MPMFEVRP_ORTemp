@@ -361,7 +361,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             return bestSolnIndex;
         }
 
-        public override void setListener(IListener listener)
+        public override bool setListener(IListener listener)
         {
             throw new NotImplementedException();
         }

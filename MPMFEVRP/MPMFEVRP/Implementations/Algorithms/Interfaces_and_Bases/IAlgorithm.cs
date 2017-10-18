@@ -21,7 +21,7 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
         string GetName();
         string[] GetOutputSummary();
 
-        void setListener(IListener listener);
+        bool setListener(IListener listener);
 
     }
 }

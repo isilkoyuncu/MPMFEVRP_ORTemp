@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
-using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
 using MPMFEVRP.SupplementaryInterfaces.Listeners;
-using MPMFEVRP.Domains.AlgorithmDomain;
+using System;
+using System.Collections.Generic;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -298,14 +294,25 @@ namespace MPMFEVRP.Implementations.Algorithms
             InformTimeSpentAccountListener();
         }
 
-        public override void setListener(IListener listener)
+        public override bool setListener(IListener listener)
         {
+            bool outcome = false;
             if (listener is CustomerSetTreeSearchListener)
+            {
+                outcome = true;
                 customerSetTreeSearchListener = (CustomerSetTreeSearchListener)listener;
+            }
             if (listener is UpperBoundListener)
+            {
+                outcome = true;
                 upperBoundListener = (UpperBoundListener)listener;
+            }
             if (listener is TimeSpentAccountListener)
+            {
+                outcome = true;
                 timeSpentAccountListener = (TimeSpentAccountListener)listener;
+            }
+            return outcome;
         }
     }
 }
