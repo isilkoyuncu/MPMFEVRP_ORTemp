@@ -293,10 +293,10 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int r = 0; r < numES; r++)
                     {
                         Site ES = externalStations[r];
-                        for (int j = 0; j < numVehCategories; j++)
+                        for (int j = 0; j < numNonESNodes; j++)
                         {
                             Site sTo = preprocessedSites[j];
-                            objFunction.AddTerm((Distance(sFrom, ES) + Distance(ES, sTo)), Y[i][r][j]);
+                            objFunction.AddTerm(Distance(sFrom, ES) + Distance(ES, sTo), Y[i][r][j]);
                         }
                     }
                 }
@@ -353,7 +353,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//11
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
             AddConstraint_TimeRegulationThroughAnESVisit();//13
-            //AddConstraint_ArrivalTimeLimits();//14
+            AddConstraint_ArrivalTimeLimits();//14
             //AddConstraint_TotalTravelTime();//15
             //AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
             //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
