@@ -273,35 +273,66 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            //Second term Part I: distance-based costs from customer to customer directly
-            for (int i = 0; i < numNonESNodes; i++)
+            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
             {
-                Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numNonESNodes; j++)
+                //Second term Part I: distance-based costs from customer to customer directly
+                for (int i = 0; i < numNonESNodes; i++)
                 {
-                    Site sTo = preprocessedSites[j];
-                    for (int v = 0; v < numVehCategories; v++)
-                        objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
-                }
-            }
-            //Second term Part II: distance-based costs from customer to customer through an ES
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                Site sFrom = preprocessedSites[i];
-                for (int r = 0; r < numES; r++)
-                {
-                    Site ES = externalStations[r];
-                    for (int j = 0; j < numVehCategories; j++)
+                    Site sFrom = preprocessedSites[i];
+                    for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sTo = preprocessedSites[j];
-                        objFunction.AddTerm(GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)), Y[i][r][j]);
+                        for (int v = 0; v < numVehCategories; v++)
+                            objFunction.AddTerm(Distance(sFrom, sTo), X[i][j][v]);
+                    }
+                }
+                //Second term Part II: distance-based costs from customer to customer through an ES
+                for (int i = 0; i < numNonESNodes; i++)
+                {
+                    Site sFrom = preprocessedSites[i];
+                    for (int r = 0; r < numES; r++)
+                    {
+                        Site ES = externalStations[r];
+                        for (int j = 0; j < numVehCategories; j++)
+                        {
+                            Site sTo = preprocessedSites[j];
+                            objFunction.AddTerm((Distance(sFrom, ES) + Distance(ES, sTo)), Y[i][r][j]);
+                        }
                     }
                 }
             }
-            //Third term: vehicle fixed costs
-            for (int j = 0; j < numVehCategories; j++)
-                for (int v = 0; v < numVehCategories; v++)
-                objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+            else
+            {
+                //Second term Part I: distance-based costs from customer to customer directly
+                for (int i = 0; i < numNonESNodes; i++)
+                {
+                    Site sFrom = preprocessedSites[i];
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sTo = preprocessedSites[j];
+                        for (int v = 0; v < numVehCategories; v++)
+                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
+                    }
+                }
+                //Second term Part II: distance-based costs from customer to customer through an ES
+                for (int i = 0; i < numNonESNodes; i++)
+                {
+                    Site sFrom = preprocessedSites[i];
+                    for (int r = 0; r < numES; r++)
+                    {
+                        Site ES = externalStations[r];
+                        for (int j = 0; j < numVehCategories; j++)
+                        {
+                            Site sTo = preprocessedSites[j];
+                            objFunction.AddTerm(GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)), Y[i][r][j]);
+                        }
+                    }
+                }
+                //Third term: vehicle fixed costs
+                for (int j = 0; j < numVehCategories; j++)
+                    for (int v = 0; v < numVehCategories; v++)
+                        objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+            }
             //Now adding the objective function to the model
             AddMinimize(objFunction);
         }
