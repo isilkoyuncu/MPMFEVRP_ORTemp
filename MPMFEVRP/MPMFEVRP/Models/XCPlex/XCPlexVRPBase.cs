@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 
@@ -96,5 +97,24 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return site.GetPrize(vehicleCategory);
         }
+
+        //TODO: Complete the GetCompleteSolution method at XCPlexVRPBase level
+        //public override SolutionBase GetCompleteSolution(Type SolutionType)
+        //{
+        //    SolutionBase output;
+
+        //    if(SolutionType == typeof(CustomerSetBasedSolution))
+        //    {
+        //        output = new CustomerSetBasedSolution()
+        //    }
+
+        //    switch (SolutionType)
+        //    {
+        //        case (CustomerSetBasedSolution):
+        //            break;
+        //    }
+
+        //    return output;
+        //}
     }
 }
