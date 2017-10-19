@@ -374,10 +374,10 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationThroughAnESVisit();//13
             AddConstraint_TimeRegulationFromDepotThroughAnESVisit();//13b
             AddConstraint_ArrivalTimeLimits();//14
-            //AddConstraint_TotalTravelTime();//15
+            AddConstraint_TotalTravelTime();//15
             AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
             //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
-            //AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
+            AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -661,7 +661,6 @@ namespace MPMFEVRP.Models.XCPlex
                         }
                     }
         }
-
         void AddConstraint_ArrivalTimeLimits()//14
         {
             for (int j = 1; j < numNonESNodes; j++)
@@ -682,26 +681,27 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_TotalTravelTime()//15
         {
             totalTravelTimeConstraintIndex = allConstraints_list.Count;
-            for (int r = 0; r < numES; r++)
-            {
-                ILinearNumExpr TotalTravelTime = LinearNumExpr();
-                for (int i = 0; i < numNonESNodes; i++)
-                    for (int j = 0; j < numNonESNodes; j++)
-                    {
-                        Site sFrom = preprocessedSites[i];
-                        Site sTo = preprocessedSites[j];
-                        for (int v = 0; v < numVehCategories; v++)
-                            TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][v]);
 
+            ILinearNumExpr TotalTravelTime = LinearNumExpr();
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    Site sFrom = preprocessedSites[i];
+                    Site sTo = preprocessedSites[j];
+                    for (int v = 0; v < numVehCategories; v++)
+                        TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][v]);
+                    for (int r = 0; r < numES; r++)
+                    {
                         Site ES = externalStations[r];
                         TotalTravelTime.AddTerm((TravelTime(sFrom, ES) + TravelTime(ES, sTo)), Y[i][r][j]);
                     }
+                }
 
-                string constraint_name = "Total_Travel_Time";
-                double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
-                rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
-                allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
-            }
+            string constraint_name = "Total_Travel_Time";
+            double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
+            rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
+            allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+
         }
         void AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs()//16
         {
@@ -716,7 +716,6 @@ namespace MPMFEVRP.Models.XCPlex
                         {
                             Site to = preprocessedSites[j];
                             if (i != j && j != k && i != k)
-                                //if (from.SiteType == SiteTypes.Customer && through.SiteType == SiteTypes.Customer && to.SiteType == SiteTypes.Customer)
                                     if (minValue_T[i] + ServiceDuration(from) + TravelTime(from, through) + ServiceDuration(through) + TravelTime(through, to) > maxValue_T[j])
                                     {
                                         ILinearNumExpr TimeFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
@@ -771,7 +770,7 @@ namespace MPMFEVRP.Models.XCPlex
                             for(int i = 0; i < numNonESNodes; i++)
                             {
                                 EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Y[i][r1][j]);
-                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Y[j][r1][i]);
+                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Y[j][r2][i]);
                             }
                             string constraint_name = "No_arc_from_ES_node_" + r1.ToString() + "_through_customer_" + j.ToString() + "to_ES_node_" + r2.ToString();
                             allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
