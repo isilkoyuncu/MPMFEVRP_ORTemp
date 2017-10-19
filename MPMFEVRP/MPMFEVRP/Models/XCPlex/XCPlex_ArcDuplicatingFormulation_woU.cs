@@ -372,6 +372,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//11
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
             AddConstraint_TimeRegulationThroughAnESVisit();//13
+            AddConstraint_TimeRegulationFromDepotThroughAnESVisit();//13b
             AddConstraint_ArrivalTimeLimits();//14
             //AddConstraint_TotalTravelTime();//15
             AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
@@ -637,6 +638,30 @@ namespace MPMFEVRP.Models.XCPlex
                         }
                     }
         }
+        void AddConstraint_TimeRegulationFromDepotThroughAnESVisit()//13b 
+        {
+                for (int r = 0; r < numES; r++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site ES = externalStations[r];
+                        Site sTo = preprocessedSites[j];
+                        ILinearNumExpr TimeDifference = LinearNumExpr();
+                        TimeDifference.AddTerm(1.0, T[j]);
+
+                        // Here we decide whether recharging duration is fixed or depends on the arrival SOC
+                        if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                        {
+                            TimeDifference.AddTerm(-1.0 * (TravelTime(theDepot, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
+                            string constraint_name = "Time_Regulation_from_customer_" + 0.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
+                            allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
+                        }
+                        else
+                        {
+                            throw new NotImplementedException("Anything other than RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full is not finished");
+                        }
+                    }
+        }
+
         void AddConstraint_ArrivalTimeLimits()//14
         {
             for (int j = 1; j < numNonESNodes; j++)
