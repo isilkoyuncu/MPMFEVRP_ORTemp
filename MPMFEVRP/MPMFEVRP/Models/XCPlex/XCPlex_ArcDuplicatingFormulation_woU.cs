@@ -106,7 +106,7 @@ namespace MPMFEVRP.Models.XCPlex
                         Y[0][r][j].UB = 0.0;
                         Y[j][r][0].UB = 0.0;
                     }
-            //No arc from a node to another if energy consumption is > 1
+            //No arc from a node to another if energy consumption is > capacity
             for (int v = 0; v < numVehCategories; v++)
             {
                 VehicleCategories vehicleCategory = vehicleCategories[v];
@@ -174,6 +174,8 @@ namespace MPMFEVRP.Models.XCPlex
                     maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
                     if (s.SiteType == SiteTypes.Customer)
                         maxValue_T[j] -= ServiceDuration(s);
+                    else if (s.SiteType == SiteTypes.ExternalStation && theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                        maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
 
                     //TODO Fine-tune the min and max values of delta
                     minValue_Delta[j] = 0.0;
@@ -182,9 +184,9 @@ namespace MPMFEVRP.Models.XCPlex
                     minValue_Epsilon[j] = 0.0;
 
                     if (s.SiteType == SiteTypes.Customer)//TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
-                        maxValue_Epsilon[j] = Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration); //Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
+                        maxValue_Epsilon[j] = Math.Min(BatteryCapacity(VehicleCategories.EV), s.ServiceDuration * RechargingRate(s));//Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration); //Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
                     else
-                        maxValue_Epsilon[j] = 1.0;
+                        maxValue_Epsilon[j] = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity;
                 }
             }
         }
