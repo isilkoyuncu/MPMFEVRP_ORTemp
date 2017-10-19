@@ -157,7 +157,7 @@ namespace MPMFEVRP.Forms
                 theAlgorithm.setBackgroundWorker(BackgroundWorker_algorithmRunner);
 
                 button_showCharts.Enabled = true;
-                button_showCharts_Click(sender, e);//This assumes the "charts" is compatible with the algorithm
+                Button_showCharts_Click(sender, e);//This assumes the "charts" is compatible with the algorithm
 
                 Log("Algorithm running.");
                 BackgroundWorker_algorithmRunner.RunWorkerAsync();
@@ -202,22 +202,22 @@ namespace MPMFEVRP.Forms
             TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_TSPModel.SelectedItem.ToString());
         }
 
-        private void button_exportDistances_Click(object sender, EventArgs e)
+        private void Button_exportDistances_Click(object sender, EventArgs e)
         {
             theProblemModel.ExportDistancesAsTxt();
         }
 
-        private void button_exportEnergyConsmp_Click(object sender, EventArgs e)
+        private void Button_exportEnergyConsmp_Click(object sender, EventArgs e)
         {
             theProblemModel.ExportEnergyConsumpionAsTxt();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Button_exportTravelDuration_Click(object sender, EventArgs e)
         {
             theProblemModel.ExportTravelDurationAsTxt();
         }
 
-        private void button_showCharts_Click(object sender, EventArgs e)
+        private void Button_showCharts_Click(object sender, EventArgs e)
         {
             if (charts != null && charts.Visible)
             {
@@ -228,6 +228,36 @@ namespace MPMFEVRP.Forms
                 charts = new HybridTreeSearchAndSetPartitionCharts();//TODO: Discuss with Huseyin: Is this a good implementation with not much coupling? 
                 if (theAlgorithm.setListener(charts))
                     charts.Show();
+            }
+        }
+
+        private void ExtractLogInfo(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = true,
+                Multiselect = false
+            };
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                label_selectedFile.Text = dialog.FileName;
+                try
+                {
+                    string[] cplexOutputSummary = SolutionUtil.ReadCplexLogByFileName(dialog.FileName);
+                    StreamWriter sw = new StreamWriter("cplexLogSummary.txt");
+                    for(int i=0; i<cplexOutputSummary.Length; i++)
+                    {
+                        sw.WriteLine(cplexOutputSummary[i]);
+                    }
+                    sw.Flush();
+                    sw.Close();
+                    Log("Solution summary is written!");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("There is something wrong while parsing the file!", "File parse error!");
+                }
             }
         }
     }

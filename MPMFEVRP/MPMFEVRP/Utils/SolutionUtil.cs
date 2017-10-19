@@ -36,6 +36,14 @@ namespace MPMFEVRP.Utils
             solutionSummary = KYSolnReader.InstanceSolutionSummary;
             return solutionSummary;
         }
+        public static string[] ReadCplexLogByFileName(String fullFileName)
+        {
+            string[] cplexLog;
+            CplexLogReader cplexLogFileReader = new CplexLogReader(fullFileName);
+            cplexLogFileReader.Read();
+            cplexLog = cplexLogFileReader.CplexLogSummary;
+            return cplexLog;
+        }
         public static ISolution CreateSolutionByName(String solutionName, EVvsGDV_ProblemModel problemData)
         {
             var allSolutions = AppDomain.CurrentDomain.GetAssemblies()

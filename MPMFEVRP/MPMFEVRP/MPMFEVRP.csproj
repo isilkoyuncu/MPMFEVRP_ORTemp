@@ -201,6 +201,7 @@
     <Compile Include="SupplementaryInterfaces\Listeners\UpperBoundListener.cs" />
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />
+    <Compile Include="Utils\CplexLogReader.cs" />
     <Compile Include="Utils\DeepCopier.cs" />
     <Compile Include="Utils\Calculators.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
