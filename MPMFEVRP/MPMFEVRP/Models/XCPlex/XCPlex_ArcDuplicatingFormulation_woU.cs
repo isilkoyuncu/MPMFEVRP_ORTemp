@@ -121,7 +121,18 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
             }
-
+            //No arc from a node to an ES or from an ES to a node if energy consumption is > capacity
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int r = 0; r < numES; r++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sFrom = preprocessedSites[i];
+                        Site ES = externalStations[r];
+                        Site sTo = preprocessedSites[j];
+                        if (EnergyConsumption(sFrom, ES, VehicleCategories.EV) > theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity ||
+                            EnergyConsumption(ES, sTo, VehicleCategories.EV) > theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity)
+                            Y[i][r][j].UB = 0.0;
+                    }
         }
         void SetMinAndMaxValuesOfAllVariables()
         {
