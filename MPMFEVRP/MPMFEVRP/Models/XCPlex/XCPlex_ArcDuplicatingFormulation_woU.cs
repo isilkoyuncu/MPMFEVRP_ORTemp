@@ -351,6 +351,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_DepartureSOCFromCustomerNode();//7
             AddConstraint_DepartureSOCFromESNodeUB();//8
             AddConstraint_DepartureSOCFromESNodeLB();//9
+            AddConstraint_ArrivalSOCToESNodeLB();//9b
             AddConstraint_SOCRegulationFollowingNondepot();//10
             AddConstraint_SOCRegulationFollowingDepot();//11
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
@@ -506,19 +507,36 @@ namespace MPMFEVRP.Models.XCPlex
         {
             for (int r = 0; r < numES; r++)
             {
-                Site from = externalStations[r];
+                Site ES = externalStations[r];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site to = preprocessedSites[j];
                     ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                     DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                     for (int i = 0; i < numNonESNodes; i++)
-                        DepartureSOCFromES.AddTerm((EnergyConsumption(from, to, VehicleCategories.EV) - BatteryCapacity(VehicleCategories.EV) + minValue_Delta[j]), Y[i][r][j]);
+                        DepartureSOCFromES.AddTerm((EnergyConsumption(ES, to, VehicleCategories.EV) - BatteryCapacity(VehicleCategories.EV) + minValue_Delta[j]), Y[i][r][j]);
                     string constraint_name = "Departure_SOC(LB)_From_ES_" + r.ToString() + "_going_to_" + j.ToString();
                     allConstraints_list.Add(AddGe(DepartureSOCFromES, minValue_Delta[j], constraint_name));
 
                 }
             }
+        }
+        void AddConstraint_ArrivalSOCToESNodeLB()//9b
+        {
+            for (int j = 0; j < numNonESNodes; j++)
+                for (int r = 0; r < numES; r++) 
+                {
+                    Site from = preprocessedSites[j];
+                    Site ES = externalStations[r]; 
+                    ILinearNumExpr ArrivalSOCFromES = LinearNumExpr();
+                    ArrivalSOCFromES.AddTerm(1.0, Delta[j]);
+                    ArrivalSOCFromES.AddTerm(1.0, Epsilon[j]);
+                    for (int k = 0; k < numNonESNodes; k++)
+                        ArrivalSOCFromES.AddTerm(-1.0* EnergyConsumption(from, ES, VehicleCategories.EV), Y[j][r][k]);
+                    string constraint_name = "Arrival_SOC(LB)_To_ES_" + r.ToString() + "_from_" + j.ToString();
+                    allConstraints_list.Add(AddGe(ArrivalSOCFromES, 0.0, constraint_name));
+
+                }
         }
         void AddConstraint_SOCRegulationFollowingNondepot()//10
         {
