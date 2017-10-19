@@ -128,6 +128,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             bestSolutionFound.Status = status;
             bestSolutionFound.UpperBound = CPlexExtender.UpperBound_XCPlex;
             bestSolutionFound.LowerBound = CPlexExtender.LowerBound_XCPlex;
+            
+
+
        }
 
         public override void SpecializedReset()

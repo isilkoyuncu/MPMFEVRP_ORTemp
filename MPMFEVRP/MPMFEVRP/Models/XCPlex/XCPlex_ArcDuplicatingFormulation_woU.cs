@@ -89,6 +89,11 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void SetUndesiredXYVariablesTo0()
         {
+            T[0].LB = theProblemModel.CRD.TMax;
+            T[0].UB = theProblemModel.CRD.TMax;
+            Epsilon[0].LB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+            Epsilon[0].UB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+
             //No arc from a node to itself
             for (int j = 0; j < numNonESNodes; j++)
             {
@@ -358,7 +363,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationThroughAnESVisit();//13
             AddConstraint_ArrivalTimeLimits();//14
             //AddConstraint_TotalTravelTime();//15
-            //AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
+            AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
             //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
             //AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
 
@@ -758,10 +763,13 @@ namespace MPMFEVRP.Models.XCPlex
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
         {
+            //TODO: Delete the following after debugging
+            GetDecisionVariableValues();
+
             int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
 
             //We first determine the route start points
-            List<List<int>> listOfFirstSiteIndices = new List<List<int>>();
+            List <List<int>> listOfFirstSiteIndices = new List<List<int>>();
             for (int j = 0; j < numNonESNodes; j++)
                 if (GetValue(X[0][j][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                 {
@@ -782,7 +790,28 @@ namespace MPMFEVRP.Models.XCPlex
             }
             return outcome;
         }
+        public void GetDecisionVariableValues()
+        {
+            double[,,] xValues = new double[numNonESNodes, numNonESNodes, numVehCategories];
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    xValues[i, j, 0] = GetValue(X[i][j][0]);
+            double[,,] yValues = new double[numNonESNodes, numES, numNonESNodes];
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int r = 0; r < numES; r++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                        yValues[i, r, j] = GetValue(Y[i][r][j]);
 
+            double[] epsilonValues = new double[numNonESNodes];
+            for (int j = 0; j < numNonESNodes; j++)
+                epsilonValues[j] = GetValue(Epsilon[j]);
+            double[] deltaValues = new double[numNonESNodes];
+            for (int j = 0; j < numNonESNodes; j++)
+                deltaValues[j] = GetValue(Delta[j]);
+            double[] TValues = new double[numNonESNodes];
+            for (int j = 0; j < numNonESNodes; j++)
+                TValues[j] = GetValue(T[j]);
+        }
         /// <summary>
         /// 
         /// </summary>
