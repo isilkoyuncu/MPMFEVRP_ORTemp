@@ -165,6 +165,8 @@
     <Compile Include="Models\ObjectiveFunctionCoefficientsPackage.cs" />
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woU.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SupplementaryInterfaces\IWriter.cs" />
