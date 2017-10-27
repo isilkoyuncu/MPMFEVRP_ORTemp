@@ -21,4 +21,6 @@ namespace Instance_Generation.Other
     public enum TripChargePolicy { None, TwoTier, Individualized };
 
     public enum DistanceMatrixSource { File, EuclideanCalculation, HaversianCalculation}
+
+    public enum CustomerRemovalCriteria { DirectRouteExceedsWorkdayLength, CannotBeReachedWithAtMostOneESVisit }
 }

@@ -150,6 +150,9 @@ namespace Instance_Generation.FileConverters
 
             //Distance
             PopulateDistancesMatrix();
+
+            //Removal of infeasible customers
+            RemoveInfeasibleCustomers(new List<CustomerRemovalCriteria>() { CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit, CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength });
         }
 
         void PopulateIDColumn()
@@ -237,7 +240,7 @@ namespace Instance_Generation.FileConverters
                 }
 
             //For each customer, we first calculate the base+trip price, and then multiply it for the EV
-            for (int i = TGPData.NESS+1; i <= TGPData.NESS+numCustomers; i++)
+            for (int i = TGPData.NESS + 1; i <= TGPData.NESS + numCustomers; i++)
             {
                 //Since vehicle categories are fixed (0:EV, 1:GDV), we handle them in quite a rigid manner:
                 switch (TGPData.BasePricingPol)
@@ -299,6 +302,165 @@ namespace Instance_Generation.FileConverters
                 useGeogPosition = false;
                 distance = null;
             }
+        }
+        void RemoveInfeasibleCustomers(List<CustomerRemovalCriteria> removalCriteria)
+        {
+            List<string> customerIDs2Remove = new List<string>();
+            //Identification
+            //TODO: In the following feasibility checkers, distance calculation is hardcoded, make it flexible
+            if (removalCriteria.Contains(CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength))
+                customerIDs2Remove.AddRange(InfeasibleCustomers_DirectRouteExceedsWorkdayLength());
+            if (removalCriteria.Contains(CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit))
+                customerIDs2Remove.AddRange(InfeasibleCustomers_CannotBeReachedWithAtMostOneESVisit());
+            //Execution
+            RemoveInfeasibleCustomers(customerIDs2Remove);
+        }
+        List<string> InfeasibleCustomers_DirectRouteExceedsWorkdayLength()
+        {
+            List<string> outcome = new List<string>();
+            for (int c = 0; c < nodeID.Length; c++)
+                if (nodeType[c].Contains("c"))
+                    if (CustomerDirectRouteExceedsWorkdayLength(c))
+                        outcome.Add(nodeID[c]);
+            return outcome;
+        }
+        bool CustomerDirectRouteExceedsWorkdayLength(int c)
+        {
+            double workdayLength = timeWindowEnd[0];
+            double minStay = 0.0;
+            if (nodeType[c].Contains("c"))
+            {
+                minStay = customerServiceDuration[c];
+            }
+            if (distance == null)
+            {
+                //double distTo = Calculators.HaversineDistance(X[0], Y[0], X[c], Y[c]);
+                //double distFrom = Calculators.HaversineDistance(X[c], Y[c], X[0], Y[0]);
+                //double totalTravelTime = (distTo + distFrom) / travelSpeed;
+                //if (totalTravelTime + minStay > workdayLength)
+                //    System.Windows.Forms.MessageBox.Show(nodeID[c] + " is infeasible: distance to = " + distTo.ToString() + ", distance from = " + distFrom.ToString() + ", total travel time = " + totalTravelTime.ToString() + ", tour length = " + (totalTravelTime + minStay).ToString() + " > " + workdayLength.ToString());
+                return ((Calculators.HaversineDistance(X[0], Y[0], X[c], Y[c]) + Calculators.HaversineDistance(X[c], Y[c], X[0], Y[0])) / travelSpeed + minStay > workdayLength);
+            }
+            else
+                return ((distance[c, 0] + distance[0, c]) / travelSpeed + minStay > timeWindowEnd[0]);
+        }
+        List<string> InfeasibleCustomers_CannotBeReachedWithAtMostOneESVisit()
+        {
+            List<string> outcome = new List<string>();
+            for (int c = 0; c < nodeID.Length; c++)
+                if (nodeType[c].Contains("c"))
+                    if (CustomerCannotBeReachedWithAtMostOneESVisit(c))
+                        outcome.Add(nodeID[c]);
+            return outcome;
+        }
+        bool CustomerCannotBeReachedWithAtMostOneESVisit(int c)
+        {
+            double EVDrivingRange = VehData.SelectedEV.BatteryCapacity / VehData.SelectedEV.ConsumptionRate;
+            double workdayLength = timeWindowEnd[0];
+            if (distance == null)
+            {
+                if ((Calculators.HaversineDistance(X[0], Y[0], X[c], Y[c]) + Calculators.HaversineDistance(X[c], Y[c], X[0], Y[0])) <= EVDrivingRange)
+                    return false;
+                for (int r = 0; r < nodeID.Length; r++)
+                    if (nodeType[r].Contains("e"))
+                        if (Calculators.HaversineDistance(X[0], Y[0], X[r], Y[r]) <= EVDrivingRange)
+                            if (Calculators.HaversineDistance(X[r], Y[r], X[c], Y[c]) + Calculators.HaversineDistance(X[c], Y[c], X[0], Y[0]) <= EVDrivingRange)
+                                if ((Calculators.HaversineDistance(X[0], Y[0], X[r], Y[r]) + Calculators.HaversineDistance(X[r], Y[r], X[c], Y[c]) + Calculators.HaversineDistance(X[c], Y[c], X[0], Y[0])) / travelSpeed + customerServiceDuration[c] + (1.0 / gamma[r]) <= workdayLength)
+                                    return false;
+            }
+            else//distances are stored in the matrix
+            {
+                if ((distance[c, 0] + distance[0, c]) <= EVDrivingRange)
+                    return false;
+                for (int r = 0; r < nodeID.Length; r++)
+                    if (nodeType[r].Contains("e"))
+                        if (distance[0, r] <= EVDrivingRange)
+                            if (distance[r, c] + distance[c, 0] <= EVDrivingRange)
+                                if ((distance[0, r] + distance[r, c] + distance[c, 0]) / travelSpeed + customerServiceDuration[c] + (1.0 / gamma[r]) <= workdayLength)
+                                    return false;
+            }
+            return true;
+        }
+        void RemoveInfeasibleCustomers(List<string> customerIDs2Remove)
+        {
+            customerIDs2Remove = customerIDs2Remove.Distinct().ToList();
+            List<int> rowNumbers2Remove = new List<int>();
+            foreach (string id in customerIDs2Remove)
+                for (int i = 0; i < nodeID.Length; i++)
+                    if (nodeID[i] == id)
+                    {
+                        rowNumbers2Remove.Add(i);
+                        break;
+                    }
+            RemoveRows(rowNumbers2Remove);
+        }
+        void RemoveRows(List<int> rowNumbers)
+        {
+            if (rowNumbers == null)
+                return;
+            if (rowNumbers.Count == 0)
+                return;
+            //Initialization
+            rowNumbers.Sort();
+            int newNumCustomers = numCustomers - rowNumbers.Count;
+            int newNumNodes = numNodes - rowNumbers.Count;
+            int[] oldRowNumberOfNewRow = new int[newNumNodes];
+            int newIndex = 0;
+            for (int oldIndex = 0; oldIndex < numNodes; oldIndex++)
+            {
+                if (rowNumbers.Contains(oldIndex))
+                    continue;
+                //else:
+                oldRowNumberOfNewRow[newIndex++] = oldIndex;
+            }
+            //Single-index data
+            string[] newnodeID = new string[newNumNodes];
+            string[] newnodeType = new string[newNumNodes];
+            double[] newx = new double[newNumNodes];
+            double[] newy = new double[newNumNodes];
+            double[] newdemand = new double[newNumNodes];
+            double[] newtimeWindowStart = new double[newNumNodes];
+            double[] newtimeWindowEnd = new double[newNumNodes];
+            double[] newcustomerServiceDuration = new double[newNumNodes];
+            double[] newgamma = new double[newNumNodes];
+            for (int i = 0; i < newNumNodes; i++)
+            {
+                newnodeID[i] = nodeID[oldRowNumberOfNewRow[i]];
+                newnodeType[i] = nodeType[oldRowNumberOfNewRow[i]];
+                newx[i] = x[oldRowNumberOfNewRow[i]];
+                newy[i] = y[oldRowNumberOfNewRow[i]];
+                newdemand[i] = demand[oldRowNumberOfNewRow[i]];
+                newtimeWindowStart[i] = timeWindowStart[oldRowNumberOfNewRow[i]];
+                newtimeWindowEnd[i] = timeWindowEnd[oldRowNumberOfNewRow[i]];
+                newcustomerServiceDuration[i] = customerServiceDuration[oldRowNumberOfNewRow[i]];
+                newgamma[i] = gamma[oldRowNumberOfNewRow[i]];
+            }
+            //price
+            double[,] newprize = new double[2, newNumNodes];
+            for (int v = 0; v < 2; v++)
+                for (int i = 0; i < newNumNodes; i++)
+                    newprize[v, i] = prize[v, oldRowNumberOfNewRow[i]];
+            //distance
+            double[,] newdistance = new double[newNumNodes, newNumNodes];
+            if (distance != null)
+                for (int i = 0; i < newNumNodes; i++)
+                    for (int j = 0; j < newNumNodes; j++)
+                        newdistance[i, j] = distance[oldRowNumberOfNewRow[i], oldRowNumberOfNewRow[j]];
+            //replace old with new
+            nodeID = newnodeID;
+            nodeType = newnodeType;
+            x = newx;
+            y = newy;
+            demand = newdemand;
+            timeWindowStart = newtimeWindowStart;
+            timeWindowEnd = newtimeWindowEnd;
+            customerServiceDuration = newcustomerServiceDuration;
+            gamma = newgamma;
+            prize = newprize;
+            if (distance != null)
+                distance = newdistance;
+            numCustomers = newNumCustomers;
+            numNodes = newNumNodes;
         }
     }
 }
