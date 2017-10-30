@@ -126,11 +126,13 @@ namespace MPMFEVRP.Forms
             series1.ChartArea = "HorizontalBarArea";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StackedBar;
             series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(163)))), ((int)(((byte)(38)))), ((int)(((byte)(56)))));
+            series1.IsValueShownAsLabel = true;
             series1.Legend = "Legend_HorizontalBarChart";
             series1.Name = "Unexplored";
             series2.ChartArea = "HorizontalBarArea";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StackedBar;
             series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(181)))), ((int)(((byte)(20)))));
+            series2.IsValueShownAsLabel = true;
             series2.Legend = "Legend_HorizontalBarChart";
             series2.Name = "Explored";
             series3.ChartArea = "TimeSeriesArea";

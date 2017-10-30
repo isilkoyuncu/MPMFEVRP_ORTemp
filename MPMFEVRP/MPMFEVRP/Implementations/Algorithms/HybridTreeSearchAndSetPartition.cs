@@ -21,6 +21,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         //These are the important characteristics that will have to be tied to the form
         int beamWidth;
+        int filterWidth;
         CustomerSetList.CustomerListPopStrategy popStrategy;
 
         PartitionedCustomerSetList allCustomerSets;
@@ -30,6 +31,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         XCPlex_SetCovering_wCustomerSets SetPartitionSolver;
         Dictionary<string, int> setPartitionCounterByStatus;
         Dictionary<string, double> setPartitionCumulativeTimeAccount;
+        Dictionary<string, double> timeSpentByXCplexSolutionStatus;
 
 //        Forms.HybridTreeSearchAndSetPartitionCharts charts;
         CustomerSetTreeSearchListener customerSetTreeSearchListener;
@@ -128,7 +130,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             xCplexParam = new XCPlexParameters();
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 1;
+            beamWidth = 3;
+            filterWidth = 7;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
             allCustomerSets = new PartitionedCustomerSetList();
@@ -172,12 +175,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
-                    parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=-3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
+                    parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
 
                     //populate children from parents
                     PopulateAndPlaceChildren();
 
-                //    InformCustomerSetTreeSearchListener();
+                    InformCustomerSetTreeSearchListener();
 
                     //end of the level, moving on to the next level
                     currentLevel++;
@@ -200,9 +203,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             foreach (CustomerSet cs in parents)
             {
-                List<string> remainingCustomers = theProblemModel.GetAllCustomerIDs();
-                foreach (string customerID in cs.Customers)
-                    remainingCustomers.Remove(customerID);
+                List<string> remainingCustomers = FilterRemainingCustomers(cs);
+
                 foreach (string customerID in remainingCustomers)
                 {
                     CustomerSet candidate = new CustomerSet(cs);
@@ -212,6 +214,37 @@ namespace MPMFEVRP.Implementations.Algorithms
             }//foreach (CustomerSet cs in parents)
             parents.Clear();
             InformCustomerSetTreeSearchListener();
+        }
+        List<string> FilterRemainingCustomers(CustomerSet cs)
+        {
+            List<string> remainingCustomers_list = theProblemModel.GetAllCustomerIDs();
+            foreach (string customerID in cs.Customers)
+                remainingCustomers_list.Remove(customerID);
+            string[] remainingCustomers_array = remainingCustomers_list.ToArray();
+            double[] minDistances = new double[remainingCustomers_array.Length];
+
+            string unvisited;
+            double minTempDist, tempDist;
+            for (int i=0;i<remainingCustomers_array.Length;i++)
+            {
+                unvisited = remainingCustomers_array[i];
+               minTempDist = double.MaxValue;
+                foreach(string visited in cs.Customers)
+                {
+                    tempDist = Math.Min(theProblemModel.SRD.GetDistance(unvisited, visited), theProblemModel.SRD.GetDistance(unvisited, visited));
+                    if (tempDist < minTempDist)
+                    {
+                        minTempDist = tempDist;
+                    }
+                }
+                minDistances[i] = minTempDist;
+            }
+            Array.Sort(minDistances, remainingCustomers_array);
+
+            List<string> outcome = new List<string>();
+            for (int i = 0; i < filterWidth; i++)
+                outcome.Add(remainingCustomers_array[i]);
+            return outcome;
         }
         void InformCustomerSetTreeSearchListener()
         {
