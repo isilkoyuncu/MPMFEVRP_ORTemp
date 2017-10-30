@@ -136,6 +136,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
+
+            timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
         }
         void PopulateAndPlaceInitialCustomerSets()
         {
@@ -261,35 +263,42 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             if (timeSpentAccountListener == null)
                 return;
-            Dictionary<string, double> timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
+            /*Dictionary<string, double> *///timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
             foreach (string key in theProblemModel.EV_TSP_TimeSpentAccount.Keys)
-                timeSpentByXCplexSolutionStatus.Add("EV_" + key, theProblemModel.EV_TSP_TimeSpentAccount[key]);
-            foreach (string key in theProblemModel.GDV_TSP_TimeSpentAccount.Keys)
-                timeSpentByXCplexSolutionStatus.Add("GDV_" + key, theProblemModel.GDV_TSP_TimeSpentAccount[key]);
-            if (SetPartitionSolver != null)
             {
-                if (setPartitionCumulativeTimeAccount == null)
+                if (timeSpentByXCplexSolutionStatus.ContainsKey("EV_" + key))
                 {
-                    setPartitionCounterByStatus = new Dictionary<string, int>();
-                    setPartitionCumulativeTimeAccount = new Dictionary<string, double>();
+                    timeSpentByXCplexSolutionStatus["EV_" + key] = theProblemModel.EV_TSP_TimeSpentAccount[key];
                 }
-                if (setPartitionCumulativeTimeAccount != null)
+                else
                 {
-                    foreach (string key in SetPartitionSolver.TotalTimeInSolveOnStatus.Keys)
-                        if (setPartitionCumulativeTimeAccount.ContainsKey(key))
-                        {
-                            setPartitionCounterByStatus[key]++;
-                            setPartitionCumulativeTimeAccount[key] += SetPartitionSolver.TotalTimeInSolveOnStatus[key];
-                        }
-                        else
-                        {
-                            setPartitionCounterByStatus.Add(key, 1);
-                            setPartitionCumulativeTimeAccount.Add(key, SetPartitionSolver.TotalTimeInSolveOnStatus[key]);
-                        }
+                    timeSpentByXCplexSolutionStatus.Add("EV_" + key, theProblemModel.EV_TSP_TimeSpentAccount[key]);
                 }
-                foreach(string key in setPartitionCumulativeTimeAccount.Keys)
-                    timeSpentByXCplexSolutionStatus.Add("SetPartition_" + key, setPartitionCumulativeTimeAccount[key]);
             }
+            foreach (string key in theProblemModel.GDV_TSP_TimeSpentAccount.Keys)
+            {
+                if (timeSpentByXCplexSolutionStatus.ContainsKey("GDV_" + key))
+                {
+                    timeSpentByXCplexSolutionStatus["GDV_" + key] = theProblemModel.GDV_TSP_TimeSpentAccount[key];
+                }
+                else
+                {
+                    timeSpentByXCplexSolutionStatus.Add("GDV_" + key, theProblemModel.GDV_TSP_TimeSpentAccount[key]);
+                }
+            }
+            if (setPartitionCumulativeTimeAccount != null)
+                foreach (string key in setPartitionCumulativeTimeAccount.Keys)
+                {
+                    if (timeSpentByXCplexSolutionStatus.ContainsKey("SetPartition_" + key))
+                    {
+                        timeSpentByXCplexSolutionStatus["SetPartition_" + key] = setPartitionCumulativeTimeAccount[key];
+                    }
+                    else
+                    {
+                        timeSpentByXCplexSolutionStatus.Add("SetPartition_" + key, setPartitionCumulativeTimeAccount[key]);
+                    }
+                }
+
             //TODO: Set partition data is obtained and stored in not an elegant way. Turning it into a singleton just like the EV and GDV TSP solvers may be a good idea.
             //TODO: Also pass the number of times!
             //The rest is good
@@ -323,8 +332,34 @@ namespace MPMFEVRP.Implementations.Algorithms
             bestSolutionFound = (CustomerSetBasedSolution)SetPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             stats.UpperBound = theProblemModel.CalculateObjectiveFunctionValue(bestSolutionFound.OFIDP);
             //stats.UpperBound = unexploredCustomerSets.TotalCount * 10;//
+            updateSetCoverTimeStatistics();
             InformUpperBoundListener();
             InformTimeSpentAccountListener();
+        }
+        void updateSetCoverTimeStatistics()
+        {
+            if (SetPartitionSolver != null)
+            {
+                if (setPartitionCumulativeTimeAccount == null)
+                {
+                    setPartitionCounterByStatus = new Dictionary<string, int>();
+                    setPartitionCumulativeTimeAccount = new Dictionary<string, double>();
+                }
+                if (setPartitionCumulativeTimeAccount != null)
+                {
+                    foreach (string key in SetPartitionSolver.TotalTimeInSolveOnStatus.Keys)
+                        if (setPartitionCumulativeTimeAccount.ContainsKey(key))
+                        {
+                            setPartitionCounterByStatus[key]++;
+                            setPartitionCumulativeTimeAccount[key] += SetPartitionSolver.TotalTimeInSolveOnStatus[key];
+                        }
+                        else
+                        {
+                            setPartitionCounterByStatus.Add(key, 1);
+                            setPartitionCumulativeTimeAccount.Add(key, SetPartitionSolver.TotalTimeInSolveOnStatus[key]);
+                        }
+                }
+            }
         }
 
         public override bool setListener(IListener listener)
