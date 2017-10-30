@@ -118,7 +118,7 @@ namespace MPMFEVRP.Forms
             this.AllCharts.Series[seriesName].Points[this.AllCharts.Series[seriesName].Points.Count - 1].Label = value.ToString();
         }
 
-        public void OnChangeOfTimeSpentAccount(Dictionary<string,double> newTimeSpentAccount)
+        public void OnChangeOfTimeSpentAccount(Dictionary<string, double> newTimeSpentAccount)
         {
             if (this.InvokeRequired)
             {
@@ -127,8 +127,17 @@ namespace MPMFEVRP.Forms
             }
             else if (this.Visible)
             {
-                AllCharts.Series["TimeSpent"].Points.Clear();
-                foreach(string key in newTimeSpentAccount.Keys)
+                foreach (DataPoint dp in AllCharts.Series["TimeSpent"].Points)
+                {
+                    string extractedKey = dp.AxisLabel;
+
+                    if (newTimeSpentAccount.ContainsKey(extractedKey))
+                    {
+                        dp.SetValueY(newTimeSpentAccount[extractedKey]);
+                        newTimeSpentAccount.Remove(extractedKey);
+                    }
+                }
+                foreach (string key in newTimeSpentAccount.Keys)
                 {
                     AllCharts.Series["TimeSpent"].Points.AddXY(key, newTimeSpentAccount[key]);
                 }
