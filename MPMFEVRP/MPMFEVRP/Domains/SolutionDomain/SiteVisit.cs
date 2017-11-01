@@ -11,7 +11,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public string SiteID { get { return site.ID; } }
 
         //time and SOC at the site
-        double arrivalTime;
+        double arrivalTime; public double ArrivalTime { get { return arrivalTime; } }
         double arrivalSOC;
         double socGain; public double SOCGain { get { return socGain; } }
         double departureTime;

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Implementations.Solutions;
+﻿using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Domains.ProblemDomain;
+using System.Collections.Generic;
 
 namespace MPMFEVRPTests.TestUtility_DefaultGetters
 {
@@ -14,7 +9,7 @@ namespace MPMFEVRPTests.TestUtility_DefaultGetters
         public static CustomerSet GetDefaultCustomerSet(MPMFEVRP.Implementations.ProblemModels.EVvsGDV_MaxProfit_VRP_Model theProblemModel)
         {
             List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();
-            CustomerSet outcome = new CustomerSet(allCustomers[5]);
+            CustomerSet outcome = new CustomerSet(allCustomers[5],allCustomers);
             outcome.ExtendAndOptimize(allCustomers[2], theProblemModel);
             return outcome;
         }

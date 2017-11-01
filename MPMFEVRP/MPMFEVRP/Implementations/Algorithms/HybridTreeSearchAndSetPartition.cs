@@ -148,9 +148,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         void PopulateAndPlaceInitialCustomerSets()
         {
             int nCustomers = theProblemModel.SRD.NumCustomers;
-            foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
+            List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();
+            foreach (string customerID in allCustomers)
             {
-                CustomerSet candidate = new CustomerSet(customerID);//The customer set is not TSP-optimized
+                CustomerSet candidate = new CustomerSet(customerID, allCustomers);//The customer set is not TSP-optimized
                 OptimizeCustomerSetAndEvaluateForLists(candidate);
             }
         }
@@ -211,9 +212,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             foreach (CustomerSet cs in parents)
             {
-                List<string> remainingCustomers = FilterRemainingCustomers(cs);
-
-                foreach (string customerID in remainingCustomers)
+                foreach (string customerID in cs.PossibleOtherCustomers)
                 {
                     CustomerSet candidate = new CustomerSet(cs);
                     candidate.Extend(customerID);

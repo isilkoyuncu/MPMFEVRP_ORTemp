@@ -23,7 +23,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         //Other fields
         List<SiteVisit> siteVisits;
         public int NumberOfSitesVisited { get { return siteVisits.Count; } }
-        public int NumberOfCustomersVisited { get { int outcome=0; foreach (SiteVisit sv in siteVisits) if (sv.Site.SiteType == SiteTypes.Customer) outcome++; return outcome; } }
+        public int NumberOfCustomersVisited { get { int outcome = 0; foreach (SiteVisit sv in siteVisits) if (sv.Site.SiteType == SiteTypes.Customer) outcome++; return outcome; } }
         //TODO check if not adding depot id to this list is the correct way.
         public List<string> ListOfVisitedSiteIncludingDepotIDs { get { List<string> listOfVisitedSiteIncludingDepotIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) listOfVisitedSiteIncludingDepotIDs.Add(sv.SiteID); return listOfVisitedSiteIncludingDepotIDs; } }
         public List<string> ListOfVisitedNonDepotSiteIDs { get { List<string> listOfVisitedNonDepotSiteIDs = new List<string>(); foreach (SiteVisit sv in siteVisits) if (sv.SiteID != problemModel.SRD.GetSingleDepotID()) listOfVisitedNonDepotSiteIDs.Add(sv.SiteID); return listOfVisitedNonDepotSiteIDs; } }
@@ -126,12 +126,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public double GetISTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return iSTotalRechargeAmount; }
         public double GetESTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return eSTotalRechargeAmount; }
         public double GetEndOfDayTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return eodTotalRechargeAmount; }
-        public double GetGrandTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return (iSTotalRechargeAmount+ eSTotalRechargeAmount+ eodTotalRechargeAmount); }
+        public double GetGrandTotalRechargeAmount() { if (!rechargeAmountsCalculated) CalculateAllTotalRechargeAmounts(); return (iSTotalRechargeAmount + eSTotalRechargeAmount + eodTotalRechargeAmount); }
         void CalculateAllTotalRechargeAmounts()
         {
             if (siteVisits == null)
                 throw new Exception("CalculateAllTotalRechargeAmounts invoked before siteVisits!");
-            foreach(SiteVisit sv in siteVisits)
+            foreach (SiteVisit sv in siteVisits)
             {
                 switch (sv.Site.SiteType)
                 {
@@ -157,6 +157,25 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     outcome += sv.Site.GetPrize(vehicle.Category);
                 }
             return outcome;
+        }
+        public double GetLongestArcLength()
+        {
+            double outcome = 0.0;
+            if (siteVisits.Count > 1)
+            {
+                double tempDouble;
+                for (int svIndex = 1; svIndex < siteVisits.Count; svIndex++)
+                {
+                    tempDouble = problemModel.SRD.GetDistance(siteVisits[svIndex - 1].SiteID, siteVisits[svIndex - 1].SiteID);
+                    if (outcome < tempDouble)
+                        outcome = tempDouble;
+                }
+            }
+            return outcome;
+        }
+        public double GetTotalTime()
+        {
+            return siteVisits.Last().ArrivalTime;
         }
     }
 
