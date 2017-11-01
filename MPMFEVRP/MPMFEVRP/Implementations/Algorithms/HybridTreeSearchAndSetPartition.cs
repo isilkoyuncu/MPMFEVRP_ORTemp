@@ -28,6 +28,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList unexploredCustomerSets;
         CustomerSetList parents;
 
+        XCPlex_SetCovering_wCustomerSets RelaxedSetPartitionSolver;
+        Dictionary<string, double> ShadowPrices;
         XCPlex_SetCovering_wCustomerSets SetPartitionSolver;
         Dictionary<string, int> setPartitionCounterByStatus;
         Dictionary<string, double> setPartitionCumulativeTimeAccount;
@@ -130,14 +132,18 @@ namespace MPMFEVRP.Implementations.Algorithms
             xCplexParam = new XCPlexParameters();
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 3;
-            filterWidth = 7;
+            beamWidth = 1;
+            filterWidth = 6;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
             allCustomerSets = new PartitionedCustomerSetList();
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
 
             timeSpentByXCplexSolutionStatus = new Dictionary<string, double>();
+
+            ShadowPrices = new Dictionary<string, double>();
+            foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
+                ShadowPrices.Add(customerID, 0.0);
         }
         void PopulateAndPlaceInitialCustomerSets()
         {
@@ -177,8 +183,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
-                    parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
-
+                   // parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
+                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, ShadowPrices);
                     //populate children from parents
                     PopulateAndPlaceChildren();
 
@@ -239,7 +245,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         minTempDist = tempDist;
                     }
                 }
-                minDistances[i] = minTempDist;
+                minDistances[i] = minTempDist-ShadowPrices[unvisited];
             }
             Array.Sort(minDistances, remainingCustomers_array);
 
@@ -327,6 +333,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         void RunSetPartition()
         {
+            RelaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
+            RelaxedSetPartitionSolver.Solve_and_PostProcess();
+            ShadowPrices = RelaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
             SetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, xCplexParam, cs_List: allCustomerSets.GetAFVFeasibles(), noGDVUnlimitedEV: true);
             SetPartitionSolver.Solve_and_PostProcess();
             bestSolutionFound = (CustomerSetBasedSolution)SetPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));

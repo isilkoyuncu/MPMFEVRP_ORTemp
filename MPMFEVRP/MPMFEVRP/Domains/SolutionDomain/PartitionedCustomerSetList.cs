@@ -51,6 +51,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             return CSLList[level].Pop(numberToPop);
         }
+        public CustomerSetList Pop(int level, int numberToPop, Dictionary<string,double> shadowPrices)
+        {
+            return CSLList[level].Pop(numberToPop, shadowPrices);
+        }
 
         public int GetHighestNonemptyLevel()
         {

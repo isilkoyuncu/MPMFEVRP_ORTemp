@@ -74,6 +74,23 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             return outcome;
         }
+        public CustomerSetList Pop(int numberToPop, Dictionary<string,double> shadowPrices)
+        {
+            CustomerSetList outcome;
+            if (numberToPop >= this.Count)
+            {
+                outcome = new CustomerSetList(this, false);//TODO: Verify whether shallow copy works or deep copy is needed
+                Clear();
+            }
+            else
+            {
+                outcome = new CustomerSetList();
+                for (int i = 0; i < numberToPop; i++)
+                    outcome.Add(Pop(shadowPrices));
+            }
+            return outcome;
+        }
+
         public CustomerSet Pop()
         {
             if (popStrategyDefined)
@@ -108,6 +125,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
                         resultIndex = 0;
                         break;
                 }
+                outcome = this[resultIndex];
+                RemoveAt(resultIndex);
+            }
+            return outcome;
+        }
+        public CustomerSet Pop(Dictionary<string, double> shadowPrices)
+        {
+            CustomerSet outcome = null;
+            if (Count >= 0)
+            {
+                int resultIndex = GetIndexOfBestNewRow0Estimate(shadowPrices);
                 outcome = this[resultIndex];
                 RemoveAt(resultIndex);
             }
@@ -178,6 +206,29 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             outcome = besti;
 
+            return outcome;
+        }
+        int GetIndexOfBestNewRow0Estimate(Dictionary<string,double> ShadowPrices)
+        {
+            double bestValue = double.MaxValue;
+            int bestIndex = -1;
+            double tempValue = 0.0;
+            for (int i = 0; i < Count; i++)
+            {
+                tempValue = this[i].OFIDP.GetVMT(ProblemDomain.VehicleCategories.GDV) - SumOfCustomerShadowPricesInTheSet(this[i], ShadowPrices);
+                if (tempValue < bestValue)
+                {
+                    bestValue = this[i].OFIDP.GetVMT(ProblemDomain.VehicleCategories.GDV)-SumOfCustomerShadowPricesInTheSet(this[i],ShadowPrices);
+                    bestIndex = i;
+                }
+            }
+            return bestIndex;
+        }
+        double SumOfCustomerShadowPricesInTheSet(CustomerSet theSet, Dictionary<string, double> ShadowPrices)
+        {
+            double outcome = 0.0;
+            foreach (string customer in theSet.Customers)
+                outcome += ShadowPrices[customer];
             return outcome;
         }
 

@@ -134,19 +134,19 @@ namespace MPMFEVRP.Models.XCPlex
                         }
                     }
                 }//for i
-                string constraint_name = "Customer " + customerID;
+                string constraint_name = "Customer_" + customerID +"_must_be_covered_";
                 switch (coverConstraintType)
                 {
                     case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce:
-                        constraint_name += " at most once";
+                        constraint_name += "at_most_once";
                         allConstraints_list.Add(AddLe(numTimesCustomerServed, 1.0, constraint_name));
                         break;
                     case CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce:
-                        constraint_name += " exactly once";
+                        constraint_name += "exactly_once";
                         allConstraints_list.Add(AddEq(numTimesCustomerServed, 1.0, constraint_name));
                         break;
                     case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce:
-                        constraint_name += " at least once";
+                        constraint_name += "at_least_once";
                         allConstraints_list.Add(AddGe(numTimesCustomerServed, 1.0, constraint_name));
                         break;
                 }
@@ -201,5 +201,21 @@ namespace MPMFEVRP.Models.XCPlex
         {
             throw new NotImplementedException();
         }
+
+
+        public Dictionary<string, double> GetCustomerCoverageConstraintShadowPrices()
+        {
+            Dictionary<string, double> outcome = new Dictionary<string, double>();
+            for(int c=0;c< allConstraints_array.Length;c++)
+            {
+                string constraintName = allConstraints_array[c].Name;
+                if (constraintName.Contains("Customer") && constraintName.Contains("must_be_covered"))
+                {
+                    outcome.Add(constraintName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries)[1], AllShadowPrices[c]);
+                }
+            }
+            return outcome;
+        }
+
     }
 }
