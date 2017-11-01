@@ -166,7 +166,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 double tempDouble;
                 for (int svIndex = 1; svIndex < siteVisits.Count; svIndex++)
                 {
-                    tempDouble = problemModel.SRD.GetDistance(siteVisits[svIndex - 1].SiteID, siteVisits[svIndex - 1].SiteID);
+                    tempDouble = siteVisits[svIndex].CumulativeTravelDistance - siteVisits[svIndex - 1].CumulativeTravelDistance;
                     if (outcome < tempDouble)
                         outcome = tempDouble;
                 }

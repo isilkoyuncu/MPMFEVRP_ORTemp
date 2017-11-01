@@ -274,9 +274,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
             double totalDistance = routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.GDV);
             double maxDistance = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetLongestArcLength();
             double minAdditionalTime, minAdditionalDistance;
-            foreach (string otherCustomer in possibleOtherCustomers)
+            for (int i = possibleOtherCustomers.Count - 1;i >= 0;i--)
             {
-                if(theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration>theProblemModel.CRD.TMax-totalTime)
+                string otherCustomer = possibleOtherCustomers[i];
+                if (theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration>theProblemModel.CRD.TMax-totalTime)
                 {
                     MakeCustomerImpossible(otherCustomer);
                     continue;
