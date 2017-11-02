@@ -17,6 +17,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
         List<string> possibleOtherCustomers = new List<string>();
         public List<string> PossibleOtherCustomers { get { return possibleOtherCustomers; } }
+        Dictionary<string, double> minAdditionalDistanceForPossibleOtherCustomer = new Dictionary<string, double>();
+        public Dictionary<string, double> MinAdditionalDistanceForPossibleOtherCustomer { get { return minAdditionalDistanceForPossibleOtherCustomer; } }
+        Dictionary<string, double> minAdditionalTimeForPossibleOtherCustomer = new Dictionary<string, double>();
+        public Dictionary<string, double> MinAdditionalTimeForPossibleOtherCustomer { get { return minAdditionalTimeForPossibleOtherCustomer; } }
         List<string> impossibleOtherCustomers = new List<string>();
         public List<string> ImpossibleOtherCustomers { get { return impossibleOtherCustomers; } }
 
@@ -112,7 +116,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 if (!impossibleOtherCustomers.Contains(customer))
                 {
                     if (possibleOtherCustomers.Count == 0)
+                    {
                         populatePossibleOtherCustomers(theProblemModel.SRD.GetCustomerIDs());
+                    }
                     possibleOtherCustomers.Remove(customer);
                     customers.Add(customer);
                     customers.Sort();
@@ -128,7 +134,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                         vsroo_EV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                     }
                     routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
-
+                    UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
                     identifyNewImpossibleOtherCustomers(theProblemModel);
                 }
                 else
@@ -138,28 +144,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new Exception("Customer is already in the set, know before asking to extend!");
         }
 
-        ////This method should not exist! TODO:Delete
-        //public void ExtendAndOptimize(string customer, ProblemModelBase problemModelBase, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
-        //{
-        //    if (!customers.Contains(customer))
-        //    {
-        //        customers.Add(customer);
-        //        customers.Sort();//TODO Write a unit test to see if this really works as intended
-        //        if(vehicle.Category== VehicleCategories.GDV)
-        //        {
-        //            VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = problemModelBase.RouteOptimize(this, vehicle);
-        //            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
-        //        }
-        //        else//It's an EV, and the customer set must have been optimized for a GDV beforehand
-        //        {
-        //            VehicleSpecificRouteOptimizationOutcome vsroo_EV = problemModelBase.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
-        //            routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
-        //        }
-
-        //    }
-        //    else
-        //        throw new Exception("Customer is already in the set, know before asking to extend!");
-        //}
         public void Extend(string customer)
         {
             if (!customers.Contains(customer))
@@ -168,8 +152,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 {
                     possibleOtherCustomers.Remove(customer);
                     customers.Add(customer);
-                customers.Sort();
-                routeOptimizationOutcome = new RouteOptimizationOutcome();
+                    customers.Sort();
+                    routeOptimizationOutcome = new RouteOptimizationOutcome();
                 }
                 else
                     throw new Exception("Customer was placed in the impossible list before, know before asking to extend!");
@@ -181,7 +165,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public void Optimize(EVvsGDV_ProblemModel theProblemModel)
         {
             routeOptimizationOutcome = theProblemModel.RouteOptimize(this);
-
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             identifyNewImpossibleOtherCustomers(theProblemModel);
         }
         public void Optimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
@@ -204,7 +188,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 VehicleSpecificRouteOptimizationOutcome vsroo_EV = theProblemModel.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
-
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             identifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
@@ -272,8 +256,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return;
             double totalTime = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetTotalTime();
             double totalDistance = routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.GDV);
-            double maxDistance = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetLongestArcLength();
-            double minAdditionalTime, minAdditionalDistance;
             for (int i = possibleOtherCustomers.Count - 1;i >= 0;i--)
             {
                 string otherCustomer = possibleOtherCustomers[i];
@@ -282,17 +264,29 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     MakeCustomerImpossible(otherCustomer);
                     continue;
                 }
-                List<double> arcLengthsToCustomerSet = new List<double>() { Math.Min(theProblemModel.SRD.GetDistance(theProblemModel.SRD.GetSingleDepotID(), otherCustomer), theProblemModel.SRD.GetDistance(otherCustomer,theProblemModel.SRD.GetSingleDepotID())) };
-                foreach (string customer in customers)
-                    arcLengthsToCustomerSet.Add(Math.Min(theProblemModel.SRD.GetDistance(otherCustomer, customer), theProblemModel.SRD.GetDistance(customer, otherCustomer)));
-                arcLengthsToCustomerSet.Sort();
-                minAdditionalDistance = Math.Max(0, arcLengthsToCustomerSet[0] + arcLengthsToCustomerSet[1] - maxDistance);
-                minAdditionalTime = minAdditionalDistance / theProblemModel.CRD.TravelSpeed + theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration;
-                if (minAdditionalTime > theProblemModel.CRD.TMax - totalTime)
+                if (minAdditionalTimeForPossibleOtherCustomer[otherCustomer] > theProblemModel.CRD.TMax - totalTime)
                 {
                     MakeCustomerImpossible(otherCustomer);
                     continue;
                 }
+            }
+        }
+        void UpdateMinAdditionalsForAllPossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
+        {
+            minAdditionalDistanceForPossibleOtherCustomer.Clear();
+            minAdditionalTimeForPossibleOtherCustomer.Clear();
+            if (routeOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+                return;
+            double maxDistance = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetLongestArcLength();
+            foreach (string otherCustomer in possibleOtherCustomers)
+            {
+                List<double> arcLengthsToCustomerSet = new List<double>() { Math.Min(theProblemModel.SRD.GetDistance(theProblemModel.SRD.GetSingleDepotID(), otherCustomer), theProblemModel.SRD.GetDistance(otherCustomer, theProblemModel.SRD.GetSingleDepotID())) };
+                foreach (string customer in customers)
+                    arcLengthsToCustomerSet.Add(Math.Min(theProblemModel.SRD.GetDistance(otherCustomer, customer), theProblemModel.SRD.GetDistance(customer, otherCustomer)));
+                arcLengthsToCustomerSet.Sort();
+                double minAddlDist = Math.Max(0, arcLengthsToCustomerSet[0] + arcLengthsToCustomerSet[1] - maxDistance);
+                minAdditionalDistanceForPossibleOtherCustomer.Add(otherCustomer, minAddlDist);
+                minAdditionalTimeForPossibleOtherCustomer.Add(otherCustomer, minAddlDist / theProblemModel.CRD.TravelSpeed + theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration);
             }
         }
         public void MakeCustomerImpossible(string otherCustomer)
@@ -300,6 +294,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (possibleOtherCustomers.Contains(otherCustomer))
             {
                 possibleOtherCustomers.Remove(otherCustomer);
+                minAdditionalDistanceForPossibleOtherCustomer.Remove(otherCustomer);
+                minAdditionalTimeForPossibleOtherCustomer.Remove(otherCustomer);
                 impossibleOtherCustomers.Add(otherCustomer);
             }
             else throw new Exception("CustomerSet. called to make impossible a customer that wasn't possible!");

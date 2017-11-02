@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -51,9 +52,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             return CSLList[level].Pop(numberToPop);
         }
-        public CustomerSetList Pop(int level, int numberToPop, Dictionary<string,double> shadowPrices)
+        public CustomerSetList Pop(int level, int numberToPop, VehicleCategories vehicleCategory, Dictionary<string,double> shadowPrices)
         {
-            return CSLList[level].Pop(numberToPop, shadowPrices);
+            return CSLList[level].Pop(numberToPop, vehicleCategory, shadowPrices);
         }
 
         public int GetHighestNonemptyLevel()
