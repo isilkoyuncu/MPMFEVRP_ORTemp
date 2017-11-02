@@ -30,7 +30,7 @@ namespace MPMFEVRP.Models.XCPlex
         int firstCustomerVisitationConstraintIndex=-1;
         int totalTravelTimeConstraintIndex = -1;
 
-        List<double> eSStayDurations = new List<double>();
+        Dictionary<string, double> eSStayDurations = new Dictionary<string, double>();
 
         public XCPlex_NodeDuplicatingFormulation_woU() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
@@ -633,20 +633,11 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
-        void SetESStayDurations()
-        {
-            for(int i=0; i<numDuplicatedNodes; i++)
-            {
-                Site s = preprocessedSites[i];
-                if(s.SiteType==SiteTypes.ExternalStation)
-                eSStayDurations.Add(GetValue(Epsilon[i])/RechargingRate(s));
-            }
-        }
+        
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<string> activeX = new List<string>();
             List<string> allX = new List<string>();
-            SetESStayDurations();
             for (int i = 0; i < numDuplicatedNodes; i++)
                 for (int j = 0; j < numDuplicatedNodes; j++)
                     for (int v = 0; v < numVehCategories; v++)
@@ -702,6 +693,8 @@ namespace MPMFEVRP.Models.XCPlex
             do
             {
                 outcome.Add(currentSiteID);
+                if (preprocessedSites[currentSiteIndex].SiteType == SiteTypes.ExternalStation)
+                    AddESStayDuration(currentSiteIndex);
                 nextSiteIndex = GetNextSiteIndex(currentSiteIndex, vc_int);
                 if (preprocessedSites[nextSiteIndex].ID == theDepot.ID)
                 {
@@ -715,7 +708,14 @@ namespace MPMFEVRP.Models.XCPlex
             return outcome;
 
         }
-
+        void AddESStayDuration(int i)
+        {
+            Site ES = preprocessedSites[i];
+            if (ES.SiteType != SiteTypes.ExternalStation)
+                throw new System.Exception("Given site is not an ES.");
+            else
+                eSStayDurations.Add(ES.ID, GetValue(Epsilon[i]) / RechargingRate(ES));
+        }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             return new RouteBasedSolution(GetVehicleSpecificRoutes());
