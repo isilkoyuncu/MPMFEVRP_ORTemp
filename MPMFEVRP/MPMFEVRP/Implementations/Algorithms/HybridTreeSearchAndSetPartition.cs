@@ -22,6 +22,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         //These are the important characteristics that will have to be tied to the form
         int beamWidth;
         int filterWidth;
+        bool partialWideBranching;
         CustomerSetList.CustomerListPopStrategy popStrategy;
 
         PartitionedCustomerSetList allCustomerSets;
@@ -134,6 +135,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             //These are the important characteristics that will have to be tied to the form
             beamWidth = 1;
             filterWidth = 6;
+            partialWideBranching = true;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
             allCustomerSets = new PartitionedCustomerSetList();
@@ -148,10 +150,29 @@ namespace MPMFEVRP.Implementations.Algorithms
         void PopulateAndPlaceInitialCustomerSets()
         {
             int nCustomers = theProblemModel.SRD.NumCustomers;
-            foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
+            List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();
+            int level = 0;
+            int maxProbingLevel = 9;
+            foreach (string customerID in allCustomers)
             {
-                CustomerSet candidate = new CustomerSet(customerID);//The customer set is not TSP-optimized
+                CustomerSet candidate = new CustomerSet(customerID, allCustomers);//The customer set is not TSP-optimized
                 OptimizeCustomerSetAndEvaluateForLists(candidate);
+                level = 1;
+                do
+                {
+                    level++;
+                    List<string> possibleExtendingCustomers = FilterRemainingCustomers(candidate, 1);
+                    if (possibleExtendingCustomers.Count > 0)
+                    {
+                        string extendingCustomerID = possibleExtendingCustomers[0];
+                        candidate = new CustomerSet(candidate);
+                        candidate.Extend(extendingCustomerID);
+                        if (!OptimizeCustomerSetAndEvaluateForLists(candidate))
+                            candidate = null;
+                    }
+                    else
+                        candidate = null;
+                } while ((candidate != null) && (level < maxProbingLevel));
             }
         }
 
@@ -184,7 +205,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
                    // parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
-                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, ShadowPrices);
+                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, VehicleCategories.EV, ShadowPrices);//TODO: This is hardcoded with the EMH problem in mind, will need to flex vehicleCategory
                     //populate children from parents
                     PopulateAndPlaceChildren();
 
@@ -211,47 +232,42 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             foreach (CustomerSet cs in parents)
             {
-                List<string> remainingCustomers = FilterRemainingCustomers(cs);
-
-                foreach (string customerID in remainingCustomers)
+                foreach (string customerID in FilterRemainingCustomers(cs, filterWidth))
                 {
                     CustomerSet candidate = new CustomerSet(cs);
                     candidate.Extend(customerID);
+                    cs.MakeCustomerImpossible(customerID);
                     OptimizeCustomerSetAndEvaluateForLists(candidate);
                 }//foreach (string customerID in remainingCustomers)
             }//foreach (CustomerSet cs in parents)
+            if (partialWideBranching)
+            {
+                foreach (CustomerSet cs in parents)
+                    if (cs.PossibleOtherCustomers.Count > 0)
+                        unexploredCustomerSets.Add(cs);
+            }
             parents.Clear();
             InformCustomerSetTreeSearchListener();
         }
-        List<string> FilterRemainingCustomers(CustomerSet cs)
+        List<string> FilterRemainingCustomers(CustomerSet cs, int filterWidth)
         {
-            List<string> remainingCustomers_list = theProblemModel.GetAllCustomerIDs();
-            foreach (string customerID in cs.Customers)
-                remainingCustomers_list.Remove(customerID);
+            List<string> remainingCustomers_list = cs.PossibleOtherCustomers;
             string[] remainingCustomers_array = remainingCustomers_list.ToArray();
-            double[] minDistances = new double[remainingCustomers_array.Length];
+            double[] bestEstimates = new double[remainingCustomers_array.Length];
 
             string unvisited;
-            double minTempDist, tempDist;
             for (int i=0;i<remainingCustomers_array.Length;i++)
             {
                 unvisited = remainingCustomers_array[i];
-               minTempDist = double.MaxValue;
-                foreach(string visited in cs.Customers)
-                {
-                    tempDist = Math.Min(theProblemModel.SRD.GetDistance(unvisited, visited), theProblemModel.SRD.GetDistance(unvisited, visited));
-                    if (tempDist < minTempDist)
-                    {
-                        minTempDist = tempDist;
-                    }
-                }
-                minDistances[i] = minTempDist-ShadowPrices[unvisited];
+                double minAddlDist = cs.MinAdditionalDistanceForPossibleOtherCustomer[unvisited];
+                bestEstimates[i] = cs.MinAdditionalDistanceForPossibleOtherCustomer[unvisited]-ShadowPrices[unvisited];
             }
-            Array.Sort(minDistances, remainingCustomers_array);
+            Array.Sort(bestEstimates, remainingCustomers_array);
 
             List<string> outcome = new List<string>();
             for (int i = 0; i < filterWidth; i++)
-                outcome.Add(remainingCustomers_array[i]);
+                if (remainingCustomers_array.Length > i)
+                    outcome.Add(remainingCustomers_array[i]);
             return outcome;
         }
         void InformCustomerSetTreeSearchListener()
@@ -312,23 +328,24 @@ namespace MPMFEVRP.Implementations.Algorithms
                 timeSpentAccountListener.OnChangeOfTimeSpentAccount(timeSpentByXCplexSolutionStatus);
         }
 
-        void OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
+        bool OptimizeCustomerSetAndEvaluateForLists(CustomerSet candidate)
         {
             //First we check equivalency of the candidate to previously evaluated customer sets
             if (allCustomerSets.ContainsAnIdenticalCustomerSet(candidate))
-                return;
+                return false;
 
             candidate.Optimize(theProblemModel);
             allCustomerSets.Add(candidate);
             //TODO: #2-the following check to make sure the candidate is worth keeping is only for all-AFV version, thus we need to have a checkpoint to detrmine of the problem is mixed-fleet or all-AFV
             if (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
-                return;
+                return false;
             if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
             {
                 unexploredCustomerSets.Add(candidate);
             }
             InformCustomerSetTreeSearchListener();
             InformTimeSpentAccountListener();
+            return true;
         }
 
         void RunSetPartition()

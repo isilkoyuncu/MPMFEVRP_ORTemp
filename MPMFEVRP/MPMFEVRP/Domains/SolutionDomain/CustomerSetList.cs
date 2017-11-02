@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -74,7 +75,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             return outcome;
         }
-        public CustomerSetList Pop(int numberToPop, Dictionary<string,double> shadowPrices)
+        public CustomerSetList Pop(int numberToPop, VehicleCategories vehicleCategory, Dictionary<string,double> shadowPrices)
         {
             CustomerSetList outcome;
             if (numberToPop >= this.Count)
@@ -86,7 +87,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 outcome = new CustomerSetList();
                 for (int i = 0; i < numberToPop; i++)
-                    outcome.Add(Pop(shadowPrices));
+                    outcome.Add(Pop(vehicleCategory, shadowPrices));
             }
             return outcome;
         }
@@ -130,12 +131,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             return outcome;
         }
-        public CustomerSet Pop(Dictionary<string, double> shadowPrices)
+        public CustomerSet Pop(VehicleCategories vehicleCategory, Dictionary<string, double> shadowPrices)
         {
             CustomerSet outcome = null;
             if (Count >= 0)
             {
-                int resultIndex = GetIndexOfBestNewRow0Estimate(shadowPrices);
+                int resultIndex = GetIndexOfBestNewRow0Estimate(vehicleCategory, shadowPrices);
                 outcome = this[resultIndex];
                 RemoveAt(resultIndex);
             }
@@ -208,14 +209,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
             return outcome;
         }
-        int GetIndexOfBestNewRow0Estimate(Dictionary<string,double> ShadowPrices)
+        int GetIndexOfBestNewRow0Estimate(VehicleCategories vehicleCategory, Dictionary<string,double> ShadowPrices)
         {
             double bestValue = double.MaxValue;
             int bestIndex = -1;
             double tempValue = 0.0;
             for (int i = 0; i < Count; i++)
             {
-                tempValue = this[i].OFIDP.GetVMT(ProblemDomain.VehicleCategories.GDV) - SumOfCustomerShadowPricesInTheSet(this[i], ShadowPrices);
+                tempValue = this[i].OFIDP.GetVMT(vehicleCategory) - SumOfCustomerShadowPricesInTheSet(this[i], ShadowPrices);
                 if (tempValue < bestValue)
                 {
                     bestValue = this[i].OFIDP.GetVMT(ProblemDomain.VehicleCategories.GDV)-SumOfCustomerShadowPricesInTheSet(this[i],ShadowPrices);

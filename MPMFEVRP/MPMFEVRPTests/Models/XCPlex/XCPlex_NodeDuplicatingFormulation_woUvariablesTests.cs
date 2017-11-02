@@ -1,12 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MPMFEVRP.Models.XCPlex;
-using System;
+using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRPTests.TestUtility_DefaultGetters;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRPTests.TestUtility_DefaultGetters;
-using MPMFEVRP.Domains.SolutionDomain;
 
 
 namespace MPMFEVRP.Models.XCPlex.Tests
@@ -25,8 +21,11 @@ namespace MPMFEVRP.Models.XCPlex.Tests
 
             IEnumerable<IEnumerable<CustomerSet>> allPossibleCSs;
             List<CustomerSet> cslist = new List<CustomerSet>();
-            foreach (string customerID in theProblemModel.SRD.GetCustomerIDs())
-                cslist.Add(new CustomerSet(customerID));
+            List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();
+            foreach (string customerID in allCustomers)
+            {
+                cslist.Add(new CustomerSet(customerID, allCustomers));
+            }
             allPossibleCSs = SubSetsOf(cslist);
 
 

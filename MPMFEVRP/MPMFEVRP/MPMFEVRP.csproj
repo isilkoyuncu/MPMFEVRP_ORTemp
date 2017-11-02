@@ -103,8 +103,6 @@
     <Compile Include="Forms\HybridTreeSearchAndSetPartitionCharts.Designer.cs">
       <DependentUpon>HybridTreeSearchAndSetPartitionCharts.cs</DependentUpon>
     </Compile>
-    <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic.cs" />
-    <Compile Include="Implementations\Algorithms\AColumnGenerationHeuristic_v2.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
