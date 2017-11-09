@@ -46,7 +46,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (alwaysClosedLoop)
                 siteVisits.Add(new SiteVisit(problemModel.SRD.GetSingleDepotSite(), batteryCapacity));
         }
-        public VehicleSpecificRoute(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, List<string> nondepotSiteIDsInOrder, List<double> ESStayDurations = null, bool alwaysClosedLoop = true) : this(theProblemModel, vehicle, alwaysClosedLoop: alwaysClosedLoop)
+        public VehicleSpecificRoute(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, List<string> nondepotSiteIDsInOrder, Dictionary<string,double> ESStayDurations = null, bool alwaysClosedLoop = true) : this(theProblemModel, vehicle, alwaysClosedLoop: alwaysClosedLoop)
         {
             double batteryCapacity = (vehicle.Category == VehicleCategories.EV ? vehicle.BatteryCapacity : 1.0);
             //nondepotSiteIDsInOrder is named this way as a constant reminder that the sites are not just in an arbitrary list (like customer set) but are in fact in a route!
@@ -62,13 +62,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     ESCounter++;
                 }
             RechargingDurationAndAllowableDepartureStatusFromES rechargePolicy = theProblemModel.ProblemCharacteristics.GetParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION).GetValue<RechargingDurationAndAllowableDepartureStatusFromES>();
-            List<double> ESStayDurationsToUse = new List<double>();
+            Dictionary<string,double> ESStayDurationsToUse = new Dictionary<string,double>();
             switch (rechargePolicy)
             {
                 case RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full:
                     //In this case, don't bother to provide ESStayDurations beforehand, we'll just ignore it for robustness
                     for (int i = 0; i < ESCounter; i++)
-                        ESStayDurationsToUse.Add(Utils.Calculators.MaxStayDurationAtSite(theProblemModel.SRD.GetSiteByID(visitedESsExtracted[i]), vehicle)); //TODO unit test: all 30mins for EMH problems
+                        ESStayDurationsToUse.Add(visitedESsExtracted[i],Utils.Calculators.MaxStayDurationAtSite(theProblemModel.SRD.GetSiteByID(visitedESsExtracted[i]), vehicle)); //TODO unit test: all 15mins for EMH problems
                     break;
                 case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full:
                     //In this case too, don't bother to provide ESStayDurations beforehand, we'll just ignore it for robustness. We'll instead calculate them JIT right before adding that siteVisit
@@ -97,8 +97,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 else//site type is ES
                 {
                     if (rechargePolicy == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full)
-                        ESStayDurationsToUse.Add(Utils.Calculators.MaxStayDurationAtSite(currentSite, vehicle));
-                    siteVisits.Add(new SiteVisit(siteVisits.Last(), currentSite, theProblemModel.SRD.GetDistance(previousSiteID, currentSiteID), theProblemModel.SRD.GetTravelTime(previousSiteID, currentSiteID), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(previousSiteID, currentSiteID), stayDuration: ESStayDurationsToUse[ESCounter]));
+                        ESStayDurationsToUse.Add(currentSite.ID, Utils.Calculators.MaxStayDurationAtSite(currentSite, vehicle));
+                    siteVisits.Add(new SiteVisit(siteVisits.Last(), currentSite, theProblemModel.SRD.GetDistance(previousSiteID, currentSiteID), theProblemModel.SRD.GetTravelTime(previousSiteID, currentSiteID), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(previousSiteID, currentSiteID), stayDuration: ESStayDurationsToUse[currentSiteID]));
                     ESCounter++;
                 }
             }//foreach(string siteID in nondepotSiteIDsInOrder)
