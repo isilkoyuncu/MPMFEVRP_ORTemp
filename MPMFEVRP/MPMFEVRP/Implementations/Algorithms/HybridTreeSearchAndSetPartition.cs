@@ -133,8 +133,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             xCplexParam = new XCPlexParameters();
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 1;
-            filterWidth = 6;
+            beamWidth = 100;
+            filterWidth = 1;
             partialWideBranching = true;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
 
@@ -152,7 +152,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             int nCustomers = theProblemModel.SRD.NumCustomers;
             List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();
             int level = 0;
-            int maxProbingLevel = 9;
+            int maxProbingLevel = 15;
             foreach (string customerID in allCustomers)
             {
                 CustomerSet candidate = new CustomerSet(customerID, allCustomers);//The customer set is not TSP-optimized
@@ -334,6 +334,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (allCustomerSets.ContainsAnIdenticalCustomerSet(candidate))
                 return false;
 
+            
+            Console.WriteLine("Now solving " + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray()));
             candidate.Optimize(theProblemModel);
             allCustomerSets.Add(candidate);
             //TODO: #2-the following check to make sure the candidate is worth keeping is only for all-AFV version, thus we need to have a checkpoint to detrmine of the problem is mixed-fleet or all-AFV
