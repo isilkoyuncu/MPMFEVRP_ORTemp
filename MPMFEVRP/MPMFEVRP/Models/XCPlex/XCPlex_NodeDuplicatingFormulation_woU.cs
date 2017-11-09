@@ -30,7 +30,8 @@ namespace MPMFEVRP.Models.XCPlex
         int firstCustomerVisitationConstraintIndex=-1;
         int totalTravelTimeConstraintIndex = -1;
 
-        Dictionary<string, double> eSStayDurations = new Dictionary<string, double>();
+        IndividualRouteESVisits singleRouteESvisits;
+        List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
 
         public XCPlex_NodeDuplicatingFormulation_woU() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
@@ -655,8 +656,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             Vehicle theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory);//Pulling the vehicle infor from the Problem Model. Not exactly flexible, but works as long as we have only two categories of vehicles and no more than one of each
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
+            int counter = 0;
             foreach (List<string> nonDepotSiteIDs in GetListsOfNonDepotSiteIDs(vehicleCategory))
-                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, nonDepotSiteIDs,eSStayDurations));
+            {
+                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, nonDepotSiteIDs, allRoutesESVisits[counter]));
+                counter++;
+            }
             return outcome;
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
@@ -689,31 +694,33 @@ namespace MPMFEVRP.Models.XCPlex
             string currentSiteID = preprocessedSites[firstSiteIndex].ID;
             int currentSiteIndex = firstSiteIndex;
             int nextSiteIndex = -1;
+            singleRouteESvisits = new IndividualRouteESVisits();
             do
             {
                 outcome.Add(currentSiteID);
                 if (preprocessedSites[currentSiteIndex].SiteType == SiteTypes.ExternalStation)
-                    AddESStayDuration(currentSiteIndex);
+                    singleRouteESvisits.Add(GetIndividualESVisit(currentSiteIndex));
                 nextSiteIndex = GetNextSiteIndex(currentSiteIndex, vc_int);
                 if (preprocessedSites[nextSiteIndex].ID == theDepot.ID)
                 {
+                    allRoutesESVisits.Add(singleRouteESvisits);
                     return outcome;
                 }
                 currentSiteIndex = nextSiteIndex;
                 currentSiteID = preprocessedSites[currentSiteIndex].ID;
             }
             while (currentSiteID != theDepot.ID);
-
+            allRoutesESVisits.Add(singleRouteESvisits);
             return outcome;
 
         }
-        void AddESStayDuration(int i)
+        IndividualESVisitDataPackage GetIndividualESVisit(int i)
         {
             Site ES = preprocessedSites[i];
             if (ES.SiteType != SiteTypes.ExternalStation)
                 throw new System.Exception("Given site is not an ES.");
             else
-                eSStayDurations.Add(ES.ID, GetValue(Epsilon[i]) / RechargingRate(ES));
+                return new IndividualESVisitDataPackage(ES.ID, GetValue(Epsilon[i]) / RechargingRate(ES), preprocessedESSiteIndex: i);
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
