@@ -27,21 +27,20 @@ namespace MPMFEVRP.Forms
         double mapWidth, mapHeight;
         double minX, maxX, minY, maxY;
         double panelMapScale;//This is the ratio between (panelPint1-panelPoint2)/(mapPoint1-mapPoint2)
+        Graphics g;
+
         //List<Site> allSites;
 
         public ProblemViewer(IProblem problem)
         {
             theProblem = problem;
             //allSites = theProblem.PDP.SRD.GetAllSitesArray().ToList();
-
             InitializeComponent();
             InitializePanelAndFormSizes();
-            GiveWhiteBackground();
+            g = panel_problemViewer.CreateGraphics();
+
             DrawBorderAndGridlines(panel_problemViewer);
-            DrawAllSites(panel_problemViewer, theProblem.PDP.SRD.GetAllSitesArray(), 100);
-            Graphics g = panel_problemViewer.CreateGraphics();
-            Pen p = new Pen(Color.Black, 3);
-            g.DrawRectangle(p, 0, 0, 35, 45);
+            DrawAllSites(panel_problemViewer, theProblem.PDP.SRD.GetAllSitesArray(), 20);
         }
         void InitializePanelAndFormSizes()
         {
@@ -58,6 +57,8 @@ namespace MPMFEVRP.Forms
                 panel_problemViewer.Width = (int)Math.Round(currentHeight / mapAspectRatio);
             }
             panelMapScale = (double)panel_problemViewer.Width / mapWidth;
+            panel_problemViewer.Height = panel_problemViewer.Height + 30;
+            panel_problemViewer.Width = panel_problemViewer.Width + 30;
         }
         void ProcessTheProblemMap()// y/x ratio
         {
@@ -90,10 +91,14 @@ namespace MPMFEVRP.Forms
 
         void DrawBorderAndGridlines(Panel panel)
         {
-            Graphics g = panel.CreateGraphics();
-            Pen p = new Pen(Color.Black, 30);
+            this.Paint += (o, e) =>
+            {
+                Pen p = new Pen(Color.Black, 5);
+                g.DrawLine(p, 0, 0, 0, panel.Height);
+                g.DrawLine(p, 0, 0, 0, panel.Width);
+                g.DrawLine(p, 0, 0, 0, panel.Height);
 
-            g.DrawLine(p, 0, 0, panel.Width, panel.Height);
+            };
         }
         void DrawAllSites(Panel panel, Site[] sites, float size)
         {
@@ -104,17 +109,31 @@ namespace MPMFEVRP.Forms
         }
         void DrawSiteAsNodeOnPanel(Panel panel, Site site, float size)
         {
-            Graphics g = panel.CreateGraphics();
+
             Pen p = new Pen(Color.Black,3);
             float[] location = ConvertSiteLocationToPointOnPanel(site);
             switch (site.SiteType)
             {
                 case SiteTypes.Depot:
                     p.Color = Color.Black;
-                    g.DrawRectangle(p,location[0],location[1],size,size);
-                    g.DrawRectangle(p, 0,0, size, size);
+                    this.Paint += (o, e) =>
+                    {
+                        g.DrawRectangle(p, location[0], location[1], size, size);
+                    };
                     break;
-                default:
+                case SiteTypes.Customer:
+                    p.Color = Color.Red;
+                    this.Paint += (o, e) =>
+                    {
+                        g.DrawEllipse(p, location[0], location[1], size, size);
+                    };
+                    break;
+                case SiteTypes.ExternalStation:
+                    p.Color = Color.Purple;
+                    this.Paint += (o, e) =>
+                    {
+                        g.DrawRectangle(p, location[0], location[1], size, size);
+                    };
                     break;
                     //throw new NotImplementedException();
             }
@@ -123,7 +142,7 @@ namespace MPMFEVRP.Forms
         {
             float[] output = new float[2];
             output[0] = (float)((site.X - minX) * panelMapScale);
-            output[1] = (float)((site.Y - maxY) * panelMapScale);
+            output[1] = (float)((site.Y - minY) * panelMapScale);
             return output; 
         }
 
