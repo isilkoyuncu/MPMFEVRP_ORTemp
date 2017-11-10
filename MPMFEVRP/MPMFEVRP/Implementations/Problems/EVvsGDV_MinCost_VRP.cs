@@ -39,7 +39,7 @@ namespace MPMFEVRP.Implementations.Problems
         //    return new EVvsGDV_MaxProfit_VRP_Model( numCustomers,  numES,  numNodes,  siteArray,  numVehicleCategories,  numVehicles, vehicleArray,  travelSpeed,  tMax,  lambda,  distance,  energyConsumption, timeConsumption);
         //}
 
-        public override string ToString() //TODO ask about deleting this since base of this contains this fnc
+        public override string ToString() //CONSULT ask about deleting this since base of this contains this fnc
         {
             return PDP.InputFileName;
         }

@@ -839,7 +839,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
         {
-            //TODO: Delete the following after debugging
+            //TODO: Delete the following after debugging. Update on 11/10/17: Is this still relevant?
             GetDecisionVariableValues();
 
             int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;
@@ -871,7 +871,7 @@ namespace MPMFEVRP.Models.XCPlex
             double[,,] xValues = new double[numNonESNodes, numNonESNodes, numVehCategories];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
-                    xValues[i, j, 0] = GetValue(X[i][j][0]);//TODO: Why only 0 when xValues is defined over all numVehCategories?
+                    xValues[i, j, 0] = GetValue(X[i][j][0]);//CONSULT (w/ Isil): Why only 0 when xValues is defined over all numVehCategories?
             double[,,] yValues = new double[numNonESNodes, numES, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int r = 0; r < numES; r++)

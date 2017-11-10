@@ -28,14 +28,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel model)
         {
-            //TODO uncomment this afer writing new default solution
-
-
             unexploredList = new SolutionList();
 
             // Step 0: Create root and add it to unexploredList
 
-            ISolution root = new CustomerSetBasedSolution();//TODO: This was default solution, perhaps we should add more details to the problem model to specify the default solution type there
+            ISolution root = new CustomerSetBasedSolution();//ISSUE (#5): Make solution type parametric, any solution type should be good as long as it can generate random instances
             unexploredList.Add(root);
 
             lowerBound = root.LowerBound;
@@ -48,7 +45,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            //TODO: Re-think the BestOfRandom algorithm: Why is it creating solutions via branching? Isn't there a method to get pseudo-random complete solutions already?
+            //ISSUE (#7):  Re-think the BestOfRandom algorithm: Why is it creating solutions via branching? Isn't there a method to get pseudo-random complete solutions already?
             while (unexploredList.Count > 0)
             {
                 // Node selection step

@@ -32,7 +32,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.variableCostPerMile = variableCostPerMile;
             this.maxChargingRate = maxChargingRate;
         }
-        public Vehicle(string[] allInput)
+        public Vehicle(string[] allInput)//ISSUE (#7): This constructor should not exist as it should never be the responsibility of the vehicle class to know how to decipher a 7-part string array, it should be the responsibility of the reader that reads the data
         {
             if (allInput.Length != 7)
                 throw new Exception("Expecting exactly 7 inputs into the 'Vehicle' class, because that's how many fields it has!");

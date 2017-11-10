@@ -26,7 +26,7 @@ namespace MPMFEVRP.Implementations.Solutions
 
         private int[,] zSetTo1;
 
-        public CustomerSetBasedSolution() //TODO check if we really need these to be created in the empty constructor
+        public CustomerSetBasedSolution() //ISSUE (#7) check if we really need these to be created in the empty constructor
         {
             assigned2EV = new CustomerSetList();
             assigned2GDV = new CustomerSetList();
@@ -80,7 +80,7 @@ namespace MPMFEVRP.Implementations.Solutions
             }
         }
 
-        // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing)
+        // TODO fill this constructor so that it'll create an initial random solution by itself (i.e. do nothing) This is needed for the BestOfRandom algorithm, so tie this to it
         public CustomerSetBasedSolution(EVvsGDV_ProblemModel theProblemModel, Random random)
         {
             this.model = theProblemModel;

@@ -5,7 +5,6 @@ namespace MPMFEVRP.Utils
 {
     class Calculators
     {
-        //TODO this EuclideanDistance calculators can be further simplified by combining the following two.
         public static double[,] EuclideanDistance(double[] x, double[] y)
         {
             if (x.Length != y.Length)
@@ -26,7 +25,6 @@ namespace MPMFEVRP.Utils
             return Math.Round(Math.Sqrt(Math.Pow((x0 - x1), 2) + Math.Pow((y0 - y1), 2)), 5);
         }
 
-        //TODO this HaversineDistance calculators can be further simplified by combining the following two.
         public static double[,] HaversineDistance(double[] x, double[] y)
         {
             if (x.Length != y.Length)

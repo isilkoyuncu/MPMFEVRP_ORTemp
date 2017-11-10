@@ -178,8 +178,8 @@ namespace MPMFEVRP.Forms
             {
                 foreach (var problemModel in problemModels)
                 {
-                    //TODO The following line is from the template, which simply assumes that each problem can be worked using onyl a single model, and there is exactly one problem(type) in nthe entire project.
-                    //Now that we have enriched the project, the line below must be corrected to handle differnet problem models for different problems
+                    //TODO The following line is from the template, which simply assumes that each problem can be worked using only a single model, and there is exactly one problem(type) in the entire project.
+                    //Now that we have enriched the project, the line below must be corrected to handle different problem models for different problems
 
                     if (problemModel == null)
                     {
@@ -245,9 +245,9 @@ namespace MPMFEVRP.Forms
         {
             if (problemModels != null)
             {
-                //TODO here select the problem from listbox first! theProblem is the last problem selected from computer if you want to see any problem from the list box then change this code
+                //ISSUE (#8) here select the problem from listbox first! theProblem is the last problem selected from computer if you want to see any problem from the list box then change this code
                 MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
-                //TODO: Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
+                //ISSUE (#8): Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
                 //new ProblemViewer(theProblem).Show();
             }
             else

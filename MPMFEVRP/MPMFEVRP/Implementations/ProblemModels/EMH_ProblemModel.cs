@@ -16,12 +16,12 @@ namespace MPMFEVRP.Implementations.ProblemModels
             problemName = problem.GetName();
             objectiveFunctionType = problem.ObjectiveFunctionType;
             coverConstraintType = problem.CoverConstraintType;
-            rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
+            rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form. Update on 11/10/17: I didn't fully understand this comment, what was really meant here?
         }//empty constructor
         public EMH_ProblemModel(EMH_Problem problem, Type TSPModelType) : base(problem, TSPModelType)
         {
         }
-        public void ModifyNumVehicles() //TODO this can be used when there is only EVs no GDVs.
+        public void ModifyNumVehicles() //ISSUE(#5) this can be used when there is only EVs no GDVs.
         {
             //NumVehicles[1] = 0;
         }
@@ -74,14 +74,6 @@ namespace MPMFEVRP.Implementations.ProblemModels
             //TODO check for any infeasibility and return false as soon as one is found!
             //return outcome;
         }
-
-        // TODO delete the following if evvsgdvprobmodel handles this job.
-
-        //public override double CalculateObjectiveFunctionValue(ISolution solution) //TODO unit test this also check the structure
-        //{
-        //    return (VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.EV)
-        //        + VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile * solution.OFIDP.GetVMT(VehicleCategories.GDV));
-        //}
 
         public override bool CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {

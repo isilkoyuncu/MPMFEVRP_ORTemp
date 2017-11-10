@@ -55,7 +55,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 }
             srd = new SiteRelatedData(reader.GetNumberOfCustomers(), reader.GetNumberOfES(), numNodes, reader.GetSiteArray(), distance,timeConsumption,energyConsumption);
             vrd = new VehicleRelatedData(numVehicleCategories, reader.GetVehicleArray());
-            crd = new ContextRelatedData(reader.GetTravelSpeed(), srd.GetSingleDepotSite().DueDate, 2); //TODO For LAMBDA we entered 2 for now; we'd love to experiment on it.
+            crd = new ContextRelatedData(reader.GetTravelSpeed(), srd.GetSingleDepotSite().DueDate, 2); //ISSUE (#5) For LAMBDA we entered 2 for now; we'd love to experiment on it.
         }
         public ProblemDataPackage(ProblemDataPackage twinPDP)
         {

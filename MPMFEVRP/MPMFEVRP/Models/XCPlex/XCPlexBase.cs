@@ -101,7 +101,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected abstract void AddTheObjectiveFunction();
         protected abstract void AddAllConstraints();
         public abstract string GetDescription_AllVariables_Array();
-        public abstract SolutionBase GetCompleteSolution(Type SolutionType);//TODO Figure out how to make this work with a run-time-selected Solution type
+        public abstract SolutionBase GetCompleteSolution(Type SolutionType);//ISSUE (#5) Figure out how to make this work with a run-time-selected Solution type
 
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
         {
@@ -348,7 +348,7 @@ namespace MPMFEVRP.Models.XCPlex
             beginTime = DateTime.Now;
             //ExportModel("mmmmodel.lp");
             Output();
-            //TODO: Turn the following two lines on/off if you want to output the log file as a text to the MPMFEVRP directory instead of output window
+            //ISSUE (#5): Turn the following two lines on/off if you want to output the log file as a text to the MPMFEVRP directory instead of output window
             //TWoutput = System.IO.File.CreateText("CplexLog.txt");
             //SetOut(TWoutput);
             Solve();
@@ -392,12 +392,12 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 //Not relaxed, outcome can be Unknown, Feasible or Optimal (Can't be infeasible, if it was, it we wouldn't come this far)
                 //Obtain a lower bound
-                lowerBound = GetBestObjValue(); //TODO this shouldn't be LB all the time, depends on the objective function type
+                lowerBound = GetBestObjValue(); //TODO test that this works for each objective function type
                 //if at least feasible, obtain an upper bound and complete solution giving the upper bound
                 if (solutionStatus > 0)
                 {
                     //Obtain upper bound value
-                    upperBound = GetObjValue(); //TODO this shouldn't be LB all the time, depends on the objective function type
+                    upperBound = GetObjValue(); //TODO test that this works for each objective function type
                     //Obtain X and maybe Y values so a complete solution can be constructed from them 
                     optimalCompleteSolutionObtained = (solutionStatus == XCPlexSolutionStatus.Optimal);
                 }
@@ -412,7 +412,6 @@ namespace MPMFEVRP.Models.XCPlex
                 if (ValidateCompletenessOfRelaxedSolution())
                     optimalCompleteSolutionObtained = true;
             }//if relaxed
-//            TWoutput.Close();//TODO: Discuss w/ Isil: Why was this needed? From where I arrived at this point, I didn't have TWOutput and got a null reference exception
         }
 
         bool ValidateCompletenessOfRelaxedSolution()

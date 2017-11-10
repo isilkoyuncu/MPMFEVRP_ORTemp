@@ -93,7 +93,7 @@ namespace MPMFEVRP.Forms
             if (theProblem != null)
             {
                 //MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
-                //TODO: Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
+                //ISSUE (#8): Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
                 new ProblemViewer(theProblem).Show();
             }
             else
@@ -225,7 +225,7 @@ namespace MPMFEVRP.Forms
             }
             else
             {
-                charts = new HybridTreeSearchAndSetPartitionCharts();//TODO: Discuss with Huseyin: Is this a good implementation with not much coupling? 
+                charts = new HybridTreeSearchAndSetPartitionCharts();//CONSULT (with Huseyin): Is this a good implementation with not much coupling? 
                 if (theAlgorithm.setListener(charts))
                     charts.Show();
             }

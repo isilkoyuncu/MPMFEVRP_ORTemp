@@ -49,7 +49,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             while (unexploredList.Count > 0)
             {
                 // Node selection step
-                ISolution current = unexploredList.Pop(strategy: PopStrategy.LowestLowerBound); // TODO get parameter from algo
+                ISolution current = unexploredList.Pop(strategy: PopStrategy.LowestLowerBound); // ISSUE (#5) get parameter from algo
 
                 // Specify current
                 current.TriggerSpecification();

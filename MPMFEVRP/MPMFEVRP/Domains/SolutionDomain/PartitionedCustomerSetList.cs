@@ -24,11 +24,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             CSLList = new List<CustomerSetList>();
         }
 
-        public void PopAndConsiderForAddition(CustomerSetList CSL)//TODO: Delete this method because it creates tight coupling
-        {
-            while (CSL.Count > 0)
-                ConsiderForAddition(CSL.Pop(CustomerSetList.CustomerListPopStrategy.First));//TODO: Verify that this actually depletes the CSL one-CS-at-a-time
-        }
         public void ConsiderForAddition(CustomerSetList CSL)
         {
             foreach (CustomerSet cs in CSL)

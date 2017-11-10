@@ -15,7 +15,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double[,] timeConsumption;  //[numNodes,numNodes]
         double[,,] energyConsumption;    //[numNodes,numNodes,numVehicleTypes]
 
-        //TODO: The following are all public however as for giving these fields to outside, the public Get...() methods below must be used as the only way.
+        //ISSUE (#6): The following are all public however as for giving these fields to outside, the public Get...() methods below must be used as the only way.
         public int NumCustomers { get { return numCustomers; } } 
         public int NumES { get { return numES; } }  
         public int NumNodes { get { return numNodes;  } }   
@@ -188,7 +188,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             return eVenergyConsumption;
         }
 
-        public string GetSiteID(int siteIndex)//TODO: Its only mission is to convert siteIndex to siteID, which will never be used after SiteArray is no longer given out.
+        public string GetSiteID(int siteIndex)//TODO: Its only mission is to convert siteIndex to siteID, which will never be used after SiteArray is no longer given out. Update: checked on 11/10/17, this method was still needed and could not be deleted.
         {
                     return siteArray[siteIndex].ID;
             throw new Exception("SiteRelatedData.GetSiteID can't find the site with the given index!");

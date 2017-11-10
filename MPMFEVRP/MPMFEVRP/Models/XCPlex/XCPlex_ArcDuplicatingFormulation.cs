@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    // TODO apply all the changes that are done in node based formulation!!!
+    //TODO apply all the changes that are done in node based formulation!!! Update on 11/10/17, clarification needed.
     //TODO get all sites here and then use the mapping we coded
     public class XCPlex_ArcDuplicatingFormulation : XCPlexVRPBase
     {

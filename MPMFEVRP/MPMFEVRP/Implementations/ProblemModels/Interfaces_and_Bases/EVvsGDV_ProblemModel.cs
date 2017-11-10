@@ -85,7 +85,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
         public override RouteOptimizationOutcome RouteOptimize(CustomerSet CS)
         {
-            //TODO unit thes: the following should combine all EV and GDVs with Concat, Concat works as long as the lists are not null. Since we create new instances here, even though the GetVehiclesOfCategory method returns nothing, they shouldn't be null.
+            //TODO unit test: the following should combine all EV and GDVs with Concat, Concat works as long as the lists are not null. Since we create new instances here, even though the GetVehiclesOfCategory method returns nothing, they shouldn't be null.
             List<Vehicle> EVvehicles = new List<Vehicle>(VRD.GetVehiclesOfCategory(VehicleCategories.EV));
             List<Vehicle> GDVvehicles = new List<Vehicle>(VRD.GetVehiclesOfCategory(VehicleCategories.GDV));
             return RouteOptimize(CS, EVvehicles.Concat(GDVvehicles).ToList());
@@ -172,7 +172,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             return false;//TODO Do the actual checking here!
         }
-        public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1) //TODO this is never used
+        public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1) //ISSUE (#7): Is this the solver's responsibility or the problem model's? We already have the code in the solver
         {
             List<string> nondepotSiteIDsInOrder = new List<string>();
             int vehicleCategoryIndex = (vehicle.Category == VehicleCategories.EV ? 0 : 1);

@@ -16,6 +16,6 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
 
         string CreateRawData();
 
-        // TODO for the different types of problems we need to add and indicatior here (GVRP classification)
+        // TODO for the different types of problems we need to add and indicator here (GVRP classification)
     }
 }

@@ -205,7 +205,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
                    // parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
-                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, VehicleCategories.EV, ShadowPrices);//TODO: This is hardcoded with the EMH problem in mind, will need to flex vehicleCategory
+                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, VehicleCategories.EV, ShadowPrices);//ISSUE (#5): This is hardcoded with the EMH problem in mind, will need to flex vehicleCategory
                     //populate children from parents
                     PopulateAndPlaceChildren();
 
@@ -338,7 +338,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             Console.WriteLine("Now solving " + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray()));
             candidate.Optimize(theProblemModel);
             allCustomerSets.Add(candidate);
-            //TODO: #2-the following check to make sure the candidate is worth keeping is only for all-AFV version, thus we need to have a checkpoint to detrmine of the problem is mixed-fleet or all-AFV
+            //ISSUE (#5): the following check to make sure the candidate is worth keeping is only for all-AFV version, thus we need to have a checkpoint to determine of the problem is mixed-fleet or all-AFV
             if (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
                 return false;
             if (candidate.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
