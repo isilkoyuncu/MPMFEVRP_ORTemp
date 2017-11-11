@@ -260,5 +260,17 @@ namespace MPMFEVRP.Forms
                 }
             }
         }
+
+        private void Button_problemViewerOnMap_Click(object sender, EventArgs e)
+        {
+            if (theProblem != null)
+            {
+                //MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
+                //ISSUE (#8): Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
+                new ProblemViewerMap(theProblem).Show();
+            }
+            else
+                MessageBox.Show("You should create a problem first!", "No problem!");
+        }
     }
 }
