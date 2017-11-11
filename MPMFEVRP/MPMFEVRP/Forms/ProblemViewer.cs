@@ -26,7 +26,12 @@ namespace MPMFEVRP.Forms
         double mapAspectRatio;//y/x 
         double mapWidth, mapHeight;
         double minX, maxX, minY, maxY;
-        double panelMapScale;//This is the ratio between (panelPint1-panelPoint2)/(mapPoint1-mapPoint2)
+        int nodeSize = 10;
+        int topMargin = 10;//must be at least nodeSize/2
+        int bottomMargin = 20;//Larger, to account for the axis label
+        int leftMargin = 20;//Larger, to account for the axis label
+        int rightMargin = 10;//must be at least nodeSize/2
+        double panelMapScale;//This is the ratio between (panelPoint1-panelPoint2)/(mapPoint1-mapPoint2)
         Graphics g;
 
         //List<Site> allSites;
@@ -40,12 +45,12 @@ namespace MPMFEVRP.Forms
             g = panel_problemViewer.CreateGraphics();
 
             DrawBorderAndGridlines(panel_problemViewer);
-            DrawAllSites(panel_problemViewer, theProblem.PDP.SRD.GetAllSitesArray(), 20);
+            DrawAllSites(panel_problemViewer, theProblem.PDP.SRD.GetAllSitesArray(), nodeSize);
         }
         void InitializePanelAndFormSizes()
         {
-            double currentWidth = panel_problemViewer.Width;
-            double currentHeight = panel_problemViewer.Height;
+            double currentWidth = panel_problemViewer.Width-leftMargin-rightMargin;
+            double currentHeight = panel_problemViewer.Height-topMargin-bottomMargin;
             ProcessTheProblemMap();
             double currentAspectRatio = currentHeight / currentWidth;
             if (currentAspectRatio > mapAspectRatio)
@@ -57,8 +62,8 @@ namespace MPMFEVRP.Forms
                 panel_problemViewer.Width = (int)Math.Round(currentHeight / mapAspectRatio);
             }
             panelMapScale = (double)panel_problemViewer.Width / mapWidth;
-            panel_problemViewer.Height = panel_problemViewer.Height + 30;
-            panel_problemViewer.Width = panel_problemViewer.Width + 30;
+            panel_problemViewer.Height = panel_problemViewer.Height + topMargin+bottomMargin;
+            panel_problemViewer.Width = panel_problemViewer.Width + leftMargin+rightMargin;
         }
         void ProcessTheProblemMap()// y/x ratio
         {
@@ -93,11 +98,23 @@ namespace MPMFEVRP.Forms
         {
             this.Paint += (o, e) =>
             {
-                Pen p = new Pen(Color.Black, 5);
-                g.DrawLine(p, 0, 0, 0, panel.Height);
-                g.DrawLine(p, 0, 0, 0, panel.Width);
-                g.DrawLine(p, 0, 0, 0, panel.Height);
-
+                GivePanelBackgroundColor(panel_problemViewer, Color.White);
+                Pen p = new Pen(Color.LightGray, 1);
+                float[] swCorner = ConvertMapPointToPointOnPanel(minX, minY);
+                float[] neCorner = ConvertMapPointToPointOnPanel(maxX, maxY);
+                g.DrawLine(p, swCorner[0], swCorner[1], swCorner[0], neCorner[1]);
+                g.DrawLine(p, swCorner[0], swCorner[1], neCorner[0], swCorner[1]);
+                g.DrawLine(p, neCorner[0], neCorner[1], swCorner[0], neCorner[1]);
+                g.DrawLine(p, neCorner[0], neCorner[1], neCorner[0], swCorner[1]);
+                //The gridlines are omitted for now, may be added later if desired
+            };
+        }
+        void GivePanelBackgroundColor(Panel panel, Color color)
+        {
+            //ISSUE This doesn't work. In the old way, it suppressed all the nodes, int the new way (below) it doesn't show!
+            this.Paint += (o, e) =>
+            {
+                panel.BackColor = color;
             };
         }
         void DrawAllSites(Panel panel, Site[] sites, float size)
@@ -109,41 +126,55 @@ namespace MPMFEVRP.Forms
         }
         void DrawSiteAsNodeOnPanel(Panel panel, Site site, float size)
         {
-
-            Pen p = new Pen(Color.Black,3);
+            int lineThickness = 2;
+            Pen p = new Pen(Color.Black,lineThickness);
+            SolidBrush b = new SolidBrush(Color.DarkGray);
             float[] location = ConvertSiteLocationToPointOnPanel(site);
+            float X = (float)(location[0] - size / 2.0);
+            float Y = (float)(location[1] - size / 2.0);
             switch (site.SiteType)
             {
                 case SiteTypes.Depot:
                     p.Color = Color.Black;
                     this.Paint += (o, e) =>
                     {
-                        g.DrawRectangle(p, location[0], location[1], size, size);
+                        g.DrawRectangle(p, X, Y, size, size);
+                        g.FillRectangle(b, X + lineThickness/2, Y + lineThickness/2, size - lineThickness, size - lineThickness);
                     };
                     break;
                 case SiteTypes.Customer:
                     p.Color = Color.Red;
                     this.Paint += (o, e) =>
                     {
-                        g.DrawEllipse(p, location[0], location[1], size, size);
+                        g.DrawEllipse(p, X, Y, size, size);
                     };
                     break;
                 case SiteTypes.ExternalStation:
-                    p.Color = Color.Purple;
+                    p.Color = Color.Blue;
                     this.Paint += (o, e) =>
                     {
-                        g.DrawRectangle(p, location[0], location[1], size, size);
+                        g.DrawRectangle(p, X, Y, size, size);//TODO: This will me made a triangle, the color can stay blue
                     };
                     break;
-                    //throw new NotImplementedException();
+                default:
+                    throw new NotImplementedException("DrawSiteAsNodeOnPanel doesn't account for the SiteType " + site.SiteType.ToString());
             }
         }
         float[] ConvertSiteLocationToPointOnPanel(Site site)//[0]:X, [1]:Y
         {
+            return ConvertMapPointToPointOnPanel(site.X, site.Y);
+            //The following old code is commented out because of the new shortcut
+            //float[] output = new float[2];
+            //output[0] = (float)((site.X - minX) * panelMapScale) + leftMargin;
+            //output[1] = (float)((site.Y - minY) * panelMapScale) + topMargin;
+            //return output; 
+        }
+        float[] ConvertMapPointToPointOnPanel(double X, double Y)//[0]:X, [1]:Y
+        {
             float[] output = new float[2];
-            output[0] = (float)((site.X - minX) * panelMapScale);
-            output[1] = (float)((site.Y - minY) * panelMapScale);
-            return output; 
+            output[0] = (float)((X - minX) * panelMapScale) + leftMargin;
+            output[1] = (float)((Y - minY) * panelMapScale) + topMargin;
+            return output;
         }
 
 
@@ -181,14 +212,6 @@ namespace MPMFEVRP.Forms
         ////            Panel_Paint(this, null);
         //            panel_problemViewer.Show();
         //        }
-        void GiveRedBackground()
-        {
-            panel_problemViewer.BackColor = Color.Red;
-        }
-        void GiveWhiteBackground()
-        {
-            panel_problemViewer.BackColor = Color.White;
-        }
 
         /// <summary>
         /// 

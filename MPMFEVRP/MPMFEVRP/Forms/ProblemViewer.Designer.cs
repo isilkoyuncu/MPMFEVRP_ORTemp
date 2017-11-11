@@ -33,19 +33,20 @@
             // 
             // panel_problemViewer
             // 
-            this.panel_problemViewer.Location = new System.Drawing.Point(11, 11);
+            this.panel_problemViewer.BackColor = System.Drawing.Color.White;
+            this.panel_problemViewer.Location = new System.Drawing.Point(8, 9);
+            this.panel_problemViewer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.panel_problemViewer.Name = "panel_problemViewer";
-            this.panel_problemViewer.Size = new System.Drawing.Size(360, 303);
+            this.panel_problemViewer.Size = new System.Drawing.Size(270, 246);
             this.panel_problemViewer.TabIndex = 0;
             this.panel_problemViewer.Paint += new System.Windows.Forms.PaintEventHandler(this.Panel_Paint);
             // 
             // ProblemViewer
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(379, 321);
+            this.ClientSize = new System.Drawing.Size(284, 261);
             this.Controls.Add(this.panel_problemViewer);
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ProblemViewer";
             this.Text = "ProblemViewer";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
