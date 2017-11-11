@@ -27,9 +27,9 @@ namespace MPMFEVRP.Models.XCPlex
 
         INumVar[][][] X; double[][][] X_LB, X_UB;
         INumVar[][][] Y; double[][][] Y_LB, Y_UB;
-        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
-        INumVar[] Delta; double[] minValue_Delta, maxValue_Delta; double[][] BigDelta;
-        INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
+        INumVar[] Epsilon;
+        INumVar[] Delta; double[][] BigDelta;
+        INumVar[] T; double[][] BigT;
         public XCPlex_ArcDuplicatingFormulation_woU() { }
         public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam) {}
@@ -37,7 +37,8 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void DefineDecisionVariables()
         {
             OrganizeSites();
-            SetMinAndMaxValuesOfAllVariables();
+            SetMinAndMaxValuesOfCommonVariables();
+            SetMinAndMaxValuesOfModelSpecificVariables();
             SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
@@ -140,20 +141,14 @@ namespace MPMFEVRP.Models.XCPlex
                             Y[i][r][j].UB = 0.0;
                     }
         }
-        void SetMinAndMaxValuesOfAllVariables()
+        void SetMinAndMaxValuesOfModelSpecificVariables()
         {
             X_LB = new double[numNonESNodes][][];
             X_UB = new double[numNonESNodes][][];
             Y_LB = new double[numNonESNodes][][];
             Y_UB = new double[numNonESNodes][][];
-            minValue_T = new double[numNonESNodes];
-            maxValue_T = new double[numNonESNodes];
-            minValue_Delta = new double[numNonESNodes];
-            maxValue_Delta = new double[numNonESNodes];
-            minValue_Epsilon = new double[numNonESNodes];
-            maxValue_Epsilon = new double[numNonESNodes];
+            
             RHS_forNodeCoverage = new double[numNonESNodes];
-
 
             for (int i = 0; i < numNonESNodes; i++)
             {
@@ -178,7 +173,6 @@ namespace MPMFEVRP.Models.XCPlex
                 X_UB[i] = new double[numNonESNodes][];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    Site s = preprocessedSites[j];
                     X_LB[i][j] = new double[numVehCategories];
                     X_UB[i][j] = new double[numVehCategories];
                     for (int v = 0; v < numVehCategories; v++)
@@ -186,24 +180,6 @@ namespace MPMFEVRP.Models.XCPlex
                         X_LB[i][j][v] = 0.0;
                         X_UB[i][j][v] = 1.0;
                     }
-
-                    minValue_T[j] = TravelTime(theDepot, s);
-                    maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
-                    if (s.SiteType == SiteTypes.Customer)
-                        maxValue_T[j] -= ServiceDuration(s);
-                    else if (s.SiteType == SiteTypes.ExternalStation && theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
-                        maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
-
-                    //TODO Fine-tune the min and max values of delta
-                    minValue_Delta[j] = 0.0;
-                    maxValue_Delta[j] = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity;
-
-                    minValue_Epsilon[j] = 0.0;
-
-                    if (s.SiteType == SiteTypes.Customer)//TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
-                        maxValue_Epsilon[j] = Math.Min(BatteryCapacity(VehicleCategories.EV), s.ServiceDuration * RechargingRate(s));//Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration); //Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
-                    else
-                        maxValue_Epsilon[j] = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity;
                 }
             }
         }

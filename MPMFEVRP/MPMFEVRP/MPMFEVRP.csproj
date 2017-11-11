@@ -82,6 +82,7 @@
   <ItemGroup>
     <Compile Include="Domains\AlgorithmDomain\AlgorithmEnums.cs" />
     <Compile Include="Domains\AlgorithmDomain\AlgorithmStatistics.cs" />
+    <Compile Include="Domains\AlgorithmDomain\SiteWithAuxiliaryBounds.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemDataPackage.cs" />
     <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemConstants.cs" />
