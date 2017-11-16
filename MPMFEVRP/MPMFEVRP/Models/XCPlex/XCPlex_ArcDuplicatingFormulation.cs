@@ -23,9 +23,9 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[][][] X; double[][][] X_LB, X_UB;
         INumVar[][][] Y; double[][][] Y_LB, Y_UB;
         INumVar[][] U; double[][] U_LB, U_UB;
-        INumVar[] T; double[] minValue_T, maxValue_T;
-        INumVar[] Delta; double[] minValue_Delta, maxValue_Delta;
-        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
+        INumVar[] T;
+        INumVar[] Delta;
+        INumVar[] Epsilon;
         public XCPlex_ArcDuplicatingFormulation() { }
         public XCPlex_ArcDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam){}
@@ -33,7 +33,11 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void DefineDecisionVariables()
         {
             OrganizeSites();
-            SetMinAndMaxValuesOfAllVariables();
+            SetMinAndMaxValuesOfCommonVariables();
+            SetMinAndMaxValuesOfModelSpecificVariables();
+            SetDeltaMinViaLabelSetting(maxValue_Epsilon);
+            SetDeltaMaxViaLabelSetting(maxValue_Epsilon);
+
             allVariables_list = new List<INumVar>();
 
             //dvs: X_ijv, Y_irj and U_jv
@@ -116,7 +120,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        void SetMinAndMaxValuesOfAllVariables()
+        void SetMinAndMaxValuesOfModelSpecificVariables()
         {
             X_LB = new double[numNonESNodes][][];
             X_UB = new double[numNonESNodes][][];
@@ -124,12 +128,6 @@ namespace MPMFEVRP.Models.XCPlex
             Y_UB = new double[numNonESNodes][][];
             U_LB = new double[numNonESNodes][];
             U_UB = new double[numNonESNodes][];
-            minValue_T = new double[numNonESNodes];
-            maxValue_T = new double[numNonESNodes];
-            minValue_Delta = new double[numNonESNodes];
-            maxValue_Delta = new double[numNonESNodes];
-            minValue_Epsilon = new double[numNonESNodes];
-            maxValue_Epsilon = new double[numNonESNodes];
 
             for (int i = 0; i < numNonESNodes; i++)
             {
@@ -168,22 +166,6 @@ namespace MPMFEVRP.Models.XCPlex
                             U_UB[j][v] = 1.0;
                         U_LB[j][v] = 0.0;
                     }
-
-                    minValue_T[j] = TravelTime(theDepot, s);
-                    maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
-                    if (s.SiteType == SiteTypes.Customer)
-                        maxValue_T[j] -= ServiceDuration(s);
-
-                    //TODO Fine-tune the min and max values of delta
-                    minValue_Delta[j] = 0.0;
-                    maxValue_Delta[j] = 1.0;
-
-                    minValue_Epsilon[j] = 0.0;
-
-                    if (s.SiteType == SiteTypes.Customer)//TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
-                        maxValue_Epsilon[j] = Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration); //Math.Min(1.0, ServiceDuration(j) * Math.Min(RechargingRate(j), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate) / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
-                    else
-                        maxValue_Epsilon[j] = 1.0;
                 }
             }
         }

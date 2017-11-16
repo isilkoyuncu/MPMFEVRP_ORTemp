@@ -26,7 +26,7 @@ namespace MPMFEVRP.Models.XCPlex
 
 
         INumVar[][] X; double[][] X_LB, X_UB;
-        INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
+        INumVar[] T; double[][] BigT;
         public XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special() { }
         public XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam) { }
@@ -34,7 +34,8 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void DefineDecisionVariables()
         {
             OrganizeSites();
-            SetMinAndMaxValuesOfAllVariables();
+            SetMinAndMaxValuesOfCommonVariables();
+            SetMinAndMaxValuesOfModelSpecificVariables();
             SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
@@ -90,14 +91,11 @@ namespace MPMFEVRP.Models.XCPlex
                     X[j][j].UB = 0.0;
             }
         }
-        void SetMinAndMaxValuesOfAllVariables()
+        void SetMinAndMaxValuesOfModelSpecificVariables()
         {
             X_LB = new double[numNonESNodes][];
             X_UB = new double[numNonESNodes][];
-            minValue_T = new double[numNonESNodes];
-            maxValue_T = new double[numNonESNodes];
             RHS_forNodeCoverage = new double[numNonESNodes];
-
 
             for (int i = 0; i < numNonESNodes; i++)
             {
@@ -110,14 +108,8 @@ namespace MPMFEVRP.Models.XCPlex
                 X_UB[i] = new double[numNonESNodes];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    Site s = preprocessedSites[j];
                     X_LB[i][j] = 0.0;
                     X_UB[i][j] = 1.0;
-
-                    minValue_T[j] = TravelTime(theDepot, s);
-                    maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
-                    if (s.SiteType == SiteTypes.Customer)
-                        maxValue_T[j] -= ServiceDuration(s);
                 }
             }
         }

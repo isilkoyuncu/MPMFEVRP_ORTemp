@@ -57,6 +57,7 @@
             this.button_extractLogInfo = new System.Windows.Forms.Button();
             this.button_showCharts = new System.Windows.Forms.Button();
             this.textBox_log = new System.Windows.Forms.TextBox();
+            this.button_problemViewerOnMap = new System.Windows.Forms.Button();
             this.groupBox_problem.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox_algorithms.SuspendLayout();
@@ -65,6 +66,7 @@
             // 
             // groupBox_problem
             // 
+            this.groupBox_problem.Controls.Add(this.button_problemViewerOnMap);
             this.groupBox_problem.Controls.Add(this.button_exportTravelDuration);
             this.groupBox_problem.Controls.Add(this.button_exportEnergyConsmp);
             this.groupBox_problem.Controls.Add(this.button_exportDistances);
@@ -83,7 +85,7 @@
             this.groupBox_problem.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox_problem.Name = "groupBox_problem";
             this.groupBox_problem.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox_problem.Size = new System.Drawing.Size(595, 798);
+            this.groupBox_problem.Size = new System.Drawing.Size(595, 826);
             this.groupBox_problem.TabIndex = 0;
             this.groupBox_problem.TabStop = false;
             this.groupBox_problem.Text = "The \"Problem\" Side (problem, model, data, etc.)";
@@ -267,7 +269,7 @@
             this.button_viewProblem.Location = new System.Drawing.Point(8, 754);
             this.button_viewProblem.Margin = new System.Windows.Forms.Padding(4);
             this.button_viewProblem.Name = "button_viewProblem";
-            this.button_viewProblem.Size = new System.Drawing.Size(283, 34);
+            this.button_viewProblem.Size = new System.Drawing.Size(149, 34);
             this.button_viewProblem.TabIndex = 8;
             this.button_viewProblem.Text = "View Problem";
             this.button_viewProblem.UseVisualStyleBackColor = true;
@@ -397,12 +399,24 @@
             this.textBox_log.Size = new System.Drawing.Size(425, 595);
             this.textBox_log.TabIndex = 14;
             // 
+            // button_problemViewerOnMap
+            // 
+            this.button_problemViewerOnMap.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_problemViewerOnMap.Location = new System.Drawing.Point(120, 796);
+            this.button_problemViewerOnMap.Margin = new System.Windows.Forms.Padding(4);
+            this.button_problemViewerOnMap.Name = "button_problemViewerOnMap";
+            this.button_problemViewerOnMap.Size = new System.Drawing.Size(259, 26);
+            this.button_problemViewerOnMap.TabIndex = 25;
+            this.button_problemViewerOnMap.Text = "View Problem on map";
+            this.button_problemViewerOnMap.UseVisualStyleBackColor = true;
+            this.button_problemViewerOnMap.Click += new System.EventHandler(this.Button_problemViewerOnMap_Click);
+            // 
             // SingleProblemSingleAlgorithm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1567, 826);
+            this.ClientSize = new System.Drawing.Size(1567, 844);
             this.Controls.Add(this.groupBox_status);
             this.Controls.Add(this.groupBox_algorithms);
             this.Controls.Add(this.groupBox_problem);
@@ -454,5 +468,6 @@
         private System.ComponentModel.BackgroundWorker BackgroundWorker_algorithmRunner;
         private System.Windows.Forms.Button button_showCharts;
         private System.Windows.Forms.Button button_extractLogInfo;
+        private System.Windows.Forms.Button button_problemViewerOnMap;
     }
 }

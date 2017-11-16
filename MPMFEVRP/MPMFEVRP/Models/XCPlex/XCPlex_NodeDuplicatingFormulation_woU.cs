@@ -23,9 +23,9 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[][][] X; double[][][] X_LB, X_UB;
 
         //Auxiliaries, upper and lower bounds
-        INumVar[] Epsilon; double[] minValue_Epsilon, maxValue_Epsilon;
-        INumVar[] Delta; double[] minValue_Delta, maxValue_Delta; double[][] BigDelta;
-        INumVar[] T; double[] minValue_T, maxValue_T; double[][] BigT;
+        INumVar[] Epsilon;
+        INumVar[] Delta; double[][] BigDelta;
+        INumVar[] T; double[][] BigT;
 
         int firstCustomerVisitationConstraintIndex=-1;
         int totalTravelTimeConstraintIndex = -1;
@@ -40,7 +40,10 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void DefineDecisionVariables()
         {
             DuplicateAndOrganizeSites();
-            SetMinAndMaxValuesOfAllVariables();
+            SetMinAndMaxValuesOfCommonVariables();
+            SetMinAndMaxValuesOfModelSpecificVariables();
+            SetDeltaMinViaLabelSetting(maxValue_Epsilon);
+            SetDeltaMaxViaLabelSetting(maxValue_Epsilon);
             SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
@@ -141,17 +144,10 @@ namespace MPMFEVRP.Models.XCPlex
                             X[j][i][v].UB = 0.0;
                         }
         }
-        void SetMinAndMaxValuesOfAllVariables()
+        void SetMinAndMaxValuesOfModelSpecificVariables()
         {
             X_LB = new double[numDuplicatedNodes][][];
             X_UB = new double[numDuplicatedNodes][][];
-
-            minValue_Epsilon = new double[numDuplicatedNodes];
-            maxValue_Epsilon = new double[numDuplicatedNodes];
-            minValue_Delta = new double[numDuplicatedNodes];
-            maxValue_Delta = new double[numDuplicatedNodes];
-            minValue_T = new double[numDuplicatedNodes];
-            maxValue_T = new double[numDuplicatedNodes];
 
             RHS_forNodeCoverage = new double[numDuplicatedNodes];
 
@@ -161,7 +157,6 @@ namespace MPMFEVRP.Models.XCPlex
                 X_UB[i] = new double[numDuplicatedNodes][];
                 for (int j = 0; j < numDuplicatedNodes; j++)
                 {
-                    Site s = preprocessedSites[j];
                     X_LB[i][j] = new double[numVehCategories];
                     X_UB[i][j] = new double[numVehCategories];
                     for (int v = 0; v < numVehCategories; v++)
@@ -169,25 +164,6 @@ namespace MPMFEVRP.Models.XCPlex
                         X_LB[i][j][v] = 0.0;
                         X_UB[i][j][v] = 1.0;
                     }
-
-                    //UB - LB on Epsilon
-                    minValue_Epsilon[j] = 0.0;
-
-                    if (s.SiteType == SiteTypes.Customer)
-                        maxValue_Epsilon[j] = Math.Min(BatteryCapacity(VehicleCategories.EV), s.ServiceDuration * RechargingRate(s)); //Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
-                    else //TODO: Unit test the following utility function. It should give us MaxSOCGainAtSite s with EV.
-                        maxValue_Epsilon[j] = BatteryCapacity(VehicleCategories.EV); //TODO fine tune this. It needs to be the same as the paper.
-
-                    //TODO Fine-tune the min and max values of delta using label setting algorithm
-                    minValue_Delta[j] = 0.0;
-                    maxValue_Delta[j] = BatteryCapacity(VehicleCategories.EV);
-
-                    minValue_T[j] = TravelTime(theDepot, s);
-                    maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
-                    if (s.SiteType == SiteTypes.Customer)
-                        maxValue_T[j] -= ServiceDuration(s);
-                    else if (s.SiteType == SiteTypes.ExternalStation && theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
-                        maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
                 }
                 RHS_forNodeCoverage[i] = 1.0;
             }                
