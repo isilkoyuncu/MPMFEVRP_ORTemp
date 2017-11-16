@@ -48,6 +48,18 @@ namespace MPMFEVRP.Domains.ProblemDomain
         {
             return siteArray;
         }
+        public List<Site> GetAllSitesList()
+        {
+            return siteArray.ToList();
+        }
+        public List<Site> GetSitesList(SiteTypes siteType)
+        {
+            List<Site> outcome = new List<Site>();
+            foreach (Site s in siteArray)
+                if (s.SiteType == siteType)
+                    outcome.Add(s);
+            return outcome;
+        }
         public List<string> GetCustomerIDs()
         {
             List<string> outcome = new List<string>();

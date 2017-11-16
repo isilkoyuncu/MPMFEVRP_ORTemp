@@ -94,7 +94,9 @@ namespace MPMFEVRP.Forms
             {
                 //MessageBox.Show("This part is currently under development. It will eventually link to the new Problem Viewer.");
                 //ISSUE (#8): Revisit here after developing the new problem viewer, and then uncomment the next line as well as eliminate the message box in the line above.
-                new ProblemViewer(theProblem).Show();
+
+                new Mixed_Fleet_Network_View(theProblem).Show();
+                //new ProblemViewer(theProblem).Show();
             }
             else
                 MessageBox.Show("You should create a problem first!", "No problem!");

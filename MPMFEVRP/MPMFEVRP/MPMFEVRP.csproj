@@ -104,6 +104,12 @@
     <Compile Include="Forms\HybridTreeSearchAndSetPartitionCharts.Designer.cs">
       <DependentUpon>HybridTreeSearchAndSetPartitionCharts.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Mixed-Fleet Network View.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Mixed-Fleet Network View.Designer.cs">
+      <DependentUpon>Mixed-Fleet Network View.cs</DependentUpon>
+    </Compile>
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
@@ -134,23 +140,11 @@
     <Compile Include="Forms\MultipleProblemMultipleAlgorithm.Designer.cs">
       <DependentUpon>MultipleProblemMultipleAlgorithm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ProblemViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ProblemViewer.Designer.cs">
-      <DependentUpon>ProblemViewer.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\SingleProblemSingleAlgorithm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\SingleProblemSingleAlgorithm.Designer.cs">
       <DependentUpon>SingleProblemSingleAlgorithm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\DefaultSolutionViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\DefaultSolutionViewer.Designer.cs">
-      <DependentUpon>DefaultSolutionViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="Implementations\Solutions\Writers\IndividualSolutionWriter.cs" />
     <Compile Include="Implementations\Solutions\Writers\KoyuncuYavuzSummaryWriter.cs" />
@@ -205,6 +199,7 @@
     <Compile Include="Utils\CplexLogReader.cs" />
     <Compile Include="Utils\DeepCopier.cs" />
     <Compile Include="Utils\Calculators.cs" />
+    <Compile Include="Utils\NetworkGraphicalUtil.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
     <Compile Include="Utils\ProblemModelUtil.cs" />
     <Compile Include="Utils\ProblemUtil.cs" />
@@ -220,17 +215,14 @@
     <EmbeddedResource Include="Forms\HybridTreeSearchAndSetPartitionCharts.resx">
       <DependentUpon>HybridTreeSearchAndSetPartitionCharts.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Mixed-Fleet Network View.resx">
+      <DependentUpon>Mixed-Fleet Network View.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MultipleProblemMultipleAlgorithm.resx">
       <DependentUpon>MultipleProblemMultipleAlgorithm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ProblemViewer.resx">
-      <DependentUpon>ProblemViewer.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\SingleProblemSingleAlgorithm.resx">
       <DependentUpon>SingleProblemSingleAlgorithm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\DefaultSolutionViewer.resx">
-      <DependentUpon>DefaultSolutionViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -284,7 +276,11 @@
     <Content Include="Resources\RawData\data2.txt" />
     <Content Include="Resources\RawData\data1.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="Svg">
+      <Version>2.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
