@@ -34,8 +34,8 @@ namespace MPMFEVRP.Models.XCPlex
             DuplicateAndOrganizeSites();
             SetMinAndMaxValuesOfCommonVariables();
             SetMinAndMaxValuesOfModelSpecificVariables();
-            SetDeltaMinViaLabelSetting(maxValue_Epsilon);
-            SetDeltaMaxViaLabelSetting(maxValue_Epsilon);
+            minValue_Delta = SetDeltaMinViaLabelSetting(maxValue_Epsilon);
+            maxValue_Delta = SetDeltaMaxViaLabelSetting(maxValue_Epsilon);
 
             allVariables_list = new List<INumVar>();
             //dvs: X_ijv and U_jv

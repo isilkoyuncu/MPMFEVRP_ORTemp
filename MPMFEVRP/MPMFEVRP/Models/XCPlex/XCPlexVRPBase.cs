@@ -120,7 +120,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 Site s = preprocessedSites[j];
                 double epsilonMax = epsilon_Max[j];
-                double tempDeltaMin = Math.Max(0,EnergyConsumption(theDepot, s, VehicleCategories.EV) - epsilonMax);
+                double tempDeltaMin = Math.Max(0,EnergyConsumption(s, theDepot, VehicleCategories.EV) - epsilonMax);
                 tempListOfSiteAuxiliaryBounds.Add(new FlexibleStringMultiDoubleTuple(s.ID, epsilonMax, tempDeltaMin));
             }          
 
@@ -140,8 +140,11 @@ namespace MPMFEVRP.Models.XCPlex
                 permListOfSiteAuxiliaryBounds.Add(siteToPerm);
                 for(int i=0; i<tempListOfSiteAuxiliaryBounds.Count; i++)
                 {
-                    double minEnergyConsumption = theProblemModel.SRD.GetEVEnergyConsumption(tempListOfSiteAuxiliaryBounds[i].ID, siteToPerm.ID);
-                    double tempDeltaMin = Math.Min(tempListOfSiteAuxiliaryBounds[i].Item2, Math.Max(0,siteToPerm.Item2+minEnergyConsumption-tempListOfSiteAuxiliaryBounds[i].Item1));
+                    FlexibleStringMultiDoubleTuple theOtherNodesTempData = tempListOfSiteAuxiliaryBounds[i];
+                    double minEnergyConsumption = theProblemModel.SRD.GetEVEnergyConsumption(theOtherNodesTempData.ID, siteToPerm.ID);
+                    double tempDeltaMin = Math.Min(theOtherNodesTempData.Item2, Math.Max(0,siteToPerm.Item2+minEnergyConsumption- theOtherNodesTempData.Item1));
+                    if ((tempDeltaMin <= 0.001) && (theOtherNodesTempData.Item1 <= 0.001))
+                        Console.WriteLine("Error with delta min for node " + theOtherNodesTempData.ID+"!");
                     tempListOfSiteAuxiliaryBounds[i].SetItem2(tempDeltaMin);
                 }
             }
