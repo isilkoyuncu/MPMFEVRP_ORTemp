@@ -85,6 +85,39 @@ namespace MPMFEVRP.Models.XCPlex
         void CalculateDeltaMaxsViaLabelSetting()
         {
         }
+        void CalculateTBounds()
+        {
+            bool useLooseBounds = false;//This is the one that'll be tied to the user-selected parameter
+            if (useLooseBounds)
+            {
+                foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+                    swav.UpdateTBounds(theProblemModel.CRD.TMax, 0.0);
+            }
+            else
+            {
+                double tLS = double.MinValue;
+                double tES = double.MaxValue;
+                Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
+                foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+                {
+
+                    tLS = theProblemModel.CRD.TMax - TravelTime(swav, theDepot);
+                    tES = TravelTime(theDepot, swav);
+                    switch (swav.SiteType)
+                    {
+                        case SiteTypes.Customer:
+                            tLS -= ServiceDuration(swav);
+                            break;
+                        case SiteTypes.ExternalStation:
+                            if (theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                                tLS -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(swav));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);
