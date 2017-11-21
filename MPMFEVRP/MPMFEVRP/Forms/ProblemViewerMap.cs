@@ -69,7 +69,19 @@ namespace MPMFEVRP.Forms
             GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerOnly;
             gMapControl1.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
             gMapControl1.OnMarkerClick += new GMap.NET.WindowsForms.MarkerClick(GMapControl1_OnMarkerClick);
-            gMapControl1.SetPositionByKeywords("United States");
+            gMapControl1.SetZoomToFitRect(GetRectangularCustomerServiceArea());
+        }
+        RectLatLng GetRectangularCustomerServiceArea()
+        {
+            double minLat = double.MaxValue, maxLat = double.MinValue, minLng = double.MaxValue, maxLng = double.MinValue;
+            foreach (Site s in allSites)
+            {
+                minLat = Math.Min(minLat, s.Y);
+                maxLat = Math.Max(maxLat, s.Y);
+                minLng = Math.Min(minLng, s.X);
+                maxLng = Math.Max(maxLng, s.X);
+            }
+            return new RectLatLng(maxLat, minLng, maxLng - minLng, maxLat - minLat);
         }
         void GMapControl1_OnMarkerClick(GMapMarker item, MouseEventArgs e)
         {
