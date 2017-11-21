@@ -29,6 +29,8 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public double RechargingRate { get { return rechargingRate; } }
         public double[] Prize { get { return prize; } }
 
+        public Site() { }
+
         public Site(string id, string type, double x, double y, double demand, double readyTime, double dueDate, double serviceDuration, double rechargingRate, double[] prize)
         {
             this.id = id;
