@@ -40,7 +40,9 @@ namespace MPMFEVRP.Models.XCPlex
         {
             foreach (Site s in theProblemModel.SRD.GetAllSitesList())
                 allSWAVs.Add(new SiteWithAuxiliaryVariables(s));
+            //ISSUE (#5): Use of bounding approaches should be tied to a parameter with the following levels: Really Loose (0 for min, BatteryCap,BatteryCap,TMax for max); Really Tight (use label setting where appropriate)
             CalculateEpsilonBounds();
+            CalculateDeltaBounds();
         }
         void CalculateEpsilonBounds()
         {
@@ -63,7 +65,26 @@ namespace MPMFEVRP.Models.XCPlex
                 swav.UpdateEpsilonBounds(epsilonMax);
             }
         }
-
+        void CalculateDeltaBounds()
+        {
+            bool useLooseBounds = false;//This is the one that'll be tied to the user-selected parameter
+            if (useLooseBounds)
+            {
+                foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+                    swav.UpdateDeltaBounds(theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, 0.0);
+            }
+            else
+            {
+                CalculateDeltaMinsViaLabelSetting();
+                CalculateDeltaMaxsViaLabelSetting();
+            }
+        }
+        void CalculateDeltaMinsViaLabelSetting()
+        {
+        }
+        void CalculateDeltaMaxsViaLabelSetting()
+        {
+        }
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);

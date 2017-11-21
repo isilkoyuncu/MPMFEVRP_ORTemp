@@ -12,19 +12,20 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double epsilonMin; public double EpsilonMin { get { return epsilonMin; } }
         double deltaMax; public double DeltaMax { get { return deltaMax; } }
         double deltaMin; public double DeltaMin { get { return deltaMin; } }
-        double tMax; public double Tmax { get { return tMax; } }
-        double tMin; public double Tmin { get { return tMin; } }
+        //The following are named LS and ES for latest and earliest start times, respectively; to avoid confusion with the problem's TMax
+        double tLS; public double TLS { get { return tLS; } }
+        double tES; public double TES { get { return tES; } }
 
         public SiteWithAuxiliaryVariables() { }
 
-        public SiteWithAuxiliaryVariables(double epsilonMax, double epsilonMin, double deltaMax, double deltaMin, double tMax, double tMin)
+        public SiteWithAuxiliaryVariables(double epsilonMax, double epsilonMin, double deltaMax, double deltaMin, double tLS, double tES)
         {
             this.epsilonMax = epsilonMax;
             this.epsilonMin = epsilonMin;
             this.deltaMax = deltaMax;
             this.deltaMin = deltaMin;
-            this.tMax = tMax;
-            this.tMin = tMin;
+            this.tLS = tLS;
+            this.tES = tES;
         }
 
         public SiteWithAuxiliaryVariables(SiteWithAuxiliaryVariables twinSWAV)
@@ -33,8 +34,8 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.epsilonMin = twinSWAV.epsilonMin;
             this.deltaMax = twinSWAV.deltaMax;
             this.deltaMin = twinSWAV.deltaMin;
-            this.tMax = twinSWAV.tMax;
-            this.tMin = twinSWAV.tMin;
+            this.tLS = twinSWAV.tLS;
+            this.tES = twinSWAV.tES;
         }
 
         public SiteWithAuxiliaryVariables(Site baseSite):base(baseSite)
@@ -45,6 +46,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
         {
             this.epsilonMax = epsilonMax;
             this.epsilonMin = epsilonMin;
+        }
+        public void UpdateDeltaBounds(double deltaMax, double deltaMin)
+        {
+            this.deltaMax = deltaMax;
+            this.deltaMin = deltaMin;
+        }
+        public void UpdateTBounds(double tLS, double tES)
+        {
+            this.tLS = tLS;
+            this.tES = tES;
         }
     }
 }
