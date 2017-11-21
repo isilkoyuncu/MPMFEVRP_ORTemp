@@ -1,14 +1,10 @@
-﻿using System;
+﻿using MPMFEVRP.Domains.ProblemDomain;
+using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MPMFEVRP.Domains.SolutionDomain;
-using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
-using MPMFEVRP.Implementations.Solutions;
-using MPMFEVRP.Domains.ProblemDomain;
-using MPMFEVRP.Utils;
-using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 
 
 namespace MPMFEVRP.Models.XCPlex
@@ -16,6 +12,8 @@ namespace MPMFEVRP.Models.XCPlex
     public abstract class XCPlexVRPBase : XCPlexBase
     {
         List<SiteWithAuxiliaryVariables> allSWAVs = new List<SiteWithAuxiliaryVariables>();
+        protected SiteWithAuxiliaryVariables[] preprocessedSWAVs;//Ready-to-use
+
 
         protected Site[] preprocessedSites;//Ready-to-use
         protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
@@ -43,6 +41,7 @@ namespace MPMFEVRP.Models.XCPlex
             //ISSUE (#5): Use of bounding approaches should be tied to a parameter with the following levels: Really Loose (0 for min, BatteryCap,BatteryCap,TMax for max); Really Tight (use label setting where appropriate)
             CalculateEpsilonBounds();
             CalculateDeltaBounds();
+            CalculateTBounds();
         }
         void CalculateEpsilonBounds()
         {
@@ -79,8 +78,9 @@ namespace MPMFEVRP.Models.XCPlex
                 CalculateDeltaMaxsViaLabelSetting();
             }
         }
+        //TODO: finish these two methods
         void CalculateDeltaMinsViaLabelSetting()
-        {
+        { 
         }
         void CalculateDeltaMaxsViaLabelSetting()
         {
@@ -116,6 +116,26 @@ namespace MPMFEVRP.Models.XCPlex
                             break;
                     }
                 }
+            }
+        }
+
+        void PopulateAuxiliaryBoundArraysFromSWAVs()
+        {
+            //Make sure you invoke this method when preprocessedSWAVs have been created!
+            minValue_Epsilon = new double[NumPreprocessedSites];
+            maxValue_Epsilon = new double[NumPreprocessedSites];
+            minValue_Delta = new double[NumPreprocessedSites];
+            maxValue_Delta = new double[NumPreprocessedSites];
+            minValue_T = new double[NumPreprocessedSites];
+            maxValue_T = new double[NumPreprocessedSites];
+            for (int i=0;i<preprocessedSWAVs.Length;i++)
+            {
+                minValue_Epsilon[i] = preprocessedSWAVs[i].EpsilonMin;
+                maxValue_Epsilon[i] = preprocessedSWAVs[i].EpsilonMax;
+                minValue_Delta[i] = preprocessedSWAVs[i].DeltaMin;
+                maxValue_Delta[i] = preprocessedSWAVs[i].DeltaMax;
+                minValue_T[i] = preprocessedSWAVs[i].TES;
+                maxValue_T[i] = preprocessedSWAVs[i].TLS;
             }
         }
 
