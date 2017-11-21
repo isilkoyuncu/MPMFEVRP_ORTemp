@@ -11,7 +11,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double epsilonMax; public double EpsilonMax { get { return epsilonMax; } }
         double epsilonMin; public double EpsilonMin { get { return epsilonMin; } }
         double deltaMax; public double DeltaMax { get { return deltaMax; } }
-        double deltaMin; public double EeltaMin { get { return deltaMin; } }
+        double deltaMin; public double DeltaMin { get { return deltaMin; } }
         double tMax; public double Tmax { get { return tMax; } }
         double tMin; public double Tmin { get { return tMin; } }
 
@@ -35,6 +35,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.deltaMin = twinSWAV.deltaMin;
             this.tMax = twinSWAV.tMax;
             this.tMin = twinSWAV.tMin;
+        }
+
+        public SiteWithAuxiliaryVariables(Site baseSite):base(baseSite)
+        {
+        }
+
+        public void UpdateEpsilonBounds(double epsilonMax, double epsilonMin = 0.0)
+        {
+            this.epsilonMax = epsilonMax;
+            this.epsilonMin = epsilonMin;
         }
     }
 }

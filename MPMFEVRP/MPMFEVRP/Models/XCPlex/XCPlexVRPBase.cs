@@ -15,6 +15,8 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public abstract class XCPlexVRPBase : XCPlexBase
     {
+        List<SiteWithAuxiliaryVariables> allSWAVs = new List<SiteWithAuxiliaryVariables>();
+
         protected Site[] preprocessedSites;//Ready-to-use
         protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
         protected List<Site> depots;
@@ -33,7 +35,33 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam)
         {
-
+        }
+        protected void PopulateAllSWAVs()
+        {
+            foreach (Site s in theProblemModel.SRD.GetAllSitesList())
+                allSWAVs.Add(new SiteWithAuxiliaryVariables(s));
+            CalculateEpsilonBounds();
+        }
+        void CalculateEpsilonBounds()
+        {
+            //ISSUE (#9): Make sure epsilonMax matches what's written in the paper by 100%!
+            double epsilonMax = double.MinValue;
+            foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+            {
+                switch (swav.SiteType)
+                {
+                    case SiteTypes.Customer:
+                        epsilonMax = Math.Min(BatteryCapacity(VehicleCategories.EV), swav.ServiceDuration * RechargingRate(swav)); //Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
+                        break;
+                    case SiteTypes.ExternalStation://TODO: Unit test the above utility function. It should give us MaxSOCGainAtSite s with EV.
+                        epsilonMax = BatteryCapacity(VehicleCategories.EV);
+                        break;
+                    default:
+                        epsilonMax = 0.0;
+                        break;
+                }
+                swav.UpdateEpsilonBounds(epsilonMax);
+            }
         }
 
 

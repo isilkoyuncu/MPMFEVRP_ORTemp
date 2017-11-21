@@ -39,6 +39,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected override void DefineDecisionVariables()
         {
+            PopulateAllSWAVs();
             DuplicateAndOrganizeSites();
             SetMinAndMaxValuesOfCommonVariables();
             SetMinAndMaxValuesOfModelSpecificVariables();
