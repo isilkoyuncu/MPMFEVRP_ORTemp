@@ -87,7 +87,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateDeltaBounds()
         {
-            bool useLooseBounds = false;//This is the one that'll be tied to the user-selected parameter
+            bool useLooseBounds = true;//This is the one that'll be tied to the user-selected parameter
             if (useLooseBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
@@ -136,6 +136,7 @@ namespace MPMFEVRP.Models.XCPlex
                         default:
                             break;
                     }
+                    swav.UpdateTBounds(tLS, tES);
                 }
             }
         }
