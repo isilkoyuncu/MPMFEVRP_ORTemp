@@ -57,8 +57,8 @@ namespace MPMFEVRP.Models.XCPlex
             numCustomers = theProblemModel.SRD.NumCustomers;
             numNonESNodes = numCustomers + 1;
             preprocessedSites = new Site[numNonESNodes];
-            depots = new List<Site>();
-            customers = new List<Site>();
+            Depots = new List<Site>();
+            Customers = new List<Site>();
             int nodeCounter = 0;
             foreach (Site s in originalSites)
             {
@@ -66,19 +66,19 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     case SiteTypes.Depot:
                         preprocessedSites[nodeCounter++] = s;
-                        depots.Add(s);
+                        Depots.Add(s);
                         break;
                     case SiteTypes.ExternalStation:
                         break;
                     case SiteTypes.Customer:
                         preprocessedSites[nodeCounter++] = s;
-                        customers.Add(s);
+                        Customers.Add(s);
                         break;
                     default:
                         throw new System.Exception("Site type incompatible!");
                 }
             }
-            theDepot = depots[0];
+            theDepot = Depots[0];
         }
         void SetUndesiredXYVariablesTo0()
         {
@@ -426,14 +426,14 @@ namespace MPMFEVRP.Models.XCPlex
             do
             {
                 if (currentSiteIndices.Count == 2)
-                    outcome.Add(externalStations[currentSiteIndices.First()].ID);
+                    outcome.Add(ExternalStations[currentSiteIndices.First()].ID);
                 outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);
 
                 nextSiteIndices = GetNextSiteIndices(currentSiteIndices.Last(), vehicleCategory);
                 if (preprocessedSites[nextSiteIndices.Last()].ID == theDepot.ID)
                 {
                     if (nextSiteIndices.Count == 2)
-                        outcome.Add(externalStations[nextSiteIndices.First()].ID);
+                        outcome.Add(ExternalStations[nextSiteIndices.First()].ID);
                     return outcome;
                 }
                 currentSiteIndices = nextSiteIndices;

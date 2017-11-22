@@ -62,9 +62,9 @@ namespace MPMFEVRP.Models.XCPlex
             numES = theProblemModel.SRD.NumES;
             numNonESNodes = numCustomers + 1;
             preprocessedSites = new Site[numNonESNodes];
-            depots = new List<Site>();
-            customers = new List<Site>();
-            externalStations = new List<Site>();
+            Depots = new List<Site>();
+            Customers = new List<Site>();
+            ExternalStations = new List<Site>();
             int nodeCounter = 0;
             foreach (Site s in originalSites)
             {
@@ -72,20 +72,20 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     case SiteTypes.Depot:
                         preprocessedSites[nodeCounter++] = s;
-                        depots.Add(s);
+                        Depots.Add(s);
                         break;
                     case SiteTypes.ExternalStation:
-                        externalStations.Add(s);
+                        ExternalStations.Add(s);
                         break;
                     case SiteTypes.Customer:
                         preprocessedSites[nodeCounter++] = s;
-                        customers.Add(s);
+                        Customers.Add(s);
                         break;
                     default:
                         throw new System.Exception("Site type incompatible!");
                 }
             }
-            theDepot = depots[0];
+            theDepot = Depots[0];
         }
         
         void SetUndesiredXYVariablesTo0()
@@ -101,7 +101,7 @@ namespace MPMFEVRP.Models.XCPlex
             //No arc from depot to its duplicate
             for (int j = 0; j < numNonESNodes; j++)
                 for (int r = 0; r < numES; r++)
-                    if ((externalStations[r].X == theDepot.X) && (externalStations[r].Y == theDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
+                    if ((ExternalStations[r].X == theDepot.X) && (ExternalStations[r].Y == theDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
                     {
                         Y[0][r][j].UB = 0.0;
                         Y[j][r][0].UB = 0.0;
@@ -219,7 +219,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sFrom = preprocessedSites[i];
                 for (int r = 0; r < numES; r++)
                 {
-                    Site ES = externalStations[r];
+                    Site ES = ExternalStations[r];
                     for (int j = 0; j < numVehCategories; j++)
                     {
                         Site sTo = preprocessedSites[j];
@@ -253,7 +253,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sFrom = preprocessedSites[i];
                 for (int r = 0; r < numES; r++)
                 {
-                    Site ES = externalStations[r];
+                    Site ES = ExternalStations[r];
                     for (int j = 0; j < numVehCategories; j++)
                     {
                         Site sTo = preprocessedSites[j];
@@ -425,7 +425,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             for (int r = 0; r < numES; r++)
             {
-                Site ES = externalStations[r];
+                Site ES = ExternalStations[r];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site sTo = preprocessedSites[j];
@@ -444,7 +444,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sFrom = preprocessedSites[i];
                 for (int r = 0; r < numES; r++)
                 {
-                    Site ES = externalStations[r];
+                    Site ES = ExternalStations[r];
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sTo = preprocessedSites[j];
@@ -503,7 +503,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sFrom = preprocessedSites[j];
                 for (int r = 0; r < numES; r++)
                 {
-                    Site ES = externalStations[r];
+                    Site ES = ExternalStations[r];
                     ILinearNumExpr SOCDifference = LinearNumExpr();
                     SOCDifference.AddTerm(1.0, Delta[j]);
                     SOCDifference.AddTerm(1.0, Epsilon[j]);
@@ -525,7 +525,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sTo = preprocessedSites[j];
                 for (int r = 0; r < numES; r++)
                 {
-                    Site ES = externalStations[r];
+                    Site ES = ExternalStations[r];
                     ILinearNumExpr SOCDifference = LinearNumExpr();
                     SOCDifference.AddTerm(1.0, Delta[j]);
                     for (int v = 0; v < numVehCategories; v++)
@@ -643,14 +643,14 @@ namespace MPMFEVRP.Models.XCPlex
             do
             {
                 if(currentSiteIndices.Count==2)
-                    outcome.Add(externalStations[currentSiteIndices.First()].ID);
+                    outcome.Add(ExternalStations[currentSiteIndices.First()].ID);
                 outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);
 
                 nextSiteIndices = GetNextSiteIndices(currentSiteIndices.Last(), vehicleCategory);
                 if(preprocessedSites[nextSiteIndices.Last()].ID == theDepot.ID)
                 {
                     if(nextSiteIndices.Count==2)
-                        outcome.Add(externalStations[nextSiteIndices.First()].ID);
+                        outcome.Add(ExternalStations[nextSiteIndices.First()].ID);
                     return outcome;
                 }
                 currentSiteIndices = nextSiteIndices;

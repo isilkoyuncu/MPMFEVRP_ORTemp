@@ -11,21 +11,32 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public abstract class XCPlexVRPBase : XCPlexBase
     {
-        List<SiteWithAuxiliaryVariables> allSWAVs = new List<SiteWithAuxiliaryVariables>();
+        //The originals
+        List<SiteWithAuxiliaryVariables> allOriginalSWAVs = new List<SiteWithAuxiliaryVariables>();
+        List<SiteWithAuxiliaryVariables> depots; protected List<SiteWithAuxiliaryVariables> Depots { get { return depots; } }
+        List<SiteWithAuxiliaryVariables> customers; protected List<SiteWithAuxiliaryVariables> Customers { get { return customers; } }
+        List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } } 
+
+        //The preprocessed (duplicated) ones
         protected SiteWithAuxiliaryVariables[] preprocessedSWAVs;//Ready-to-use
+        protected int NumPreprocessedSWAVs { get { return preprocessedSWAVs.Length; } }
+        protected int FirstESNodeIndex = int.MaxValue, LastESNodeIndex = int.MinValue, FirstCustomerNodeIndex = int.MaxValue, LastCustomerNodeIndex = int.MinValue;
+        protected Site TheDepot { get { return depots.First(); } } //There is a single depot
 
 
-        protected Site[] preprocessedSites;//Ready-to-use
-        protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
-        protected List<Site> depots;
-        protected List<Site> customers;
-        protected List<Site> externalStations;//Preprocessed, Ready-to-use
+        //protected Site[] preprocessedSites;//Ready-to-use
+        //protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
+        //protected List<Site> depots;
+        //protected List<Site> customers;
+        //protected List<Site> externalStations;//Preprocessed, Ready-to-use
         protected int vIndex_EV = -1, vIndex_GDV = -1;
         protected int[] numVehicles;
 
         protected double[] minValue_T, maxValue_T;
         protected double[] minValue_Delta, maxValue_Delta;
         protected double[] minValue_Epsilon, maxValue_Epsilon;
+        protected double[][] BigDelta;
+        protected double[][] BigT;
 
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
@@ -34,10 +45,20 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam)
         {
         }
-        protected void PopulateAllSWAVs()
+
+        protected void PreprocessSites(int numCopiesOfEachES = 0)
+        {
+            PopulateAllOriginalSWAVs();
+            PopulateSubLists();
+            PopulatePreprocessedSWAVs(numCopiesOfEachES);
+            SetFirstAndLastNodeIndices();
+            PopulateAuxiliaryBoundArraysFromSWAVs();
+            SetBigMvalues();
+        }
+        protected void PopulateAllOriginalSWAVs()
         {
             foreach (Site s in theProblemModel.SRD.GetAllSitesList())
-                allSWAVs.Add(new SiteWithAuxiliaryVariables(s));
+                allOriginalSWAVs.Add(new SiteWithAuxiliaryVariables(s));
             //ISSUE (#5): Use of bounding approaches should be tied to a parameter with the following levels: Really Loose (0 for min, BatteryCap,BatteryCap,TMax for max); Really Tight (use label setting where appropriate)
             CalculateEpsilonBounds();
             CalculateDeltaBounds();
@@ -47,7 +68,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             //ISSUE (#9): Make sure epsilonMax matches what's written in the paper by 100%!
             double epsilonMax = double.MinValue;
-            foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
             {
                 switch (swav.SiteType)
                 {
@@ -69,7 +90,7 @@ namespace MPMFEVRP.Models.XCPlex
             bool useLooseBounds = false;//This is the one that'll be tied to the user-selected parameter
             if (useLooseBounds)
             {
-                foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                     swav.UpdateDeltaBounds(theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, 0.0);
             }
             else
@@ -90,7 +111,7 @@ namespace MPMFEVRP.Models.XCPlex
             bool useLooseBounds = false;//This is the one that'll be tied to the user-selected parameter
             if (useLooseBounds)
             {
-                foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                     swav.UpdateTBounds(theProblemModel.CRD.TMax, 0.0);
             }
             else
@@ -98,7 +119,7 @@ namespace MPMFEVRP.Models.XCPlex
                 double tLS = double.MinValue;
                 double tES = double.MaxValue;
                 Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
-                foreach (SiteWithAuxiliaryVariables swav in allSWAVs)
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                 {
 
                     tLS = theProblemModel.CRD.TMax - TravelTime(swav, theDepot);
@@ -118,16 +139,83 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-
+        void PopulateSubLists()
+        {
+            depots = new List<SiteWithAuxiliaryVariables>();
+            customers = new List<SiteWithAuxiliaryVariables>();
+            externalStations = new List<SiteWithAuxiliaryVariables>();
+            foreach(SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                switch(swav.SiteType)
+                {
+                    case SiteTypes.Depot:
+                        depots.Add(swav);
+                        break;
+                    case SiteTypes.Customer:
+                        customers.Add(swav);
+                        break;
+                    case SiteTypes.ExternalStation:
+                        externalStations.Add(swav);
+                        break;
+                }
+        }
+        protected void PopulatePreprocessedSWAVs(int numCopiesOfEachES = 0)
+        {
+            List<SiteWithAuxiliaryVariables> preprocessedSWAVs_list = new List<SiteWithAuxiliaryVariables>();
+            foreach(SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            {
+                if (swav.SiteType == SiteTypes.ExternalStation)
+                    preprocessedSWAVs_list.AddRange(SWAVDuplicates(swav, numCopiesOfEachES));
+                else
+                    preprocessedSWAVs_list.Add(swav);
+            }
+            preprocessedSWAVs = preprocessedSWAVs_list.ToArray();
+        }
+        /// <summary>
+        /// Returns a list of deep-copied SWAVs
+        /// </summary>
+        /// <param name="swav"></param> The original SWAV to be duplicated
+        /// <param name="numCopies"></param>Total number of copies, including the original
+        /// <returns></returns>
+        List<SiteWithAuxiliaryVariables> SWAVDuplicates(SiteWithAuxiliaryVariables swav, int numCopies)
+        {
+            List<SiteWithAuxiliaryVariables> outcome = new List<SiteWithAuxiliaryVariables>();
+            if (numCopies > 0)
+            {
+                outcome.Add(swav);
+                while (outcome.Count < numCopies)
+                    outcome.Add(new SiteWithAuxiliaryVariables(swav));
+            }
+            return outcome;
+        }
+        void SetFirstAndLastNodeIndices()
+        {
+            for(int i = 0; i < NumPreprocessedSWAVs; i++)
+            {
+                if(preprocessedSWAVs[i].SiteType== SiteTypes.Customer)
+                {
+                    if (FirstCustomerNodeIndex == int.MaxValue)
+                        FirstCustomerNodeIndex = i;
+                    if (LastCustomerNodeIndex == int.MinValue)
+                        LastCustomerNodeIndex = i;
+                }
+                if (preprocessedSWAVs[i].SiteType == SiteTypes.ExternalStation)
+                {
+                    if (FirstESNodeIndex == int.MaxValue)
+                        FirstESNodeIndex = i;
+                    if (LastESNodeIndex == int.MinValue)
+                        LastESNodeIndex = i;
+                }
+            }
+        }
         void PopulateAuxiliaryBoundArraysFromSWAVs()
         {
             //Make sure you invoke this method when preprocessedSWAVs have been created!
-            minValue_Epsilon = new double[NumPreprocessedSites];
-            maxValue_Epsilon = new double[NumPreprocessedSites];
-            minValue_Delta = new double[NumPreprocessedSites];
-            maxValue_Delta = new double[NumPreprocessedSites];
-            minValue_T = new double[NumPreprocessedSites];
-            maxValue_T = new double[NumPreprocessedSites];
+            minValue_Epsilon = new double[NumPreprocessedSWAVs];
+            maxValue_Epsilon = new double[NumPreprocessedSWAVs];
+            minValue_Delta = new double[NumPreprocessedSWAVs];
+            maxValue_Delta = new double[NumPreprocessedSWAVs];
+            minValue_T = new double[NumPreprocessedSWAVs];
+            maxValue_T = new double[NumPreprocessedSWAVs];
             for (int i=0;i<preprocessedSWAVs.Length;i++)
             {
                 minValue_Epsilon[i] = preprocessedSWAVs[i].EpsilonMin;
@@ -138,6 +226,24 @@ namespace MPMFEVRP.Models.XCPlex
                 maxValue_T[i] = preprocessedSWAVs[i].TLS;
             }
         }
+        protected void SetBigMvalues()
+        {
+            BigDelta = new double[NumPreprocessedSWAVs][];
+            BigT = new double[NumPreprocessedSWAVs][];
+
+            for (int i = 0; i < NumPreprocessedSWAVs; i++)
+            {
+                BigDelta[i] = new double[NumPreprocessedSWAVs];
+                BigT[i] = new double[NumPreprocessedSWAVs];
+
+                for (int j = 0; j < NumPreprocessedSWAVs; j++)
+                {
+                    BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] - minValue_Epsilon[i];
+                    BigT[i][j] = maxValue_T[i] - minValue_T[j];
+                }
+            }
+        }
+
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);
@@ -176,17 +282,17 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected void SetMinAndMaxValuesOfCommonVariables()
         {
-            minValue_T = new double[NumPreprocessedSites];
-            maxValue_T = new double[NumPreprocessedSites];
-            minValue_Delta = new double[NumPreprocessedSites];
-            maxValue_Delta = new double[NumPreprocessedSites];
-            minValue_Epsilon = new double[NumPreprocessedSites];
-            maxValue_Epsilon = new double[NumPreprocessedSites];
+            minValue_T = new double[NumPreprocessedSWAVs];
+            maxValue_T = new double[NumPreprocessedSWAVs];
+            minValue_Delta = new double[NumPreprocessedSWAVs];
+            maxValue_Delta = new double[NumPreprocessedSWAVs];
+            minValue_Epsilon = new double[NumPreprocessedSWAVs];
+            maxValue_Epsilon = new double[NumPreprocessedSWAVs];
 
-            for (int j = 0; j < NumPreprocessedSites; j++)
+            for (int j = 0; j < NumPreprocessedSWAVs; j++)
             {
-                Site s = preprocessedSites[j];
-                Site theDepot = depots[0];
+                Site s = preprocessedSWAVs[j];
+                Site theDepot = Depots[0];
 
                 //UB - LB on Epsilon
                 minValue_Epsilon[j] = 0.0;

@@ -57,9 +57,9 @@ namespace MPMFEVRP.Models.XCPlex
             int numDuplicationsForeachES = theProblemModel.Lambda * theProblemModel.NumVehicles[0];
             numDuplicatedNodes = 1 + (numDuplicationsForeachES * theProblemModel.SRD.NumES) + numCustomers;
             preprocessedSites = new Site[numDuplicatedNodes];
-            depots = new List<Site>();
-            customers = new List<Site>();
-            externalStations = new List<Site>();
+            Depots = new List<Site>();
+            Customers = new List<Site>();
+            ExternalStations = new List<Site>();
             int nodeCounter = 0;
             foreach(Site s in originalSites)
             {
@@ -67,7 +67,7 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     case SiteTypes.Depot:
                         preprocessedSites[nodeCounter++] = s;
-                        depots.Add(s);
+                        Depots.Add(s);
                         break;
                     case SiteTypes.ExternalStation:
                         if (firstESNodeIndex == 0)
@@ -75,7 +75,7 @@ namespace MPMFEVRP.Models.XCPlex
                         for (int i = 0; i < numDuplicationsForeachES; i++)
                         {
                             preprocessedSites[nodeCounter++] = s;
-                            externalStations.Add(s);
+                            ExternalStations.Add(s);
                         }
                         lastESNodeIndex = nodeCounter - 1;
                         break;
@@ -84,13 +84,13 @@ namespace MPMFEVRP.Models.XCPlex
                             firstCustomerNodeIndex = nodeCounter;
                         lastCustomerNodeIndex = nodeCounter;
                         preprocessedSites[nodeCounter++] = s;
-                        customers.Add(s);
+                        Customers.Add(s);
                         break;
                     default:
                         throw new System.Exception("Site type incompatible!");
                 }
             }
-            theDepot = depots[0];
+            theDepot = Depots[0];
         }
         void SetUndesiredXVariablesTo0()
         {
