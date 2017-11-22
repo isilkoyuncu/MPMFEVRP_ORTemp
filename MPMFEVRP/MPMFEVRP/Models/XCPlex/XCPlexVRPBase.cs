@@ -15,7 +15,10 @@ namespace MPMFEVRP.Models.XCPlex
         List<SiteWithAuxiliaryVariables> allOriginalSWAVs = new List<SiteWithAuxiliaryVariables>();
         List<SiteWithAuxiliaryVariables> depots; protected List<SiteWithAuxiliaryVariables> Depots { get { return depots; } }
         List<SiteWithAuxiliaryVariables> customers; protected List<SiteWithAuxiliaryVariables> Customers { get { return customers; } }
-        List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } } 
+        List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } }
+
+        //How do we want to process the auxiliary variable bounds
+        bool useLooseBounds = false;//TODO: This is the one that'll be tied to the user-selected parameter
 
         //The preprocessed (duplicated) ones
         protected SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use
@@ -23,7 +26,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected int FirstESNodeIndex = int.MaxValue, LastESNodeIndex = int.MinValue, FirstCustomerNodeIndex = int.MaxValue, LastCustomerNodeIndex = int.MinValue;
         protected SiteWithAuxiliaryVariables TheDepot { get { return depots.First(); } } //There is a single depot
 
-
+        
         //protected Site[] preprocessedSites;//Ready-to-use
         //protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
         //protected List<Site> depots;
@@ -48,8 +51,11 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected void PreprocessSites(int numCopiesOfEachES = 0)
         {
-            PopulateAllOriginalSWAVs();
+            foreach (Site s in theProblemModel.SRD.GetAllSitesList())
+                allOriginalSWAVs.Add(new SiteWithAuxiliaryVariables(s));
+
             PopulateSubLists();
+            PopulateAllOriginalSWAVs();
             PopulatePreprocessedSWAVs(numCopiesOfEachES);
             SetFirstAndLastNodeIndices();
             PopulateAuxiliaryBoundArraysFromSWAVs();
@@ -57,8 +63,6 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected void PopulateAllOriginalSWAVs()
         {
-            foreach (Site s in theProblemModel.SRD.GetAllSitesList())
-                allOriginalSWAVs.Add(new SiteWithAuxiliaryVariables(s));
             //ISSUE (#5): Use of bounding approaches should be tied to a parameter with the following levels: Really Loose (0 for min, BatteryCap,BatteryCap,TMax for max); Really Tight (use label setting where appropriate)
             CalculateEpsilonBounds();
             CalculateDeltaBounds();
@@ -66,28 +70,35 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateEpsilonBounds()
         {
-            //ISSUE (#9): Make sure epsilonMax matches what's written in the paper by 100%!
-            double epsilonMax = double.MinValue;
-            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            if (useLooseBounds)
             {
-                switch (swav.SiteType)
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                    swav.UpdateEpsilonBounds(BatteryCapacity(VehicleCategories.EV));
+            }
+            else
+            {
+                //ISSUE (#9): Make sure epsilonMax matches what's written in the paper by 100%!
+                double epsilonMax = double.MinValue;
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                 {
-                    case SiteTypes.Customer:
-                        epsilonMax = Math.Min(BatteryCapacity(VehicleCategories.EV), swav.ServiceDuration * RechargingRate(swav)); //Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
-                        break;
-                    case SiteTypes.ExternalStation://TODO: Unit test the above utility function. It should give us MaxSOCGainAtSite s with EV.
-                        epsilonMax = BatteryCapacity(VehicleCategories.EV);
-                        break;
-                    default:
-                        epsilonMax = 0.0;
-                        break;
+                    switch (swav.SiteType)
+                    {
+                        case SiteTypes.Customer:
+                            epsilonMax = Math.Min(BatteryCapacity(VehicleCategories.EV), swav.ServiceDuration * RechargingRate(swav)); //Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
+                            break;
+                        case SiteTypes.ExternalStation://TODO: Unit test the above utility function. It should give us MaxSOCGainAtSite s with EV.
+                            epsilonMax = BatteryCapacity(VehicleCategories.EV);
+                            break;
+                        default:
+                            epsilonMax = 0.0;
+                            break;
+                    }
+                    swav.UpdateEpsilonBounds(epsilonMax);
                 }
-                swav.UpdateEpsilonBounds(epsilonMax);
             }
         }
         void CalculateDeltaBounds()
         {
-            bool useLooseBounds = true;//This is the one that'll be tied to the user-selected parameter
             if (useLooseBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
@@ -99,16 +110,92 @@ namespace MPMFEVRP.Models.XCPlex
                 CalculateDeltaMaxsViaLabelSetting();
             }
         }
-        //TODO: finish these two methods
         void CalculateDeltaMinsViaLabelSetting()
-        { 
+        {
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
+            List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
+
+            foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                if (swav.SiteType == SiteTypes.Depot)
+                    swav.UpdateDeltaMin(0.0);
+                else
+                    swav.UpdateDeltaMin(Math.Max(0, EnergyConsumption(swav, TheDepot, VehicleCategories.EV) - swav.EpsilonMax));
+
+            while (tempSWAVs.Count != 0)
+            {
+                SiteWithAuxiliaryVariables firstSWAV = tempSWAVs.First();
+                SiteWithAuxiliaryVariables swavToPerm = firstSWAV.ShallowCopy();
+                string siteIDtoRemove = swavToPerm.ID;
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                    if(swav.DeltaMin<swavToPerm.DeltaMin)
+                    {
+                        swavToPerm = swav.ShallowCopy();
+                        siteIDtoRemove = swavToPerm.ID;
+                    }
+                tempSWAVs.Remove(tempSWAVs.SingleOrDefault(x => x.ID == siteIDtoRemove));
+                permSWAVs.Add(swavToPerm);
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                    swav.UpdateDeltaMin(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
+            }
+            if (allOriginalSWAVs.Count != permSWAVs.Count)
+                throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
+
+            foreach (SiteWithAuxiliaryVariables pswav in permSWAVs)
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                    if (pswav.ID == swav.ID)
+                    {
+                        swav.UpdateDeltaMin(pswav.DeltaMin);
+                        break;
+                    }
         }
         void CalculateDeltaMaxsViaLabelSetting()
         {
-        }
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
+            List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
+            foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                if (swav.SiteType == SiteTypes.Depot)
+                {
+                    swav.UpdateDeltaMax(0.0);
+                    swav.UpdateDeltaPrimeMax(BatteryCapacity(VehicleCategories.EV));
+                }
+                else
+                {
+                    swav.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(TheDepot, swav, VehicleCategories.EV));
+                    swav.UpdateDeltaPrimeMax(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
+                }
+            while (tempSWAVs.Count != 0)
+            {
+                SiteWithAuxiliaryVariables firstSWAV = tempSWAVs.First();
+                SiteWithAuxiliaryVariables swavToPerm = firstSWAV.ShallowCopy();
+                string siteIDtoRemove = swavToPerm.ID;
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                    if (swav.DeltaPrimeMax > swavToPerm.DeltaPrimeMax)
+                    {
+                        swavToPerm = swav.ShallowCopy();
+                        siteIDtoRemove = swavToPerm.ID;
+                    }
+                tempSWAVs.Remove(tempSWAVs.SingleOrDefault(x => x.ID == siteIDtoRemove));
+                permSWAVs.Add(swavToPerm);
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                {
+                    swav.UpdateDeltaMax(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
+                    swav.UpdateDeltaPrimeMax(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
+                }
+            }
+            if (allOriginalSWAVs.Count != permSWAVs.Count)
+                throw new System.Exception("XCPlexVRPBase.SetDeltaMaxViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
+
+            foreach (SiteWithAuxiliaryVariables pswav in permSWAVs)
+                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                    if (pswav.ID == swav.ID)
+                    {
+                        swav.UpdateDeltaMax(pswav.DeltaMax);
+                        swav.UpdateDeltaPrimeMax(pswav.DeltaPrimeMax);
+                        break;
+                    }
+        }    
         void CalculateTBounds()
         {
-            bool useLooseBounds = false;//This is the one that'll be tied to the user-selected parameter
             if (useLooseBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
@@ -315,121 +402,7 @@ namespace MPMFEVRP.Models.XCPlex
         //            maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
         //    }
         //}
-        //protected double[] SetDeltaMinViaLabelSetting(double[] epsilon_Max)
-        //{
-        //    Site[] allSites = new Site[theProblemModel.SRD.GetAllSitesArray().Length];
-        //    allSites = theProblemModel.SRD.GetAllSitesArray();
-        //    double[] delta_Min = new double[allSites.Length]; //final outcome
-
-        //    List<FlexibleStringMultiDoubleTuple> tempListOfSiteAuxiliaryBounds = new List<FlexibleStringMultiDoubleTuple>(); //List of SiteID, epsilon_Max, delta_Min
-        //    List<FlexibleStringMultiDoubleTuple> permListOfSiteAuxiliaryBounds = new List<FlexibleStringMultiDoubleTuple>(); //List of SiteID, epsilon_Max, delta_Min
-
-        //    Site theDepot = allSites[0];
-        //    tempListOfSiteAuxiliaryBounds.Add(new FlexibleStringMultiDoubleTuple(theDepot.ID, epsilon_Max[0], 0.0));
-
-        //    for (int j = 1; j < allSites.Length; j++)
-        //    {
-        //        Site s = allSites[j];
-        //        double epsilonMax = epsilon_Max[j];
-        //        double tempDeltaMin = Math.Max(0, EnergyConsumption(s, theDepot, VehicleCategories.EV) - epsilonMax);
-        //        tempListOfSiteAuxiliaryBounds.Add(new FlexibleStringMultiDoubleTuple(s.ID, epsilonMax, tempDeltaMin));
-        //    }
-
-        //    while (tempListOfSiteAuxiliaryBounds.Count != 0)
-        //    {
-        //        FlexibleStringMultiDoubleTuple siteToPerm = new FlexibleStringMultiDoubleTuple(tempListOfSiteAuxiliaryBounds.First().ID);
-        //        int indexToRemove = 0;
-        //        for (int i = 0; i < tempListOfSiteAuxiliaryBounds.Count; i++)
-        //        {
-        //            if (tempListOfSiteAuxiliaryBounds[i].Item2 < siteToPerm.Item2)
-        //            {
-        //                siteToPerm = new FlexibleStringMultiDoubleTuple(tempListOfSiteAuxiliaryBounds[i]);
-        //                indexToRemove = i;
-        //            }
-        //        }
-        //        tempListOfSiteAuxiliaryBounds.RemoveAt(indexToRemove);
-        //        permListOfSiteAuxiliaryBounds.Add(siteToPerm);
-        //        for (int i = 0; i < tempListOfSiteAuxiliaryBounds.Count; i++)
-        //        {
-        //            FlexibleStringMultiDoubleTuple theOtherNodesTempData = tempListOfSiteAuxiliaryBounds[i];
-        //            double minEnergyConsumption = theProblemModel.SRD.GetEVEnergyConsumption(theOtherNodesTempData.ID, siteToPerm.ID);
-        //            double tempDeltaMin = Math.Min(theOtherNodesTempData.Item2, Math.Max(0, siteToPerm.Item2 + minEnergyConsumption - theOtherNodesTempData.Item1));
-        //            if ((tempDeltaMin <= 0.001) && (theOtherNodesTempData.Item1 <= 0.001))
-        //                Console.WriteLine("Error with delta min for node " + theOtherNodesTempData.ID + "!");
-        //            tempListOfSiteAuxiliaryBounds[i].SetItem2(tempDeltaMin);
-        //        }
-        //    }
-        //    if (allSites.Length != permListOfSiteAuxiliaryBounds.Count)
-        //        throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence preprocessedSites.Length!=permListOfSiteAuxiliaryBounds.Count");
-        //    for (int i = 0; i < allSites.Length; i++)
-        //    {
-        //        for (int j = 0; j < permListOfSiteAuxiliaryBounds.Count; j++)
-        //            if (allSites[i].ID == permListOfSiteAuxiliaryBounds[j].ID)
-        //            {
-        //                delta_Min[i] = permListOfSiteAuxiliaryBounds[j].Item2;
-        //                break;
-        //            }
-        //    }
-        //    return delta_Min;
-        //}
-
-        //protected double[] SetDeltaMaxViaLabelSetting(double[] epsilon_Max)
-        //{
-        //    Site[] allSites = new Site[theProblemModel.SRD.GetAllSitesArray().Length];
-        //    allSites = theProblemModel.SRD.GetAllSitesArray();
-        //    double[] delta_Max = new double[allSites.Length]; //final outcome
-
-        //    List<FlexibleStringMultiDoubleTuple> tempListOfSiteAuxiliaryBounds = new List<FlexibleStringMultiDoubleTuple>(); // List of SiteID, epsilon_Max, delta_Max, deltaPrime_Max
-        //    List<FlexibleStringMultiDoubleTuple> permListOfSiteAuxiliaryBounds = new List<FlexibleStringMultiDoubleTuple>();
-
-        //    Site theDepot = allSites[0];
-        //    tempListOfSiteAuxiliaryBounds.Add(new FlexibleStringMultiDoubleTuple(theDepot.ID, epsilon_Max[0], 0.0, BatteryCapacity(VehicleCategories.EV)));
-
-        //    for (int j = 1; j < allSites.Length; j++)
-        //    {
-        //        Site s = allSites[j];
-        //        double epsilonMax = epsilon_Max[j];
-        //        double tempDeltaMax = BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(theDepot, s, VehicleCategories.EV);
-        //        double tempDeltaPrimeMax = Math.Min(BatteryCapacity(VehicleCategories.EV), (tempDeltaMax + epsilonMax));
-        //        tempListOfSiteAuxiliaryBounds.Add(new FlexibleStringMultiDoubleTuple(s.ID, epsilonMax, tempDeltaMax, tempDeltaPrimeMax));
-        //    }
-
-        //    while (tempListOfSiteAuxiliaryBounds.Count != 0)
-        //    {
-        //        FlexibleStringMultiDoubleTuple siteToPerm = new FlexibleStringMultiDoubleTuple(tempListOfSiteAuxiliaryBounds.First().ID);
-        //        int indexToRemove = 0;
-        //        for (int i = 0; i < tempListOfSiteAuxiliaryBounds.Count; i++)
-        //        {
-        //            if (tempListOfSiteAuxiliaryBounds[i].Item3 > siteToPerm.Item3)
-        //            {
-        //                siteToPerm = new FlexibleStringMultiDoubleTuple(tempListOfSiteAuxiliaryBounds[i]);
-        //                indexToRemove = i;
-        //            }
-        //        }
-        //        tempListOfSiteAuxiliaryBounds.RemoveAt(indexToRemove);
-        //        permListOfSiteAuxiliaryBounds.Add(siteToPerm);
-        //        for (int i = 0; i < tempListOfSiteAuxiliaryBounds.Count; i++)
-        //        {
-        //            double minEnergyConsumption = theProblemModel.SRD.GetEVEnergyConsumption(tempListOfSiteAuxiliaryBounds[i].ID, siteToPerm.ID);
-        //            double tempDeltaMax = Math.Max(tempListOfSiteAuxiliaryBounds[i].Item2, siteToPerm.Item3 - minEnergyConsumption);
-        //            double tempDeltaPrimeMax = Math.Min(BatteryCapacity(VehicleCategories.EV), (tempDeltaMax + tempListOfSiteAuxiliaryBounds[i].Item1));
-        //            tempListOfSiteAuxiliaryBounds[i].SetItem2(tempDeltaMax);
-        //            tempListOfSiteAuxiliaryBounds[i].SetItem3(tempDeltaPrimeMax);
-        //        }
-        //    }
-        //    if (allSites.Length != permListOfSiteAuxiliaryBounds.Count)
-        //        throw new System.Exception("XCPlexVRPBase.SetDeltaMaxViaLabelSetting could not produce proper delta bounds hence preprocessedSites.Length!=permListOfSiteAuxiliaryBounds.Count");
-        //    for (int i = 0; i < allSites.Length; i++)
-        //    {
-        //        for (int j = 0; j < permListOfSiteAuxiliaryBounds.Count; j++)
-        //            if (allSites[i].ID == permListOfSiteAuxiliaryBounds[j].ID)
-        //            {
-        //                delta_Max[i] = permListOfSiteAuxiliaryBounds[j].Item2;
-        //                break;
-        //            }
-        //    }
-        //    return delta_Max;
-        //}
+        
 
         protected double Distance(Site from, Site to)
         {

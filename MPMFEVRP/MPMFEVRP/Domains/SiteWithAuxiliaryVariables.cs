@@ -15,10 +15,11 @@ namespace MPMFEVRP.Domains.ProblemDomain
         //The following are named LS and ES for latest and earliest start times, respectively; to avoid confusion with the problem's TMax
         double tLS; public double TLS { get { return tLS; } }
         double tES; public double TES { get { return tES; } }
+        double deltaPrimeMax; public double DeltaPrimeMax { get { return deltaPrimeMax; } }
 
         public SiteWithAuxiliaryVariables() { }
 
-        public SiteWithAuxiliaryVariables(double epsilonMax, double epsilonMin, double deltaMax, double deltaMin, double tLS, double tES)
+        public SiteWithAuxiliaryVariables(double epsilonMax, double epsilonMin, double deltaMax, double deltaMin, double tLS, double tES, double deltaPrimeMax=double.MaxValue)
         {
             this.epsilonMax = epsilonMax;
             this.epsilonMin = epsilonMin;
@@ -26,16 +27,21 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.deltaMin = deltaMin;
             this.tLS = tLS;
             this.tES = tES;
+            this.deltaPrimeMax = deltaPrimeMax;
         }
-
+        public SiteWithAuxiliaryVariables ShallowCopy()
+        {
+            return (SiteWithAuxiliaryVariables) this.MemberwiseClone();
+        }
         public SiteWithAuxiliaryVariables(SiteWithAuxiliaryVariables twinSWAV)
         {
-            this.epsilonMax = twinSWAV.epsilonMax;
-            this.epsilonMin = twinSWAV.epsilonMin;
-            this.deltaMax = twinSWAV.deltaMax;
-            this.deltaMin = twinSWAV.deltaMin;
-            this.tLS = twinSWAV.tLS;
-            this.tES = twinSWAV.tES;
+            epsilonMax = twinSWAV.epsilonMax;
+            epsilonMin = twinSWAV.epsilonMin;
+            deltaMax = twinSWAV.deltaMax;
+            deltaMin = twinSWAV.deltaMin;
+            tLS = twinSWAV.tLS;
+            tES = twinSWAV.tES;
+            deltaPrimeMax = twinSWAV.deltaPrimeMax;
         }
 
         public SiteWithAuxiliaryVariables(Site baseSite):base(baseSite)
@@ -51,6 +57,18 @@ namespace MPMFEVRP.Domains.ProblemDomain
         {
             this.deltaMax = deltaMax;
             this.deltaMin = deltaMin;
+        }
+        public void UpdateDeltaMin(double deltaMin)
+        {
+            this.deltaMin = deltaMin;
+        }
+        public void UpdateDeltaMax(double deltaMax)
+        {
+            this.deltaMax = deltaMax;
+        }
+        public void UpdateDeltaPrimeMax(double deltaPrimeMax)
+        {
+            this.deltaPrimeMax = deltaPrimeMax;
         }
         public void UpdateTBounds(double tLS, double tES)
         {

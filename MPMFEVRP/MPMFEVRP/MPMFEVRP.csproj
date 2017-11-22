@@ -206,7 +206,6 @@
     <Compile Include="Utils\CplexLogReader.cs" />
     <Compile Include="Utils\DeepCopier.cs" />
     <Compile Include="Utils\Calculators.cs" />
-    <Compile Include="Utils\FlexibleStringMultiDoubleTuple.cs" />
     <Compile Include="Utils\NetworkGraphicalUtil.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
     <Compile Include="Utils\ProblemModelUtil.cs" />
