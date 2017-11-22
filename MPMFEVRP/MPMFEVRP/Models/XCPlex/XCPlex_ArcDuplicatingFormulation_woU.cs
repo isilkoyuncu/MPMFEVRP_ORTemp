@@ -16,8 +16,6 @@ namespace MPMFEVRP.Models.XCPlex
         int numNonESNodes;
         int numCustomers, numES;
 
-        Site theDepot;
-
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
         int totalTravelTimeConstraintIndex = -1;
         int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
@@ -28,20 +26,21 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[][][] X; double[][][] X_LB, X_UB;
         INumVar[][][] Y; double[][][] Y_LB, Y_UB;
         INumVar[] Epsilon;
-        INumVar[] Delta; double[][] BigDelta;
-        INumVar[] T; double[][] BigT;
+        INumVar[] Delta;
+        INumVar[] T;
         public XCPlex_ArcDuplicatingFormulation_woU() { }
         public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam) {}
+            : base(theProblemModel, xCplexParam)
+        {
+            numCustomers = theProblemModel.SRD.NumCustomers;
+            numES = theProblemModel.SRD.NumES;
+            numNonESNodes = numCustomers + 1;
+        }
 
         protected override void DefineDecisionVariables()
         {
-            OrganizeSites();
-            SetMinAndMaxValuesOfCommonVariables();
+            PreprocessSites();
             SetMinAndMaxValuesOfModelSpecificVariables();
-            minValue_Delta= SetDeltaMinViaLabelSetting(maxValue_Epsilon);
-            maxValue_Delta = SetDeltaMaxViaLabelSetting(maxValue_Epsilon);
-            SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
 
@@ -58,38 +57,6 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
-        }
-        void OrganizeSites()
-        {
-            Site[] originalSites = theProblemModel.SRD.GetAllSitesArray();
-            numCustomers = theProblemModel.SRD.NumCustomers;
-            numES = theProblemModel.SRD.NumES;
-            numNonESNodes = numCustomers + 1;
-            preprocessedSites = new Site[numNonESNodes];
-            Depots = new List<Site>();
-            Customers = new List<Site>();
-            ExternalStations = new List<Site>();
-            int nodeCounter = 0;
-            foreach (Site s in originalSites)
-            {
-                switch (s.SiteType)
-                {
-                    case SiteTypes.Depot:
-                        preprocessedSites[nodeCounter++] = s;
-                        Depots.Add(s);
-                        break;
-                    case SiteTypes.ExternalStation:
-                        ExternalStations.Add(s);
-                        break;
-                    case SiteTypes.Customer:
-                        preprocessedSites[nodeCounter++] = s;
-                        Customers.Add(s);
-                        break;
-                    default:
-                        throw new System.Exception("Site type incompatible!");
-                }
-            }
-            theDepot = Depots[0];
         }
         void SetUndesiredXYVariablesTo0()
         {
@@ -110,7 +77,7 @@ namespace MPMFEVRP.Models.XCPlex
             //No arc from depot to its duplicate
             for (int j = 0; j < numNonESNodes; j++)
                 for (int r = 0; r < numES; r++)
-                    if ((ExternalStations[r].X == theDepot.X) && (ExternalStations[r].Y == theDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
+                    if ((ExternalStations[r].X == TheDepot.X) && (ExternalStations[r].Y == TheDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
                     {
                         Y[0][r][j].UB = 0.0;
                         Y[j][r][0].UB = 0.0;
@@ -182,22 +149,6 @@ namespace MPMFEVRP.Models.XCPlex
                         X_LB[i][j][v] = 0.0;
                         X_UB[i][j][v] = 1.0;
                     }
-                }
-            }
-        }
-        void SetBigMvalues()
-        {
-            BigDelta = new double[numNonESNodes][];
-            BigT = new double[numNonESNodes][];
-
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                BigDelta[i] = new double[numNonESNodes];
-                BigT[i] = new double[numNonESNodes];
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] - minValue_Epsilon[i];
-                    BigT[i][j] = maxValue_T[i] - minValue_T[j];
                 }
             }
         }
@@ -563,7 +514,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site sTo = preprocessedSites[j];
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, Delta[j]);
-                SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo, VehicleCategories.EV), X[0][j][vIndex_EV]);
+                SOCDifference.AddTerm(EnergyConsumption(TheDepot, sTo, VehicleCategories.EV), X[0][j][vIndex_EV]);
                 for(int r=0;r<numES; r++)
                 {
                     Site ES = ExternalStations[r];
@@ -639,7 +590,7 @@ namespace MPMFEVRP.Models.XCPlex
                         // Here we decide whether recharging duration is fixed or depends on the arrival SOC
                         if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                         {
-                            TimeDifference.AddTerm(-1.0 * (TravelTime(theDepot, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
+                            TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
                             string constraint_name = "Time_Regulation_from_customer_" + 0.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
                             allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
                         }
@@ -901,7 +852,7 @@ namespace MPMFEVRP.Models.XCPlex
                 outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);
 
                 nextSiteIndices = GetNextSiteIndices(currentSiteIndices.Last(), vehicleCategory);
-                if (preprocessedSites[nextSiteIndices.Last()].ID == theDepot.ID)
+                if (preprocessedSites[nextSiteIndices.Last()].ID == TheDepot.ID)
                 {
                     if (nextSiteIndices.Count == 2)
                         outcome.Add(ExternalStations[nextSiteIndices.First()].ID);
@@ -909,7 +860,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
                 currentSiteIndices = nextSiteIndices;
             }
-            while (preprocessedSites[currentSiteIndices.Last()].ID != theDepot.ID);
+            while (preprocessedSites[currentSiteIndices.Last()].ID != TheDepot.ID);
 
             return outcome;
         }

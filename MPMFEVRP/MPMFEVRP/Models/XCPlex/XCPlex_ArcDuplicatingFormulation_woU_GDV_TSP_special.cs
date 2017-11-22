@@ -4,7 +4,6 @@ using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
-using MPMFEVRP.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +15,6 @@ namespace MPMFEVRP.Models.XCPlex
         int numNonESNodes;
         int numCustomers;
 
-        Site theDepot;
-
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
         int totalTravelTimeConstraintIndex = -1;
         int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
@@ -26,17 +23,19 @@ namespace MPMFEVRP.Models.XCPlex
 
 
         INumVar[][] X; double[][] X_LB, X_UB;
-        INumVar[] T; double[][] BigT;
+        INumVar[] T;
         public XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special() { }
         public XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam) { }
+            : base(theProblemModel, xCplexParam)
+        {
+            numCustomers = theProblemModel.SRD.NumCustomers;
+            numNonESNodes = numCustomers + 1;
+        }
 
         protected override void DefineDecisionVariables()
         {
-            OrganizeSites();
-            SetMinAndMaxValuesOfCommonVariables();
+            PreprocessSites();
             SetMinAndMaxValuesOfModelSpecificVariables();
-            SetBigMvalues();
 
             allVariables_list = new List<INumVar>();
 
@@ -50,35 +49,6 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
-        }
-        void OrganizeSites()
-        {
-            Site[] originalSites = theProblemModel.SRD.GetAllSitesArray();
-            numCustomers = theProblemModel.SRD.NumCustomers;
-            numNonESNodes = numCustomers + 1;
-            preprocessedSites = new Site[numNonESNodes];
-            Depots = new List<Site>();
-            Customers = new List<Site>();
-            int nodeCounter = 0;
-            foreach (Site s in originalSites)
-            {
-                switch (s.SiteType)
-                {
-                    case SiteTypes.Depot:
-                        preprocessedSites[nodeCounter++] = s;
-                        Depots.Add(s);
-                        break;
-                    case SiteTypes.ExternalStation:
-                        break;
-                    case SiteTypes.Customer:
-                        preprocessedSites[nodeCounter++] = s;
-                        Customers.Add(s);
-                        break;
-                    default:
-                        throw new System.Exception("Site type incompatible!");
-                }
-            }
-            theDepot = Depots[0];
         }
         void SetUndesiredXYVariablesTo0()
         {
@@ -110,19 +80,6 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     X_LB[i][j] = 0.0;
                     X_UB[i][j] = 1.0;
-                }
-            }
-        }
-        void SetBigMvalues()
-        {
-            BigT = new double[numNonESNodes][];
-
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                BigT[i] = new double[numNonESNodes];
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    BigT[i][j] = maxValue_T[i] - minValue_T[j];
                 }
             }
         }
@@ -430,7 +387,7 @@ namespace MPMFEVRP.Models.XCPlex
                 outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);
 
                 nextSiteIndices = GetNextSiteIndices(currentSiteIndices.Last(), vehicleCategory);
-                if (preprocessedSites[nextSiteIndices.Last()].ID == theDepot.ID)
+                if (preprocessedSites[nextSiteIndices.Last()].ID == TheDepot.ID)
                 {
                     if (nextSiteIndices.Count == 2)
                         outcome.Add(ExternalStations[nextSiteIndices.First()].ID);
@@ -438,7 +395,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
                 currentSiteIndices = nextSiteIndices;
             }
-            while (preprocessedSites[currentSiteIndices.Last()].ID != theDepot.ID);
+            while (preprocessedSites[currentSiteIndices.Last()].ID != TheDepot.ID);
 
             return outcome;
         }

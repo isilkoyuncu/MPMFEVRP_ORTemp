@@ -1,5 +1,4 @@
 ﻿using ILOG.Concert;
-using MPMFEVRP.Domains.AlgorithmDomain;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
@@ -7,19 +6,12 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 
 namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlex_NodeDuplicatingFormulation : XCPlexVRPBase
     {
-        int numDuplicatedNodes;
-          
-        Site theDepot;
-
-        int firstESNodeIndex, lastESNodeIndex, firstCustomerNodeIndex, lastCustomerNodeIndex;//There is a single depot and it is always node #0
-
         INumVar[][][] X; double[][][] X_LB, X_UB;
         INumVar[][] U; double[][] U_LB, U_UB;
         INumVar[] T;
@@ -31,85 +23,40 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected override void DefineDecisionVariables()
         {
-            DuplicateAndOrganizeSites();
-            SetMinAndMaxValuesOfCommonVariables();
+            PreprocessSites(theProblemModel.Lambda * theProblemModel.NumVehicles[0]);
             SetMinAndMaxValuesOfModelSpecificVariables();
-            minValue_Delta = SetDeltaMinViaLabelSetting(maxValue_Epsilon);
-            maxValue_Delta = SetDeltaMaxViaLabelSetting(maxValue_Epsilon);
 
             allVariables_list = new List<INumVar>();
             //dvs: X_ijv and U_jv
-            AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numDuplicatedNodes, numDuplicatedNodes, numVehCategories,out X);
-            AddTwoDimensionalDecisionVariable("U", U_LB, U_UB, NumVarType.Int, numDuplicatedNodes, numVehCategories, out U);
+            AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, NumPreprocessedSites, NumPreprocessedSites, numVehCategories,out X);
+            AddTwoDimensionalDecisionVariable("U", U_LB, U_UB, NumVarType.Int, NumPreprocessedSites, numVehCategories, out U);
             //auxiliaries (T_j, Delta_j, Epsilon_j)
-            AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numDuplicatedNodes, out T);
-            AddOneDimensionalDecisionVariable("Delta", minValue_Delta, maxValue_Delta, NumVarType.Float, numDuplicatedNodes, out Delta);
-            AddOneDimensionalDecisionVariable("Epsilon", minValue_Epsilon, maxValue_Epsilon, NumVarType.Float, numDuplicatedNodes, out Epsilon);
+            AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, NumPreprocessedSites, out T);
+            AddOneDimensionalDecisionVariable("Delta", minValue_Delta, maxValue_Delta, NumVarType.Float, NumPreprocessedSites, out Delta);
+            AddOneDimensionalDecisionVariable("Epsilon", minValue_Epsilon, maxValue_Epsilon, NumVarType.Float, NumPreprocessedSites, out Epsilon);
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXVariablesTo0();
         }
-        void DuplicateAndOrganizeSites()
-        {
-            Site[] originalSites = theProblemModel.SRD.GetAllSitesArray();
-            int numCustomers = theProblemModel.SRD.NumCustomers;
-            int numDuplicationsForeachES = theProblemModel.Lambda * theProblemModel.NumVehicles[0];
-            numDuplicatedNodes = 1 + (numDuplicationsForeachES * theProblemModel.SRD.NumES) + numCustomers;
-            preprocessedSites = new Site[numDuplicatedNodes];
-            Depots = new List<Site>();
-            Customers = new List<Site>();
-            ExternalStations = new List<Site>();
-            int nodeCounter = 0;
-            foreach(Site s in originalSites)
-            {
-                switch (s.SiteType)
-                {
-                    case SiteTypes.Depot:
-                        preprocessedSites[nodeCounter++] = s;
-                        Depots.Add(s);
-                        break;
-                    case SiteTypes.ExternalStation:
-                        if (firstESNodeIndex == 0)
-                            firstESNodeIndex = nodeCounter;
-                        for (int i = 0; i < numDuplicationsForeachES; i++)
-                        {
-                            preprocessedSites[nodeCounter++] = s;
-                            ExternalStations.Add(s);
-                        }
-                        lastESNodeIndex = nodeCounter - 1;
-                        break;
-                    case SiteTypes.Customer:
-                        if (firstCustomerNodeIndex == 0)
-                            firstCustomerNodeIndex = nodeCounter;
-                        lastCustomerNodeIndex = nodeCounter;
-                        preprocessedSites[nodeCounter++] = s;
-                        Customers.Add(s);
-                        break;
-                    default:
-                        throw new System.Exception("Site type incompatible!");
-                }
-            }
-            theDepot = Depots[0];
-        }
         void SetUndesiredXVariablesTo0()
         {
             //No arc from a node to itself
-            for (int j = 0; j < numDuplicatedNodes; j++)
+            for (int j = 0; j < NumPreprocessedSites; j++)
                 for (int v = 0; v < numVehCategories; v++)
                     X[j][j][v].UB = 0.0;
             //No arc from one ES to another
-            for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
-                for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
+            for (int i = FirstESNodeIndex; i <= LastESNodeIndex; i++)
+                for (int j = FirstESNodeIndex; j <= LastESNodeIndex; j++)
                     for (int v = 0; v < numVehCategories; v++)
                     {
                         X[i][j][v].UB = 0.0;
                     }
             //No arc from a node to another if energy consumption is > 1
-            for (int i = 0; i < numDuplicatedNodes; i++)
+            for (int i = 0; i < NumPreprocessedSites; i++)
             {
                 Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site sTo = preprocessedSites[j];
                     for (int v = 0; v < numVehCategories; v++)
@@ -119,15 +66,15 @@ namespace MPMFEVRP.Models.XCPlex
             }
             //No arc from depot to its duplicate
             for (int v = 0; v < numVehCategories; v++)
-                for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
-                    if((preprocessedSites[j].X==theDepot.X)&&(preprocessedSites[j].Y== theDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
+                for (int j = FirstESNodeIndex; j <= LastESNodeIndex; j++)
+                    if((preprocessedSites[j].X==TheDepot.X)&&(preprocessedSites[j].Y== TheDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
                     {
                         X[0][j][v].UB = 0.0;
                         X[j][0][v].UB = 0.0;
                     }
             //No arc from or to an ES node can be traversed by a GDV
-            for (int i = 0; i < numDuplicatedNodes; i++)
-                for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
+            for (int i = 0; i < NumPreprocessedSites; i++)
+                for (int j = FirstESNodeIndex; j <= LastESNodeIndex; j++)
                     for (int v = 0; v < numVehCategories; v++)
                         if (vehicleCategories[v] == VehicleCategories.GDV)
                         {
@@ -137,16 +84,16 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void SetMinAndMaxValuesOfModelSpecificVariables()
         {
-            X_LB = new double[numDuplicatedNodes][][];
-            X_UB = new double[numDuplicatedNodes][][];
-            U_LB = new double[numDuplicatedNodes][];
-            U_UB = new double[numDuplicatedNodes][];
+            X_LB = new double[NumPreprocessedSites][][];
+            X_UB = new double[NumPreprocessedSites][][];
+            U_LB = new double[NumPreprocessedSites][];
+            U_UB = new double[NumPreprocessedSites][];
 
-            for (int i = 0; i < numDuplicatedNodes; i++)
+            for (int i = 0; i < NumPreprocessedSites; i++)
             {
-                X_LB[i] = new double[numDuplicatedNodes][];
-                X_UB[i] = new double[numDuplicatedNodes][];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                X_LB[i] = new double[NumPreprocessedSites][];
+                X_UB[i] = new double[NumPreprocessedSites][];
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site s = preprocessedSites[j];
                     X_LB[i][j] = new double[numVehCategories];
@@ -190,17 +137,17 @@ namespace MPMFEVRP.Models.XCPlex
         {
             ILinearNumExpr objFunction = LinearNumExpr();
             //First term: prize collection
-            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
+            for (int j = FirstCustomerNodeIndex; j <= LastCustomerNodeIndex; j++)
             {
                 Site s = preprocessedSites[j];
                 for (int v = 0; v < numVehCategories; v++)
                     objFunction.AddTerm(Prize(s, vehicleCategories[v]), U[j][v]);
             }
             //Second term: distance-based costs
-            for (int i = 0; i < numDuplicatedNodes; i++)
+            for (int i = 0; i < NumPreprocessedSites; i++)
             {
                 Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site sTo = preprocessedSites[j];
                     for (int v = 0; v < numVehCategories; v++)
@@ -217,10 +164,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             ILinearNumExpr objFunction = LinearNumExpr();
             //Second term: distance-based costs
-            for (int i = 0; i < numDuplicatedNodes; i++)
+            for (int i = 0; i < NumPreprocessedSites; i++)
             {
                 Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site sTo = preprocessedSites[j];
                     for (int v = 0; v < numVehCategories; v++)
@@ -228,7 +175,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
             //Third term: vehicle fixed costs
-            for (int j = 0; j < numDuplicatedNodes; j++)
+            for (int j = 0; j < NumPreprocessedSites; j++)
                 for (int v = 0; v < numVehCategories; v++)
                     objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);            
             //Now adding the objective function to the model
@@ -264,7 +211,7 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int v = 0; v < numVehCategories; v++)
                 {
                     ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
-                    for (int i = 0; i < numDuplicatedNodes; i++)
+                    for (int i = 0; i < NumPreprocessedSites; i++)
                         IncomingXTotalMinusU.AddTerm(1.0, X[i][0][v]);
                     IncomingXTotalMinusU.AddTerm(-1.0, U[0][v]);
                     string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_incoming_to_depot_equals_the_U_variable";
@@ -276,7 +223,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int v = 0; v < numVehCategories; v++)
             {
                 ILinearNumExpr OutgoingXTotalMinusU = LinearNumExpr();
-                for (int k = 0; k < numDuplicatedNodes; k++)
+                for (int k = 0; k < NumPreprocessedSites; k++)
                     OutgoingXTotalMinusU.AddTerm(1.0, X[0][k][v]);
                 OutgoingXTotalMinusU.AddTerm(-1.0, U[0][v]);
                 string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_outgoing_from_depot_equals_the_U_variable";
@@ -285,11 +232,11 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_IncomingXTotalEqualsU()
         {
-            for(int j=1; j < numDuplicatedNodes; j++)
+            for(int j=1; j < NumPreprocessedSites; j++)
                 for(int v=0; v < numVehCategories; v++)
                 {
                     ILinearNumExpr IncomingXTotalMinusU = LinearNumExpr();
-                    for (int i = 0; i < numDuplicatedNodes; i++)
+                    for (int i = 0; i < NumPreprocessedSites; i++)
                         IncomingXTotalMinusU.AddTerm(1.0, X[i][j][v]);
                     IncomingXTotalMinusU.AddTerm(-1.0, U[j][v]);
                     string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_incoming_to_node_" + j.ToString() + "_equals_the_U_variable";
@@ -298,11 +245,11 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_OutgoingXTotalEqualsU()
         {
-            for (int j = 1; j < numDuplicatedNodes; j++)
+            for (int j = 1; j < NumPreprocessedSites; j++)
                 for (int v = 0; v < numVehCategories; v++)
                 {
                     ILinearNumExpr OutgoingXTotalMinusU = LinearNumExpr();
-                    for (int k = 0; k < numDuplicatedNodes; k++)
+                    for (int k = 0; k < NumPreprocessedSites; k++)
                         OutgoingXTotalMinusU.AddTerm(1.0, X[j][k][v]);
                     OutgoingXTotalMinusU.AddTerm(-1.0, U[j][v]);
                     string constraint_name = "Number_of_type_" + v.ToString() + "_vehicles_outgoing_from_node_" + j.ToString() + "_equals_the_U_variable";
@@ -311,7 +258,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_NumberOfVisitsPerNode()
         {
-            for (int j = 1; j < numDuplicatedNodes; j++)
+            for (int j = 1; j < NumPreprocessedSites; j++)
             {
                 ILinearNumExpr NumberOfVehiclesVisitingTheNode = LinearNumExpr();
                 for (int v = 0; v < numVehCategories; v++)
@@ -319,7 +266,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                 string constraint_name;
 
-                if ((theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)&&(j >= firstCustomerNodeIndex) && (j <= lastCustomerNodeIndex))
+                if ((theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)&&(j >= FirstCustomerNodeIndex) && (j <= LastCustomerNodeIndex))
                 {
                     constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
                     allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheNode, 1.0, constraint_name));
@@ -333,7 +280,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_NoGDVVisitToESNodes()
         {
-            for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
+            for (int j = FirstESNodeIndex; j <= LastESNodeIndex; j++)
             {
                 ILinearNumExpr NumberOfGDVsVisitingTheNode = LinearNumExpr();
                 for (int v = 0; v < numVehCategories; v++)
@@ -367,7 +314,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int v = 0; v < numVehCategories; v++)
             {
                 ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
-                for (int k = 0; k < numDuplicatedNodes; k++)
+                for (int k = 0; k < NumPreprocessedSites; k++)
                     NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][k][v]);
                 string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[v].ToString();
                 allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
@@ -375,8 +322,8 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_TimeRegulationFollowingACustomerVisit()
         {
-            for (int i = firstCustomerNodeIndex; i <= lastCustomerNodeIndex; i++)
-                for (int j = 0; j < numDuplicatedNodes; j++)
+            for (int i = FirstCustomerNodeIndex; i <= LastCustomerNodeIndex; i++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site sFrom = preprocessedSites[i];
                     Site sTo = preprocessedSites[j];
@@ -391,10 +338,10 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_TimeRegulationFollowingAnESVisit() // TODO make sure all the other constraints are the same as formulation
         {
-            for (int i = firstESNodeIndex; i <= lastESNodeIndex; i++)
+            for (int i = FirstESNodeIndex; i <= LastESNodeIndex; i++)
             {
                 Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site sTo = preprocessedSites[j];
                     ILinearNumExpr TimeDifference = LinearNumExpr();
@@ -421,10 +368,10 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_SOCRegulationFollowingNondepot()
         {
-            for (int i = 1; i < numDuplicatedNodes; i++)
+            for (int i = 1; i < NumPreprocessedSites; i++)
             {
                 Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numDuplicatedNodes; j++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     Site sTo = preprocessedSites[j];
                     ILinearNumExpr SOCDifference = LinearNumExpr();
@@ -441,21 +388,21 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_SOCRegulationFollowingDepot()
         {
-            for (int j = 0; j < numDuplicatedNodes; j++)
+            for (int j = 0; j < NumPreprocessedSites; j++)
             {
                 Site sTo = preprocessedSites[j];
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, Delta[j]);
                 for (int v = 0; v < numVehCategories; v++)
                     if (vehicleCategories[v] == VehicleCategories.EV)
-                        SOCDifference.AddTerm(EnergyConsumption(theDepot, sTo, vehicleCategories[v]), X[0][j][v]);
+                        SOCDifference.AddTerm(EnergyConsumption(TheDepot, sTo, vehicleCategories[v]), X[0][j][v]);
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, 1.0, constraint_name));
             }
         }
         void AddConstraint_MaxRechargeAtCustomerNode()
         {
-            for (int j = firstCustomerNodeIndex; j <=lastCustomerNodeIndex ; j++)
+            for (int j = FirstCustomerNodeIndex; j <=LastCustomerNodeIndex ; j++)
             {
                 ILinearNumExpr RechargeAtCustomer = LinearNumExpr();
                 RechargeAtCustomer.AddTerm(1.0, Epsilon[j]);
@@ -468,7 +415,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MaxDepartureSOCFromCustomerNode()
         {
-            for (int j = firstCustomerNodeIndex; j <= lastCustomerNodeIndex; j++)
+            for (int j = FirstCustomerNodeIndex; j <= LastCustomerNodeIndex; j++)
             {
                 ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
                 DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
@@ -482,7 +429,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_DepartureSOCFromESNode()
         {
-            for (int j = firstESNodeIndex; j <= lastESNodeIndex; j++)
+            for (int j = FirstESNodeIndex; j <= LastESNodeIndex; j++)
             {
                 ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                 DepartureSOCFromES.AddTerm(1.0, Delta[j]);
@@ -523,7 +470,7 @@ namespace MPMFEVRP.Models.XCPlex
 
             //We first determine the route start points
             List<int> firstSiteIndices = new List<int>();
-            for (int j = 0; j < numDuplicatedNodes; j++)
+            for (int j = 0; j < NumPreprocessedSites; j++)
                 if (GetValue(X[0][j][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                 {
                     firstSiteIndices.Add(j);
@@ -551,14 +498,14 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 outcome.Add(currentSiteID);
                 nextSiteIndex = GetNextSiteIndex(currentSiteIndex, vc_int);
-                if (preprocessedSites[nextSiteIndex].ID == theDepot.ID)
+                if (preprocessedSites[nextSiteIndex].ID == TheDepot.ID)
                 {
                     return outcome;
                 }
                 currentSiteIndex = nextSiteIndex;
                 currentSiteID = preprocessedSites[currentSiteIndex].ID;
             }
-            while (currentSiteID != theDepot.ID);
+            while (currentSiteID != TheDepot.ID);
 
             return outcome;
 
@@ -567,7 +514,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             int VCIndex = (int)xCplexParam.VehCategory;
             
-            for (int j=firstCustomerNodeIndex; j<=lastCustomerNodeIndex; j++)
+            for (int j=FirstCustomerNodeIndex; j<=LastCustomerNodeIndex; j++)
             {
                 if(CS.Customers.Contains(preprocessedSites[j].ID))
                 {
@@ -592,7 +539,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         int GetNextSiteIndex(int currentSiteIndex, int vc_int)
         {
-            for (int nextSiteIndex = 0; nextSiteIndex < numDuplicatedNodes; nextSiteIndex++)
+            for (int nextSiteIndex = 0; nextSiteIndex < NumPreprocessedSites; nextSiteIndex++)
                 if (GetValue(X[currentSiteIndex][nextSiteIndex][vc_int]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                 {
                     return nextSiteIndex;
