@@ -28,13 +28,13 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam)
         {
-            numCustomers = theProblemModel.SRD.NumCustomers;
-            numNonESNodes = numCustomers + 1;
         }
 
         protected override void DefineDecisionVariables()
         {
             PreprocessSites();
+            numCustomers = theProblemModel.SRD.NumCustomers;
+            numNonESNodes = numCustomers + 1;
             SetMinAndMaxValuesOfModelSpecificVariables();
 
             allVariables_list = new List<INumVar>();

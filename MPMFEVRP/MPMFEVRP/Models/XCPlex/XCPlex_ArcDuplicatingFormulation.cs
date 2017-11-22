@@ -4,7 +4,6 @@ using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
-using MPMFEVRP.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,14 +27,14 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlex_ArcDuplicatingFormulation(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam)
         {
-            numCustomers = theProblemModel.SRD.NumCustomers;
-            numES = theProblemModel.SRD.NumES;
-            numNonESNodes = numCustomers + 1;
         }
 
         protected override void DefineDecisionVariables()
         {
             PreprocessSites();
+            numCustomers = theProblemModel.SRD.NumCustomers;
+            numES = theProblemModel.SRD.NumES;
+            numNonESNodes = numCustomers + 1;
             SetMinAndMaxValuesOfModelSpecificVariables();
 
             allVariables_list = new List<INumVar>();
