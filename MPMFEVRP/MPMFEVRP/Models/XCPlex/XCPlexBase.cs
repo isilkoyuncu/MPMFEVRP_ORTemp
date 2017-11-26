@@ -55,7 +55,6 @@ namespace MPMFEVRP.Models.XCPlex
         protected int numVehCategories;
         public System.IO.TextWriter TWoutput;
 
-
         public XCPlexBase()
         {
             numberOfTimesSolveFoundStatus = new Dictionary<string, int>();
@@ -245,7 +244,6 @@ namespace MPMFEVRP.Models.XCPlex
                 .Select(x => (T)Convert.ChangeType(x, typeof(T)))       // convert it to generic T
                 .ToArray();
         }
-
         public T[][] GetTwoDimensionalDecisionVariableResult<T>(String name)
         {
             return ((INumVar[][])DecisionVariables[name])
@@ -254,74 +252,19 @@ namespace MPMFEVRP.Models.XCPlex
                     .ToArray())
                 .ToArray();
         }
-
         protected INumVar[] GetOneDimensionalDecisionVariableValue(String name)
         {
             return ((INumVar[])DecisionVariables[name]);
         }
-
         protected INumVar[][] GetTwoDimensionalDecisionVariableValue(String name)
         {
             return ((INumVar[][])DecisionVariables[name]);
         }
-
         protected INumVar[][][] GetThreeDimensionalDecisionVariableValue(String name)
         {
             return ((INumVar[][][])DecisionVariables[name]);
         }
 
-        // Shortcuts
-        // DV1D : Decision Variable 1-Dimensional etc.
-        protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
-        {
-            AddOneDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, out dv);
-        }
-
-        protected void AddDV2D(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, out INumVar[][] dv)
-        {
-            AddTwoDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, length2, out dv);
-        }
-
-        public T[] DV1DResult<T>(String name)
-        {
-            return GetOneDimensionalDecisionVariableResult<T>(name);
-        }
-
-        public T[][] DV2DResult<T>(String name)
-        {
-            return GetTwoDimensionalDecisionVariableResult<T>(name);
-        }
-
-        protected INumVar[] DV1D(String name)
-        {
-            return GetOneDimensionalDecisionVariableValue(name);
-        }
-
-        protected INumVar[][] DV2D(String name)
-        {
-            return GetTwoDimensionalDecisionVariableValue(name);
-        }
-
-        protected void InitializeOutputVariables()
-        {
-            //Initializing outputs
-            this.solutionStatus = XCPlexSolutionStatus.NotYetSolved;
-            this.optimalCompleteSolutionObtained = false;
-            this.variableValuesObtained = false;
-            this.reducedCostsObtained = false;
-            this.lowerBound = double.MinValue;
-            this.upperBound = double.MaxValue;
-        }
-        protected void RefineDecisionVariables(PartialSolution PS)
-        {
-            double[] allLB = PS.GetAllDecisionVariableLowerBounds();
-            double[] allUB = PS.GetAllDecisionVariableUpperBounds();
-            for (int dvIndex = 0; dvIndex < allVariables_array.Length; dvIndex++)
-            {
-                allVariables_array[dvIndex].LB = allLB[dvIndex];
-                allVariables_array[dvIndex].UB = allUB[dvIndex];
-            }
-        }
         protected void SetCplexParameters()
         {
             if (xCplexParam.LimitComputationTime)
@@ -336,6 +279,28 @@ namespace MPMFEVRP.Models.XCPlex
                 SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_THREADS].Value.ToString()));
             SetParam(Cplex.Param.MIP.Display, 4);
         }
+        protected void InitializeOutputVariables()
+        {
+            //Initializing outputs
+            this.solutionStatus = XCPlexSolutionStatus.NotYetSolved;
+            this.optimalCompleteSolutionObtained = false;
+            this.variableValuesObtained = false;
+            this.reducedCostsObtained = false;
+            this.lowerBound = double.MinValue;
+            this.upperBound = double.MaxValue;
+        }
+
+        protected void RefineDecisionVariables(PartialSolution PS)
+        {
+            double[] allLB = PS.GetAllDecisionVariableLowerBounds();
+            double[] allUB = PS.GetAllDecisionVariableUpperBounds();
+            for (int dvIndex = 0; dvIndex < allVariables_array.Length; dvIndex++)
+            {
+                allVariables_array[dvIndex].LB = allLB[dvIndex];
+                allVariables_array[dvIndex].UB = allUB[dvIndex];
+            }
+        }
+
         public void Solve_and_PostProcess(PartialSolution specifiedSubproblemRoot = null)
         {
             InitializeOutputVariables();
@@ -442,7 +407,6 @@ namespace MPMFEVRP.Models.XCPlex
         public abstract string GetModelName();
 
         private bool disposedValue = false; // To detect redundant calls
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -463,6 +427,33 @@ namespace MPMFEVRP.Models.XCPlex
 
                 disposedValue = true;
             }
+        }
+        
+        // Shortcuts
+        // DV1D : Decision Variable 1-Dimensional etc.
+        protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
+        {
+            AddOneDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, out dv);
+        }
+        protected void AddDV2D(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, out INumVar[][] dv)
+        {
+            AddTwoDimensionalDecisionVariable(name, lowerBound, upperBound, type, length1, length2, out dv);
+        }
+        public T[] DV1DResult<T>(String name)
+        {
+            return GetOneDimensionalDecisionVariableResult<T>(name);
+        }
+        public T[][] DV2DResult<T>(String name)
+        {
+            return GetTwoDimensionalDecisionVariableResult<T>(name);
+        }
+        protected INumVar[] DV1D(String name)
+        {
+            return GetOneDimensionalDecisionVariableValue(name);
+        }
+        protected INumVar[][] DV2D(String name)
+        {
+            return GetTwoDimensionalDecisionVariableValue(name);
         }
     }
 }

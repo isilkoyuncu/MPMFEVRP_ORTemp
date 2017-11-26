@@ -108,7 +108,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 {
                     return s;
                 }
-            throw new Exception("No depot found!");
+            throw new Exception("No site found!");
         }
         public List<string> GetClosenessOrder(string nodeID)
         {

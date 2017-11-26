@@ -24,6 +24,7 @@
         ALG_SET_COVER,
         ALG_RECOVERY_OPTIONS,
         ALG_PROB_SELECTION_POWER,
+        ALG_TIGHTER_AUX_BOUNDS,
 
         PRB_NUM_EV,
         PRB_NUM_GDV,

@@ -25,6 +25,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RELAXATION, "Cplex Relaxation", new List<object>() { XCPlexRelaxation.None, XCPlexRelaxation.LinearProgramming }, XCPlexRelaxation.None, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS, "Tighter Auxiliary Bounds", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
         }
 
         public override string GetName()
@@ -44,7 +45,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 limitComputationTime: true,
                 runtimeLimit_Seconds: algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue(),
                 optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters),
-                relaxation: (XCPlexRelaxation)algorithmParameters.GetParameter(ParameterID.ALG_RELAXATION).Value);
+                relaxation: (XCPlexRelaxation)algorithmParameters.GetParameter(ParameterID.ALG_RELAXATION).Value,
+                tighterAuxBounds: algorithmParameters.GetParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS).GetBoolValue());
         }
 
         public override void SpecializedRun()

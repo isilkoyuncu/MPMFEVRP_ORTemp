@@ -18,7 +18,7 @@ namespace MPMFEVRP.Models.XCPlex
         List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } }
 
         //How do we want to process the auxiliary variable bounds
-        bool useLooseBounds = false;//TODO: This is the one that'll be tied to the user-selected parameter
+        bool useLooseBounds = false;
 
         //The preprocessed (duplicated) ones
         protected SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use
@@ -26,12 +26,6 @@ namespace MPMFEVRP.Models.XCPlex
         protected int FirstESNodeIndex = int.MaxValue, LastESNodeIndex = int.MinValue, FirstCustomerNodeIndex = int.MaxValue, LastCustomerNodeIndex = int.MinValue;
         protected SiteWithAuxiliaryVariables TheDepot { get { return depots.First(); } } //There is a single depot
 
-        
-        //protected Site[] preprocessedSites;//Ready-to-use
-        //protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
-        //protected List<Site> depots;
-        //protected List<Site> customers;
-        //protected List<Site> externalStations;//Preprocessed, Ready-to-use
         protected int vIndex_EV = -1, vIndex_GDV = -1;
         protected int[] numVehicles;
 
@@ -45,8 +39,40 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlexVRPBase() { }
 
-        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam)
+        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam) { }
+
+        protected override void Initialize()
         {
+            rechargingDuration_status = theProblemModel.RechargingDuration_status;
+            useLooseBounds = xCplexParam.TighterAuxBounds;
+            for (int v = 0; v < numVehCategories; v++)
+            {
+                if (vehicleCategories[v] == VehicleCategories.EV)
+                    vIndex_EV = v;
+                else if (vehicleCategories[v] == VehicleCategories.GDV)
+                    vIndex_GDV = v;
+                else
+                    throw new System.Exception("EV category could not found!");
+            }
+            //If you change v index above, change the following num vehicles for a TSP as well
+            if (xCplexParam.TSP)
+            {
+                switch (xCplexParam.VehCategory)
+                {
+                    case VehicleCategories.EV:
+                        numVehicles = new int[] { 1, 0 };
+                        break;
+                    case VehicleCategories.GDV:
+                        numVehicles = new int[] { 0, 1 };
+                        break;
+                    default:
+                        throw new System.Exception("Vehicle Category unrecognized!!!");
+                }
+            }
+            else//not TSP
+            {
+                numVehicles = new int[] { theProblemModel.GetNumVehicles(VehicleCategories.EV), theProblemModel.GetNumVehicles(VehicleCategories.GDV) };
+            }
         }
 
         protected void PreprocessSites(int numCopiesOfEachES = 0)
@@ -55,15 +81,35 @@ namespace MPMFEVRP.Models.XCPlex
                 allOriginalSWAVs.Add(new SiteWithAuxiliaryVariables(s));
 
             PopulateSubLists();
-            PopulateAllOriginalSWAVs();
+
+            CalculateBoundsForAllOriginalSWAVs();
             PopulatePreprocessedSWAVs(numCopiesOfEachES);
             SetFirstAndLastNodeIndices();
             PopulateAuxiliaryBoundArraysFromSWAVs();
             SetBigMvalues();
         }
-        protected void PopulateAllOriginalSWAVs()
+        void PopulateSubLists()
         {
-            //ISSUE (#5): Use of bounding approaches should be tied to a parameter with the following levels: Really Loose (0 for min, BatteryCap,BatteryCap,TMax for max); Really Tight (use label setting where appropriate)
+            depots = new List<SiteWithAuxiliaryVariables>();
+            customers = new List<SiteWithAuxiliaryVariables>();
+            externalStations = new List<SiteWithAuxiliaryVariables>();
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                switch (swav.SiteType)
+                {
+                    case SiteTypes.Depot:
+                        depots.Add(swav);
+                        break;
+                    case SiteTypes.Customer:
+                        customers.Add(swav);
+                        break;
+                    case SiteTypes.ExternalStation:
+                        externalStations.Add(swav);
+                        break;
+                }
+        }
+
+        protected void CalculateBoundsForAllOriginalSWAVs()
+        {
             CalculateEpsilonBounds();
             CalculateDeltaBounds();
             CalculateTBounds();
@@ -227,25 +273,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void PopulateSubLists()
-        {
-            depots = new List<SiteWithAuxiliaryVariables>();
-            customers = new List<SiteWithAuxiliaryVariables>();
-            externalStations = new List<SiteWithAuxiliaryVariables>();
-            foreach(SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                switch(swav.SiteType)
-                {
-                    case SiteTypes.Depot:
-                        depots.Add(swav);
-                        break;
-                    case SiteTypes.Customer:
-                        customers.Add(swav);
-                        break;
-                    case SiteTypes.ExternalStation:
-                        externalStations.Add(swav);
-                        break;
-                }
-        }
+
         protected void PopulatePreprocessedSWAVs(int numCopiesOfEachES = 0)
         {
             List<SiteWithAuxiliaryVariables> preprocessedSWAVs_list = new List<SiteWithAuxiliaryVariables>();
@@ -271,30 +299,30 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 outcome.Add(swav);
                 while (outcome.Count < numCopies)
-                    outcome.Add(new SiteWithAuxiliaryVariables(swav));
+                    outcome.Add(swav.ShallowCopy());
+                    //outcome.Add(new SiteWithAuxiliaryVariables(swav));
             }
             return outcome;
         }
         void SetFirstAndLastNodeIndices()
         {
-            for(int i = 0; i < NumPreprocessedSites; i++)
+            for (int i = 0; i < NumPreprocessedSites; i++)
             {
-                if(preprocessedSites[i].SiteType== SiteTypes.Customer)
+                if (preprocessedSites[i].SiteType == SiteTypes.Customer)
                 {
                     if (FirstCustomerNodeIndex == int.MaxValue)
                         FirstCustomerNodeIndex = i;
-                    if (LastCustomerNodeIndex == int.MinValue)
                         LastCustomerNodeIndex = i;
                 }
                 if (preprocessedSites[i].SiteType == SiteTypes.ExternalStation)
                 {
                     if (FirstESNodeIndex == int.MaxValue)
                         FirstESNodeIndex = i;
-                    if (LastESNodeIndex == int.MinValue)
                         LastESNodeIndex = i;
                 }
             }
         }
+
         void PopulateAuxiliaryBoundArraysFromSWAVs()
         {
             //Make sure you invoke this method when preprocessedSWAVs have been created!
@@ -314,6 +342,7 @@ namespace MPMFEVRP.Models.XCPlex
                 maxValue_T[i] = preprocessedSites[i].TLS;
             }
         }
+
         protected void SetBigMvalues()
         {
             BigDelta = new double[NumPreprocessedSites][];
@@ -332,77 +361,8 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
-
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);
-
-        protected override void Initialize()
-        {
-            rechargingDuration_status = theProblemModel.RechargingDuration_status;
-            for (int v = 0; v < numVehCategories; v++)
-            {
-                if (vehicleCategories[v] == VehicleCategories.EV)
-                    vIndex_EV = v;
-                else if (vehicleCategories[v] == VehicleCategories.GDV)
-                    vIndex_GDV = v;
-                else
-                    throw new System.Exception("EV category could not found!");
-            }
-            //If you change v index above, change the following num vehicles for a TSP as well
-            if (xCplexParam.TSP)
-            {
-                switch (xCplexParam.VehCategory)
-                {
-                    case VehicleCategories.EV:
-                        numVehicles = new int[] { 1, 0 };
-                        break;
-                    case VehicleCategories.GDV:
-                        numVehicles = new int[] { 0, 1 };
-                        break;
-                    default:
-                        throw new System.Exception("Vehicle Category unrecognized!!!");
-                }
-            }
-            else//not TSP
-            {
-                numVehicles = new int[] { theProblemModel.GetNumVehicles(VehicleCategories.EV), theProblemModel.GetNumVehicles(VehicleCategories.GDV) };
-            }
-        }
-        //protected void SetMinAndMaxValuesOfCommonVariables()
-        //{
-        //    minValue_T = new double[NumPreprocessedSites];
-        //    maxValue_T = new double[NumPreprocessedSites];
-        //    minValue_Delta = new double[NumPreprocessedSites];
-        //    maxValue_Delta = new double[NumPreprocessedSites];
-        //    minValue_Epsilon = new double[NumPreprocessedSites];
-        //    maxValue_Epsilon = new double[NumPreprocessedSites];
-
-        //    for (int j = 0; j < NumPreprocessedSites; j++)
-        //    {
-        //        Site s = preprocessedSites[j];
-        //        Site theDepot = Depots[0];
-
-        //        //UB - LB on Epsilon
-        //        minValue_Epsilon[j] = 0.0;
-
-        //        if (s.SiteType == SiteTypes.Customer)
-        //            maxValue_Epsilon[j] = Math.Min(BatteryCapacity(VehicleCategories.EV), s.ServiceDuration * RechargingRate(s)); //Utils.Calculators.MaxSOCGainAtSite(s, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), maxStayDuration: s.ServiceDuration);
-        //        else //TODO: Unit test the above utility function. It should give us MaxSOCGainAtSite s with EV.
-        //            maxValue_Epsilon[j] = BatteryCapacity(VehicleCategories.EV); //TODO fine tune this. It needs to be the same as the paper.
-
-        //        //TODO Fine-tune the min and max values of delta using label setting algorithm
-        //        minValue_Delta[j] = 0.0;
-        //        maxValue_Delta[j] = BatteryCapacity(VehicleCategories.EV);
-
-        //        minValue_T[j] = TravelTime(theDepot, s);
-        //        maxValue_T[j] = theProblemModel.CRD.TMax - TravelTime(s, theDepot);
-        //        if (s.SiteType == SiteTypes.Customer)
-        //            maxValue_T[j] -= ServiceDuration(s);
-        //        else if (s.SiteType == SiteTypes.ExternalStation && theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
-        //            maxValue_T[j] -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(s));
-        //    }
-        //}
-        
 
         protected double Distance(Site from, Site to)
         {
@@ -436,6 +396,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
 
         //TODO: Complete the GetCompleteSolution method at XCPlexVRPBase level
+        
         //public override SolutionBase GetCompleteSolution(Type SolutionType)
         //{
         //    SolutionBase output;
