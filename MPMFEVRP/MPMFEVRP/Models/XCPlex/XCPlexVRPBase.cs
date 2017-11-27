@@ -18,7 +18,7 @@ namespace MPMFEVRP.Models.XCPlex
         List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } }
 
         //How do we want to process the auxiliary variable bounds
-        bool useLooseBounds = false;
+        bool useTighterBounds = false;
 
         //The preprocessed (duplicated) ones
         protected SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use
@@ -44,7 +44,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void Initialize()
         {
             rechargingDuration_status = theProblemModel.RechargingDuration_status;
-            useLooseBounds = xCplexParam.TighterAuxBounds;
+            useTighterBounds = xCplexParam.TighterAuxBounds;
             for (int v = 0; v < numVehCategories; v++)
             {
                 if (vehicleCategories[v] == VehicleCategories.EV)
@@ -114,7 +114,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateEpsilonBounds()
         {
-            if (useLooseBounds)
+            if (!useTighterBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                     swav.UpdateEpsilonBounds(BatteryCapacity(VehicleCategories.EV));
@@ -143,7 +143,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateDeltaBounds()
         {
-            if (useLooseBounds)
+            if (!useTighterBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                     swav.UpdateDeltaBounds(theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, 0.0);
@@ -240,7 +240,7 @@ namespace MPMFEVRP.Models.XCPlex
         }    
         void CalculateTBounds()
         {
-            if (useLooseBounds)
+            if (!useTighterBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                     swav.UpdateTBounds(theProblemModel.CRD.TMax, 0.0);
