@@ -156,7 +156,10 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateDeltaMinsViaLabelSetting()
         {
-            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>();
+            foreach (SiteWithAuxiliaryVariables original in allOriginalSWAVs)
+                tempSWAVs.Add(original.ShallowCopy());
+
             List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
 
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
@@ -194,7 +197,10 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateDeltaMaxsViaLabelSetting()
         {
-            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>();
+            foreach (SiteWithAuxiliaryVariables original in allOriginalSWAVs)
+                tempSWAVs.Add(original.ShallowCopy());
+
             List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 if (swav.SiteType == SiteTypes.Depot)

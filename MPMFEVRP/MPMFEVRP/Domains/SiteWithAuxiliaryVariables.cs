@@ -46,6 +46,13 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
         public SiteWithAuxiliaryVariables(Site baseSite):base(baseSite)
         {
+            epsilonMax = -1;
+            epsilonMin = -1;
+            deltaMax = -1;
+            deltaMin = -1;
+            tLS = -1;
+            tES = -1;
+            deltaPrimeMax = -1;
         }
 
         public void UpdateEpsilonBounds(double epsilonMax, double epsilonMin = 0.0)
