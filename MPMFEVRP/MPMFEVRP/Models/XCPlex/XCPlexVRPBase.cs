@@ -107,7 +107,6 @@ namespace MPMFEVRP.Models.XCPlex
                         break;
                 }
         }
-
         protected void CalculateBoundsForAllOriginalSWAVs()
         {
             CalculateEpsilonBounds();
@@ -142,6 +141,12 @@ namespace MPMFEVRP.Models.XCPlex
                     swav.UpdateEpsilonBounds(epsilonMax);
                 }
             }
+        }
+        void CalculateEpsilonMinConsideringAsymetricDistances(SiteWithAuxiliaryVariables swav)
+        {
+            Vehicle ev = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
+            double batteryCap = ev.BatteryCapacity;
+            double effectiveRechargingRate = Math.Min(swav.RechargingRate, ev.MaxChargingRate);
         }
         void CalculateDeltaBounds()
         {
