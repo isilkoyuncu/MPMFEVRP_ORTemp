@@ -142,12 +142,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void CalculateEpsilonMinConsideringAsymetricDistances(SiteWithAuxiliaryVariables swav)
-        {
-            Vehicle ev = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
-            double batteryCap = ev.BatteryCapacity;
-            double effectiveRechargingRate = Math.Min(swav.RechargingRate, ev.MaxChargingRate);
-        }
+        
         void CalculateDeltaBounds()
         {
             if (useLooseBounds)

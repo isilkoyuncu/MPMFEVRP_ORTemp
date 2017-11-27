@@ -46,40 +46,43 @@ namespace MPMFEVRP.Utils
             return Math.Round(2.0 * 4182.44949 * Math.Asin(Math.Sqrt(Math.Pow(Math.Sin(((LatA * Math.PI / 180.0) - (LatB * Math.PI / 180.0)) / 2.0), 2.0) + Math.Cos((LatB * Math.PI / 180.0)) * Math.Cos((LatA * Math.PI / 180.0)) * Math.Pow(Math.Sin(((LonA * Math.PI / 180.0) - (LonB * Math.PI / 180.0)) / 2.0), 2.0))), 5);
         }
 
-        public static double MaxSOCGainAtSite(ProblemModelBase theProblemModel, Site site, Vehicle vehicle, double maxStayDuration = double.MaxValue)
+        public static double MaxSOCGainAtSite(ProblemModelBase theProblemModel, Site site, Vehicle vehicle)
         {
             double batteryCap = vehicle.BatteryCapacity;
             double effectiveRechargingRate = Math.Min(site.RechargingRate, vehicle.MaxChargingRate);
-            
-            if (vehicle.BatteryCapacity != 0)
-                if (maxStayDuration == double.MaxValue)
-                {
-                    double tMax = theProblemModel.CRD.TMax;
-                    double minStayAndTravelDuration = double.MaxValue;
-                    string theDepotID = theProblemModel.SRD.GetSingleDepotID();
-                    foreach (Site otherSite in theProblemModel.SRD.GetAllSitesArray())
-                    {
-                        double minTotalTravel = Math.Min(theProblemModel.SRD.GetTravelTime(theDepotID, otherSite.ID) +
-                                                         theProblemModel.SRD.GetTravelTime(otherSite.ID, site.ID) +
-                                                         theProblemModel.SRD.GetTravelTime(site.ID, theDepotID),
-                                                         theProblemModel.SRD.GetTravelTime(theDepotID, site.ID) +
-                                                         theProblemModel.SRD.GetTravelTime(site.ID, otherSite.ID) +
-                                                         theProblemModel.SRD.GetTravelTime(otherSite.ID, theDepotID));
+            double tMax = theProblemModel.CRD.TMax;
+            double minStayAndTravelDuration = double.MaxValue;
+            string theDepotID = theProblemModel.SRD.GetSingleDepotID();
+            foreach (Site otherSite in theProblemModel.SRD.GetAllSitesArray())
+            {
+                double minTotalTravel = Math.Min(theProblemModel.SRD.GetTravelTime(theDepotID, otherSite.ID) +
+                                                 theProblemModel.SRD.GetTravelTime(otherSite.ID, site.ID) +
+                                                 theProblemModel.SRD.GetTravelTime(site.ID, theDepotID),
+                                                 theProblemModel.SRD.GetTravelTime(theDepotID, site.ID) +
+                                                 theProblemModel.SRD.GetTravelTime(site.ID, otherSite.ID) +
+                                                 theProblemModel.SRD.GetTravelTime(otherSite.ID, theDepotID));
 
-                        if (minStayAndTravelDuration > otherSite.ServiceDuration + minTotalTravel)
-                            minStayAndTravelDuration = otherSite.ServiceDuration + minTotalTravel;
-                    }
-                    return Math.Min(batteryCap, ((tMax - minStayAndTravelDuration) * effectiveRechargingRate));
-                }
-                else
-                    return Math.Min(batteryCap, maxStayDuration * effectiveRechargingRate); 
+                if (minStayAndTravelDuration > otherSite.ServiceDuration + minTotalTravel)
+                    minStayAndTravelDuration = otherSite.ServiceDuration + minTotalTravel;
+            }
+            return Math.Min(batteryCap, ((tMax - minStayAndTravelDuration) * effectiveRechargingRate));
+
+        }
+
+        public static double MaxSOCGainAtSite(Site site, Vehicle vehicle, double maxStayDuration)
+        {
+            double batteryCap = vehicle.BatteryCapacity;
+            double effectiveRechargingRate = Math.Min(site.RechargingRate, vehicle.MaxChargingRate);
+
+            if (vehicle.BatteryCapacity != 0)
+                return Math.Min(batteryCap, maxStayDuration * effectiveRechargingRate);
             else
                 throw new DivideByZeroException("Vehicle battery capacity is 0.");
         }
 
         public static double MaxStayDurationAtSite(Site s, Vehicle v, double maxSOCGainAtSite = double.MaxValue)
         {
-            double effectiveRechargingRate= Math.Min(s.RechargingRate, v.MaxChargingRate);
+            double effectiveRechargingRate = Math.Min(s.RechargingRate, v.MaxChargingRate);
             if (effectiveRechargingRate == 0.0)
             {
                 //Cannot charge here and cannot stay longer than service duration if applicable
