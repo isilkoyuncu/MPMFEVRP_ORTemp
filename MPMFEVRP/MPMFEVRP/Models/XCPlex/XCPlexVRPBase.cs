@@ -114,13 +114,13 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateEpsilonBounds()
         {
-            if (!useTighterBounds)
-            {
-                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                    swav.UpdateEpsilonBounds(BatteryCapacity(VehicleCategories.EV));
-            }
-            else
-            {
+            //if (!useTighterBounds)
+            //{
+            //    foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            //        swav.UpdateEpsilonBounds(BatteryCapacity(VehicleCategories.EV));
+            //}
+            //else
+            //{
                 double epsilonMax = double.MinValue;
                 Vehicle theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
@@ -139,7 +139,7 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                     swav.UpdateEpsilonBounds(epsilonMax);
                 }
-            }
+            //}
         }
         void CalculateDeltaBounds()
         {
@@ -299,13 +299,13 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateTBounds()
         {
-            if (!useTighterBounds)
-            {
-                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                    swav.UpdateTBounds(theProblemModel.CRD.TMax, 0.0);
-            }
-            else
-            {
+            //if (!useTighterBounds)
+            //{
+            //    foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            //        swav.UpdateTBounds(theProblemModel.CRD.TMax, 0.0);
+            //}
+            //else
+            //{
                 double tLS = double.MinValue;
                 double tES = double.MaxValue;
                 Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
@@ -328,7 +328,7 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                     swav.UpdateTBounds(tLS, tES);
                 }
-            }
+            //}
         }
 
         protected void PopulatePreprocessedSWAVs(int numCopiesOfEachES = 0)
