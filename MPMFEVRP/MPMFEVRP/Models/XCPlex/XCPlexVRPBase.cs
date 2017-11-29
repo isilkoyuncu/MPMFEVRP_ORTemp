@@ -18,7 +18,7 @@ namespace MPMFEVRP.Models.XCPlex
         List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } }
 
         //How do we want to process the auxiliary variable bounds
-        bool useTighterBounds = false;
+        bool useTighterBounds = true;
 
         //The preprocessed (duplicated) ones
         protected SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use

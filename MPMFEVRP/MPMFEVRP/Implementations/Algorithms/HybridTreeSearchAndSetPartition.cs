@@ -121,8 +121,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (setPartitionCumulativeTimeAccount != null)
                 foreach (string key in setPartitionCumulativeTimeAccount.Keys)
                 {
-                    stats.addNewStat("SetPartition_" + key, setPartitionCounterByStatus[key].ToString());
-                    stats.addNewStat("SetPartition_" + key, setPartitionCumulativeTimeAccount[key].ToString());
+                    stats.addNewStat("SetPartition_#solved_" + key, setPartitionCounterByStatus[key].ToString());
+                    stats.addNewStat("SetPartition_timespent" + key, setPartitionCumulativeTimeAccount[key].ToString());
                 }
         }
 
