@@ -163,7 +163,7 @@ namespace MPMFEVRP.Models.XCPlex
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                     if(swav.DeltaMin<swavToPerm.DeltaMin)
                     {
-                        swavToPerm = swav.ShallowCopy();
+                        swavToPerm = swav;
                     }
                 tempSWAVs.Remove(swavToPerm);
                 permSWAVs.Add(swavToPerm);
@@ -195,7 +195,7 @@ namespace MPMFEVRP.Models.XCPlex
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                     if (swav.DeltaPrimeMax > swavToPerm.DeltaPrimeMax)
                     {
-                        swavToPerm = swav.ShallowCopy();
+                        swavToPerm = swav;
                     }
                 tempSWAVs.Remove(swavToPerm);
                 permSWAVs.Add(swavToPerm);
