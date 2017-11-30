@@ -114,32 +114,24 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateEpsilonBounds()
         {
-            //if (!useTighterBounds)
-            //{
-            //    foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-            //        swav.UpdateEpsilonBounds(BatteryCapacity(VehicleCategories.EV));
-            //}
-            //else
-            //{
-                double epsilonMax = double.MinValue;
-                Vehicle theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
-                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            double epsilonMax = double.MinValue;
+            Vehicle theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            {
+                switch (swav.SiteType)
                 {
-                    switch (swav.SiteType)
-                    {
-                        case SiteTypes.Customer:
-                            epsilonMax = Calculators.MaxSOCGainAtSite(swav, theEV, maxStayDuration: swav.ServiceDuration);
-                            break;
-                        case SiteTypes.ExternalStation:
-                            epsilonMax = Calculators.MaxSOCGainAtESSite(theProblemModel, swav, theEV);
-                            break;
-                        default:
-                            epsilonMax = 0.0;
-                            break;
-                    }
-                    swav.UpdateEpsilonBounds(epsilonMax);
+                    case SiteTypes.Customer:
+                        epsilonMax = Calculators.MaxSOCGainAtSite(swav, theEV, maxStayDuration: swav.ServiceDuration);
+                        break;
+                    case SiteTypes.ExternalStation:
+                        epsilonMax = Calculators.MaxSOCGainAtESSite(theProblemModel, swav, theEV);
+                        break;
+                    default:
+                        epsilonMax = 0.0;
+                        break;
                 }
-            //}
+                swav.UpdateEpsilonBounds(epsilonMax);
+            }
         }
         void CalculateDeltaBounds()
         {
@@ -156,10 +148,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateDeltaMinsViaLabelSetting()
         {
-            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>();
-            foreach (SiteWithAuxiliaryVariables original in allOriginalSWAVs)
-                tempSWAVs.Add(original.ShallowCopy());
-
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
             List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
 
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
@@ -170,38 +159,25 @@ namespace MPMFEVRP.Models.XCPlex
 
             while (tempSWAVs.Count != 0)
             {
-                SiteWithAuxiliaryVariables firstSWAV = tempSWAVs.First();
-                SiteWithAuxiliaryVariables swavToPerm = firstSWAV.ShallowCopy();
-                string siteIDtoRemove = swavToPerm.ID;
+                SiteWithAuxiliaryVariables swavToPerm = tempSWAVs.First();
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                     if(swav.DeltaMin<swavToPerm.DeltaMin)
                     {
                         swavToPerm = swav.ShallowCopy();
-                        siteIDtoRemove = swavToPerm.ID;
                     }
-                tempSWAVs.Remove(tempSWAVs.SingleOrDefault(x => x.ID == siteIDtoRemove));
+                tempSWAVs.Remove(swavToPerm);
                 permSWAVs.Add(swavToPerm);
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                     swav.UpdateDeltaMin(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
             }
             if (allOriginalSWAVs.Count != permSWAVs.Count)
                 throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
-
-            foreach (SiteWithAuxiliaryVariables pswav in permSWAVs)
-                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                    if (pswav.ID == swav.ID)
-                    {
-                        swav.UpdateDeltaMin(pswav.DeltaMin);
-                        break;
-                    }
         }
         void CalculateDeltaMaxsViaLabelSetting()
         {
             List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
-            //foreach (SiteWithAuxiliaryVariables original in allOriginalSWAVs)
-            //    tempSWAVs.Add(original.ShallowCopy());
-
             List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
+
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 if (swav.SiteType == SiteTypes.Depot)
                 {
@@ -215,16 +191,13 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             while (tempSWAVs.Count != 0)
             {
-                SiteWithAuxiliaryVariables firstSWAV = tempSWAVs.First();
-                SiteWithAuxiliaryVariables swavToPerm = firstSWAV.ShallowCopy();
-                string siteIDtoRemove = swavToPerm.ID;
+                SiteWithAuxiliaryVariables swavToPerm = tempSWAVs.First();
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                     if (swav.DeltaPrimeMax > swavToPerm.DeltaPrimeMax)
                     {
                         swavToPerm = swav.ShallowCopy();
-                        siteIDtoRemove = swavToPerm.ID;
                     }
-                tempSWAVs.Remove(tempSWAVs.SingleOrDefault(x => x.ID == siteIDtoRemove));
+                tempSWAVs.Remove(swavToPerm);
                 permSWAVs.Add(swavToPerm);
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 {
@@ -234,15 +207,6 @@ namespace MPMFEVRP.Models.XCPlex
             }
             if (allOriginalSWAVs.Count != permSWAVs.Count)
                 throw new System.Exception("XCPlexVRPBase.SetDeltaMaxViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
-
-            //foreach (SiteWithAuxiliaryVariables pswav in permSWAVs)
-            //    foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-            //        if (pswav.ID == swav.ID)
-            //        {
-            //            swav.UpdateDeltaMax(pswav.DeltaMax);
-            //            swav.UpdateDeltaPrimeMax(pswav.DeltaPrimeMax);
-            //            break;
-            //        }
 
             //Revisiting the depot
             double eMinToDepot = double.MaxValue;
@@ -299,13 +263,6 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateTBounds()
         {
-            //if (!useTighterBounds)
-            //{
-            //    foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-            //        swav.UpdateTBounds(theProblemModel.CRD.TMax, 0.0);
-            //}
-            //else
-            //{
                 double tLS = double.MinValue;
                 double tES = double.MaxValue;
                 Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
@@ -328,7 +285,6 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                     swav.UpdateTBounds(tLS, tES);
                 }
-            //}
         }
 
         protected void PopulatePreprocessedSWAVs(int numCopiesOfEachES = 0)
@@ -356,8 +312,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 outcome.Add(swav);
                 while (outcome.Count < numCopies)
-                    outcome.Add(swav.ShallowCopy());
-                    //outcome.Add(new SiteWithAuxiliaryVariables(swav));
+                    outcome.Add(swav);
             }
             return outcome;
         }
