@@ -46,6 +46,7 @@ namespace MPMFEVRP.Forms
 
             problems = new BindingList<IProblem>();
             listBox_problems.DataSource = problems;
+
             problemModels = new BindingList<EVvsGDV_ProblemModel>();
 
             algorithms = new BindingList<IAlgorithm>();
@@ -68,7 +69,7 @@ namespace MPMFEVRP.Forms
         private void ComboBox_multi_problems_SelectedIndexChanged(object sender, EventArgs e)
         {
             theProblem = ProblemUtil.CreateProblemByName(comboBox_multi_problems.SelectedItem.ToString());
-            ParamUtil.DrawParameters(panel_multi_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
+            //ParamUtil.DrawParameters(panel_multi_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
             if (theProblem == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
@@ -123,7 +124,7 @@ namespace MPMFEVRP.Forms
             listBox_algorithms.DataSource = algorithms;
             algorithms.ResetBindings();
         }
-
+        
         private void LinkLabel_deleteSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (listBox_algorithms.SelectedIndex != -1)

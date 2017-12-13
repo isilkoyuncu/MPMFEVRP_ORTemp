@@ -47,6 +47,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
         }
+        public string GetInstanceName(string inputFileName)
+        {
+            return inputFileName.Split('.')[0];
+        }
         void CreateTSPSolvers(Type TSPModelType)
         {
            if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
