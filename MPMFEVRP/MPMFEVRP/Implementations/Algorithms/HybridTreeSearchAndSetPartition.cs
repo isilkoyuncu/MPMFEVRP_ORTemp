@@ -47,7 +47,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string GetName()
         {
-            return "CS Generation Heuristic";
+            return "Hybrid tree search & set partition";
         }
 
         public override string[] GetOutputSummary()
