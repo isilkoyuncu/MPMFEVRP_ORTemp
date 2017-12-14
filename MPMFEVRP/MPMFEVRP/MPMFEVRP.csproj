@@ -119,6 +119,7 @@
     </Compile>
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
+    <Compile Include="Implementations\Algorithms\RandomizedCustomerSetExplorerViaTreeSearch.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
     <Compile Include="Implementations\ProblemModels\FleetCompositionProblemModelUnderCarbonRegulations.cs" />
