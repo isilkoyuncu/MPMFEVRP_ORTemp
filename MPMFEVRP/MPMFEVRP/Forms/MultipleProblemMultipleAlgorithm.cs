@@ -46,6 +46,7 @@ namespace MPMFEVRP.Forms
 
             problems = new BindingList<IProblem>();
             listBox_problems.DataSource = problems;
+
             problemModels = new BindingList<EVvsGDV_ProblemModel>();
 
             algorithms = new BindingList<IAlgorithm>();
@@ -68,7 +69,7 @@ namespace MPMFEVRP.Forms
         private void ComboBox_multi_problems_SelectedIndexChanged(object sender, EventArgs e)
         {
             theProblem = ProblemUtil.CreateProblemByName(comboBox_multi_problems.SelectedItem.ToString());
-            ParamUtil.DrawParameters(panel_multi_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
+            //ParamUtil.DrawParameters(panel_multi_problemCharacteristics, theProblem.ProblemCharacteristics.GetAllParameters());
             if (theProblem == null)
                 MessageBox.Show("We just selected the problem, but it failed to create!");
             else
@@ -123,7 +124,7 @@ namespace MPMFEVRP.Forms
             listBox_algorithms.DataSource = algorithms;
             algorithms.ResetBindings();
         }
-
+        
         private void LinkLabel_deleteSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (listBox_algorithms.SelectedIndex != -1)
@@ -270,6 +271,11 @@ namespace MPMFEVRP.Forms
             {
                 for (int i = 0; i < problems.Count; i++)
                 {
+                    int dummyInt = problems[i].ProblemCharacteristics.UpdateParameters(theProblem.ProblemCharacteristics);
+                    if (dummyInt > 0)
+                    {
+                        System.Windows.Forms.MessageBox.Show("Problem needed " + dummyInt.ToString() + " parameter updates!");
+                    }
                     TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_multi_TSPModel.SelectedItem.ToString());
                     theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), problems[i], TSPModelType);
                     problemModels.Add(theProblemModel);

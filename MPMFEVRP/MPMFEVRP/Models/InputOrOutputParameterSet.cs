@@ -41,5 +41,21 @@ namespace MPMFEVRP.Models
         {
             allParameters.Add(p.ID, p);
         }
+
+        public int UpdateParameters(InputOrOutputParameterSet theOtherSet)
+        {
+            int output = 0;
+            foreach (ParameterID pid in theOtherSet.allParameters.Keys)
+            {
+                bool theSameKey = allParameters.ContainsKey(pid);
+                bool theSameValue = allParameters[pid] != theOtherSet.allParameters[pid];
+                if (allParameters.ContainsKey(pid) && allParameters[pid] != theOtherSet.allParameters[pid])
+                {
+                    allParameters[pid] = theOtherSet.allParameters[pid];
+                    output++;
+                }
+            }
+            return output;
+        }
     }
 }

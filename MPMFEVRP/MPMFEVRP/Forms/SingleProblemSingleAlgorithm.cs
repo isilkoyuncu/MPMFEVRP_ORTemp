@@ -235,6 +235,9 @@ namespace MPMFEVRP.Forms
 
         private void ExtractLogInfo(object sender, EventArgs e)
         {
+            IKTestsToDelete testLPfiles = new IKTestsToDelete();
+            bool sameLP = testLPfiles.AreFilesTheSame;
+
             OpenFileDialog dialog = new OpenFileDialog()
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
