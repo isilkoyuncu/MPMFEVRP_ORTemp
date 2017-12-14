@@ -143,7 +143,7 @@ namespace MPMFEVRP.Models.XCPlex
             else
             {
                 CalculateDeltaMinsViaLabelSetting();
-                CalculateDeltaMaxsViaLabelSetting_noShallows();
+                CalculateDeltaMaxsViaLabelSetting();
             }
         }
         void CalculateDeltaMinsViaLabelSetting()
@@ -174,50 +174,6 @@ namespace MPMFEVRP.Models.XCPlex
                 throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
         }
         void CalculateDeltaMaxsViaLabelSetting()
-        {
-            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
-            List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
-
-            foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
-                if (swav.SiteType == SiteTypes.Depot)
-                {
-                    swav.UpdateDeltaMax(0.0);
-                    swav.UpdateDeltaPrimeMax(BatteryCapacity(VehicleCategories.EV));
-                }
-                else
-                {
-                    swav.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(TheDepot, swav, VehicleCategories.EV));
-                    swav.UpdateDeltaPrimeMax(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
-                }
-            while (tempSWAVs.Count != 0)
-            {
-                SiteWithAuxiliaryVariables swavToPerm = tempSWAVs.First();
-                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
-                    if (swav.DeltaPrimeMax > swavToPerm.DeltaPrimeMax)
-                    {
-                        swavToPerm = swav;
-                    }
-                tempSWAVs.Remove(swavToPerm);
-                permSWAVs.Add(swavToPerm);
-                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
-                {
-                    swav.UpdateDeltaMax(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
-                    swav.UpdateDeltaPrimeMax(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
-                }
-            }
-            if (allOriginalSWAVs.Count != permSWAVs.Count)
-                throw new System.Exception("XCPlexVRPBase.SetDeltaMaxViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
-
-            //Revisiting the depot
-            double eMinToDepot = double.MaxValue;
-            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                if ((swav.X != TheDepot.X) || (swav.Y != TheDepot.Y))
-                {
-                    eMinToDepot = Math.Min(eMinToDepot, EnergyConsumption(swav, TheDepot, VehicleCategories.EV));
-                }
-            TheDepot.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - eMinToDepot);
-        }
-        void CalculateDeltaMaxsViaLabelSetting_noShallows()
         {
             List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(allOriginalSWAVs);
             List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
