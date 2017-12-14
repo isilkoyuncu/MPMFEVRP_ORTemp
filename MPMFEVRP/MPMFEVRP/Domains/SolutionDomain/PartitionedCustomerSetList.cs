@@ -51,6 +51,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             return CSLList[level].Pop(numberToPop, vehicleCategory, shadowPrices);
         }
+        public CustomerSetList Pop(List<CustomerSet> theList)
+        {
+            CustomerSetList outcome = new CustomerSetList();
+            foreach(CustomerSet cs in theList)
+            {
+                int l = cs.NumberOfCustomers;
+                if (CSLList[l].Contains(cs))
+                {
+                    CSLList[l].Remove(cs);
+                    outcome.Add(cs);
+                }
+                else
+                {
+                    //do nothing
+                }
+            }
+            return outcome;
+        }
 
         public int GetHighestNonemptyLevel()
         {

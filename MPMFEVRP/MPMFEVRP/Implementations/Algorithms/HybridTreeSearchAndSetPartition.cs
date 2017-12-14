@@ -133,7 +133,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             xCplexParam = new XCPlexParameters();
 
             //These are the important characteristics that will have to be tied to the form
-            beamWidth = 100;
+            beamWidth = 10;
             filterWidth = 1;
             partialWideBranching = true;
             popStrategy = CustomerSetList.CustomerListPopStrategy.MinOFVforAnyVehicle;//This is too tightly coupled! Will cause issues in generalizing to tree search
@@ -161,7 +161,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 do
                 {
                     level++;
-                    List<string> possibleExtendingCustomers = FilterRemainingCustomers(candidate, 1);
+                    List<string> possibleExtendingCustomers = FilterRemainingCustomers(candidate, candidate.NumberOfCustomers, false);
                     if (possibleExtendingCustomers.Count > 0)
                     {
                         string extendingCustomerID = possibleExtendingCustomers[0];
@@ -198,21 +198,38 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 //The core of the iteration:
                 iter++;
-                currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
-                while (currentLevel <= deepestPossibleLevel)
+
+                //This is new, it focuses only on the basic variables (customer sets)
+                int nColumns_before = allCustomerSets.TotalCount;
+                List<CustomerSet> basicCustomerSetsInBestSolution = new List<CustomerSet>();
+                CustomerSetBasedSolution csbsBestSolutionFound = (CustomerSetBasedSolution)bestSolutionFound;
+                foreach (CustomerSet cs in csbsBestSolutionFound.Assigned2EV)
+                    basicCustomerSetsInBestSolution.Add(cs);
+                foreach (CustomerSet cs in csbsBestSolutionFound.Assigned2GDV)
+                    basicCustomerSetsInBestSolution.Add(cs);
+                parents = unexploredCustomerSets.Pop(basicCustomerSetsInBestSolution);
+                PopulateAndPlaceChildren(-1,true);
+                InformCustomerSetTreeSearchListener();
+                //if new columns have been added, we need to bypass the IBS column generation phase
+                if (allCustomerSets.TotalCount == nColumns_before)
                 {
-                    //Take the parents from the current level
-                    if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
-                        break;
-                   // parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
-                    parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, VehicleCategories.EV, ShadowPrices);//ISSUE (#5): This is hardcoded with the EMH problem in mind, will need to flex vehicleCategory
-                    //populate children from parents
-                    PopulateAndPlaceChildren();
+                    //The following is the regular IBS node selection and branching
+                    currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
+                    while (currentLevel <= deepestPossibleLevel)
+                    {
+                        //Take the parents from the current level
+                        if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
+                            break;
+                        // parents = unexploredCustomerSets.Pop(currentLevel, ((currentLevel<=3)&&(currentLevel == unexploredCustomerSets.GetHighestNonemptyLevel()))?100: beamWidth);
+                        parents = unexploredCustomerSets.Pop(currentLevel, beamWidth, VehicleCategories.EV, ShadowPrices);//ISSUE (#5): This is hardcoded with the EMH problem in mind, will need to flex vehicleCategory
+                                                                                                                          //populate children from parents
+                        PopulateAndPlaceChildren();
 
-                    InformCustomerSetTreeSearchListener();
+                        InformCustomerSetTreeSearchListener();
 
-                    //end of the level, moving on to the next level
-                    currentLevel++;
+                        //end of the level, moving on to the next level
+                        currentLevel++;
+                    }
                 }
 
                 //The end of the iteration, solving the SetPartition and updating the best solution if/when possible
@@ -230,9 +247,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         void PopulateAndPlaceChildren()
         {
+            PopulateAndPlaceChildren(filterWidth, true);
+        }
+        void PopulateAndPlaceChildren(int specialFilterWidth, bool useShadowPrices)
+        {
             foreach (CustomerSet cs in parents)
             {
-                foreach (string customerID in FilterRemainingCustomers(cs, filterWidth))
+                foreach (string customerID in FilterRemainingCustomers(cs, specialFilterWidth, useShadowPrices))
                 {
                     CustomerSet candidate = new CustomerSet(cs);
                     candidate.Extend(customerID);
@@ -249,7 +270,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             parents.Clear();
             InformCustomerSetTreeSearchListener();
         }
-        List<string> FilterRemainingCustomers(CustomerSet cs, int filterWidth)
+        List<string> FilterRemainingCustomers(CustomerSet cs, int specialFilterWidth, bool useShadowPrices)
         {
             List<string> remainingCustomers_list = cs.PossibleOtherCustomers;
             string[] remainingCustomers_array = remainingCustomers_list.ToArray();
@@ -265,9 +286,23 @@ namespace MPMFEVRP.Implementations.Algorithms
             Array.Sort(bestEstimates, remainingCustomers_array);
 
             List<string> outcome = new List<string>();
-            for (int i = 0; i < filterWidth; i++)
-                if (remainingCustomers_array.Length > i)
-                    outcome.Add(remainingCustomers_array[i]);
+            if (specialFilterWidth < 0)
+            {
+                int bestEstIndex = 0;
+                while ((bestEstIndex < cs.NumberOfCustomers)&&(bestEstIndex < remainingCustomers_array.Length))
+                {
+                    if ((!useShadowPrices) || ((useShadowPrices) && (bestEstimates[bestEstIndex] <= 0)))
+                        outcome.Add(remainingCustomers_array[bestEstIndex]);
+                    bestEstIndex++;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < specialFilterWidth; i++)
+                    if (remainingCustomers_array.Length > i)
+                        if ((!useShadowPrices) || ((useShadowPrices) && (bestEstimates[i] <= 0)))
+                            outcome.Add(remainingCustomers_array[i]);
+            }
             return outcome;
         }
         void InformCustomerSetTreeSearchListener()
