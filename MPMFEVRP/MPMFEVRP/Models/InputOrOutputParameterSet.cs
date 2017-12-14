@@ -47,9 +47,7 @@ namespace MPMFEVRP.Models
             int output = 0;
             foreach (ParameterID pid in theOtherSet.allParameters.Keys)
             {
-                bool theSameKey = allParameters.ContainsKey(pid);
-                bool theSameValue = allParameters[pid] != theOtherSet.allParameters[pid];
-                if (allParameters.ContainsKey(pid) && allParameters[pid] != theOtherSet.allParameters[pid])
+                if (allParameters.ContainsKey(pid) && (allParameters[pid].Value != theOtherSet.allParameters[pid].Value))
                 {
                     allParameters[pid] = theOtherSet.allParameters[pid];
                     output++;

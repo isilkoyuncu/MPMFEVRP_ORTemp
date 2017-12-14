@@ -271,11 +271,7 @@ namespace MPMFEVRP.Forms
             {
                 for (int i = 0; i < problems.Count; i++)
                 {
-                    int dummyInt = problems[i].ProblemCharacteristics.UpdateParameters(theProblem.ProblemCharacteristics);
-                    if (dummyInt > 0)
-                    {
-                        System.Windows.Forms.MessageBox.Show("Problem needed " + dummyInt.ToString() + " parameter updates!");
-                    }
+                    problems[i].ProblemCharacteristics.UpdateParameters(theProblem.ProblemCharacteristics);
                     TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(comboBox_multi_TSPModel.SelectedItem.ToString());
                     theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), problems[i], TSPModelType);
                     problemModels.Add(theProblemModel);
