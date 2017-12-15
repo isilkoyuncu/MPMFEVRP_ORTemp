@@ -27,10 +27,14 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList exploredFeasibleCustomerSets;
         PartitionedCustomerSetList exploredInfeasibleCustomerSets;
 
-
+        public RandomizedCustomerSetExplorerViaTreeSearch() : base()
+        {
+            AddSpecializedParameters();
+        }
         public override void AddSpecializedParameters()
         {
-            throw new NotImplementedException();
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_INFEASIBLE_CUSTOMER_SETS, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 50, UserInputObjectType.TextBox));
+            //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_BEAM_WIDTH, "Beam width", 1));
         }
 
         public override string GetName()
@@ -62,8 +66,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             theGDV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV);
             theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
 
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_INFEASIBLE_CUSTOMER_SETS, "Minimum # of infeasible customer sets", 50));
-            //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_BEAM_WIDTH, "Beam width", 1));
             popStrategy = CustomerSetList.CustomerListPopStrategy.Random;
 
             exploredFeasibleCustomerSets = new PartitionedCustomerSetList();
@@ -89,10 +91,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         void OptimizeAndEvaluateForLists(CustomerSet cs)
         {
             if ((exploredFeasibleCustomerSets.ContainsAnIdenticalCustomerSet(cs)) || (exploredInfeasibleCustomerSets.ContainsAnIdenticalCustomerSet(cs)))
-                    return;
+                return;
 
             cs.Optimize(theProblemModel, theGDV);//TODO: This is necessary only because the current infrastructure assumes GDV-optimization must precede EV-Optimization
-            cs.Optimize(theProblemModel, theEV, vsroo_GDV:cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV), requireGDVSolutionBeforeEV: false);
+            cs.Optimize(theProblemModel, theEV, vsroo_GDV: cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV), requireGDVSolutionBeforeEV: false);
             bool feasible = (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized);
             bool infeasible = (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Infeasible);
             bool largeEnough = (cs.NumberOfCustomers >= 3);
@@ -126,19 +128,33 @@ namespace MPMFEVRP.Implementations.Algorithms
             int minNumInfeasibles = algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_INFEASIBLE_CUSTOMER_SETS).GetIntValue();
             int beamWidth = 1;// algorithmParameters.GetParameter(ParameterID.ALG_BEAM_WIDTH).GetIntValue();
             int currentLevel;
-            while (exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
+            int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;
+
+            while (exploredInfeasibleCustomerSets.TotalCount < minNumInfeasibles)
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
-                CustomerSet theParent = unexploredCustomerSets.Pop(currentLevel, beamWidth)[0];
 
-                foreach (string customerID in theParent.PossibleOtherCustomers)
+                while (currentLevel <= deepestPossibleLevel)
                 {
-                    CustomerSet candidate = new CustomerSet(theParent);
-                    candidate.Extend(customerID);
-                    theParent.MakeCustomerImpossible(customerID);
-                    OptimizeAndEvaluateForLists(candidate);
-                }//foreach (string customerID in remainingCustomers)
+                    //Take the parents from the current level
+                    if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
+                        break;
+                    CustomerSet theParent = unexploredCustomerSets.Pop(currentLevel, beamWidth)[0];
+                    List<string> possibleOtherCustomers = new List<string>();
+                    foreach (string customerID in theParent.PossibleOtherCustomers)
+                        possibleOtherCustomers.Add(customerID);
 
+                    foreach (string customerID in possibleOtherCustomers)
+                    {
+                        CustomerSet candidate = new CustomerSet(theParent);
+                        candidate.Extend(customerID);
+                        theParent.MakeCustomerImpossible(customerID);
+                        OptimizeAndEvaluateForLists(candidate);
+                    }//foreach (string customerID in remainingCustomers)
+
+                    //end of the level, moving on to the next level
+                    currentLevel++;
+                }
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
         }
     }

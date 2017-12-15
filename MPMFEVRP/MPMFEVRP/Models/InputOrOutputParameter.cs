@@ -121,7 +121,10 @@ namespace MPMFEVRP.Models
 
         public string GetStringValue()
         {
-            return GetValue<string>();
+            if (value is Int32)
+                return value.ToString();
+
+            return (string)GetValue<object>();
         }
 
         public bool GetBoolValue()
