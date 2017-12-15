@@ -159,7 +159,7 @@ namespace MPMFEVRP.Forms
                 theAlgorithm.setBackgroundWorker(BackgroundWorker_algorithmRunner);
 
                 button_showCharts.Enabled = true;
-                Button_showCharts_Click(sender, e);//This assumes the "charts" is compatible with the algorithm
+                //Button_showCharts_Click(sender, e);//This assumes the "charts" is compatible with the algorithm
 
                 Log("Algorithm running.");
                 BackgroundWorker_algorithmRunner.RunWorkerAsync();

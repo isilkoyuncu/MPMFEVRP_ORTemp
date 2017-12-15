@@ -18,6 +18,7 @@ namespace MPMFEVRP.Implementations.Algorithms
     class RandomizedCustomerSetExplorerViaTreeSearch : AlgorithmBase
     {
         //        XCPlexParameters xCplexParam;
+        Vehicle theGDV;
         Vehicle theEV;
 
         CustomerSetList.CustomerListPopStrategy popStrategy;
@@ -44,17 +45,21 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override bool setListener(IListener listener)
         {
+            //TODO: Add later
+            System.Windows.Forms.MessageBox.Show("RandomizedCustomerSetExplorerViaTreeSearch.setListener called for some reason; this is not ready yet!");
             throw new NotImplementedException();
         }
 
         public override void SpecializedConclude()
         {
+            System.Windows.Forms.MessageBox.Show("RandomizedCustomerSetExplorerViaTreeSearch algorithm run successfully, now it's time to conclude by reporting some statistics!");
             throw new NotImplementedException();
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
             //            xCplexParam = new XCPlexParameters();
+            theGDV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV);
             theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
 
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_INFEASIBLE_CUSTOMER_SETS, "Minimum # of infeasible customer sets", 50));
@@ -86,7 +91,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             if ((exploredFeasibleCustomerSets.ContainsAnIdenticalCustomerSet(cs)) || (exploredInfeasibleCustomerSets.ContainsAnIdenticalCustomerSet(cs)))
                     return;
 
-            cs.Optimize(theProblemModel, theEV);
+            cs.Optimize(theProblemModel, theGDV);//TODO: This is necessary only because the current infrastructure assumes GDV-optimization must precede EV-Optimization
+            cs.Optimize(theProblemModel, theEV, vsroo_GDV:cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV), requireGDVSolutionBeforeEV: false);
             bool feasible = (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized);
             bool infeasible = (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Infeasible);
             bool largeEnough = (cs.NumberOfCustomers >= 3);

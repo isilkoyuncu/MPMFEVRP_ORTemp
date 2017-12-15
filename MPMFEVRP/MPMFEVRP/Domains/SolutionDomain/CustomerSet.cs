@@ -157,7 +157,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             identifyNewImpossibleOtherCustomers(theProblemModel);
         }
-        public void Optimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null)
+        public void Optimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null, bool requireGDVSolutionBeforeEV = true)
         {
             //This method makes heavy use of the problem model
             //A closer look therein reveals that the intelligence of checking whether GDV-optimal route is EV-feasible and if the customer set is definitely EV-infeasible are invoked
@@ -172,9 +172,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             else//It's an EV, and the customer set must have been optimized for a GDV beforehand
             {
-                if ((vsroo_GDV == null) || (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.Optimized))
-                    throw new Exception("CustomerSet.Optimize invoked to optimize for an EV, without a GDV-optimal route at hand!");
-                VehicleSpecificRouteOptimizationOutcome vsroo_EV = theProblemModel.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV;
+                if (requireGDVSolutionBeforeEV)
+                {
+                    if ((vsroo_GDV == null) || (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.Optimized))
+                        throw new Exception("CustomerSet.Optimize invoked to optimize for an EV, without a GDV-optimal route at hand!");
+                    vsroo_EV = theProblemModel.RouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                }
+                else
+                {
+                    vsroo_EV = theProblemModel.RouteOptimize(this, vehicle);
+                }
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);

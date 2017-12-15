@@ -369,7 +369,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (allCustomerSets.ContainsAnIdenticalCustomerSet(candidate))
                 return false;
 
-            
             Console.WriteLine("Now solving " + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray()));
             candidate.Optimize(theProblemModel);
             allCustomerSets.Add(candidate);
