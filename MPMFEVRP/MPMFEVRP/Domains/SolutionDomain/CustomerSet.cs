@@ -75,14 +75,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
-        public CustomerSet(List<string> customers, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
+        public CustomerSet(List<string> customers, double computationTime=0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
             this.customers = customers;
             this.customers.Sort();//just in case
             possibleOtherCustomers = new List<string>();
             impossibleOtherCustomers = new List<string>();
             VehicleCategories vehicleCategory = (vehicleSpecificRoute == null ? VehicleCategories.GDV : vehicleSpecificRoute.VehicleCategory);
-            VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicleCategory, vsros, vehicleSpecificRoute);
+            VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicleCategory, computationTime, vsros, vehicleSpecificRoute);
             routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
             retrievedFromArchive = false;
         }
@@ -116,7 +116,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
                     {
                         // Do not try to optimize for EV
-                        vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                        vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
                     }
                     else
                     {

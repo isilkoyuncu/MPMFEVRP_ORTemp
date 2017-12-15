@@ -26,7 +26,7 @@ namespace MPMFEVRPTests.TestUtility_DefaultGetters
             cs1.RouteOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo1 });
             outcome.Add(cs1);
             List<string> lc2 = new List<string>() { allCustomers[1], allCustomers[11], allCustomers[15] };
-            CustomerSet cs2 = new CustomerSet(lc2, VehicleSpecificRouteOptimizationStatus.NotYetOptimized);
+            CustomerSet cs2 = new CustomerSet(lc2);
             VehicleSpecificRouteOptimizationOutcome vsroo2 = theProblemModel.RouteOptimize(cs2, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV));
             cs2.RouteOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo2 });
             outcome.Add(cs2);

@@ -118,7 +118,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             theList.Add(vsroo_EV);
             return new RouteOptimizationOutcome(theList);
         }
-        public override VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute=null)
+        public override VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle, VehicleSpecificRoute GDVOptimalRoute = null)
         {
             //This method has nothing to do with a list of previously generated customer sets, management of that is completely some other class's responsibility
 
@@ -129,9 +129,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //Make an AFV-optimized route out of the given GDV-optimized route:
             VehicleSpecificRoute fittedRoute = FitGDVOptimalRouteToEV(GDVOptimalRoute, vehicle);
             if (fittedRoute.Feasible)//if the fitted route is feasible:
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: fittedRoute);
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: fittedRoute);
             if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
             //If none of the previous conditions worked, we must solve an EV-TSP
             return RouteOptimize(CS, vehicle);
         }
@@ -142,9 +142,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             solver.Solve_and_PostProcess();
             VehicleSpecificRouteOptimizationOutcome vsroo;
             if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
-                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
-                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
 //            solver.ClearModel();
             return vsroo;
         }
