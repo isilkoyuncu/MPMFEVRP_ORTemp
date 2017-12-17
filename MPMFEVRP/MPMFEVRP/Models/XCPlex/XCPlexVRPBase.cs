@@ -219,30 +219,49 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void CalculateTBounds()
         {
-                double tLS = double.MinValue;
-                double tES = double.MaxValue;
-                Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
-                foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            double tLS = double.MinValue;
+            double tES = double.MaxValue;
+            Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            {
+                if (swav.X == theDepot.X && swav.Y == theDepot.Y)
                 {
-
+                    tLS = theProblemModel.CRD.TMax - GetMinTravelTime(swav);
+                    tES = GetMinTravelTime(swav);
+                }
+                else
+                {
                     tLS = theProblemModel.CRD.TMax - TravelTime(swav, theDepot);
                     tES = TravelTime(theDepot, swav);
-                    switch (swav.SiteType)
-                    {
-                        case SiteTypes.Customer:
-                            tLS -= ServiceDuration(swav);
-                            break;
-                        case SiteTypes.ExternalStation:
-                            if (theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
-                                tLS -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(swav));
-                            break;
-                        default:
-                            break;
-                    }
-                    swav.UpdateTBounds(tLS, tES);
                 }
+                switch (swav.SiteType)
+                {
+                    case SiteTypes.Customer:
+                        tLS -= ServiceDuration(swav);
+                        break;
+                    case SiteTypes.ExternalStation:
+                        if (theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                            tLS -= (BatteryCapacity(VehicleCategories.EV) / RechargingRate(swav));
+                        break;
+                    default:
+                        break;
+                }
+                swav.UpdateTBounds(tLS, tES);
+            }
         }
-
+        double GetMinTravelTime(SiteWithAuxiliaryVariables swav)
+        {
+            Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
+            double minTravelTime = double.MaxValue;
+            foreach (SiteWithAuxiliaryVariables otherSwav in allOriginalSWAVs)
+            {
+                if (otherSwav.X != theDepot.X && otherSwav.Y != theDepot.Y)
+                    if(minTravelTime> TravelTime(swav, otherSwav))
+                        minTravelTime = TravelTime(swav, otherSwav);
+                else { }//Do nothing
+            }
+            return minTravelTime;
+        }
         protected void PopulatePreprocessedSWAVs(int numCopiesOfEachES = 0)
         {
             List<SiteWithAuxiliaryVariables> preprocessedSWAVs_list = new List<SiteWithAuxiliaryVariables>();

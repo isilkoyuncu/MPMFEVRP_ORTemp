@@ -217,7 +217,7 @@ namespace MPMFEVRP.Models.XCPlex
 
             AddConstraint_ArrivalTimeLimits();
             AddConstraint_TotalTravelTime();
-            AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs();
+            AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();
             //AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs();
             
             //All constraints added
@@ -489,7 +489,7 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
             TotalTravelTime.Clear();
         }
-        void AddConstrain_TimeFeasibilityOfTwoConsecutiveArcs()//15
+        void AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs()//15
         {
             for (int i = 0; i < NumPreprocessedSites; i++)
             {
@@ -515,7 +515,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs()//16
+        void AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs()//16
         {
             for (int i = 0; i < NumPreprocessedSites; i++)
             {
@@ -539,7 +539,6 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-
         
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
