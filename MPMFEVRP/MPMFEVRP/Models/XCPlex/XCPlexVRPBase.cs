@@ -156,12 +156,20 @@ namespace MPMFEVRP.Models.XCPlex
                     swav.UpdateDeltaMin(0.0);
                 else
                     swav.UpdateDeltaMin(Math.Max(0, EnergyConsumption(swav, TheDepot, VehicleCategories.EV) - swav.EpsilonMax));
-
+                //{
+                //    if ((swav.X == TheDepot.X) && (swav.Y == TheDepot.Y))
+                //    {
+                //        if (swav.SiteType != SiteTypes.Customer)
+                //            swav.UpdateDeltaMin(Math.Max(0, GetMinEnergyConsumptionFromDepotToDepotDuplicateThroughANode() - swav.EpsilonMax));
+                //    }
+                //    else
+                //        swav.UpdateDeltaMin(Math.Max(0, EnergyConsumption(swav, TheDepot, VehicleCategories.EV) - swav.EpsilonMax));
+                //}
             while (tempSWAVs.Count != 0)
             {
                 SiteWithAuxiliaryVariables swavToPerm = tempSWAVs.First();
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
-                    if(swav.DeltaMin<swavToPerm.DeltaMin)
+                    if (swav.DeltaMin < swavToPerm.DeltaMin)
                     {
                         swavToPerm = swav;
                     }
@@ -208,14 +216,11 @@ namespace MPMFEVRP.Models.XCPlex
             if (allOriginalSWAVs.Count != permSWAVs.Count)
                 throw new System.Exception("XCPlexVRPBase.SetDeltaMaxViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
 
-            //Revisiting the depot
-            double eMinToDepot = double.MaxValue;
+            //Revisiting the depot and its duplicates
             foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                if ((swav.X != TheDepot.X) || (swav.Y != TheDepot.Y))
-                {
-                    eMinToDepot = Math.Min(eMinToDepot, EnergyConsumption(swav, TheDepot, VehicleCategories.EV));
-                }
-            TheDepot.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - eMinToDepot);
+                if ((swav.X == TheDepot.X) && (swav.Y == TheDepot.Y))
+                    if (swav.SiteType != SiteTypes.Customer)
+                        swav.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - GetMinEnergyConsumptionFromNonDepotToDepot());
         }
         void CalculateTBounds()
         {
@@ -226,8 +231,16 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 if (swav.X == theDepot.X && swav.Y == theDepot.Y)
                 {
-                    tLS = theProblemModel.CRD.TMax - GetMinTravelTime(swav);
-                    tES = GetMinTravelTime(swav);
+                    if (swav.SiteType != SiteTypes.Depot)
+                    {
+                        tLS = theProblemModel.CRD.TMax - GetMinTravelTimeFromDepotDuplicateToDepotThroughANode(swav);
+                        tES = GetMinTravelTimeFromDepotToDepotDuplicateThroughANode(swav);
+                    }
+                    else
+                    {
+                        tLS = theProblemModel.CRD.TMax;
+                        tES = 0.0;
+                    }
                 }
                 else
                 {
@@ -249,23 +262,53 @@ namespace MPMFEVRP.Models.XCPlex
                 swav.UpdateTBounds(tLS, tES);
             }
         }
-        double GetMinTravelTime(SiteWithAuxiliaryVariables swav)
+        double GetMinTravelTimeFromDepotDuplicateToDepotThroughANode(SiteWithAuxiliaryVariables depotDuplicate)
         {
             Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
             double minTravelTime = double.MaxValue;
             foreach (SiteWithAuxiliaryVariables otherSwav in allOriginalSWAVs)
-            {
-                if (otherSwav.X != theDepot.X && otherSwav.Y != theDepot.Y)
-                    if(minTravelTime> TravelTime(swav, otherSwav))
-                        minTravelTime = TravelTime(swav, otherSwav);
-                else { }//Do nothing
-            }
+                if (otherSwav.X != theDepot.X || otherSwav.Y != theDepot.Y)
+                    minTravelTime = Math.Min(minTravelTime, TravelTime(depotDuplicate, otherSwav) + TravelTime(otherSwav, theDepot));
+
             return minTravelTime;
+        }
+        double GetMinTravelTimeFromDepotToDepotDuplicateThroughANode(SiteWithAuxiliaryVariables depotDuplicate)
+        {
+            Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
+            double minTravelTime = double.MaxValue;
+            foreach (SiteWithAuxiliaryVariables otherSwav in allOriginalSWAVs)
+                if (otherSwav.X != theDepot.X || otherSwav.Y != theDepot.Y)
+                    minTravelTime = Math.Min(minTravelTime, TravelTime(theDepot, otherSwav) + TravelTime(otherSwav, depotDuplicate));
+
+            return minTravelTime;
+        }
+        double GetMinEnergyConsumptionFromNonDepotToDepot()
+        {
+            Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
+            double eMinToDepot = double.MaxValue;
+
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                if ((swav.X != TheDepot.X) || (swav.Y != TheDepot.Y))
+                    eMinToDepot = Math.Min(eMinToDepot, EnergyConsumption(swav, TheDepot, VehicleCategories.EV));
+
+            return eMinToDepot;
+        }
+
+        double GetMinEnergyConsumptionFromDepotToDepotDuplicateThroughANode()
+        {
+            Site theDepot = theProblemModel.SRD.GetSingleDepotSite();
+            double eMinFromDepotThroughNonDepot = double.MaxValue;
+
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                if ((swav.X != TheDepot.X) || (swav.Y != TheDepot.Y))
+                    eMinFromDepotThroughNonDepot = Math.Min(eMinFromDepotThroughNonDepot, EnergyConsumption(theDepot, swav, VehicleCategories.EV)+ EnergyConsumption(swav,theDepot, VehicleCategories.EV));
+
+            return eMinFromDepotThroughNonDepot;
         }
         protected void PopulatePreprocessedSWAVs(int numCopiesOfEachES = 0)
         {
             List<SiteWithAuxiliaryVariables> preprocessedSWAVs_list = new List<SiteWithAuxiliaryVariables>();
-            foreach(SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
             {
                 if (swav.SiteType == SiteTypes.ExternalStation)
                     preprocessedSWAVs_list.AddRange(SWAVDuplicates(swav, numCopiesOfEachES));
@@ -299,13 +342,13 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     if (FirstCustomerNodeIndex == int.MaxValue)
                         FirstCustomerNodeIndex = i;
-                        LastCustomerNodeIndex = i;
+                    LastCustomerNodeIndex = i;
                 }
                 if (preprocessedSites[i].SiteType == SiteTypes.ExternalStation)
                 {
                     if (FirstESNodeIndex == int.MaxValue)
                         FirstESNodeIndex = i;
-                        LastESNodeIndex = i;
+                    LastESNodeIndex = i;
                 }
             }
         }
@@ -319,7 +362,7 @@ namespace MPMFEVRP.Models.XCPlex
             maxValue_Delta = new double[NumPreprocessedSites];
             minValue_T = new double[NumPreprocessedSites];
             maxValue_T = new double[NumPreprocessedSites];
-            for (int i=0;i<preprocessedSites.Length;i++)
+            for (int i = 0; i < preprocessedSites.Length; i++)
             {
                 minValue_Epsilon[i] = preprocessedSites[i].EpsilonMin;
                 maxValue_Epsilon[i] = preprocessedSites[i].EpsilonMax;
@@ -383,7 +426,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
 
         //TODO: Complete the GetCompleteSolution method at XCPlexVRPBase level
-        
+
         //public override SolutionBase GetCompleteSolution(Type SolutionType)
         //{
         //    SolutionBase output;

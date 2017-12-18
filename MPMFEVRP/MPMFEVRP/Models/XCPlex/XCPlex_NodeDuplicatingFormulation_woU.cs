@@ -218,8 +218,8 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_ArrivalTimeLimits();
             AddConstraint_TotalTravelTime();
             AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();
-            //AddConstrain_EnergyFeasibilityOfTwoConsecutiveArcs();
-            
+            //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();
+            //AddConstraint_EnergyConservation();
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
@@ -517,29 +517,42 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs()//16
         {
-            for (int i = 0; i < NumPreprocessedSites; i++)
+            for (int j = FirstCustomerNodeIndex; j <= LastCustomerNodeIndex; j++)
             {
-                Site from = preprocessedSites[i];
-                for (int k = 0; k < NumPreprocessedSites; k++)
+                Site through = preprocessedSites[j];
+                ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
+                for (int i = FirstESNodeIndex; i <= LastESNodeIndex; i++)
                 {
-                    Site through = preprocessedSites[k];
-                    for (int j = 0; j < NumPreprocessedSites; j++)
-                    {
-                        Site to = preprocessedSites[j];
-                        if (EnergyConsumption(from, through, VehicleCategories.EV) + EnergyConsumption(through, to, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
-                        {
-                            ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
-                            EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][vIndex_EV]);
-                            EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][vIndex_EV]);
-                            string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
-                            allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
-                            EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
-                        }
-                    }
+                    Site ES = preprocessedSites[i];
+                    EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(EnergyConsumption(ES, through, VehicleCategories.EV), X[i][j][vIndex_EV]);
+                    EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(EnergyConsumption(through, ES, VehicleCategories.EV), X[j][i][vIndex_EV]);
                 }
+                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(-1.0, Epsilon[j]);
+                string constraint_name = "No_arc_through_node_" + j.ToString();
+                allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, BatteryCapacity(VehicleCategories.EV), constraint_name));
+                EnergyFeasibilityOfTwoConsecutiveArcs.Clear();
             }
         }
-        
+        void AddConstraint_EnergyConservation()//17
+        {
+            ILinearNumExpr EnergyConservation = LinearNumExpr();
+            for (int i = 0; i < NumPreprocessedSites; i++)
+            {
+                Site sFrom = preprocessedSites[i];
+                for (int j = 0; j < NumPreprocessedSites; j++)
+                {
+                    Site sTo = preprocessedSites[j];
+                    EnergyConservation.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV), X[i][j][vIndex_EV]);
+                    EnergyConservation.AddTerm(-1.0*maxValue_Epsilon[j], X[i][j][vIndex_EV]);
+                }
+            }
+            string constraint_name = "Energy conservation";
+            allConstraints_list.Add(AddLe(EnergyConservation, numVehicles[vIndex_EV] * BatteryCapacity(VehicleCategories.EV), constraint_name));
+            EnergyConservation.Clear();
+        }
+
+
+
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<string> activeX = new List<string>();

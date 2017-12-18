@@ -310,7 +310,7 @@ namespace MPMFEVRP.Models.XCPlex
             //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
             AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
             AddConstraint_TotalNumberOfActiveArcs();
-
+            //AddConstraint_EnergyConservation();
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
@@ -748,7 +748,29 @@ namespace MPMFEVRP.Models.XCPlex
             string constraintName_GDV = "Number_of_active_GDV_arcs_cannot_exceed_" + nActiveArcs_GDV.ToString();
             allConstraints_list.Add(AddLe(totalArcFlow_GDV, (double)nActiveArcs_GDV, constraintName_GDV));
         }
-
+        void AddConstraint_EnergyConservation()//17
+        {
+            ILinearNumExpr EnergyConservation = LinearNumExpr();
+            for (int i = 0; i < NumPreprocessedSites; i++)
+            {
+                Site sFrom = preprocessedSites[i];
+                for (int r = 0; r < numES; r++)
+                {
+                    Site through = ExternalStations[r];
+                    for (int j = 0; j < NumPreprocessedSites; j++)
+                    {
+                        Site sTo = preprocessedSites[j];
+                        EnergyConservation.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV), X[i][j][vIndex_EV]);
+                        EnergyConservation.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][vIndex_EV]);
+                        EnergyConservation.AddTerm(EnergyConsumption(sFrom, through, VehicleCategories.EV)+ EnergyConsumption(through, sTo, VehicleCategories.EV), Y[i][r][j]);
+                        EnergyConservation.AddTerm(-1.0 * BatteryCapacity(VehicleCategories.EV), Y[i][r][j]);
+                    }
+                }
+            }
+            string constraint_name = "Energy conservation";
+            allConstraints_list.Add(AddLe(EnergyConservation, numVehicles[vIndex_EV]*BatteryCapacity(VehicleCategories.EV), constraint_name));
+            EnergyConservation.Clear();
+        }
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
