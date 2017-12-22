@@ -22,14 +22,10 @@ namespace Instance_Generation.FileReaders
         Vehicle[] V;
         int numCustomers=0;
         int numESS = 0;
-
-
+        
         System.IO.StreamReader sr;
 
-        public ErdoganMiller_Hooks12Reader()
-        {
-
-        }
+        public ErdoganMiller_Hooks12Reader() { }
         public ErdoganMiller_Hooks12Reader(string sourceDirectory, string file_name, string file_extension)
         {
             this.sourceDirectory = sourceDirectory;
