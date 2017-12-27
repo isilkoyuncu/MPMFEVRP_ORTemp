@@ -314,9 +314,9 @@ namespace Instance_Generation.Utility
             foreach (ChargingLevels cl in Enum.GetValues(typeof(ChargingLevels)))
                 sw.WriteLine(CombineAndTabSeparateStringArray(ChargingStation.getIndividualRow(cl)));
             sw.WriteLine();
-            sw.WriteLine(CombineAndTabSeparateStringArray(Vehicle.getHeaderRow()));
-            sw.WriteLine(CombineAndTabSeparateStringArray(selectedEV.getIndividualRow()));
-            sw.WriteLine(CombineAndTabSeparateStringArray(selectedGDV.getIndividualRow()));
+            sw.WriteLine(CombineAndTabSeparateStringArray(Vehicle.GetHeaderRow()));
+            sw.WriteLine(CombineAndTabSeparateStringArray(selectedEV.GetIndividualRow()));
+            sw.WriteLine(CombineAndTabSeparateStringArray(selectedGDV.GetIndividualRow()));
             sw.WriteLine();
             sw.WriteLine("Average Velocity\t{0}", travelSpeed);
             sw.WriteLine();

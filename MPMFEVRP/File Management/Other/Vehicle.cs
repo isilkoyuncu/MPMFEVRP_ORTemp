@@ -104,11 +104,11 @@ namespace Instance_Generation.Other
             }
         }
 
-        public static string[] getHeaderRow()
+        public static string[] GetHeaderRow()
         {
             return new string[] { "ID", "Category", "Load Capacity", "Battery Capacity", "Consumption Rate", "Fixed Cost", "Variable Cost Per Mile" , "Maximum Charging Rate"};
         }
-        public string[] getIndividualRow()
+        public string[] GetIndividualRow()
         {
             return new string[] { id.ToString(), category.ToString(), loadCapacity.ToString(), batteryCapacity.ToString(), consumptionRate.ToString(), fixedCost.ToString(), variableCostPerMile.ToString(), maxChargingRate.ToString()};
         }

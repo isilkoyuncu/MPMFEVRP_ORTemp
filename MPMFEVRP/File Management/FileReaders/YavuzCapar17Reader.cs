@@ -15,15 +15,13 @@ namespace Instance_Generation.FileReaders
         string file_name;
         string file_extension;
         string fullFilename;
-        int nSiteRows;
-        string[] ID;
-        string[] Type;
+        int numCustomers = 0;
+        int numESS = 0;
+        double gamma = 0.0;
         double[] X;
         double[] Y;
         double[,] distance;
         Vehicle[] V;//TODO A new vehicle constructor is needed
-        int numCustomers = 0;
-        int numESS = 0;
 
         System.IO.StreamReader sr;
 
@@ -51,33 +49,30 @@ namespace Instance_Generation.FileReaders
             string wholeFile = sr.ReadToEnd();
             sr.Close();
             string[] allRows = wholeFile.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
-            int blankRowPosition = 0;
+            char[] cellSeparator = new char[] { '\t' };
+            string[] cellsInCurrentRow;
+            cellsInCurrentRow = allRows[0].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            numCustomers = int.Parse(cellsInCurrentRow[1]);
+            cellsInCurrentRow = allRows[1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            numESS = int.Parse(cellsInCurrentRow[1]);
+            cellsInCurrentRow = allRows[2].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            double refuelTimeMinutes = double.Parse(cellsInCurrentRow[1]);
+            gamma = 24.0 / refuelTimeMinutes;
+            int blankRowPosition = 4;
             while (allRows[blankRowPosition] != "\r")
                 blankRowPosition++;
 
             int nTabularRows = blankRowPosition - 1;
-            ID = new string[nTabularRows];
-            Type = new string[nTabularRows];
             X = new double[nTabularRows];
             Y = new double[nTabularRows];
-            char[] cellSeparator = new char[] { '\t' };
-            string[] cellsInCurrentRow;
             for (int r = 1; r <= nTabularRows; r++)
             {
                 cellsInCurrentRow = allRows[r].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
-                ID[r - 1] = cellsInCurrentRow[0];
-                Type[r - 1] = cellsInCurrentRow[1];
-                if (Type[r - 1] == "c")
-                    numCustomers++;
-                if (Type[r - 1] == "f")
-                    numESS++;
-                X[r - 1] = double.Parse(cellsInCurrentRow[2]);
-                Y[r - 1] = double.Parse(cellsInCurrentRow[3]);
+                X[r - 1] = double.Parse(cellsInCurrentRow[0]);
+                Y[r - 1] = double.Parse(cellsInCurrentRow[1]);
             }
 
             V = new Vehicle[2];
-            //V[0] = new Vehicle("EMH12AFV", VehicleCategories.EV, 0, 60, 0.2, 0.35, );//TODO Check out the EMH12 paper to see if they have any cost information
-            //V[1] = new Vehicle("EMH12GDV", VehicleCategories.GDV, 0, 0, 0, 1);
         }
         bool RowIsBlank(string theRow)
         {
@@ -93,29 +88,34 @@ namespace Instance_Generation.FileReaders
             output += file_extension;
             return output;
         }
-        public string[] getIDColumn() { return ID; }
-        public string[] getTypeColumn() { return Type; }
+        public string[] getIDColumn() { return null; }
+        public string[] getTypeColumn() { return null; }
         public bool usesGeographicPositions() { return false; }
         public bool needToShuffleCustomers() { return false; }
         public double[] getXorLongitudeColumn() { return X; }
         public double[] getYorLatitudeColumn() { return Y; }
-        public double[] getDemandColumn() { return Enumerable.Repeat(0.0, ID.Length).ToArray(); }
-        public double[] getReadyTimeColumn() { return Enumerable.Repeat(0.0, ID.Length).ToArray(); }
-        public double[] getDueDateColumn() { return Enumerable.Repeat(480.0, ID.Length).ToArray(); }
-        public double[] getServiceDurationColumn()
-        {
-            double[] toReturnServiceDuration = new double[ID.Length];
-            for (int i = 0; i <= numESS; i++)
-            {
-                toReturnServiceDuration[i] = 0.0;
-            }
-            for (int i = numESS + 1; i < ID.Length; i++)
-            {
-                toReturnServiceDuration[i] = 30.0;
-            }
-            return toReturnServiceDuration;
-        }
-        public double[] getRechargingRate() { return Enumerable.Repeat(1.0, ID.Length).ToArray(); }//TODO change this to be based on gamma, where the rate given here applies to external stations only
+        public double[] getDemandColumn() { return null; }
+        public double[] getReadyTimeColumn() { return null; }
+        public double[] getDueDateColumn() { return null; }
+        public double[] getServiceDurationColumn() { return null; }
+
+        //public double[] getReadyTimeColumn() { return Enumerable.Repeat(0.0, ID.Length).ToArray(); }
+        //public double[] getDueDateColumn() { return Enumerable.Repeat(480.0, ID.Length).ToArray(); }
+
+        //public double[] getServiceDurationColumn()
+        //{
+        //    double[] toReturnServiceDuration = new double[ID.Length];
+        //    for (int i = 0; i <= numESS; i++)
+        //    {
+        //        toReturnServiceDuration[i] = 0.0;
+        //    }
+        //    for (int i = numESS + 1; i < ID.Length; i++)
+        //    {
+        //        toReturnServiceDuration[i] = 30.0;
+        //    }
+        //    return toReturnServiceDuration;
+        //}
+        public double[] getRechargingRate() { return Enumerable.Repeat(1.0, X.Length).ToArray(); }//TODO change this to be based on gamma, where the rate given here applies to external stations only
         public double[,] getPrizeMatrix() { return null; }
         public double[,] getDistanceMatrix(){ return distance; }
         public Vehicle[] getVehicleRows(){ return V; }

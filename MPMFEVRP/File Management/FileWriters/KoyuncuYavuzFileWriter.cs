@@ -121,9 +121,9 @@ namespace Instance_Generation.FileWriters
         }
         void WriteVehicleRelatedData()
         {
-            sw.WriteLine(StringOperations.CombineAndTabSeparateArray(Vehicle.getHeaderRow()));
-            sw.WriteLine(StringOperations.CombineAndTabSeparateArray(VehData.SelectedEV.getIndividualRow()));
-            sw.WriteLine(StringOperations.CombineAndTabSeparateArray(VehData.SelectedGDV.getIndividualRow()));
+            sw.WriteLine(StringOperations.CombineAndTabSeparateArray(Vehicle.GetHeaderRow()));
+            sw.WriteLine(StringOperations.CombineAndTabSeparateArray(VehData.SelectedEV.GetIndividualRow()));
+            sw.WriteLine(StringOperations.CombineAndTabSeparateArray(VehData.SelectedGDV.GetIndividualRow()));
             sw.WriteLine();
         }
         void WriteBottomOverallData()
