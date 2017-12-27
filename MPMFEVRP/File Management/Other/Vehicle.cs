@@ -29,8 +29,28 @@ namespace Instance_Generation.Other
         {
             switch (v)
             {
+                case Vehicles.YC_24KWH:
+                    id = "YC AVF 24kWh 0.2kWh/mile";
+                    category = VehicleCategories.EV;
+                    loadCapacity = 200;
+                    batteryCapacity = 60.0;
+                    consumptionRate = 0.20;
+                    fixedCost = 0.0;//40.0
+                    variableCostPerMile = 0.0388;
+                    maxChargingRate = 24.0 / 30.0;
+                    break;
+                case Vehicles.YC_1_6L_4cyl_Automatic:
+                    id = "YC 1.6L 4cyl Automatic";
+                    category = VehicleCategories.GDV;
+                    loadCapacity = 200;
+                    batteryCapacity = 0;
+                    consumptionRate = 0;
+                    fixedCost = 0.0;//30.0
+                    variableCostPerMile = 0.0656;
+                    maxChargingRate = 0.0;
+                    break;
                 case Vehicles.EMH_60KWH:
-                    id = "EMH AVF 50kWh 0.2kWh/mile";
+                    id = "EMH AVF 60kWh 0.2kWh/mile";
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
                     batteryCapacity = 60.0;
@@ -100,7 +120,6 @@ namespace Instance_Generation.Other
                     variableCostPerMile = 0.0656;
                     maxChargingRate = 0.0;
                     break;
-
             }
         }
 
