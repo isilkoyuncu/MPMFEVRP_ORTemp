@@ -33,7 +33,7 @@ namespace Instance_Generation.Other
                     id = "YC AVF 24kWh 0.2kWh/mile";
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
-                    batteryCapacity = 60.0;
+                    batteryCapacity = 24.0;
                     consumptionRate = 0.20;
                     fixedCost = 0.0;//40.0
                     variableCostPerMile = 0.0388;

@@ -126,7 +126,8 @@ namespace Instance_Generation.FileConverters
             //Now we need to shuffle the rows
             if (reader != null)//otherwise we don't need the shuffling at all!
             {
-                RIG.ShuffleRows(reader.getNumESS(), numCustomers, nodeID, x, y, demand, timeWindowStart, timeWindowEnd, customerServiceDuration);
+                if (reader.needToShuffleCustomers())
+                    RIG.ShuffleRows(reader.getNumESS(), numCustomers, nodeID, x, y, demand, timeWindowStart, timeWindowEnd, customerServiceDuration);
             }
 
             //The Type Column:
