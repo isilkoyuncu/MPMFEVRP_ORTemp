@@ -148,15 +148,15 @@ namespace Instance_Generation.FileWriters
             if (Distance != null)
             {
                 sw.Write("Distances\t");
-                for (int j = 0; j < numNodes - 1; j++)
+                for (int j = 0; j < numNodes; j++)
                 {
                     sw.Write(Distance[0, j] + "\t");
                 }
                 sw.WriteLine();
-                for (int i = 1; i < numNodes - 1; i++)
+                for (int i = 1; i < numNodes; i++)
                 {
-                    sw.Write("\t");
-                    for (int j = 0; j < numNodes - 1; j++)
+                    //sw.Write("\t");
+                    for (int j = 0; j < numNodes; j++)
                     {
                         sw.Write("\t" + Distance[i, j]);
                     }
