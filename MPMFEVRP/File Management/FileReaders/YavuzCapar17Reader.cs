@@ -17,10 +17,13 @@ namespace Instance_Generation.FileReaders
         string fullFilename;
         int numCustomers = 0;
         int numESS = 0;
+        int numSites = 0;
         double gamma = 0.0;
         double[] X;
         double[] Y;
         double[,] distance;
+        string[] ID;
+        string[] Type;
         Vehicle[] V;//TODO A new vehicle constructor is needed
 
         System.IO.StreamReader sr;
@@ -55,30 +58,87 @@ namespace Instance_Generation.FileReaders
             numCustomers = int.Parse(cellsInCurrentRow[1]);
             cellsInCurrentRow = allRows[1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             numESS = int.Parse(cellsInCurrentRow[1]);
+            numSites = numCustomers + numESS + 1;
             cellsInCurrentRow = allRows[2].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             double refuelTimeMinutes = double.Parse(cellsInCurrentRow[1]);
             gamma = 24.0 / refuelTimeMinutes;
-            int blankRowPosition = 4;
-            while (allRows[blankRowPosition] != "\r")
+
+            int blankRowPosition = 5;
+            while (allRows[blankRowPosition] != "")
                 blankRowPosition++;
 
-            int nTabularRows = blankRowPosition - 1;
-            X = new double[nTabularRows];
-            Y = new double[nTabularRows];
-            for (int r = 1; r <= nTabularRows; r++)
+            int nTabularRows = blankRowPosition - 5;
+            if (nTabularRows != numSites)
+                throw new Exception("number of rows is different than the total number of sites");
+            double[] tempX = new double[nTabularRows];
+            double[] tempY = new double[nTabularRows];
+            for (int r = 5; r < nTabularRows+5; r++)
             {
                 cellsInCurrentRow = allRows[r].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
-                X[r - 1] = double.Parse(cellsInCurrentRow[0]);
-                Y[r - 1] = double.Parse(cellsInCurrentRow[1]);
+                tempX[r - 5] = double.Parse(cellsInCurrentRow[0]);
+                tempY[r - 5] = double.Parse(cellsInCurrentRow[1]);
             }
-
+            SortXY(tempX, tempY);//Sorts as follows: first depot, then ESs, then customers
+            double[,] tempDistance = new double[nTabularRows, nTabularRows];
+            string[] distanceRows = allRows[blankRowPosition + 2].Split(new string[] { "\r" }, StringSplitOptions.None);
+            for (int i = 0; i < nTabularRows; i++)
+            {
+                for (int j = 0; j < nTabularRows; j++)
+                {
+                    cellsInCurrentRow = distanceRows[i].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+                    tempDistance[i,j] = double.Parse(cellsInCurrentRow[j]);
+                }
+            }
             V = new Vehicle[2];
         }
-        bool RowIsBlank(string theRow)
+        void SortXY(double[] tempX, double[] tempY)
         {
-            List<string> endOfLineStrings = new List<string>() { "\n", "\r", "\r\n" };
-            string cleanedRow = theRow.Replace("\t", "").Replace(" ", "");
-            return ((endOfLineStrings.Contains(cleanedRow)) || (cleanedRow == ""));
+            X = new double[numSites];
+            Y = new double[numSites];
+            int nodeCounter = 0;
+            X[nodeCounter] = tempX[0];
+            Y[nodeCounter] = tempY[0];
+            nodeCounter++;
+            for (int i=numCustomers+1; i<=numCustomers+numESS; i++)
+            {
+                X[nodeCounter] = tempX[i];
+                Y[nodeCounter] = tempY[i];
+                nodeCounter++;
+            }
+            for (int i = 1; i <= numCustomers; i++)
+            {
+                X[nodeCounter] = tempX[i];
+                Y[nodeCounter] = tempY[i];
+                nodeCounter++;
+            }
+        }
+        void SortDistances(double[,] tempDist)
+        {
+            distance = new double[numSites, numSites];
+            int nodeCounter = 0;
+            distance[0, nodeCounter++] = tempDist[0,0];
+            for (int j = numCustomers + 1; j <= numCustomers + numESS; j++)
+                distance[0, nodeCounter++] = tempDist[0, j];
+            for (int j = 1; j <= numCustomers; j++)
+                distance[0, nodeCounter++] = tempDist[0, j];
+            nodeCounter = 0;
+            for (int i = 1; i <= numESS; i++)
+            {
+                distance[i, nodeCounter++] = tempDist[numCustomers+i, 0];
+                for (int j = numCustomers + 1; j <= numCustomers + numESS; j++)
+                    distance[0, nodeCounter++] = tempDist[0, j];
+                for (int j = 1; j <= numCustomers; j++)
+                    distance[0, nodeCounter++] = tempDist[0, j];
+            }
+            nodeCounter = 0;
+            for (int i = numESS+1; i < numSites; i++)
+            {
+                distance[i, nodeCounter++] = tempDist[i-numESS, 0];
+                for (int j = numCustomers + 1; j <= numCustomers + numESS; j++)
+                    distance[0, nodeCounter++] = tempDist[0, j];
+                for (int j = 1; j <= numCustomers; j++)
+                    distance[0, nodeCounter++] = tempDist[0, j];
+            }
         }
         public string getRecommendedOutputFileFullName()
         {
