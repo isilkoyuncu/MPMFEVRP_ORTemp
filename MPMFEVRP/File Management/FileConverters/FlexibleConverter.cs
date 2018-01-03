@@ -76,7 +76,7 @@ namespace Instance_Generation.FileConverters
                 nodeID = reader.getIDColumn();
                 if (nodeID == null)
                 {
-                    System.Windows.Forms.MessageBox.Show("reader.getIDColumn() returned null, so we have to create it from scratch!");//TODO After verifying the reader always populates the ID column correctly, delete this conditional code!
+                    //System.Windows.Forms.MessageBox.Show("reader.getIDColumn() returned null, so we have to create it from scratch!");//TODO After verifying the reader always populates the ID column correctly, delete this conditional code!
                     PopulateIDColumn();
                 }
             }

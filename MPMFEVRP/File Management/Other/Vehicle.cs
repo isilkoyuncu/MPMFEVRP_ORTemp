@@ -36,7 +36,7 @@ namespace Instance_Generation.Other
                     batteryCapacity = 24.0;
                     consumptionRate = 0.20;
                     fixedCost = 0.0;//40.0
-                    variableCostPerMile = 0.0388;
+                    variableCostPerMile = 0.5;
                     maxChargingRate = 24.0 / 30.0;
                     break;
                 case Vehicles.YC_1_6L_4cyl_Automatic:
@@ -46,7 +46,7 @@ namespace Instance_Generation.Other
                     batteryCapacity = 0;
                     consumptionRate = 0;
                     fixedCost = 0.0;//30.0
-                    variableCostPerMile = 0.0656;
+                    variableCostPerMile = 1;
                     maxChargingRate = 0.0;
                     break;
                 case Vehicles.EMH_60KWH:

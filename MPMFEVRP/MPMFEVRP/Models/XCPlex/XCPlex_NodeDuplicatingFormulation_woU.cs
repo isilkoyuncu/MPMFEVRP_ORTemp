@@ -166,19 +166,33 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            //First term: distance-based costs
-            for (int i = 0; i < NumPreprocessedSites; i++)
+            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
             {
-                Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < NumPreprocessedSites; j++)
+                //First term: distance-based costs
+                for (int i = 0; i < NumPreprocessedSites; i++)
                 {
-                    Site sTo = preprocessedSites[j];
-                    for (int v = 0; v < numVehCategories; v++)
-                        objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
+                    Site sFrom = preprocessedSites[i];
+                    for (int j = 0; j < NumPreprocessedSites; j++)
+                    {
+                        Site sTo = preprocessedSites[j];
+                        for (int v = 0; v < numVehCategories; v++)
+                            objFunction.AddTerm(Distance(sFrom, sTo), X[i][j][v]);
+                    }
                 }
             }
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeTotalCost)
+            else
             {
+                //First term: distance-based costs
+                for (int i = 0; i < NumPreprocessedSites; i++)
+                {
+                    Site sFrom = preprocessedSites[i];
+                    for (int j = 0; j < NumPreprocessedSites; j++)
+                    {
+                        Site sTo = preprocessedSites[j];
+                        for (int v = 0; v < numVehCategories; v++)
+                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
+                    }
+                }
                 //Second term: vehicle fixed costs
                 for (int j = 0; j < NumPreprocessedSites; j++)
                     for (int v = 0; v < numVehCategories; v++)

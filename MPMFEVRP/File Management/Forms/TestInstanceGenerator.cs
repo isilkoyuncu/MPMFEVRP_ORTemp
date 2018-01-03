@@ -67,12 +67,12 @@ namespace Instance_Generation.Forms
             nISS_L1 = int.Parse(textBox_nISS_L1.Text);
             nISS_L2 = int.Parse(textBox_nISS_L2.Text);
             nISS_L3 = int.Parse(textBox_nISS_L3.Text);
-            update_nISS();
+            Update_nISS();
 
             nESS_L1 = int.Parse(textBox_nESS_L1.Text);
             nESS_L2 = int.Parse(textBox_nESS_L2.Text);
             nESS_L3 = int.Parse(textBox_nESS_L3.Text);
-            update_nESS();
+            Update_nESS();
 
             l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
             l2kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
@@ -186,7 +186,7 @@ namespace Instance_Generation.Forms
                 checkBoxDistanceMatrixReadFromFile.Checked = (reader.getDistanceMatrix() != null);
                 label_Source.Text = StringOperations.SeparateFullFileName(tiFilenames[0])[1];//TODO When we allow selecting multiple files, this textbox will look awful, will have to do something
                 //textBox_Seed.Enabled = false; //TODO if this stays here other than their positions all instances are going to have the same 
-                fixOnFormInputFromFile(); 
+                FixOnFormInputFromFile(); 
                 textBox_nCustomers.Text = reader.getNumCustomers().ToString();
                 textBox_nESS.Text = reader.getNumESS().ToString();
             }
@@ -195,7 +195,7 @@ namespace Instance_Generation.Forms
                 //textBox_nInstances.Enabled = true; // TODO Turn this on after making sure we can create multiple files at once
             }
         }
-        void fixOnFormInputFromFile()
+        void FixOnFormInputFromFile()
         {
             comboBox_DepotLocation.Text = "";
             textBox_nCustomers.Text = "";
@@ -207,51 +207,51 @@ namespace Instance_Generation.Forms
             textBox_TravelSpeed.Text = "";
             groupBox_AsIsDataFromFile.Enabled = false;
         }
-        private void textBox_nISS_L1_TextChanged(object sender, EventArgs e)
+        private void TextBox_nISS_L1_TextChanged(object sender, EventArgs e)
         {
             nISS_L1 = int.Parse(textBox_nISS_L1.Text);
-            update_nISS();
+            Update_nISS();
         }
-        private void textBox_nISS_L2_TextChanged(object sender, EventArgs e)
+        private void TextBox_nISS_L2_TextChanged(object sender, EventArgs e)
         {
             nISS_L2 = int.Parse(textBox_nISS_L2.Text);
-            update_nISS();
+            Update_nISS();
         }
-        private void textBox_nISS_L3_TextChanged(object sender, EventArgs e)
+        private void TextBox_nISS_L3_TextChanged(object sender, EventArgs e)
         {
             nISS_L3 = int.Parse(textBox_nISS_L3.Text);
-            update_nISS();
+            Update_nISS();
         }
-        private void textBox_nESS_L1_TextChanged(object sender, EventArgs e)
+        private void TextBox_nESS_L1_TextChanged(object sender, EventArgs e)
         {
             nESS_L1 = int.Parse(textBox_nESS_L1.Text);
-            update_nESS();
+            Update_nESS();
         }
 
-        private void textBox_L3kwhPerMin_TextChanged(object sender, EventArgs e)
+        private void TextBox_L3kwhPerMin_TextChanged(object sender, EventArgs e)
         {
-            l1kWhPerMinute = double.Parse(textBox_L3kwhPerMin.Text); //L3 charging speed
+            l3kWhPerMinute = double.Parse(textBox_L3kwhPerMin.Text); //L3 charging speed
         }
-        private void textBox_L2kwhPerMin_TextChanged(object sender, EventArgs e)
+        private void TextBox_L2kwhPerMin_TextChanged(object sender, EventArgs e)
         {
-            l1kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
+            l2kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
         }
-        private void textBox_L1kwhPerMin_TextChanged(object sender, EventArgs e)
+        private void TextBox_L1kwhPerMin_TextChanged(object sender, EventArgs e)
         {
             l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
         }
 
-        private void textBox_nESS_L2_TextChanged(object sender, EventArgs e)
+        private void TextBox_nESS_L2_TextChanged(object sender, EventArgs e)
         {
             nESS_L2 = int.Parse(textBox_nESS_L2.Text);
-            update_nESS();
+            Update_nESS();
         }
-        private void textBox_nESS_L3_TextChanged(object sender, EventArgs e)
+        private void TextBox_nESS_L3_TextChanged(object sender, EventArgs e)
         {
             nESS_L3 = int.Parse(textBox_nESS_L3.Text);
-            update_nESS();
+            Update_nESS();
         }
-        private void comboBox_BasePricingPolicy_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox_BasePricingPolicy_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox_BasePricingPolicy.Items[comboBox_BasePricingPolicy.SelectedIndex].ToString() == BasePricingPolicy.Identical.ToString())
             {
@@ -264,7 +264,7 @@ namespace Instance_Generation.Forms
                 textBox_BasePriceDollar.Text = "1";
             }
         }
-        private void comboBox_TripChargePolicy_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox_TripChargePolicy_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox_TripChargePolicy.Items[comboBox_TripChargePolicy.SelectedIndex].ToString() == TripChargePolicy.None.ToString())
             {
@@ -290,7 +290,7 @@ namespace Instance_Generation.Forms
                 }
             }
         }
-        private void comboBox_EV_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox_EV_SelectedIndexChanged(object sender, EventArgs e)
         {
             selectedEV = list_EV[comboBox_EV.SelectedIndex];
             textBox_EV_BatteryCapacity.Text = selectedEV.BatteryCapacity.ToString();
@@ -299,7 +299,7 @@ namespace Instance_Generation.Forms
             textBox_EV_LoadCapacity.Text = selectedEV.LoadCapacity.ToString();
             textBox_EV_VariableCost.Text = selectedEV.VariableCostPerMile.ToString();
         }
-        private void comboBox_GDV_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox_GDV_SelectedIndexChanged(object sender, EventArgs e)
         {
             selectedGDV = list_GDV[comboBox_GDV.SelectedIndex];
             textBox_GDV_BatteryCapacity.Text = selectedGDV.BatteryCapacity.ToString();
@@ -308,17 +308,17 @@ namespace Instance_Generation.Forms
             textBox_GDV_LoadCapacity.Text = selectedGDV.LoadCapacity.ToString();
             textBox_GDV_VariableCost.Text = selectedGDV.VariableCostPerMile.ToString();
         }
-        void update_nISS()
+        void Update_nISS()
         {
             nISS = nISS_L1 + nISS_L2 + nISS_L3;
             textBox_nISS.Text = nISS.ToString();
         }
-        void update_nESS()
+        void Update_nESS()
         {
             nESS = nESS_L1 + nESS_L2 + nESS_L3;
             textBox_nESS.Text = nESS.ToString();
         }
-        private void button_UpdateFilename_Click(object sender, EventArgs e)
+        private void Button_UpdateFilename_Click(object sender, EventArgs e)
         {
             if (reader == null)
             {
@@ -430,7 +430,7 @@ namespace Instance_Generation.Forms
                 }
             }
         }
-        private void button_Create_n_Save_Click(object sender, EventArgs e)
+        private void Button_Create_n_Save_Click(object sender, EventArgs e)
         {
             //Reading different sections of the form and creating their respective objects for flexible future use
             Experiment_RelatedData ExpData = new FormSections.Experiment_RelatedData(minSeed);
