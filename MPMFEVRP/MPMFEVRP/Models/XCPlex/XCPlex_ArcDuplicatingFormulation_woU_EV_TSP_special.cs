@@ -285,9 +285,19 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//11
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
             if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
-            { }
-            else
-                AddConstraint_TimeRegulationThroughAnESVisit_FullRecharging();//13
+            {
+                AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging();//13b
+            }
+            else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full)
+            {
+                AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging();//13b
+                AddConstraint_DepartureSOCFromESNodeLB();//9
+            }
+            else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+            {
+                AddConstraint_TimeRegulationThroughAnESVisit_FixedTimeRecharging();//13a
+                AddConstraint_DepartureSOCFromESNodeLB();//9
+            }
             AddConstraint_TimeRegulationFromDepotThroughAnESVisit();//13b
             AddConstraint_ArrivalTimeLimits();//14
             AddConstraint_TotalTravelTime();//15
@@ -497,7 +507,7 @@ namespace MPMFEVRP.Models.XCPlex
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                 }
         }
-        void AddConstraint_TimeRegulationThroughAnESVisit_FullRecharging()//13 Only if recharging is full (FF, VF) 
+        void AddConstraint_TimeRegulationThroughAnESVisit_FixedTimeRecharging()//13a Only if recharging time is fixed (FF) 
         {
             for (int i = 1; i < numNonESNodes; i++)
                 for (int r = 0; r < numES; r++)
@@ -514,7 +524,7 @@ namespace MPMFEVRP.Models.XCPlex
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                     }
         }
-        void AddConstraint_TimeRegulationThroughAnESVisitsg()//13 Only in VP case
+        void AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging()//13b Only if recharing time is variable (VF, VP) cases
         {
             for (int i = 1; i < numNonESNodes; i++)
                 for (int r = 0; r < numES; r++)
@@ -534,7 +544,7 @@ namespace MPMFEVRP.Models.XCPlex
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigT[i][j] + (EnergyConsumption(sFrom, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV) / RechargingRate(ES))), constraint_name));
                     }
         }
-        void AddConstraint_TimeRegulationFromDepotThroughAnESVisit()//13b 
+        void AddConstraint_TimeRegulationFromDepotThroughAnESVisit()//13c 
         {
             for (int r = 0; r < numES; r++)
                 for (int j = 0; j < numNonESNodes; j++)
@@ -543,17 +553,21 @@ namespace MPMFEVRP.Models.XCPlex
                     Site sTo = preprocessedSites[j];
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
-
                     // Here we decide whether recharging duration is fixed or depends on the arrival SOC
                     if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                     {
                         TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
-                        string constraint_name = "Time_Regulation_from_customer_" + 0.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
+                        string constraint_name = "Time_Regulation_from_depot_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
                     }
                     else
                     {
-                        throw new NotImplementedException("Anything other than RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full is not finished");
+                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + (EnergyConsumption(TheDepot, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
+                        TimeDifference.AddTerm(-1.0 / RechargingRate(ES), Delta[j]);
+                        TimeDifference.AddTerm(1.0 / RechargingRate(ES), Delta[0]);
+                        TimeDifference.AddTerm(1.0 / RechargingRate(ES), Epsilon[0]);
+                        string constraint_name = "Time_Regulation_from_depot_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
                     }
                 }
         }
