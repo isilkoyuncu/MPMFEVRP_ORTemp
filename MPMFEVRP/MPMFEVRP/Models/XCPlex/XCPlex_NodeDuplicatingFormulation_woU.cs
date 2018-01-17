@@ -49,6 +49,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Now we need to set some to the variables to 0
             SetUndesiredXVariablesTo0();
         }
+
         void SetUndesiredXVariablesTo0()
         {
             //No arc from a node to itself

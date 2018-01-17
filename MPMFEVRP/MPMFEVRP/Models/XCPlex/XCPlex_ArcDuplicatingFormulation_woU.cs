@@ -7,6 +7,7 @@ using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -45,6 +46,7 @@ namespace MPMFEVRP.Models.XCPlex
             //dvs: X_ijv and Y_irj
             AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numNonESNodes, numNonESNodes, numVehCategories, out X);
             AddThreeDimensionalDecisionVariable("Y", Y_LB, Y_UB, NumVarType.Int, numNonESNodes, numES, numNonESNodes, out Y);
+            GiveAFeasibleSolution();
 
             //auxiliaries (T_j, Delta_j, Epsilon_j)
             AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numNonESNodes, out T);
@@ -55,6 +57,48 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
+        }
+        void GiveAFeasibleSolution()
+        {
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        X[i][j][v].LB = 0.0;
+                        X[i][j][v].UB = 0.0;
+                    }
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int r = 0; r < numES; r++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Y[i][r][j].LB = 0.0;
+                        Y[i][r][j].UB = 0.0;
+                    }
+            IKTestsToDelete ikTest = new IKTestsToDelete();
+            List<List<int>> routes = ikTest.Routes;
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    int from = routes[0].IndexOf(i);
+                    if (from >= 0)
+                        if (routes[0].ElementAt(from + 1) == j)
+                        {
+                            X[i][j][0].LB = 1.0;
+                            X[i][j][0].UB = 1.0;
+                        }
+                }
+            for(int rt = 1; rt<routes.Count;rt++)
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    int from = routes[rt].IndexOf(i);
+                    if (from >= 0)
+                        if (routes[rt].ElementAt(from + 1) == j)
+                        {
+                            X[i][j][1].LB = 1.0;
+                            X[i][j][1].UB = 1.0;
+                        }
+                }
         }
         void SetUndesiredXYVariablesTo0()
         {
@@ -829,10 +873,11 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public void GetDecisionVariableValues()
         {
+            //System.IO.StreamWriter sw = new System.IO.StreamWriter("routes.txt");
             double[,,] xValues = new double[numNonESNodes, numNonESNodes, numVehCategories];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
-                    xValues[i, j, 0] = GetValue(X[i][j][0]);//CONSULT (w/ Isil): Why only 0 when xValues is defined over all numVehCategories?
+                    xValues[i, j, 0] = GetValue(X[i][j][0]);//CONSULT (w/ Isil): Why only 0 when xValues is defined over all numVehCategories? IK: This was just debugging purposes, since EMH does not have any GDVs, I only wrote [0].
             double[,,] yValues = new double[numNonESNodes, numES, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int r = 0; r < numES; r++)
@@ -921,7 +966,6 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "Arc Duplicating without U";
         }
-
         public override void RefineDecisionVariables(CustomerSet cS)
         {
             RHS_forNodeCoverage = new double[numNonESNodes];
