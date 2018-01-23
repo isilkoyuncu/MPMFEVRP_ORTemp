@@ -18,10 +18,10 @@ namespace MPMFEVRP.Models.XCPlex
 
         //Auxiliaries, upper and lower bounds
         INumVar[] Epsilon;
-        INumVar[] Delta; 
-        INumVar[] T; 
+        INumVar[] Delta;
+        INumVar[] T;
 
-        int firstCustomerVisitationConstraintIndex=-1;
+        int firstCustomerVisitationConstraintIndex = -1;
         int totalTravelTimeConstraintIndex = -1;
 
         IndividualRouteESVisits singleRouteESvisits;
@@ -29,7 +29,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlex_NodeDuplicatingFormulation_woU() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam){ } //XCPlex VRP Constructor
+            : base(theProblemModel, xCplexParam) { } //XCPlex VRP Constructor
 
         protected override void DefineDecisionVariables()
         {
@@ -114,7 +114,7 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
                 RHS_forNodeCoverage[i] = 1.0;
-            }                
+            }
         }
         public override string GetDescription_AllVariables_Array()
         {
@@ -140,11 +140,11 @@ namespace MPMFEVRP.Models.XCPlex
             //First term: prize collection
             for (int i = 0; i < NumPreprocessedSites; i++)
                 for (int j = 0; j < NumPreprocessedSites; j++)
-            {
-                Site s = preprocessedSites[j];
-                for (int v = 0; v < numVehCategories; v++)
-                    objFunction.AddTerm(Prize(s, vehicleCategories[v]), X[i][j][v]);
-            }
+                {
+                    Site s = preprocessedSites[j];
+                    for (int v = 0; v < numVehCategories; v++)
+                        objFunction.AddTerm(Prize(s, vehicleCategories[v]), X[i][j][v]);
+                }
             //Second term: distance-based costs
             for (int i = 0; i < NumPreprocessedSites; i++)
             {
@@ -159,7 +159,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Third term: vehicle fixed costs
             for (int j = 0; j < NumPreprocessedSites; j++)
                 for (int v = 0; v < numVehCategories; v++)
-                objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+                    objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
             //Now adding the objective function to the model
             AddMaximize(objFunction);
         }
@@ -212,7 +212,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_MaxNumberOfVehiclesPerCategory();//5
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
 
-            if (rechargingDuration_status==RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
+            if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
                 AddConstraint_DepartureSOCFromNode_PartialRecharging();//7-8
             else
             {
@@ -224,7 +224,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_SOCRegulationFollowingDepot();//10
             AddConstraint_TimeRegulationFollowingACustomerVisit();//11
 
-            if(rechargingDuration_status==RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+            if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                 AddConstraint_TimeRegulationFollowingAnESVisit_FixedRechargingDuration();//12
             else
                 AddConstraint_TimeRegulationFollowingAnESVisit_VariableRechargingDuration();//12
@@ -235,6 +235,7 @@ namespace MPMFEVRP.Models.XCPlex
             //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();
             //AddConstraint_EnergyConservation();
             //All constraints added
+
             allConstraints_array = allConstraints_list.ToArray();
         }
 
