@@ -16,7 +16,7 @@ namespace MPMFEVRP.Utils
         {
             //areFilesTheSame = CheckIfTwoFilesAreTheSame();
             //isFeasible = CheckIfTheGivenSolutionIsFeasible();
-            routes = SubstractTheRouteFromSolution();
+            //routes = SubstractTheRouteFromSolution();
         }
         bool CheckIfTwoFilesAreTheSame()
         {
