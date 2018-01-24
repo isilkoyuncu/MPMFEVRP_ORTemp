@@ -46,7 +46,6 @@ namespace MPMFEVRP.Models.XCPlex
             //dvs: X_ijv and Y_irj
             AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numNonESNodes, numNonESNodes, numVehCategories, out X);
             AddThreeDimensionalDecisionVariable("Y", Y_LB, Y_UB, NumVarType.Int, numNonESNodes, numES, numNonESNodes, out Y);
-            GiveAFeasibleSolution();
 
             //auxiliaries (T_j, Delta_j, Epsilon_j)
             AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numNonESNodes, out T);
@@ -58,7 +57,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
         }
-        void GiveAFeasibleSolution()
+        void rig_IK()
         {
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
