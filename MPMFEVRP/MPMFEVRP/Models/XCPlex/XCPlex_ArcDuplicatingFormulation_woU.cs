@@ -267,7 +267,7 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int r = 0; r < numES; r++)
                     {
                         Site ES = ExternalStations[r];
-                        for (int j = 0; j < numVehCategories; j++)
+                        for (int j = 0; j < numNonESNodes; j++)
                         {
                             Site sTo = preprocessedSites[j];
                             objFunction.AddTerm(GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)), Y[i][r][j]);
@@ -275,7 +275,7 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
                 //Third term: vehicle fixed costs
-                for (int j = 0; j < numVehCategories; j++)
+                for (int j = 0; j < numNonESNodes; j++)
                     for (int v = 0; v < numVehCategories; v++)
                         objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
             }
