@@ -95,7 +95,7 @@ namespace Instance_Generation.FileReaders
             }
             for (int i = 0; i < nTabularRows-1; i++)
             {
-                tempDistance[i, nTabularRows-1] = tempDistance[0, nTabularRows-1];
+                tempDistance[i, nTabularRows-1] = tempDistance[i, 0];
             }
             SortDistances(tempDistance);
             V = new Vehicle[2];
