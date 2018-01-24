@@ -55,7 +55,7 @@ namespace Instance_Generation.FileReaders
             cellsInCurrentRow = allRows[0].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             numCustomers = int.Parse(cellsInCurrentRow[1]);
             cellsInCurrentRow = allRows[1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
-            numESS = int.Parse(cellsInCurrentRow[1]);
+            numESS = int.Parse(cellsInCurrentRow[1]) + 1; //+1 is for the ESS at the depot, YC does not count the depot in their numESS reports on the file
             numSites = numCustomers + numESS + 1;
             cellsInCurrentRow = allRows[2].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             double refuelTimeMinutes = double.Parse(cellsInCurrentRow[1]);
@@ -65,27 +65,37 @@ namespace Instance_Generation.FileReaders
             while (allRows[blankRowPosition] != "")
                 blankRowPosition++;
 
-            int nTabularRows = blankRowPosition - 5;
+            int nTabularRows = blankRowPosition - 4;
             if (nTabularRows != numSites)
                 throw new Exception("number of rows is different than the total number of sites");
             double[] tempX = new double[nTabularRows];
             double[] tempY = new double[nTabularRows];
-            for (int r = 5; r < nTabularRows+5; r++)
+            for (int r = 5; r < nTabularRows+4; r++)
             {
                 cellsInCurrentRow = allRows[r].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
                 tempX[r - 5] = double.Parse(cellsInCurrentRow[0]);
                 tempY[r - 5] = double.Parse(cellsInCurrentRow[1]);
             }
+            tempX[nTabularRows-1] = tempX[0];
+            tempY[nTabularRows-1] = tempY[0];
             SortXY(tempX, tempY);//Sorts as follows: first depot, then ESs, then customers
             double[,] tempDistance = new double[nTabularRows, nTabularRows];
             string[] distanceRows = allRows[blankRowPosition + 2].Split(new string[] { "\r" }, StringSplitOptions.None);
-            for (int i = 0; i < nTabularRows; i++)
+            for (int i = 0; i < nTabularRows-1; i++)
             {
-                for (int j = 0; j < nTabularRows; j++)
+                for (int j = 0; j < nTabularRows-1; j++)
                 {
                     cellsInCurrentRow = distanceRows[i].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
                     tempDistance[i,j] = double.Parse(cellsInCurrentRow[j]);
                 }
+            }
+            for (int j = 0; j < nTabularRows-1; j++)
+            {
+                tempDistance[nTabularRows-1, j] = tempDistance[0, j];
+            }
+            for (int i = 0; i < nTabularRows-1; i++)
+            {
+                tempDistance[i, nTabularRows-1] = tempDistance[0, nTabularRows-1];
             }
             SortDistances(tempDistance);
             V = new Vehicle[2];
