@@ -27,6 +27,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList exploredFeasibleCustomerSets;
         PartitionedCustomerSetList exploredInfeasibleCustomerSets;
 
+        double avgTimePerGDVOptimalTSPSolution, avgTimePerGDVInfeasibleTSPSolution, avgTimePerEVOptimalTSPSolution, avgTimePerEVInfeasibleTSPSolution;
+
         public RandomizedCustomerSetExplorerViaTreeSearch() : base()
         {
             AddSpecializedParameters();
@@ -57,6 +59,14 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedConclude()
         {
             System.Windows.Forms.MessageBox.Show("RandomizedCustomerSetExplorerViaTreeSearch algorithm run successfully, now it's time to conclude by reporting some statistics!");
+
+            //The following assumes no div/zero error is possible, will have to come back to make this code robust
+            avgTimePerGDVOptimalTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            avgTimePerGDVInfeasibleTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+
+            avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            avgTimePerEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+
             throw new NotImplementedException();
         }
 
