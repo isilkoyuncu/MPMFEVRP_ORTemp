@@ -46,7 +46,38 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string[] GetOutputSummary()
         {
-            throw new NotImplementedException();
+            List<string> list = new List<string>{
+                //Algorithm Name has to be the first entry for output file name purposes
+                //"Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value.ToString(),
+                //Run time limit has to be the second entry for output file name purposes
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Value.ToString(),
+                
+                //Optional
+                //"Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value.ToString(),
+                //algorithmParameters.GetAllParameters();
+                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
+                //list.Add(asString);
+                
+                //Necessary statistics
+                "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
+                "avgTimePerGDVOptimalTSPSolution: " + avgTimePerGDVOptimalTSPSolution,
+                "avgTimePerGDVInfeasibleTSPSolution" + avgTimePerGDVInfeasibleTSPSolution,
+                "avgTimePerEVOptimalTSPSolution" + avgTimePerEVOptimalTSPSolution,
+                "avgTimePerEVInfeasibleTSPSolution" + avgTimePerEVInfeasibleTSPSolution,
+                "Total GDV time spent on optimal: "+ theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"],
+                "Total GDV time spent on infeasible: "+ theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"],
+                "Total EV time spent on optimal: " + theProblemModel.EV_TSP_TimeSpentAccount["Optimal"],
+                "Total EV time spent on infeasible: " + theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"],
+                "Total # of GDV optimal: "+ theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
+                "Total # of GDV infeasible: "+ theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
+                "Total # of EV optimal: "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
+                "Total # of EV infeasible: "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
+                "Solution Status: " + status.ToString()
+            };
+            
+            string[] toReturn = new string[list.Count];
+            toReturn = list.ToArray();
+            return toReturn;
         }
 
         public override bool setListener(IListener listener)
@@ -58,7 +89,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedConclude()
         {
-            System.Windows.Forms.MessageBox.Show("RandomizedCustomerSetExplorerViaTreeSearch algorithm run successfully, now it's time to conclude by reporting some statistics!");
+            //System.Windows.Forms.MessageBox.Show("RandomizedCustomerSetExplorerViaTreeSearch algorithm run successfully, now it's time to conclude by reporting some statistics!");
 
             //The following assumes no div/zero error is possible, will have to come back to make this code robust
             avgTimePerGDVOptimalTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
@@ -66,8 +97,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
             avgTimePerEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
-
-            throw new NotImplementedException();
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -130,7 +159,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedReset()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public override void SpecializedRun()

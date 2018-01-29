@@ -199,9 +199,17 @@ namespace MPMFEVRP.Forms
                         algorithm.Conclude();
                         theSolution = algorithm.Solution;
                         solutions.Add(theSolution);
-                        Log("Solution " + theSolution.ToString() + " started writing.");
-                        writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
-                        writer.Write();
+                        if (theSolution == null)
+                        {
+                            writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), null,null);
+                            writer.Write();
+                        }
+                        else
+                        {
+                            Log("Solution " + theSolution.ToString() + " started writing.");
+                            writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
+                            writer.Write();
+                        }
                         Log("**************RESET************");
                         algorithm.Reset();
                     }

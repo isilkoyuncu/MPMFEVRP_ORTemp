@@ -33,7 +33,10 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
             string algorithmName = "";
             algorithmName = algorithmOutputSummary[0].Remove(0, algorithmOutputSummary[0].IndexOf(":") + 1);
 
-            outputFileName = fileName+algorithmName+" Runtime Limit-"+runtimeLimit+".txt";
+            if (solutionOutputSummary != null)
+                outputFileName = fileName + algorithmName + " Runtime Limit-" + runtimeLimit + "_.txt";
+            else
+                outputFileName = "SingleVehicle_" + fileName + ".txt";
             //TODO Make sure everything is passed into this constructor and used appropriately
             //verify input
             //Verify();
@@ -57,12 +60,14 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
             sw.WriteLine("Instance Name:\t{0}", inputFileName);
             for (int i = 0; i < algorithmOutputSummary.Length; i++)
                 sw.WriteLine(algorithmOutputSummary[i]);
-            for (int i = 0; i < solutionOutputSummary.Length; i++)
-                sw.WriteLine(solutionOutputSummary[i]);
+            if (solutionOutputSummary != null)
+                for (int i = 0; i < solutionOutputSummary.Length; i++)
+                    sw.WriteLine(solutionOutputSummary[i]);
             sw.WriteLine();
         }
         private void WriteSolution()
         {
+            if(writableSolution!=null)
             for (int i = 0; i < writableSolution.Length; i++)
                 sw.WriteLine(writableSolution[i]);
             sw.WriteLine();
