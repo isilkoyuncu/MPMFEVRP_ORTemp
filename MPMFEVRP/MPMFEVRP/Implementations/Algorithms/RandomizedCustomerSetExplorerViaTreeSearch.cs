@@ -105,7 +105,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             theGDV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV);
             theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
 
-            popStrategy = CustomerSetList.CustomerListPopStrategy.Random;
+            popStrategy = CustomerSetList.CustomerListPopStrategy.First;
 
             exploredFeasibleCustomerSets = new PartitionedCustomerSetList();
             exploredInfeasibleCustomerSets = new PartitionedCustomerSetList();
@@ -178,6 +178,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
                         break;
+                    if (unexploredCustomerSets.CountByLevel()[currentLevel] == 0)
+                        continue;
                     CustomerSet theParent = unexploredCustomerSets.Pop(currentLevel, beamWidth)[0];
                     List<string> possibleOtherCustomers = new List<string>();
                     foreach (string customerID in theParent.PossibleOtherCustomers)
