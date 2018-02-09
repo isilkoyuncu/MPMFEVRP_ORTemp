@@ -211,6 +211,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NoGDVVisitToESNodes();//3
             AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//4
             AddConstraint_MaxNumberOfVehiclesPerCategory();//5
+            AddConstraint_MinNumberOfVehicles();//5 b
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
 
             if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
@@ -326,6 +327,17 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
                 NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
             }
+        }
+        void AddConstraint_MinNumberOfVehicles() //4-5 b
+        {
+            ILinearNumExpr NumberOfVehiclesOutgoingFromTheDepot = LinearNumExpr();
+            for (int j = 1; j < NumPreprocessedSites; j++)
+            {
+                for (int v = 0; v < numVehCategories; v++)
+                    NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
+            }
+            string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than" + (minNumVeh).ToString();
+            allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
         {

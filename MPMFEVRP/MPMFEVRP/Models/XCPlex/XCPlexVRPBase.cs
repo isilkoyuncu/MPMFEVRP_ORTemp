@@ -37,6 +37,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
+        protected int minNumVeh=0;
         public XCPlexVRPBase() { }
 
         public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam) { }
@@ -86,6 +87,8 @@ namespace MPMFEVRP.Models.XCPlex
             SetFirstAndLastNodeIndices();
             PopulateAuxiliaryBoundArraysFromSWAVs();
             SetBigMvalues();
+
+            CalculateMinNumVehicles();
         }
         void PopulateSubLists()
         {
@@ -390,7 +393,58 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
+        protected int CalculateMinNumVehicles()
+        {
+            bool dontStop = true;
+            minNumVeh = 1;
+            int oldNumVeh = 1;
+            while (dontStop)
+            {
+                List<double> travelDuration = new List<double>();
+                List<double> travelDurationFromDepot = new List<double>();
+                List<double> travelDurationToDepot = new List<double>();
+                double durationFromToDepot = 0.0;
+                double minTotalTravelDuration = 0.0;
+                double totalServiceDuration = 0.0;
+                double totalDuration = 0.0;
+                //TODO tighten this LB: calculate the min num vehicles needed to solve this problem
+                for (int j = 1; j < allOriginalSWAVs.Count; j++)
+                    if (allOriginalSWAVs[j].SiteType != SiteTypes.ExternalStation)
+                        travelDurationFromDepot.Add(TravelTime(allOriginalSWAVs[0], allOriginalSWAVs[j]));
+                var sortedDurationFromDepot = travelDurationFromDepot.OrderBy(x => x);
 
+                //for (int j = 1; j < allOriginalSWAVs.Count; j++)
+                //    if (allOriginalSWAVs[j].SiteType != SiteTypes.ExternalStation)
+                //        travelDurationToDepot.Add(TravelTime(allOriginalSWAVs[j], allOriginalSWAVs[0]));
+                //var sortedDurationToDepot = travelDurationToDepot.OrderBy(x => x);
+
+                for (int i = 0; i < 2*minNumVeh; i++)
+                    durationFromToDepot = durationFromToDepot + sortedDurationFromDepot.ElementAt(i);
+
+                for (int i = 1; i < allOriginalSWAVs.Count; i++)
+                    if (allOriginalSWAVs[i].SiteType != SiteTypes.ExternalStation)
+                        for (int j = 0; j < allOriginalSWAVs.Count; j++)
+                            if (allOriginalSWAVs[j].SiteType != SiteTypes.ExternalStation && i < j)
+                                travelDuration.Add(TravelTime(allOriginalSWAVs[i], allOriginalSWAVs[j]));
+                var sortedDuration = travelDuration.OrderBy(x => x);
+
+                for (int i = 0; i < theProblemModel.SRD.NumCustomers-minNumVeh; i++)
+                    minTotalTravelDuration = minTotalTravelDuration + sortedDuration.ElementAt(i);
+
+                foreach (Site s in allOriginalSWAVs)
+                    if (s.SiteType == SiteTypes.Customer)
+                        totalServiceDuration = totalServiceDuration + s.ServiceDuration;
+
+                totalDuration = durationFromToDepot + minTotalTravelDuration + totalServiceDuration;
+                double numVeh = totalDuration / theProblemModel.CRD.TMax;
+                minNumVeh = (int)Math.Ceiling(numVeh);
+                if (minNumVeh > oldNumVeh)
+                    oldNumVeh = minNumVeh;
+                else
+                    dontStop = false;
+            }
+            return minNumVeh;
+        }
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);
 

@@ -15,7 +15,6 @@ namespace MPMFEVRP.Models.XCPlex
     {
         int numNonESNodes;
         int numCustomers, numES;
-        int minNumVeh = 4;
 
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
         int totalTravelTimeConstraintIndex = -1;
@@ -1035,11 +1034,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        int GetMinNumVehicles()
-        {
-            //TODO calculate the min num vehicles needed to solve this problem
-            return minNumVeh;
-        }
+        
     }
 }
 
