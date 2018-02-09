@@ -15,6 +15,7 @@ namespace MPMFEVRP.Models.XCPlex
     {
         int numNonESNodes;
         int numCustomers, numES;
+        int minNumVeh = 4;
 
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
         int totalTravelTimeConstraintIndex = -1;
@@ -334,6 +335,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
             AddConstraint_MaxNumberOfEVs();//4
             AddConstraint_MaxNumberOfGDvs();//5
+            AddConstraint_MinNumberOfVehicles();//4-5 b
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
             AddConstraint_DepartureSOCFromCustomerNode();//7
             AddConstraint_DepartureSOCFromESNodeUB();//8
@@ -452,6 +454,19 @@ namespace MPMFEVRP.Models.XCPlex
             }
             string constraint_name = "Number_of_GDVs_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_GDV].ToString();
             allConstraints_list.Add(AddLe(NumberOfGDVsOutgoingFromTheDepot, numVehicles[vIndex_GDV], constraint_name));
+        }
+        void AddConstraint_MinNumberOfVehicles() //4-5 b
+        {
+            ILinearNumExpr NumberOfVehiclesOutgoingFromTheDepot = LinearNumExpr();
+            for (int j = 1; j < numNonESNodes; j++)
+            {
+                for(int v=0;v<numVehCategories;v++)
+                    NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
+                for (int r = 0; r < numES; r++)
+                    NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, Y[0][r][j]);
+            }
+            string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than" + (minNumVeh).ToString();
+            allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
         {
@@ -1019,6 +1034,11 @@ namespace MPMFEVRP.Models.XCPlex
                 c++;
             }
 
+        }
+        int GetMinNumVehicles()
+        {
+            //TODO calculate the min num vehicles needed to solve this problem
+            return minNumVeh;
         }
     }
 }

@@ -164,20 +164,20 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             {
                 distType = "X-Y";
             }
-            
-            if (allRows.Contains("Distances")) //Distance matrix exists
+            for (int r = 0; r < allRows.Length; r++)
             {
-                distance = new double[id.Length, id.Length];
-                int distPosition = blankRowPosition2+1;
-                while (allRows[distPosition] !="Distances")
-                    distPosition++;
-                for (int i = 0; i < id.Length; i++)
+                if ((allRows[r].Replace("\t", "").Replace(" ", "")).Contains("Distances"))
                 {
-                    cellsInCurrentRow = allRows[i + distPosition + 1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
-                    for (int j = 0; j < id.Length; j++)
+                    distance = new double[id.Length, id.Length];
+                    for (int i = r + 1; i <= r + id.Length; i++)
                     {
-                        distance[i, j] = double.Parse(cellsInCurrentRow[j]);
+                        cellsInCurrentRow = allRows[i].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+                        for (int j = 0; j < id.Length; j++)
+                        {
+                            distance[i-(r+1), j] = double.Parse(cellsInCurrentRow[j]);
+                        }
                     }
+                    break;
                 }
             }
         }

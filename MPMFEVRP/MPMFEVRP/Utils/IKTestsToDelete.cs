@@ -4,19 +4,63 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
+using MPMFEVRP.Domains.ProblemDomain;
 namespace MPMFEVRP.Utils
 {
     public class IKTestsToDelete
     {
         bool areFilesTheSame; public bool AreFilesTheSame { get { return areFilesTheSame; } }
         bool isFeasible; public bool IsFeasible { get { return isFeasible; } }
+        List<bool> isAllFeasible; public bool IsAllFeasible { get { return isFeasible; } }
+
         List<List<int>> routes; public List<List<int>> Routes { get { return routes; } }
+        IProblem theProblem;
+        Vehicle theEV;
+        Site theDepot;
+        int numSites;
+        List<Site> ESs;
+        List<Site> customersList;
         public IKTestsToDelete()
         {
             //areFilesTheSame = CheckIfTwoFilesAreTheSame();
             //isFeasible = CheckIfTheGivenSolutionIsFeasible();
             //routes = SubstractTheRouteFromSolution();
+            isAllFeasible = CustomersCanBeReachedWithAtMostOneESVisit();
+        }
+        List<bool> CustomersCanBeReachedWithAtMostOneESVisit()
+        {
+            List<bool> tempisAllFeasible = new List<bool>();
+            for (int i = 1; i <= 10; i++)
+            {
+                if(i==10)
+                    theProblem = ProblemUtil.CreateProblemByFileName("EV vs GDV Minimum Cost VRP", "C:\\Users\\ikoyuncu\\Google Drive\\0-Research\\KoyuncuYavuzInstances\\Yavuz-Capar Test Instances\\KY 50c1i2e-U 80x80_1(1,1+0+0)_2(2+0+0)_Y24\\50c0i3e-U10-80x80_1(1,1+0+0)_2(2+0+0)_Y24.txt");
+                else
+                    theProblem = ProblemUtil.CreateProblemByFileName("EV vs GDV Minimum Cost VRP", "C:\\Users\\ikoyuncu\\Google Drive\\0-Research\\KoyuncuYavuzInstances\\Yavuz-Capar Test Instances\\KY 50c1i2e-U 80x80_1(1,1+0+0)_2(2+0+0)_Y24\\50c0i3e-U0" + i + "-80x80_1(1,1+0+0)_2(2+0+0)_Y24.txt");
+                theEV = theProblem.PDP.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
+                theDepot = theProblem.PDP.SRD.GetSingleDepotSite();
+                numSites = theProblem.PDP.SRD.NumNodes;
+                ESs = theProblem.PDP.SRD.GetSitesList(SiteTypes.ExternalStation);
+                customersList = theProblem.PDP.SRD.GetSitesList(SiteTypes.Customer);
+                foreach (Site c in customersList)
+                    tempisAllFeasible.Add(CustomerCannotBeReachedWithAtMostOneESVisit(c.ID));
+
+            }
+
+            return tempisAllFeasible;
+        }
+        bool CustomerCannotBeReachedWithAtMostOneESVisit(String cID)
+        {
+            double EVDrivingRange = theEV.BatteryCapacity / theEV.ConsumptionRate;
+            double workdayLength = theDepot.DueDate;
+                if ((theProblem.PDP.SRD.GetDistance(cID, theDepot.ID) + theProblem.PDP.SRD.GetDistance(theDepot.ID, cID)) <= EVDrivingRange)
+                    return false;
+                foreach(Site es in ESs)
+                        if (theProblem.PDP.SRD.GetDistance(theDepot.ID,es.ID) <= EVDrivingRange)
+                            if (theProblem.PDP.SRD.GetDistance(es.ID,cID) + theProblem.PDP.SRD.GetDistance(cID,theDepot.ID) <= EVDrivingRange)
+                                if ((theProblem.PDP.SRD.GetDistance(theDepot.ID, es.ID) + theProblem.PDP.SRD.GetDistance(es.ID, cID) + theProblem.PDP.SRD.GetDistance(cID, theDepot.ID)) / theProblem.PDP.CRD.TravelSpeed + theProblem.PDP.SRD.GetSiteByID(cID).ServiceDuration + (1.0 / theProblem.PDP.SRD.GetSiteByID(es.ID).RechargingRate) <= workdayLength)
+                                    return false;
+            return true;
         }
         bool CheckIfTwoFilesAreTheSame()
         {
