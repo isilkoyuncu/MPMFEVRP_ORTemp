@@ -38,6 +38,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
         protected int minNumVeh=0;
+        int numESVisits = 0;
         public XCPlexVRPBase() { }
 
         public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam) { }
@@ -393,7 +394,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        protected int CalculateMinNumVehicles()
+        protected int CalculateMinNumVehicles_oldold()
         {
             bool dontStop = true;
             minNumVeh = 1;
@@ -445,6 +446,141 @@ namespace MPMFEVRP.Models.XCPlex
             }
             return minNumVeh;
         }
+        protected int CalculateMinNumVehicles_old()
+        {
+            bool dontStop = true;
+            minNumVeh = 1;
+            int oldNumVeh = 1;
+            int numCustomers = theProblemModel.SRD.NumCustomers;
+            string theDepotID = theProblemModel.SRD.GetSingleDepotID();
+            
+            double[] minDurationsFrom = new double[numCustomers];
+            string[] idsOfminDurationFrom = new string[numCustomers];
+            double[] minDurationsTo = new double[numCustomers];
+            string[] idsOfminDurationTo = new string[numCustomers];
+            double[] durationsFromDepot = new double[numCustomers];
+            string[] idsOfdurationFromDepot = new string[numCustomers];
+
+            for (int i = 0; i < customers.Count; i++)
+            {
+                double minDuration = double.MaxValue;
+                string minDurationID = "";
+                for (int j = 0; j < allOriginalSWAVs.Count; j++)
+                    if (allOriginalSWAVs[j].SiteType != SiteTypes.ExternalStation 
+                        && 
+                        customers[i].ID != allOriginalSWAVs[j].ID)
+                        if (TravelTime(customers[i], allOriginalSWAVs[j]) < minDuration)
+                        {
+                            minDuration = TravelTime(customers[i], allOriginalSWAVs[j]);
+                            minDurationID = allOriginalSWAVs[j].ID;
+                        }
+                minDurationsFrom[i] = minDuration;
+                idsOfminDurationFrom[i] = minDurationID;
+                minDuration = double.MaxValue;
+                minDurationID = "";
+                for (int k = 0; k < allOriginalSWAVs.Count; k++)
+                    if (allOriginalSWAVs[k].SiteType == SiteTypes.Customer 
+                        && 
+                        customers[i].ID != allOriginalSWAVs[k].ID && 
+                        allOriginalSWAVs[k].ID != idsOfminDurationFrom[i] 
+                        || 
+                        allOriginalSWAVs[k].SiteType == SiteTypes.Depot)
+                        if (TravelTime(allOriginalSWAVs[k], customers[i]) < minDuration)
+                        {
+                            minDuration = TravelTime(allOriginalSWAVs[k], customers[i]);
+                            minDurationID = allOriginalSWAVs[k].ID;
+                        }
+                minDurationsTo[i] = minDuration;
+                idsOfminDurationTo[i] = minDurationID;
+            }
+
+            for (int j = 0; j < customers.Count; j++)
+            {
+                durationsFromDepot[j] = TravelTime(TheDepot, customers[j]);
+                idsOfdurationFromDepot[j] =customers[j].ID;
+            }
+            Array.Sort(durationsFromDepot, idsOfdurationFromDepot);
+
+            List<string> singleCustVisitFromDepot = new List<string>();
+            List<string> visitFromDepot = new List<string>();
+
+            while (dontStop)
+            {               
+                List<double> travelDurationFromDepot = new List<double>();
+                List<double> travelDurationToDepot = new List<double>();
+                double durationFromToDepot = 0.0;
+                double minCustomersTravelDuration = 0.0;
+                double avgMinTotalTravelDuration = 0.0;
+                double totalServiceDuration = 0.0;
+                double totalDuration = 0.0;
+
+                int nArcsSelectedByDepot = 0;
+                int indexMinDurationFromDepot = 0;
+                while (nArcsSelectedByDepot <2* minNumVeh)
+                {
+                    int count = 0;
+                    int index = 0;
+                    for (int j = 0; j < customers.Count; j++)
+                        if (customers[j].ID == idsOfdurationFromDepot[indexMinDurationFromDepot])
+                        {
+                            index = j;
+                            break;
+                        }
+                    if (idsOfminDurationFrom[index] == theDepotID && 
+                        idsOfminDurationTo[index] == theDepotID)
+                    {
+                        count = 2;
+                        singleCustVisitFromDepot.Add(idsOfdurationFromDepot[indexMinDurationFromDepot]);
+                    }
+                    else
+                    {
+                        count = 1;
+                        visitFromDepot.Add(idsOfdurationFromDepot[indexMinDurationFromDepot]);
+                    }
+                    durationFromToDepot = durationFromToDepot + count * durationsFromDepot[indexMinDurationFromDepot];
+                    indexMinDurationFromDepot++;
+                    nArcsSelectedByDepot = nArcsSelectedByDepot + count;
+                }
+
+                for (int i = 0; i < numCustomers; i++)
+                    minCustomersTravelDuration = minCustomersTravelDuration + minDurationsFrom[i] + minDurationsTo[i];
+
+                avgMinTotalTravelDuration = (minCustomersTravelDuration + durationFromToDepot)/2.0;
+
+                foreach (Site s in customers)
+                    totalServiceDuration = totalServiceDuration + s.ServiceDuration;
+
+                totalDuration = avgMinTotalTravelDuration + totalServiceDuration;
+                double numVeh = totalDuration / theProblemModel.CRD.TMax;
+                minNumVeh = (int)Math.Ceiling(numVeh);
+                if (minNumVeh > oldNumVeh)
+                    oldNumVeh = minNumVeh;
+                else
+                    dontStop = false;
+            }
+            return minNumVeh;
+        }
+        protected int CalculateMinNumVehicles()
+        {
+            minNumVeh = 1;
+            numESVisits = 0;
+            TotalRouteMeasures trm = new TotalRouteMeasures(theProblemModel, allOriginalSWAVs, customers, minNumVeh, numESVisits);
+            bool dontStop = true;
+            int oldNumVeh = 1;
+            
+            while (dontStop)
+            {
+                double totalDuration;
+                double numVeh = trm.TotalTravelDistance / theProblemModel.CRD.TMax;
+                minNumVeh = (int)Math.Ceiling(numVeh);
+                if (minNumVeh > oldNumVeh)
+                    oldNumVeh = minNumVeh;
+                else
+                    dontStop = false;
+            }
+            return minNumVeh;
+        }
+
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);
 

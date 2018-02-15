@@ -32,5 +32,10 @@ namespace MPMFEVRP.Forms
         {
             new TestInstanceGenerator().ShowDialog();
         }
+
+        private void Button_TSRuns_Click(object sender, EventArgs e)
+        {
+            new TS_Runs().ShowDialog();
+        }
     }
 }

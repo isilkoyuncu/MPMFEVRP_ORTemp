@@ -465,7 +465,7 @@ namespace MPMFEVRP.Models.XCPlex
                     NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, Y[0][r][j]);
             }
             string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than" + (minNumVeh).ToString();
-            allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
+            allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, 5, constraint_name));
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
         {
