@@ -562,22 +562,9 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected int CalculateMinNumVehicles()
         {
-            minNumVeh = 1;
-            numESVisits = 0;
-            TotalRouteMeasures trm = new TotalRouteMeasures(theProblemModel, allOriginalSWAVs, customers, minNumVeh, numESVisits);
-            bool dontStop = true;
-            int oldNumVeh = 1;
-            
-            while (dontStop)
-            {
-                double totalDuration;
-                double numVeh = trm.TotalTravelDistance / theProblemModel.CRD.TMax;
-                minNumVeh = (int)Math.Ceiling(numVeh);
-                if (minNumVeh > oldNumVeh)
-                    oldNumVeh = minNumVeh;
-                else
-                    dontStop = false;
-            }
+            TotalRouteMeasures trm = new TotalRouteMeasures(theProblemModel, TheDepot, externalStations, customers);
+            trm.SetNumberOfVehiclesNeeded();
+            minNumVeh = trm.NumRoutes;
             return minNumVeh;
         }
 
