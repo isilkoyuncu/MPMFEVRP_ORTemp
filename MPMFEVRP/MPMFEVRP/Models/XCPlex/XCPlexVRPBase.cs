@@ -34,6 +34,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected double[] minValue_Epsilon, maxValue_Epsilon;
         protected double[][] BigDelta;
         protected double[][] BigT;
+        protected double[][][] BigTVarRecharge;
 
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
@@ -381,16 +382,22 @@ namespace MPMFEVRP.Models.XCPlex
         {
             BigDelta = new double[NumPreprocessedSites][];
             BigT = new double[NumPreprocessedSites][];
+            BigTVarRecharge = new double[NumPreprocessedSites][][];
 
             for (int i = 0; i < NumPreprocessedSites; i++)
             {
                 BigDelta[i] = new double[NumPreprocessedSites];
                 BigT[i] = new double[NumPreprocessedSites];
+                BigTVarRecharge[i] = new double[NumPreprocessedSites][];
 
                 for (int j = 0; j < NumPreprocessedSites; j++)
                 {
                     BigDelta[i][j] = maxValue_Delta[j] - minValue_Delta[i] - minValue_Epsilon[i];
                     BigT[i][j] = maxValue_T[i] - minValue_T[j];
+
+                    BigTVarRecharge[i][j] = new double[externalStations.Count];
+                    for (int r = 0; r < externalStations.Count; r++)
+                        BigTVarRecharge[i][j][r] = maxValue_T[i] + (maxValue_Delta[j] - minValue_Delta[i] - minValue_Epsilon[i]) / RechargingRate(externalStations[r]) - minValue_T[j];
                 }
             }
         }
