@@ -579,8 +579,6 @@ namespace MPMFEVRP.Models.XCPlex
             EnergyConservation.Clear();
         }
 
-
-
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<string> activeX = new List<string>();

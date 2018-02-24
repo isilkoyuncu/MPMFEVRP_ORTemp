@@ -260,10 +260,10 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 totalTravelTime = totalTravelTime + minDurationsFrom[i] + minDurationsTo[i];
             }
             double totalServiceTime = 0.0;
-            //foreach(Site customer in customers)
-            //{
-            //    totalServiceTime = totalServiceTime + customer.ServiceDuration;
-            //}
+            foreach (Site customer in customers)
+            {
+                totalServiceTime = totalServiceTime + customer.ServiceDuration;
+            }
 
             return ((totalTravelTime/2.0)+totalServiceTime);
         }

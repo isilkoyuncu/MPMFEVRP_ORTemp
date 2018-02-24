@@ -27,6 +27,10 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] Epsilon;
         INumVar[] Delta;
         INumVar[] T;
+
+        IndividualRouteESVisits singleRouteESvisits;
+        List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
+
         public XCPlex_ArcDuplicatingFormulation_woU() { }
         public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam)
@@ -851,8 +855,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             Vehicle theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory);//Pulling the vehicle infor from the Problem Model. Not exactly flexible, but works as long as we have only two categories of vehicles and no more than one of each
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
+            int counter = 0;
             foreach (List<string> nonDepotSiteIDs in GetListsOfNonDepotSiteIDs(vehicleCategory))
-                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, nonDepotSiteIDs));
+            {
+                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, nonDepotSiteIDs, allRoutesESVisits[counter]));
+                counter++;
+            }
             return outcome;
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
@@ -934,24 +942,38 @@ namespace MPMFEVRP.Models.XCPlex
 
             List<int> currentSiteIndices = firstSiteIndices;
             List<int> nextSiteIndices;
-
+            singleRouteESvisits = new IndividualRouteESVisits();
+            int i = 0, r = 0, j = 0;
             do
             {
+                j = currentSiteIndices.Last();
                 if (currentSiteIndices.Count == 2)
+                {
                     outcome.Add(ExternalStations[currentSiteIndices.First()].ID);
-                outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);
+                    r = currentSiteIndices.First();
+                    singleRouteESvisits.Add(GetIndividualESVisit(i, r, j));
+                }
+                outcome.Add(preprocessedSites[currentSiteIndices.Last()].ID);               
 
                 nextSiteIndices = GetNextSiteIndices(currentSiteIndices.Last(), vehicleCategory);
+                i = currentSiteIndices.Last();
                 if (preprocessedSites[nextSiteIndices.Last()].ID == TheDepot.ID)
                 {
                     if (nextSiteIndices.Count == 2)
+                    {
+                        r = nextSiteIndices.First();
+                        j = 0;
                         outcome.Add(ExternalStations[nextSiteIndices.First()].ID);
+                        singleRouteESvisits.Add(GetIndividualESVisit(i, r, j));
+                    }
+                    allRoutesESVisits.Add(singleRouteESvisits);
                     return outcome;
                 }
                 currentSiteIndices = nextSiteIndices;
             }
             while (preprocessedSites[currentSiteIndices.Last()].ID != TheDepot.ID);
 
+            allRoutesESVisits.Add(singleRouteESvisits);
             return outcome;
         }
         List<int> GetNextSiteIndices(int currentSiteIndex, VehicleCategories vehicleCategory)
@@ -969,7 +991,15 @@ namespace MPMFEVRP.Models.XCPlex
                             return new List<int>() { nextESIndex, nextCustomerIndex };
             throw new System.Exception("Flow ended before returning to the depot!");
         }
+        IndividualESVisitDataPackage GetIndividualESVisit(int i, int r, int j)
+        {
+            Site from = preprocessedSites[i];
+            Site ES = ExternalStations[r];
+            Site to = preprocessedSites[j];
 
+            double timeSpentInES = GetValue(T[j]) - TravelTime(from, ES) - ServiceDuration(from) - GetValue(T[i]) - TravelTime(ES, to);
+            return new IndividualESVisitDataPackage(ES.ID, timeSpentInES / RechargingRate(ES), preprocessedESSiteIndex: r);
+        }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
             return new RouteBasedSolution(GetVehicleSpecificRoutes());
