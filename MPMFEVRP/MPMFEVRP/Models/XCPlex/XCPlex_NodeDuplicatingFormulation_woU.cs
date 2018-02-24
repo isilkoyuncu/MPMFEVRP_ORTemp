@@ -237,10 +237,9 @@ namespace MPMFEVRP.Models.XCPlex
             //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();
             //AddConstraint_EnergyConservation();
             //All constraints added
-
+            //AddConstraint_TimeRegulationFollowingDepot();
             allConstraints_array = allConstraints_list.ToArray();
         }
-
         void AddConstraint_NumberOfVisitsPerCustomerNode()//1
         {
             firstCustomerVisitationConstraintIndex = allConstraints_list.Count;
@@ -440,6 +439,21 @@ namespace MPMFEVRP.Models.XCPlex
                         TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, sTo) + BigT[i][j]), X[i][j][v]);
                     string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
                     allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
+                    TimeDifference.Clear();
+                }
+        }
+        void AddConstraint_TimeRegulationFollowingDepot()//000
+        {
+                for (int j = 0; j < NumPreprocessedSites; j++)
+                {
+                    Site sFrom = preprocessedSites[0];
+                    Site sTo = preprocessedSites[j];
+                    ILinearNumExpr TimeDifference = LinearNumExpr();
+                    TimeDifference.AddTerm(1.0, T[j]);
+                    for (int v = 0; v < numVehCategories; v++)
+                        TimeDifference.AddTerm(-1.0 * (TravelTime(sFrom, sTo) + BigT[0][j]), X[0][j][v]);
+                    string constraint_name = "Time_Regulation_from_depot_to_node_" + j.ToString();
+                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
                     TimeDifference.Clear();
                 }
         }

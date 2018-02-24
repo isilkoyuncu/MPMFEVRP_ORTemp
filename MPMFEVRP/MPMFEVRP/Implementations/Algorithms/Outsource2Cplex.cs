@@ -76,7 +76,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             }
             //ISSUE (#5) the following is turned on and off to export the model, and there are two issues with this. 1-The same command is also used in individual model classes, thus they should be deleted. 2-The outputting of model(s) should be tied to parameters and left to run-time user decision
-            //model.ExportModel(theProblemModel.GetInstanceName(theProblemModel.InputFileName) + "-" +((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString() + "- model.lp");
+            model.ExportModel(theProblemModel.GetInstanceName(theProblemModel.InputFileName) + "-" +((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString() + "- model.lp");
             return model;
         }
 

@@ -56,6 +56,39 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
+            rig_IKfromNDFEMH();
+        }
+        void rig_IKfromNDFEMH()
+        {
+            Y[0][2][3].LB = 1.0;
+            X[3][13][0].LB = 1.0;
+            X[13][12][0].LB = 1.0;
+            X[12][5][0].LB = 1.0;
+            X[5][0][0].LB = 1.0;
+
+            X[0][4][0].LB = 1.0;
+            X[4][17][0].LB = 1.0;
+            X[17][10][0].LB = 1.0;
+            X[10][0][0].LB = 1.0;
+
+            X[0][6][0].LB = 1.0;
+            X[6][1][0].LB = 1.0;
+            X[1][15][0].LB = 1.0;
+            X[15][0][0].LB = 1.0;
+
+            X[0][8][0].LB = 1.0;
+            X[8][19][0].LB = 1.0;
+            X[19][14][0].LB = 1.0;
+            X[14][7][0].LB = 1.0;
+            X[7][9][0].LB = 1.0;
+            X[9][20][0].LB = 1.0;
+            X[20][0][0].LB = 1.0;
+
+            X[0][18][0].LB = 1.0;
+            Y[18][3][11].LB = 1.0;
+            X[11][2][0].LB = 1.0;
+            X[2][16][0].LB = 1.0;
+            X[16][0][0].LB = 1.0;
         }
         void rig_IK()
         {
@@ -512,7 +545,7 @@ namespace MPMFEVRP.Models.XCPlex
                     DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                     for (int i = 0; i < numNonESNodes; i++)
                         DepartureSOCFromES.AddTerm(EnergyConsumption(from,to,VehicleCategories.EV), Y[i][r][j]);
-                    string constraint_name = "Departure_SOC(UB)_From_ES_" + r.ToString() + "_going_to_" + j.ToString();
+                    string constraint_name = "Departure_SOC(UB)_From_ES_" + r.ToString() + "_going_to_customer_" + j.ToString();
                     allConstraints_list.Add(AddLe(DepartureSOCFromES, BatteryCapacity(VehicleCategories.EV), constraint_name));
                     
                 }
@@ -631,14 +664,16 @@ namespace MPMFEVRP.Models.XCPlex
                         Site ES = ExternalStations[r];
                         Site sTo = preprocessedSites[j];
                         ILinearNumExpr TimeDifference = LinearNumExpr();
+                        double travelDuration = TravelTime(sFrom, ES) + TravelTime(ES, sTo);
+                        double timeSpentDueToEnergyConsumption = (EnergyConsumption(sFrom, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV))/ RechargingRate(ES);
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
-                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, ES) + TravelTime(ES, sTo)+(EnergyConsumption(sFrom,ES,VehicleCategories.EV)+ EnergyConsumption(ES, sTo, VehicleCategories.EV)/RechargingRate(ES)) + BigT[i][j]), Y[i][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) +travelDuration+ timeSpentDueToEnergyConsumption + BigTVarRecharge[i][j][r]), Y[i][r][j]);
                         TimeDifference.AddTerm(-1.0 / RechargingRate(ES), Delta[j]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Delta[i]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Epsilon[i]);
                         string constraint_name = "Time_Regulation_from_customer_" + i.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigT[i][j]+ (EnergyConsumption(sFrom, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV) / RechargingRate(ES))), constraint_name));
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigTVarRecharge[i][j][r]), constraint_name)); //BigTVarRecharge[i][j][r] is defined as i,j,r so it is the correct format
                     }
         }
         void AddConstraint_TimeRegulationFromDepotThroughAnESVisit()//13c
