@@ -28,6 +28,8 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] Delta;
         INumVar[] T;
 
+        protected double[][][] BigTVarRecharge;
+
         IndividualRouteESVisits singleRouteESvisits;
         List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
 
@@ -60,39 +62,82 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXYVariablesTo0();
-            rig_IKfromNDFEMH();
+            //rig_IKfromNDFEMH();
         }
         void rig_IKfromNDFEMH()
         {
-            Y[0][2][3].LB = 1.0;
-            X[3][13][0].LB = 1.0;
-            X[13][12][0].LB = 1.0;
-            X[12][5][0].LB = 1.0;
-            X[5][0][0].LB = 1.0;
 
-            X[0][4][0].LB = 1.0;
-            X[4][17][0].LB = 1.0;
-            X[17][10][0].LB = 1.0;
-            X[10][0][0].LB = 1.0;
+            T[1].LB = 366.00699;
+            T[2].LB = 400.20915;
+            T[3].LB = 220.1283875;
+            T[4].LB = 81.44184;
+            T[5].LB = 488.3652575;
+            T[6].LB = 219.0498;
+            T[7].LB = 349.19325;
+            T[8].LB = 114.21864;
+            T[9].LB = 478.446045;
+            T[10].LB = 416.758605;
+            T[11].LB = 231.152445;
+            T[12].LB = 411.3943625;
+            T[13].LB = 275.0834975;
+            T[14].LB = 306.22566;
+            T[15].LB = 504.3756;
+            T[16].LB = 530.24517;
+            T[17].LB = 251.21334;
+            T[18].LB = 90.40152;
+            T[19].LB = 249.225225;
+            T[20].LB = 576.055185;
 
-            X[0][6][0].LB = 1.0;
-            X[6][1][0].LB = 1.0;
-            X[1][15][0].LB = 1.0;
-            X[15][0][0].LB = 1.0;
+            T[1].UB = 366.00699;
+            T[2].UB = 400.20915;
+            T[3].UB = 220.1283875;
+            T[4].UB = 81.44184;
+            T[5].UB = 488.3652575;
+            T[6].UB = 219.0498;
+            T[7].UB = 349.19325;
+            T[8].UB = 114.21864;
+            T[9].UB = 478.446045;
+            T[10].UB = 416.758605;
+            T[11].UB = 231.152445;
+            T[12].UB = 411.3943625;
+            T[13].UB = 275.0834975;
+            T[14].UB = 306.22566;
+            T[15].UB = 504.3756;
+            T[16].UB = 530.24517;
+            T[17].UB = 251.21334;
+            T[18].UB = 90.40152;
+            T[19].UB = 249.225225;
+            T[20].UB = 576.055185;
 
-            X[0][8][0].LB = 1.0;
-            X[8][19][0].LB = 1.0;
-            X[19][14][0].LB = 1.0;
-            X[14][7][0].LB = 1.0;
-            X[7][9][0].LB = 1.0;
-            X[9][20][0].LB = 1.0;
-            X[20][0][0].LB = 1.0;
+            //Y[0][2][3].LB = 1.0;
+            //X[3][13][0].LB = 1.0;
+            //X[13][12][0].LB = 1.0;
+            //X[12][5][0].LB = 1.0;
+            //X[5][0][0].LB = 1.0;
 
-            X[0][18][0].LB = 1.0;
-            Y[18][3][11].LB = 1.0;
-            X[11][2][0].LB = 1.0;
-            X[2][16][0].LB = 1.0;
-            X[16][0][0].LB = 1.0;
+            //X[0][4][0].LB = 1.0;
+            //X[4][17][0].LB = 1.0;
+            //X[17][10][0].LB = 1.0;
+            //X[10][0][0].LB = 1.0;
+
+            //X[0][6][0].LB = 1.0;
+            //X[6][1][0].LB = 1.0;
+            //X[1][15][0].LB = 1.0;
+            //X[15][0][0].LB = 1.0;
+
+            //X[0][8][0].LB = 1.0;
+            //X[8][19][0].LB = 1.0;
+            //X[19][14][0].LB = 1.0;
+            //X[14][7][0].LB = 1.0;
+            //X[7][9][0].LB = 1.0;
+            //X[9][20][0].LB = 1.0;
+            //X[20][0][0].LB = 1.0;
+
+            //X[0][18][0].LB = 1.0;
+            //Y[18][3][11].LB = 1.0;
+            //X[11][2][0].LB = 1.0;
+            //X[2][16][0].LB = 1.0;
+            //X[16][0][0].LB = 1.0;
         }
         void rig_IK()
         {
@@ -194,21 +239,26 @@ namespace MPMFEVRP.Models.XCPlex
             X_UB = new double[numNonESNodes][][];
             Y_LB = new double[numNonESNodes][][];
             Y_UB = new double[numNonESNodes][][];
-            
+            BigTVarRecharge = new double[numNonESNodes][][];
+
             RHS_forNodeCoverage = new double[numNonESNodes];
 
             for (int i = 0; i < numNonESNodes; i++)
             {
                 Y_LB[i] = new double[numES][];
                 Y_UB[i] = new double[numES][];
+                BigTVarRecharge[i] = new double[numES][];
+
                 for (int r = 0; r < numES; r++)
                 {
                     Y_LB[i][r] = new double[numNonESNodes];
                     Y_UB[i][r] = new double[numNonESNodes];
+                    BigTVarRecharge[i][r] = new double[numNonESNodes];
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Y_LB[i][r][j] = 0.0;
                         Y_UB[i][r][j] = 1.0;
+                        BigTVarRecharge[i][r][j] = maxValue_T[i] - minValue_T[j] + TravelTime(preprocessedSites[i], ExternalStations[r]) + TravelTime(ExternalStations[r],preprocessedSites[j])+(BatteryCapacity(VehicleCategories.EV)+EnergyConsumption(preprocessedSites[i],ExternalStations[r],VehicleCategories.EV))/RechargingRate(ExternalStations[r]);
                     }
                 }
                 RHS_forNodeCoverage[i] = 1.0;
@@ -381,11 +431,11 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
             if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
             {
-                AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging();//13b
+                AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging();//13c
             }
             else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full)
             {
-                AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging();//13b
+                AddConstraint_TimeRegulationThroughAnESVisits_VariableFullTimeRecharging();//13b
                 AddConstraint_DepartureSOCFromESNodeLB();//9
             }
             else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
@@ -672,12 +722,34 @@ namespace MPMFEVRP.Models.XCPlex
                         double timeSpentDueToEnergyConsumption = (EnergyConsumption(sFrom, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV))/ RechargingRate(ES);
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
-                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) +travelDuration+ timeSpentDueToEnergyConsumption + BigTVarRecharge[i][j][r]), Y[i][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) +travelDuration+ timeSpentDueToEnergyConsumption + BigTVarRecharge[i][r][j]), Y[i][r][j]);
                         TimeDifference.AddTerm(-1.0 / RechargingRate(ES), Delta[j]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Delta[i]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Epsilon[i]);
                         string constraint_name = "Time_Regulation_from_customer_" + i.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigTVarRecharge[i][j][r]), constraint_name)); //BigTVarRecharge[i][j][r] is defined as i,j,r so it is the correct format
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigTVarRecharge[i][r][j]), constraint_name)); 
+                    }
+        }
+        void AddConstraint_TimeRegulationThroughAnESVisits_VariableFullTimeRecharging()//13b Only in VF, VP cases
+        {
+            for (int i = 1; i < numNonESNodes; i++)
+                for (int r = 0; r < numES; r++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sFrom = preprocessedSites[i];
+                        Site ES = ExternalStations[r];
+                        Site sTo = preprocessedSites[j];
+                        ILinearNumExpr TimeDifference = LinearNumExpr();
+                        double travelDuration = TravelTime(sFrom, ES) + TravelTime(ES, sTo);
+                        double timeSpentDueToEnergyConsumption = (BatteryCapacity(VehicleCategories.EV) + EnergyConsumption(sFrom, ES, VehicleCategories.EV)) / RechargingRate(ES);
+                        TimeDifference.AddTerm(1.0, T[j]);
+                        TimeDifference.AddTerm(-1.0, T[i]);
+                        TimeDifference.AddTerm(-1.0 * (BigTVarRecharge[i][r][j]), Y[i][r][j]);
+                        TimeDifference.AddTerm(1.0 / RechargingRate(ES), Delta[i]);
+                        TimeDifference.AddTerm(1.0 / RechargingRate(ES), Epsilon[i]);
+                        string constraint_name = "Time_Regulation_from_customer_" + i.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
+                        double rhs = -1.0 * BigTVarRecharge[i][r][j] + ServiceDuration(sFrom);
+                        allConstraints_list.Add(AddGe(TimeDifference, rhs, constraint_name));
                     }
         }
         void AddConstraint_TimeRegulationFromDepotThroughAnESVisit()//13c

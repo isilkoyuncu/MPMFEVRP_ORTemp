@@ -21,7 +21,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU }, XCPlex_Formulation.NodeDuplicatingwoU, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU }, XCPlex_Formulation.ArcDuplicatingwoU, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RELAXATION, "Cplex Relaxation", new List<object>() { XCPlexRelaxation.None, XCPlexRelaxation.LinearProgramming }, XCPlexRelaxation.None, UserInputObjectType.ComboBox));

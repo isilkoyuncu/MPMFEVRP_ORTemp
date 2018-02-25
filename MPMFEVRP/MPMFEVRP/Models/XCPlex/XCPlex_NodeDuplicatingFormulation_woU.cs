@@ -597,6 +597,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             List<string> activeX = new List<string>();
             List<string> allX = new List<string>();
+            List<double> Tvalues = new List<double>();
+            List<double> DeltaValues = new List<double>();
+            List<double> EpsilonValues = new List<double>();
+
             for (int i = 0; i < NumPreprocessedSites; i++)
                 for (int j = 0; j < NumPreprocessedSites; j++)
                     for (int v = 0; v < numVehCategories; v++)
@@ -605,6 +609,12 @@ namespace MPMFEVRP.Models.XCPlex
                         if (GetValue(X[i][j][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                             activeX.Add(preprocessedSites[i].ID + "," + preprocessedSites[j].ID + "," + v.ToString()+"->"+ GetValue(X[i][j][v]).ToString());
                     }
+            for (int j = 1; j < NumPreprocessedSites; j++)
+            {
+                Tvalues.Add(GetValue(T[j]));
+                DeltaValues.Add(GetValue(Delta[j]));
+                EpsilonValues.Add(GetValue(Epsilon[j]));
+            }
 
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
             foreach (VehicleCategories vc in vehicleCategories)
