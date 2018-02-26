@@ -191,6 +191,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         candidate.Extend(customerID);
                         theParent.MakeCustomerImpossible(customerID);
                         OptimizeAndEvaluateForLists(candidate);
+                        Console.WriteLine("Working on "+theProblemModel.InputFileName+"; another child evaluated, now we have " + exploredFeasibleCustomerSets.TotalCount.ToString() + " feasible and " + exploredInfeasibleCustomerSets.TotalCount.ToString() + " infeasible");
                     }//foreach (string customerID in remainingCustomers)
 
                     //end of the level, moving on to the next level

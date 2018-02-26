@@ -4,10 +4,10 @@ using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using MPMFEVRP.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -67,77 +67,33 @@ namespace MPMFEVRP.Models.XCPlex
         void rig_IKfromNDFEMH()
         {
 
-            T[1].LB = 366.00699;
-            T[2].LB = 400.20915;
-            T[3].LB = 220.1283875;
-            T[4].LB = 81.44184;
-            T[5].LB = 488.3652575;
-            T[6].LB = 219.0498;
-            T[7].LB = 349.19325;
-            T[8].LB = 114.21864;
-            T[9].LB = 478.446045;
-            T[10].LB = 416.758605;
-            T[11].LB = 231.152445;
-            T[12].LB = 411.3943625;
-            T[13].LB = 275.0834975;
-            T[14].LB = 306.22566;
-            T[15].LB = 504.3756;
-            T[16].LB = 530.24517;
-            T[17].LB = 251.21334;
-            T[18].LB = 90.40152;
-            T[19].LB = 249.225225;
-            T[20].LB = 576.055185;
+            X[0][4][0].LB = 1.0;
+            X[4][10][0].LB = 1.0;
+            X[10][0][0].LB = 1.0;
 
-            T[1].UB = 366.00699;
-            T[2].UB = 400.20915;
-            T[3].UB = 220.1283875;
-            T[4].UB = 81.44184;
-            T[5].UB = 488.3652575;
-            T[6].UB = 219.0498;
-            T[7].UB = 349.19325;
-            T[8].UB = 114.21864;
-            T[9].UB = 478.446045;
-            T[10].UB = 416.758605;
-            T[11].UB = 231.152445;
-            T[12].UB = 411.3943625;
-            T[13].UB = 275.0834975;
-            T[14].UB = 306.22566;
-            T[15].UB = 504.3756;
-            T[16].UB = 530.24517;
-            T[17].UB = 251.21334;
-            T[18].UB = 90.40152;
-            T[19].UB = 249.225225;
-            T[20].UB = 576.055185;
+            X[0][6][0].LB = 1.0;
+            X[6][15][0].LB = 1.0;
+            Y[15][2][3].LB = 1.0;
+            X[3][13][0].LB = 1.0;
+            X[13][12][0].LB = 1.0;
+            X[12][5][0].LB = 1.0;
+            X[5][0][0].LB = 1.0;
 
-            //Y[0][2][3].LB = 1.0;
-            //X[3][13][0].LB = 1.0;
-            //X[13][12][0].LB = 1.0;
-            //X[12][5][0].LB = 1.0;
-            //X[5][0][0].LB = 1.0;
+            X[0][8][0].LB = 1.0;
+            X[8][19][0].LB = 1.0;
+            X[19][14][0].LB = 1.0;
+            X[14][7][0].LB = 1.0;
+            Y[7][3][11].LB = 1.0;
+            X[11][18][0].LB = 1.0;
+            X[18][9][0].LB = 1.0;
+            X[9][0][0].LB = 1.0;                
+            
+            X[0][20][0].LB = 1.0;
+            X[20][16][0].LB = 1.0;
+            X[16][2][0].LB = 1.0;
+            Y[2][3][17].LB = 1.0;
+            X[17][1][0].LB = 1.0;
 
-            //X[0][4][0].LB = 1.0;
-            //X[4][17][0].LB = 1.0;
-            //X[17][10][0].LB = 1.0;
-            //X[10][0][0].LB = 1.0;
-
-            //X[0][6][0].LB = 1.0;
-            //X[6][1][0].LB = 1.0;
-            //X[1][15][0].LB = 1.0;
-            //X[15][0][0].LB = 1.0;
-
-            //X[0][8][0].LB = 1.0;
-            //X[8][19][0].LB = 1.0;
-            //X[19][14][0].LB = 1.0;
-            //X[14][7][0].LB = 1.0;
-            //X[7][9][0].LB = 1.0;
-            //X[9][20][0].LB = 1.0;
-            //X[20][0][0].LB = 1.0;
-
-            //X[0][18][0].LB = 1.0;
-            //Y[18][3][11].LB = 1.0;
-            //X[11][2][0].LB = 1.0;
-            //X[2][16][0].LB = 1.0;
-            //X[16][0][0].LB = 1.0;
         }
         void rig_IK()
         {
@@ -414,6 +370,8 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected override void AddAllConstraints()
         {
+            //rig_IKfromNDFEMH();
+
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerCustomerNode();//1
@@ -435,7 +393,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full)
             {
-                AddConstraint_TimeRegulationThroughAnESVisits_VariableFullTimeRecharging();//13b
+                AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging();//13
                 AddConstraint_DepartureSOCFromESNodeLB();//9
             }
             else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
@@ -771,10 +729,10 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                     else
                     {
-                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + (EnergyConsumption(TheDepot, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + ((EnergyConsumption(TheDepot, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV)) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), Y[0][r][j]);
                         TimeDifference.AddTerm(-1.0 / RechargingRate(ES), Delta[j]);
                         string constraint_name = "Time_Regulation_from_depot_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j] - BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES), constraint_name));
                     }
                 }
         }
