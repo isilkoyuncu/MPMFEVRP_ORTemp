@@ -26,7 +26,7 @@ namespace MPMFEVRP.Utils
             //areFilesTheSame = CheckIfTwoFilesAreTheSame();
             //isFeasible = CheckIfTheGivenSolutionIsFeasible();
             //routes = SubstractTheRouteFromSolution();
-            isAllFeasible = CustomersCanBeReachedWithAtMostOneESVisit();
+            //isAllFeasible = CustomersCanBeReachedWithAtMostOneESVisit();
         }
         List<bool> CustomersCanBeReachedWithAtMostOneESVisit()
         {

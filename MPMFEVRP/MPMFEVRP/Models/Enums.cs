@@ -4,7 +4,7 @@
 
     public enum ObjectiveFunctions { MinimizeVMT, MinimizeVariableCost, MinimizeTotalCost, MaximizeProfit };
 
-    public enum ParameterID//When adding a new optional Cplex parameter, make sure to add ity to the public static list in the XCplexParameters class and make a note next to it so we can double-check!
+    public enum ParameterID//When adding a new optional Cplex parameter, make sure to add it to the public static list in the XCplexParameters class and make a note next to it so we can double-check!
     {
         ALG_RUNTIME_SECONDS,
         ALG_RANDOM_POOL_SIZE,
@@ -15,6 +15,8 @@
         ALG_MIP_SEARCH,//This is an optional Cplex parameter
         ALG_CUTS_FACTOR,//This is an optional Cplex parameter
         ALG_THREADS,//This is an optional Cplex parameter
+        ALG_LOG_OUTPUT_TYPE,
+        ALG_EXPORT_LP_MODEL,
         ALG_RELAXATION,
         ALG_XCPLEX_FORMULATION,
         ALG_SELECTION_CRITERIA,
