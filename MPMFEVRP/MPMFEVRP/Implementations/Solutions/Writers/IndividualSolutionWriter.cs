@@ -1,5 +1,6 @@
 ﻿using MPMFEVRP.Interfaces;
 using System;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 
 namespace MPMFEVRP.Implementations.Solutions.Writers
 {
@@ -43,7 +44,20 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
             //process
             sw = new System.IO.StreamWriter(outputFileName);
         }
+        public IndividualSolutionWriter(int index, string problemName, string formulationName, string rechargingOpt, double runTime, string[] algorithmOutputSummary, string[] solutionOutputSummary, string[] writableSolution)
+        {
+            this.algorithmOutputSummary = algorithmOutputSummary;
+            this.solutionOutputSummary = solutionOutputSummary;
+            this.writableSolution = writableSolution;
 
+
+            outputFileName = problemName + index.ToString() + "_" + formulationName + "_" + rechargingOpt + "_" + runTime.ToString()+".txt";
+            //TODO Make sure everything is passed into this constructor and used appropriately
+            //verify input
+            //Verify();
+            //process
+            sw = new System.IO.StreamWriter(outputFileName);
+        }
         void Verify()
         {
             throw new NotImplementedException();
