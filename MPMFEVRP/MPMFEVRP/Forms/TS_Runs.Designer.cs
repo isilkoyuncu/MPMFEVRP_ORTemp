@@ -38,6 +38,10 @@
             this.button_solveYCwithNDF = new System.Windows.Forms.Button();
             this.button_solveEMHwithADF = new System.Windows.Forms.Button();
             this.button_solveYCwithADF = new System.Windows.Forms.Button();
+            this.textBox_runTime = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.checkBox_cplexLog2File = new System.Windows.Forms.CheckBox();
+            this.textBox_log = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
@@ -142,11 +146,53 @@
             this.button_solveYCwithADF.UseVisualStyleBackColor = true;
             this.button_solveYCwithADF.Click += new System.EventHandler(this.Button_solveYCwithADF_FF_Click);
             // 
+            // textBox_runTime
+            // 
+            this.textBox_runTime.Location = new System.Drawing.Point(884, 35);
+            this.textBox_runTime.Name = "textBox_runTime";
+            this.textBox_runTime.Size = new System.Drawing.Size(79, 20);
+            this.textBox_runTime.TabIndex = 12;
+            this.textBox_runTime.Text = "3600";
+            this.textBox_runTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(898, 20);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(53, 13);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "Run Time";
+            // 
+            // checkBox_cplexLog2File
+            // 
+            this.checkBox_cplexLog2File.AutoSize = true;
+            this.checkBox_cplexLog2File.Checked = true;
+            this.checkBox_cplexLog2File.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_cplexLog2File.Location = new System.Drawing.Point(996, 37);
+            this.checkBox_cplexLog2File.Name = "checkBox_cplexLog2File";
+            this.checkBox_cplexLog2File.Size = new System.Drawing.Size(101, 17);
+            this.checkBox_cplexLog2File.TabIndex = 14;
+            this.checkBox_cplexLog2File.Text = "Cplex Log 2 File";
+            this.checkBox_cplexLog2File.UseVisualStyleBackColor = true;
+            // 
+            // textBox_log
+            // 
+            this.textBox_log.Location = new System.Drawing.Point(855, 70);
+            this.textBox_log.Multiline = true;
+            this.textBox_log.Name = "textBox_log";
+            this.textBox_log.Size = new System.Drawing.Size(242, 418);
+            this.textBox_log.TabIndex = 15;
+            // 
             // TS_Runs
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1122, 500);
+            this.Controls.Add(this.textBox_log);
+            this.Controls.Add(this.checkBox_cplexLog2File);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.textBox_runTime);
             this.Controls.Add(this.button_solveYCwithADF);
             this.Controls.Add(this.button_solveEMHwithADF);
             this.Controls.Add(this.button_solveYCwithNDF);
@@ -177,5 +223,9 @@
         private System.Windows.Forms.Button button_solveYCwithNDF;
         private System.Windows.Forms.Button button_solveEMHwithADF;
         private System.Windows.Forms.Button button_solveYCwithADF;
+        private System.Windows.Forms.TextBox textBox_runTime;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox checkBox_cplexLog2File;
+        private System.Windows.Forms.TextBox textBox_log;
     }
 }

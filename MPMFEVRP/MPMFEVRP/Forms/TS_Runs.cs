@@ -99,30 +99,32 @@ namespace MPMFEVRP.Forms
             foreach (var problemModel in problemModels)
             {
                 theAlgorithm.Initialize(problemModel);
-                Debug.WriteLine("The algorithm is initialized: " + theAlgorithm.GetName() + "\t" + DateTime.Now);
+                Log("The formulation is initialized: " + formulationName);
                 theAlgorithm.Run();
-                Debug.WriteLine("Started solving: " + problemModel.InputFileName +"\t"+ DateTime.Now);
-                Debug.WriteLine("************************************************");
+                Log("Started solving: " + probShortName+index.ToString());
+                Log("************************************************");
                 theAlgorithm.Conclude();
                 theSolution = theAlgorithm.Solution;
                 solutions.Add(theSolution);
                 writer = new IndividualSolutionWriter(index, probShortName,formulationName,refuelingOpt,runTime, theAlgorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
                 writer.Write();
                 theAlgorithm.Reset();
-                Debug.WriteLine("Finished solving: " + "\t" + DateTime.Now);
-                Debug.WriteLine("************************************************");
+                Log("Finished solving: " + probShortName + index.ToString());
+                Log("************************************************");
                 index++;
             }
         }       
         void CreateXcplexFormulation()
         {
+            writeOnFile = checkBox_cplexLog2File.Checked;
             theAlgorithm = new Outsource2Cplex();
             theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_EXPORT_LP_MODEL, false);
             theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_LOG_OUTPUT_TYPE, writeOnFile);
             theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_RELAXATION, XCPlexRelaxation.None);
+            runTime = double.Parse(textBox_runTime.Text);
             theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_RUNTIME_SECONDS, runTime);
-            Debug.WriteLine("The algorithm parameters are set: " + theAlgorithm.GetName() + "\t" + DateTime.Now);
-            Debug.WriteLine("************************************************");
+            Log("The algorithm parameters are set: " + theAlgorithm.GetName());
+            Log("************************************************");
         }
         void CreateEMHProblem()
         {
@@ -133,8 +135,8 @@ namespace MPMFEVRP.Forms
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_LAMBDA, 1);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, false);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, false);
-            Debug.WriteLine("The problem parameters are set: " + theAlgorithm.GetName() + "\t" + DateTime.Now);
-            Debug.WriteLine("************************************************");
+            Log("The problem parameters are set: " + theProblem.GetName());
+            Log("************************************************");
             theProblemModel = new EMH_ProblemModel();
         }
         void CreateYCProblem()
@@ -146,6 +148,9 @@ namespace MPMFEVRP.Forms
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_LAMBDA, 1);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, false);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, false);
+            Log("The problem parameters are set: " + theProblem.GetName());
+            Log("************************************************");
+            theProblemModel = new EVvsGDV_MinCost_VRP_Model();
         }      
         private void AddProblems()
         {
@@ -162,10 +167,10 @@ namespace MPMFEVRP.Forms
                     for (int i = 0; i < dialog.FileNames.Length; i++)
                     {
                         theProblem = ProblemUtil.CreateProblemByFileName(theProblem.GetName(), dialog.FileNames[i]);
-                        Debug.WriteLine("The problem is created: " + theProblem.PDP.InputFileName + "\t" + DateTime.Now);
+                        Log("The problem is read: " + theProblem.PDP.InputFileName);
                         problems.Add(theProblem);
                     }
-                    Debug.WriteLine("************************************************");
+                    Log("************************************************");
                 }
                 catch (Exception)
                 {
@@ -183,17 +188,22 @@ namespace MPMFEVRP.Forms
                     problems[i].ProblemCharacteristics.UpdateParameters(theProblem.ProblemCharacteristics);
                     TSPModelType = typeof(Models.XCPlex.XCPlex_ArcDuplicatingFormulation_woU);
                     theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(theProblemModel.GetType(), problems[i], TSPModelType);
-                    Debug.WriteLine("The problem model is created: " + theProblemModel.InputFileName + "\t" + DateTime.Now);
+                    Log(probShortName + (i+1).ToString() + " is created.");
                     problemModels.Add(theProblemModel);
                 }
-                Debug.WriteLine("************************************************");
+                Log("************************************************");
             }
             catch (Exception)
             {
                 MessageBox.Show("There is something wrong while loading problem from the whole data!", "Problem loading error!");
             }
         }
-
-        
+        void Log(string message)
+        {
+            textBox_log.AppendText(DateTime.Now.ToString("HH:mm:ss tt") + ": " + message + "\n");
+            textBox_log.SelectionStart = textBox_log.GetFirstCharIndexOfCurrentLine();
+            textBox_log.SelectionLength = 1;
+            textBox_log.ScrollToCaret();
+        }
     }
 }
