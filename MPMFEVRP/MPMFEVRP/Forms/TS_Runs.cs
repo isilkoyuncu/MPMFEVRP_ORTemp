@@ -33,6 +33,7 @@ namespace MPMFEVRP.Forms
 
         bool writeOnFile = true;
         double runTime = 3600.0;
+        int lambda = 1;
         string probShortName;
         string formulationName;
         string refuelingOpt;
@@ -128,11 +129,12 @@ namespace MPMFEVRP.Forms
         }
         void CreateEMHProblem()
         {
+            lambda = int.Parse(textBox_lambda.Text);
             theProblem = new EMH_Problem();
             AddProblems();
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_NUM_EV, 6);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_NUM_GDV, 0);
-            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_LAMBDA, 1);
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_LAMBDA, lambda);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, false);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, false);
             Log("The problem parameters are set: " + theProblem.GetName());
@@ -141,11 +143,12 @@ namespace MPMFEVRP.Forms
         }
         void CreateYCProblem()
         {
+            lambda = int.Parse(textBox_lambda.Text);
             theProblem = new EVvsGDV_MinCost_VRP();
             AddProblems();
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_NUM_EV, 7);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_NUM_GDV, 7);
-            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_LAMBDA, 1);
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_LAMBDA, lambda);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, false);
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, false);
             Log("The problem parameters are set: " + theProblem.GetName());
