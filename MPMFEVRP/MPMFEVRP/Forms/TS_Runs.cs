@@ -44,6 +44,7 @@ namespace MPMFEVRP.Forms
             problemModels = new BindingList<EVvsGDV_ProblemModel>();
         }
 
+        //Solve EMH - FF with NDF and ADF
         private void Button_solveEMHwithNDF_FF_Click(object sender, EventArgs e)
         {
             CreateXcplexFormulation();
@@ -68,6 +69,7 @@ namespace MPMFEVRP.Forms
             CreateProblemModels();
             Run();
         }
+        //Solve YC - FF with NDF and ADF
         private void Button_solveYCwithNDF_FF_Click(object sender, EventArgs e)
         {
             CreateXcplexFormulation();
@@ -85,14 +87,113 @@ namespace MPMFEVRP.Forms
             CreateXcplexFormulation();
             theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
             formulationName = "ADF";
-            CreateEMHProblem();
+            CreateYCProblem();
             probShortName = "YC";
             theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full);
             refuelingOpt = "FF";
             CreateProblemModels();
             Run();
         }
-
+        //Solve EMH - VF with NDF and ADF
+        private void Button_solve_EMH_NDF_VF_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.NodeDuplicatingwoU);
+            formulationName = "NDF";
+            CreateEMHProblem();
+            probShortName = "EMH";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full);
+            refuelingOpt = "VF";
+            CreateProblemModels();
+            Run();
+        }
+        private void Button_solve_EMH_ADF_VF_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
+            formulationName = "ADF";
+            CreateEMHProblem();
+            probShortName = "EMH";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full);
+            refuelingOpt = "VF";
+            CreateProblemModels();
+            Run();
+        }
+        //Solve EMH - VP with NDF and ADF
+        private void Button_solve_EMH_NDF_VP_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.NodeDuplicatingwoU);
+            formulationName = "NDF";
+            CreateEMHProblem();
+            probShortName = "EMH";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial);
+            refuelingOpt = "VP";
+            CreateProblemModels();
+            Run();
+        }
+        private void Button_solve_EMH_ADF_VP_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
+            formulationName = "ADF";
+            CreateEMHProblem();
+            probShortName = "EMH";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial);
+            refuelingOpt = "VP";
+            CreateProblemModels();
+            Run();
+        }
+        //Solve YC - VF with NDF and ADF
+        private void Button_solve_YC_NDF_VF_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.NodeDuplicatingwoU);
+            formulationName = "NDF";
+            CreateYCProblem();
+            probShortName = "YC";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full);
+            refuelingOpt = "VF";
+            CreateProblemModels();
+            Run();
+        }
+        private void Button_solve_YC_ADF_VF_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
+            formulationName = "ADF";
+            CreateYCProblem();
+            probShortName = "YC";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full);
+            refuelingOpt = "VF";
+            CreateProblemModels();
+            Run();
+        }
+        //Solve YC - VP with NDF and ADF
+        private void Button_solve_YC_NDF_VP_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.NodeDuplicatingwoU);
+            formulationName = "NDF";
+            CreateYCProblem();
+            probShortName = "YC";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial);
+            refuelingOpt = "VP";
+            CreateProblemModels();
+            Run();
+        }
+        private void Button_solve_YC_ADF_VP_Click(object sender, EventArgs e)
+        {
+            CreateXcplexFormulation();
+            theAlgorithm.AlgorithmParameters.UpdateParameter(Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
+            formulationName = "ADF";
+            CreateYCProblem();
+            probShortName = "YC";
+            theProblem.ProblemCharacteristics.UpdateParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial);
+            refuelingOpt = "VP";
+            CreateProblemModels();
+            Run();
+        }
         void Run()
         {
             solutions = new BindingList<ISolution>();
@@ -208,5 +309,7 @@ namespace MPMFEVRP.Forms
             textBox_log.SelectionLength = 1;
             textBox_log.ScrollToCaret();
         }
+
+        
     }
 }
