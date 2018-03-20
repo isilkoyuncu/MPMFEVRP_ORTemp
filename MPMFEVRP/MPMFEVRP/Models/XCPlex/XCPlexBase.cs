@@ -313,11 +313,10 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             Output();
-            if (xCplexParam.CplexLogOutputFile)
-            {
-                TWoutput = System.IO.File.CreateText("CplexLog_"+theProblemModel.InputFileName);
-                SetOut(TWoutput);
-            }
+            //ISSUE (#5): Turn the following two lines on/off if you want to output the log file as a text to the MPMFEVRP directory instead of output window
+            TWoutput = System.IO.File.CreateText("CplexLog_"+theProblemModel.InputFileName);
+            SetOut(TWoutput);
+            //SetOut(null);
             Solve();
             if (xCplexParam.CplexLogOutputFile)
             {
