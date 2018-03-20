@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Domains.SolutionDomain
@@ -142,6 +143,37 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 foreach (CustomerSet cs in CSLList[l])
                     if (desiredStatuses.Contains(cs.RouteOptimizationOutcome.Status))
                         outcome.Add(cs);
+            return outcome;
+        }
+
+        /// <summary>
+        /// Returns Dictionary<level,Tuple<Number at Level, Avg. Comp. Time>>
+        /// </summary>
+        /// <param name="vc"></param>
+        /// <returns></returns>
+        public Dictionary<int, Tuple<int,double>> GetSolutionTimeStatisticsByLevel(VehicleCategories vc)
+        {
+            Dictionary<int, Tuple<int, double>> outcome = new Dictionary<int, Tuple<int, double>>();
+
+            int lMin = GetHighestNonemptyLevel();
+            int lMax = GetDeepestNonemptyLevel();
+            int[] countsByLevel = CountByLevel();
+
+            for (int l = lMin; l <= lMax; l++)
+            {
+                int numCS = 0;
+                double totalCompTime = 0.0;
+                if (CSLList[l].Count > 0)
+                {
+                    foreach (CustomerSet cs in CSLList[l])
+                        if (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc) != null)
+                        {
+                            numCS++;
+                            totalCompTime += cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc).ComputationTime;
+                        }
+                    outcome.Add(l, new Tuple<int, double>(numCS, totalCompTime / numCS));
+                }
+            }
             return outcome;
         }
     }

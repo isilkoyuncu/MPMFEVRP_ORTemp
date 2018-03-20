@@ -35,7 +35,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_INFEASIBLE_CUSTOMER_SETS, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 50, UserInputObjectType.TextBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 50, UserInputObjectType.TextBox));
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_BEAM_WIDTH, "Beam width", 1));
         }
 
@@ -74,7 +74,22 @@ namespace MPMFEVRP.Implementations.Algorithms
                 "Total # of EV infeasible: "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
                 "Solution Status: " + status.ToString()
             };
-            
+            list.Add("Optimal Comp Time Avgs by Level");
+            Dictionary<int, Tuple<int, double>> optimalCompTimeAvgsByLevel = exploredFeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
+            foreach (int l in optimalCompTimeAvgsByLevel.Keys)
+            {
+                list.Add(l.ToString());
+                list.Add(optimalCompTimeAvgsByLevel[l].Item1.ToString());
+                list.Add(optimalCompTimeAvgsByLevel[l].Item2.ToString());
+            }
+            list.Add("Infeasible Comp Time Avgs by Level");
+            Dictionary<int, Tuple<int, double>> infeasibleCompTimeAvgsByLevel = exploredInfeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
+            foreach (int l in infeasibleCompTimeAvgsByLevel.Keys)
+            {
+                list.Add(l.ToString());
+                list.Add(infeasibleCompTimeAvgsByLevel[l].Item1.ToString());
+                list.Add(infeasibleCompTimeAvgsByLevel[l].Item2.ToString());
+            }
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();
             return toReturn;
@@ -136,16 +151,20 @@ namespace MPMFEVRP.Implementations.Algorithms
             cs.Optimize(theProblemModel, theEV, vsroo_GDV: cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV), requireGDVSolutionBeforeEV: false);
             bool feasible = (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized);
             bool infeasible = (cs.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Infeasible);
-            bool largeEnough = (cs.NumberOfCustomers >= 3);
+            bool largeEnough = (cs.NumberOfCustomers > 3);
             if (largeEnough)
             {
+                int numCustomerSetsToReport = algorithmParameters.GetParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY).GetIntValue();
+
                 if (feasible)
                 {
+                    if((numCustomerSetsToReport<0)||(exploredFeasibleCustomerSets.TotalCount< numCustomerSetsToReport))
                     exploredFeasibleCustomerSets.Add(cs);
                 }
                 else if (infeasible)
                 {
-                    exploredInfeasibleCustomerSets.Add(cs);
+                    if ((numCustomerSetsToReport < 0) || (exploredInfeasibleCustomerSets.TotalCount < numCustomerSetsToReport))
+                        exploredInfeasibleCustomerSets.Add(cs);
                 }
                 else
                 {
@@ -164,12 +183,12 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
-            int minNumInfeasibles = algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_INFEASIBLE_CUSTOMER_SETS).GetIntValue();
+            int numCustomerSetsToReport = algorithmParameters.GetParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY).GetIntValue();
             int beamWidth = 1;// algorithmParameters.GetParameter(ParameterID.ALG_BEAM_WIDTH).GetIntValue();
             int currentLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;
 
-            while (exploredInfeasibleCustomerSets.TotalCount < minNumInfeasibles)
+            while ((unexploredCustomerSets.TotalCount>0)&&((exploredInfeasibleCustomerSets.TotalCount < numCustomerSetsToReport)||(exploredFeasibleCustomerSets.TotalCount<numCustomerSetsToReport)))
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
 

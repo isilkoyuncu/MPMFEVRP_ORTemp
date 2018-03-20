@@ -6,7 +6,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class RouteOptimizationOutcome
     {
-        List<VehicleSpecificRouteOptimizationOutcome> theListofVSROOs;
+        List<VehicleSpecificRouteOptimizationOutcome> theListofVSROOs; public List<VehicleSpecificRouteOptimizationOutcome> TheListofVSROOs { get => theListofVSROOs; }
         RouteOptimizationStatus overallStatus; public RouteOptimizationStatus Status { get { return overallStatus; } }
         ObjectiveFunctionInputDataPackage ofidp;
         public ObjectiveFunctionInputDataPackage OFIDP { get { return ofidp; } }

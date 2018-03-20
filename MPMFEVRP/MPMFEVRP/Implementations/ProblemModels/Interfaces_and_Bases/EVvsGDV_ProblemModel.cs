@@ -23,7 +23,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected XCPlexVRPBase GDV_TSPSolver;
         public Dictionary<string, int> GDV_TSP_NumberOfCustomerSetsByStatus { get { return GDV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
         public Dictionary<string, double> GDV_TSP_TimeSpentAccount { get { return GDV_TSPSolver.TotalTimeInSolveOnStatus; } }
-
+        
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
         public EVvsGDV_ProblemModel() { }
