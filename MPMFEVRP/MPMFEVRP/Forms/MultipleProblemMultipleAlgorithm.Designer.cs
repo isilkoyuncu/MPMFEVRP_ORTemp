@@ -73,29 +73,27 @@
             this.groupBox1.Controls.Add(this.button_multi_viewProblem);
             this.groupBox1.Controls.Add(this.linkLabel_deleteSelectedProblem);
             this.groupBox1.Controls.Add(this.listBox_problems);
-            this.groupBox1.Location = new System.Drawing.Point(16, 15);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(490, 910);
+            this.groupBox1.Size = new System.Drawing.Size(368, 739);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Problems";
             // 
             // panel_multi_problemCharacteristics
             // 
-            this.panel_multi_problemCharacteristics.Location = new System.Drawing.Point(8, 570);
+            this.panel_multi_problemCharacteristics.Location = new System.Drawing.Point(6, 463);
+            this.panel_multi_problemCharacteristics.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.panel_multi_problemCharacteristics.Name = "panel_multi_problemCharacteristics";
-            this.panel_multi_problemCharacteristics.Size = new System.Drawing.Size(471, 232);
+            this.panel_multi_problemCharacteristics.Size = new System.Drawing.Size(353, 188);
             this.panel_multi_problemCharacteristics.TabIndex = 25;
             // 
             // button_multi_createProblemModel
             // 
             this.button_multi_createProblemModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_multi_createProblemModel.Location = new System.Drawing.Point(259, 861);
-            this.button_multi_createProblemModel.Margin = new System.Windows.Forms.Padding(4);
+            this.button_multi_createProblemModel.Location = new System.Drawing.Point(194, 700);
             this.button_multi_createProblemModel.Name = "button_multi_createProblemModel";
-            this.button_multi_createProblemModel.Size = new System.Drawing.Size(220, 39);
+            this.button_multi_createProblemModel.Size = new System.Drawing.Size(165, 32);
             this.button_multi_createProblemModel.TabIndex = 24;
             this.button_multi_createProblemModel.Text = "Create Problem Model";
             this.button_multi_createProblemModel.UseVisualStyleBackColor = true;
@@ -105,10 +103,9 @@
             // 
             this.comboBox_multi_TSPModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_multi_TSPModel.FormattingEnabled = true;
-            this.comboBox_multi_TSPModel.Location = new System.Drawing.Point(8, 829);
-            this.comboBox_multi_TSPModel.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_multi_TSPModel.Location = new System.Drawing.Point(6, 674);
             this.comboBox_multi_TSPModel.Name = "comboBox_multi_TSPModel";
-            this.comboBox_multi_TSPModel.Size = new System.Drawing.Size(471, 24);
+            this.comboBox_multi_TSPModel.Size = new System.Drawing.Size(354, 21);
             this.comboBox_multi_TSPModel.TabIndex = 23;
             this.comboBox_multi_TSPModel.SelectedIndexChanged += new System.EventHandler(this.ComboBox_multi_TSPModel_SelectedIndexChanged);
             // 
@@ -116,10 +113,9 @@
             // 
             this.comboBox_multi_problemModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_multi_problemModels.FormattingEnabled = true;
-            this.comboBox_multi_problemModels.Location = new System.Drawing.Point(8, 88);
-            this.comboBox_multi_problemModels.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_multi_problemModels.Location = new System.Drawing.Point(6, 72);
             this.comboBox_multi_problemModels.Name = "comboBox_multi_problemModels";
-            this.comboBox_multi_problemModels.Size = new System.Drawing.Size(474, 24);
+            this.comboBox_multi_problemModels.Size = new System.Drawing.Size(356, 21);
             this.comboBox_multi_problemModels.TabIndex = 18;
             // 
             // label_multi_TSPModel
@@ -127,30 +123,27 @@
             this.label_multi_TSPModel.AutoSize = true;
             this.label_multi_TSPModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_multi_TSPModel.ForeColor = System.Drawing.Color.Black;
-            this.label_multi_TSPModel.Location = new System.Drawing.Point(5, 805);
-            this.label_multi_TSPModel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_multi_TSPModel.Location = new System.Drawing.Point(4, 654);
             this.label_multi_TSPModel.Name = "label_multi_TSPModel";
-            this.label_multi_TSPModel.Size = new System.Drawing.Size(188, 20);
+            this.label_multi_TSPModel.Size = new System.Drawing.Size(162, 17);
             this.label_multi_TSPModel.TabIndex = 22;
             this.label_multi_TSPModel.Text = "TSP Model for Solver";
             // 
             // label_problemModel
             // 
             this.label_problemModel.AutoSize = true;
-            this.label_problemModel.Location = new System.Drawing.Point(8, 69);
-            this.label_problemModel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_problemModel.Location = new System.Drawing.Point(6, 56);
             this.label_problemModel.Name = "label_problemModel";
-            this.label_problemModel.Size = new System.Drawing.Size(102, 17);
+            this.label_problemModel.Size = new System.Drawing.Size(77, 13);
             this.label_problemModel.TabIndex = 20;
             this.label_problemModel.Text = "Problem Model";
             // 
             // label_problem
             // 
             this.label_problem.AutoSize = true;
-            this.label_problem.Location = new System.Drawing.Point(8, 19);
-            this.label_problem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_problem.Location = new System.Drawing.Point(6, 15);
             this.label_problem.Name = "label_problem";
-            this.label_problem.Size = new System.Drawing.Size(60, 17);
+            this.label_problem.Size = new System.Drawing.Size(45, 13);
             this.label_problem.TabIndex = 19;
             this.label_problem.Text = "Problem";
             // 
@@ -158,18 +151,16 @@
             // 
             this.comboBox_multi_problems.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_multi_problems.FormattingEnabled = true;
-            this.comboBox_multi_problems.Location = new System.Drawing.Point(8, 39);
-            this.comboBox_multi_problems.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_multi_problems.Location = new System.Drawing.Point(6, 32);
             this.comboBox_multi_problems.Name = "comboBox_multi_problems";
-            this.comboBox_multi_problems.Size = new System.Drawing.Size(474, 24);
+            this.comboBox_multi_problems.Size = new System.Drawing.Size(356, 21);
             this.comboBox_multi_problems.TabIndex = 17;
             // 
             // button_openDataManager
             // 
-            this.button_openDataManager.Location = new System.Drawing.Point(8, 120);
-            this.button_openDataManager.Margin = new System.Windows.Forms.Padding(4);
+            this.button_openDataManager.Location = new System.Drawing.Point(6, 98);
             this.button_openDataManager.Name = "button_openDataManager";
-            this.button_openDataManager.Size = new System.Drawing.Size(240, 28);
+            this.button_openDataManager.Size = new System.Drawing.Size(180, 23);
             this.button_openDataManager.TabIndex = 6;
             this.button_openDataManager.Text = "Open Data Manager";
             this.button_openDataManager.UseVisualStyleBackColor = true;
@@ -177,10 +168,9 @@
             // 
             // button_addProblem
             // 
-            this.button_addProblem.Location = new System.Drawing.Point(259, 120);
-            this.button_addProblem.Margin = new System.Windows.Forms.Padding(4);
+            this.button_addProblem.Location = new System.Drawing.Point(194, 98);
             this.button_addProblem.Name = "button_addProblem";
-            this.button_addProblem.Size = new System.Drawing.Size(223, 28);
+            this.button_addProblem.Size = new System.Drawing.Size(167, 23);
             this.button_addProblem.TabIndex = 5;
             this.button_addProblem.Text = "Load Problem from File";
             this.button_addProblem.UseVisualStyleBackColor = true;
@@ -189,10 +179,9 @@
             // button_multi_viewProblem
             // 
             this.button_multi_viewProblem.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_multi_viewProblem.Location = new System.Drawing.Point(8, 861);
-            this.button_multi_viewProblem.Margin = new System.Windows.Forms.Padding(4);
+            this.button_multi_viewProblem.Location = new System.Drawing.Point(6, 700);
             this.button_multi_viewProblem.Name = "button_multi_viewProblem";
-            this.button_multi_viewProblem.Size = new System.Drawing.Size(240, 39);
+            this.button_multi_viewProblem.Size = new System.Drawing.Size(180, 32);
             this.button_multi_viewProblem.TabIndex = 5;
             this.button_multi_viewProblem.Text = "View Problem";
             this.button_multi_viewProblem.UseVisualStyleBackColor = true;
@@ -201,10 +190,9 @@
             // linkLabel_deleteSelectedProblem
             // 
             this.linkLabel_deleteSelectedProblem.AutoSize = true;
-            this.linkLabel_deleteSelectedProblem.Location = new System.Drawing.Point(374, 154);
-            this.linkLabel_deleteSelectedProblem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.linkLabel_deleteSelectedProblem.Location = new System.Drawing.Point(280, 125);
             this.linkLabel_deleteSelectedProblem.Name = "linkLabel_deleteSelectedProblem";
-            this.linkLabel_deleteSelectedProblem.Size = new System.Drawing.Size(108, 17);
+            this.linkLabel_deleteSelectedProblem.Size = new System.Drawing.Size(83, 13);
             this.linkLabel_deleteSelectedProblem.TabIndex = 5;
             this.linkLabel_deleteSelectedProblem.TabStop = true;
             this.linkLabel_deleteSelectedProblem.Text = "Delete Selected";
@@ -213,11 +201,9 @@
             // listBox_problems
             // 
             this.listBox_problems.FormattingEnabled = true;
-            this.listBox_problems.ItemHeight = 16;
-            this.listBox_problems.Location = new System.Drawing.Point(8, 175);
-            this.listBox_problems.Margin = new System.Windows.Forms.Padding(4);
+            this.listBox_problems.Location = new System.Drawing.Point(6, 142);
             this.listBox_problems.Name = "listBox_problems";
-            this.listBox_problems.Size = new System.Drawing.Size(474, 388);
+            this.listBox_problems.Size = new System.Drawing.Size(356, 316);
             this.listBox_problems.TabIndex = 0;
             // 
             // groupBox2
@@ -227,11 +213,9 @@
             this.groupBox2.Controls.Add(this.button_addAlgo);
             this.groupBox2.Controls.Add(this.listBox_algorithms);
             this.groupBox2.Controls.Add(this.comboBox_algorithms);
-            this.groupBox2.Location = new System.Drawing.Point(514, 15);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox2.Location = new System.Drawing.Point(386, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(389, 910);
+            this.groupBox2.Size = new System.Drawing.Size(292, 739);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Algorithms";
@@ -239,10 +223,9 @@
             // button_run
             // 
             this.button_run.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_run.Location = new System.Drawing.Point(9, 861);
-            this.button_run.Margin = new System.Windows.Forms.Padding(4);
+            this.button_run.Location = new System.Drawing.Point(7, 700);
             this.button_run.Name = "button_run";
-            this.button_run.Size = new System.Drawing.Size(372, 39);
+            this.button_run.Size = new System.Drawing.Size(279, 32);
             this.button_run.TabIndex = 4;
             this.button_run.Text = "RUN";
             this.button_run.UseVisualStyleBackColor = true;
@@ -251,10 +234,9 @@
             // linkLabel_deleteSelectedAlgorithm
             // 
             this.linkLabel_deleteSelectedAlgorithm.AutoSize = true;
-            this.linkLabel_deleteSelectedAlgorithm.Location = new System.Drawing.Point(272, 64);
-            this.linkLabel_deleteSelectedAlgorithm.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.linkLabel_deleteSelectedAlgorithm.Location = new System.Drawing.Point(204, 52);
             this.linkLabel_deleteSelectedAlgorithm.Name = "linkLabel_deleteSelectedAlgorithm";
-            this.linkLabel_deleteSelectedAlgorithm.Size = new System.Drawing.Size(108, 17);
+            this.linkLabel_deleteSelectedAlgorithm.Size = new System.Drawing.Size(83, 13);
             this.linkLabel_deleteSelectedAlgorithm.TabIndex = 3;
             this.linkLabel_deleteSelectedAlgorithm.TabStop = true;
             this.linkLabel_deleteSelectedAlgorithm.Text = "Delete Selected";
@@ -262,10 +244,9 @@
             // 
             // button_addAlgo
             // 
-            this.button_addAlgo.Location = new System.Drawing.Point(304, 22);
-            this.button_addAlgo.Margin = new System.Windows.Forms.Padding(4);
+            this.button_addAlgo.Location = new System.Drawing.Point(228, 18);
             this.button_addAlgo.Name = "button_addAlgo";
-            this.button_addAlgo.Size = new System.Drawing.Size(77, 28);
+            this.button_addAlgo.Size = new System.Drawing.Size(58, 23);
             this.button_addAlgo.TabIndex = 2;
             this.button_addAlgo.Text = "Add";
             this.button_addAlgo.UseVisualStyleBackColor = true;
@@ -274,31 +255,27 @@
             // listBox_algorithms
             // 
             this.listBox_algorithms.FormattingEnabled = true;
-            this.listBox_algorithms.ItemHeight = 16;
-            this.listBox_algorithms.Location = new System.Drawing.Point(9, 81);
-            this.listBox_algorithms.Margin = new System.Windows.Forms.Padding(4);
+            this.listBox_algorithms.Location = new System.Drawing.Point(7, 66);
             this.listBox_algorithms.Name = "listBox_algorithms";
-            this.listBox_algorithms.Size = new System.Drawing.Size(371, 772);
+            this.listBox_algorithms.Size = new System.Drawing.Size(279, 628);
             this.listBox_algorithms.TabIndex = 1;
             // 
             // comboBox_algorithms
             // 
             this.comboBox_algorithms.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_algorithms.FormattingEnabled = true;
-            this.comboBox_algorithms.Location = new System.Drawing.Point(9, 23);
-            this.comboBox_algorithms.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_algorithms.Location = new System.Drawing.Point(7, 19);
             this.comboBox_algorithms.Name = "comboBox_algorithms";
-            this.comboBox_algorithms.Size = new System.Drawing.Size(284, 24);
+            this.comboBox_algorithms.Size = new System.Drawing.Size(214, 21);
             this.comboBox_algorithms.TabIndex = 0;
             // 
             // textBox_log
             // 
-            this.textBox_log.Location = new System.Drawing.Point(9, 25);
-            this.textBox_log.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_log.Location = new System.Drawing.Point(7, 20);
             this.textBox_log.Multiline = true;
             this.textBox_log.Name = "textBox_log";
             this.textBox_log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_log.Size = new System.Drawing.Size(350, 828);
+            this.textBox_log.Size = new System.Drawing.Size(264, 674);
             this.textBox_log.TabIndex = 0;
             this.textBox_log.WordWrap = false;
             // 
@@ -306,11 +283,9 @@
             // 
             this.groupBox3.Controls.Add(this.button_report);
             this.groupBox3.Controls.Add(this.textBox_log);
-            this.groupBox3.Location = new System.Drawing.Point(911, 15);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox3.Location = new System.Drawing.Point(683, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(372, 910);
+            this.groupBox3.Size = new System.Drawing.Size(279, 739);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Status";
@@ -318,10 +293,9 @@
             // button_report
             // 
             this.button_report.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_report.Location = new System.Drawing.Point(9, 861);
-            this.button_report.Margin = new System.Windows.Forms.Padding(4);
+            this.button_report.Location = new System.Drawing.Point(7, 700);
             this.button_report.Name = "button_report";
-            this.button_report.Size = new System.Drawing.Size(350, 39);
+            this.button_report.Size = new System.Drawing.Size(262, 32);
             this.button_report.TabIndex = 5;
             this.button_report.Text = "Report";
             this.button_report.UseVisualStyleBackColor = true;
@@ -329,15 +303,14 @@
             // 
             // MultipleProblemMultipleAlgorithm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1293, 929);
+            this.ClientSize = new System.Drawing.Size(970, 683);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MultipleProblemMultipleAlgorithm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Multiple Instances Using the same Model, by Multiple Algorithm";

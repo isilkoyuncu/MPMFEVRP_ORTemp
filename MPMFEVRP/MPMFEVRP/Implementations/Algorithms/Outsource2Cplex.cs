@@ -21,11 +21,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU }, XCPlex_Formulation.ArcDuplicatingwoU, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU }, XCPlex_Formulation.NodeDuplicatingwoU, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_THREADS, "# of Threads", listPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RELAXATION, "Cplex Relaxation", new List<object>() { XCPlexRelaxation.None, XCPlexRelaxation.LinearProgramming }, XCPlexRelaxation.None, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS, "Tighter Auxiliary Bounds", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_LOG_OUTPUT_TYPE, "CPLEX Log Output Type", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_EXPORT_LP_MODEL, "Export LP Model", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
         }
 
         public override string GetName()
@@ -46,7 +48,11 @@ namespace MPMFEVRP.Implementations.Algorithms
                 runtimeLimit_Seconds: algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue(),
                 optionalCPlexParameters: algorithmParameters.GetIntersectingParameters(XCPlexParameters.recognizedOptionalCplexParameters),
                 relaxation: (XCPlexRelaxation)algorithmParameters.GetParameter(ParameterID.ALG_RELAXATION).Value,
-                tighterAuxBounds: algorithmParameters.GetParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS).GetBoolValue());
+                tighterAuxBounds: algorithmParameters.GetParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS).GetBoolValue(),
+                cplexLogOutputFile: algorithmParameters.GetParameter(ParameterID.ALG_LOG_OUTPUT_TYPE).GetBoolValue(),
+                exportLpModel: algorithmParameters.GetParameter(ParameterID.ALG_EXPORT_LP_MODEL).GetBoolValue()
+                );
+            
         }
 
         public override void SpecializedRun()
@@ -75,8 +81,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                     throw new Exception("XCplex model type does not exist, thus cannot be built.");
 
             }
-            //ISSUE (#5) the following is turned on and off to export the model, and there are two issues with this. 1-The same command is also used in individual model classes, thus they should be deleted. 2-The outputting of model(s) should be tied to parameters and left to run-time user decision
-            model.ExportModel(theProblemModel.GetInstanceName(theProblemModel.InputFileName) + "-" +((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString() + "- model.lp");
+            if(XcplexParam.ExportLpModel)
+                model.ExportModel(theProblemModel.GetInstanceName(theProblemModel.InputFileName) + "-" +((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value).ToString() + "- model.lp");
             return model;
         }
 

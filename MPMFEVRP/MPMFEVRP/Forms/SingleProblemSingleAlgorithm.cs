@@ -242,22 +242,25 @@ namespace MPMFEVRP.Forms
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 RestoreDirectory = true,
-                Multiselect = false
+                Multiselect = true
             };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                label_selectedFile.Text = dialog.FileName;
+
                 try
                 {
-                    string[] cplexOutputSummary = SolutionUtil.ReadCplexLogByFileName(dialog.FileName);
-                    StreamWriter sw = new StreamWriter("cplexLogSummary.txt");
-                    for(int i=0; i<cplexOutputSummary.Length; i++)
+                    for (int j = 0; j < dialog.FileNames.Length; j++)
                     {
-                        sw.WriteLine(cplexOutputSummary[i]);
+                        string[] cplexOutputSummary = SolutionUtil.ReadCplexLogByFileName(dialog.FileNames[j]);
+                        StreamWriter sw = new StreamWriter("cplexLogSummary"+(j+1).ToString()+".txt");
+                        for (int i = 0; i < cplexOutputSummary.Length; i++)
+                        {
+                            sw.WriteLine(cplexOutputSummary[i]);
+                        }
+                        sw.Flush();
+                        sw.Close();
+                        Log("Solution summary is written!");
                     }
-                    sw.Flush();
-                    sw.Close();
-                    Log("Solution summary is written!");
                 }
                 catch (Exception)
                 {

@@ -53,6 +53,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
         protected int numVehCategories;
+
         public System.IO.TextWriter TWoutput;
 
         public XCPlexBase()
@@ -312,12 +313,16 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             Output();
-            //ISSUE (#5): Turn the following two lines on/off if you want to output the log file as a text to the MPMFEVRP directory instead of output window
-            TWoutput = System.IO.File.CreateText("CplexLog_"+theProblemModel.InputFileName);
-            //SetOut(TWoutput);
-            //SetOut(null);
+            if (xCplexParam.CplexLogOutputFile)
+            {
+                TWoutput = System.IO.File.CreateText("CplexLog_"+theProblemModel.InputFileName);
+                SetOut(TWoutput);
+            }
             Solve();
-            TWoutput.Close();
+            if (xCplexParam.CplexLogOutputFile)
+            {
+                TWoutput.Close();
+            }
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
             numberOfTimesSolveMethodCalled++;
