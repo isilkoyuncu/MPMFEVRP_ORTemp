@@ -313,15 +313,18 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             Output();
-            //ISSUE (#5): Turn the following two lines on/off if you want to output the log file as a text to the MPMFEVRP directory instead of output window
-            TWoutput = System.IO.File.CreateText("CplexLog_"+theProblemModel.InputFileName);
-            SetOut(TWoutput);
-            //SetOut(null);
+
+            if (xCplexParam.CplexLogOutputFile)
+            {
+                TWoutput = System.IO.File.CreateText("CplexLog_" + theProblemModel.InputFileName);
+                SetOut(TWoutput);
+            }
             Solve();
             if (xCplexParam.CplexLogOutputFile)
             {
                 TWoutput.Close();
             }
+
             endTime = DateTime.Now;
             cpuTime = (endTime - beginTime).TotalSeconds;
             numberOfTimesSolveMethodCalled++;
@@ -433,7 +436,7 @@ namespace MPMFEVRP.Models.XCPlex
                 disposedValue = true;
             }
         }
-        
+
         // Shortcuts
         // DV1D : Decision Variable 1-Dimensional etc.
         protected void AddDV1D(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)

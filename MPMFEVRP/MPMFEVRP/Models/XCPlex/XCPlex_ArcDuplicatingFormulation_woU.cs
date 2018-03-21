@@ -208,6 +208,97 @@ namespace MPMFEVRP.Models.XCPlex
                                 }
                             }
                     }
+
+            //Between two YArcs, check for domination and kill the dominated one
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r1 = 0; r1 < numES; r1++)
+                    {
+                        if (Y[i][r1][j].UB == 0.0)
+                            continue;
+                        for (int r2 = 0; r2 < numES; r2++)
+                        {
+                            if (r2 == r1)
+                                continue;
+                            if (Y[i][r2][j].UB == 0.0)
+                                continue;
+                            int dom = Dominates(i, j, r1, r2);
+                            if (dom == 1)
+                                Y[i][r2][j].UB = 0.0;
+                            if (dom == 2)
+                                Y[i][r1][j].UB = 0.0;
+                        }
+                    }
+        }
+        /// <summary>
+        /// Returns 0, 1, or 2 based on the comparison of two YArcs
+        /// </summary>
+        /// <param name="nonES1"></param>
+        /// <param name="nonES2"></param>
+        /// <param name="r1"></param>
+        /// <param name="r2"></param>
+        /// <returns>1 if the first one dominates, 2 if the second dominates, 0 if both are nondominated</returns>
+        int Dominates(int nonES1, int nonES2, int r1, int r2)
+        {
+            Site from = preprocessedSites[nonES1];
+            Site to = preprocessedSites[nonES2];
+            Site ES1 = ExternalStations[r1];
+            Site ES2 = ExternalStations[r2];
+            bool ES1isNotDominated = false;
+            bool ES2isNotDominated = false;
+
+            //Who has the shortest first leg is not dominated
+            int sign = Math.Sign(Distance(from, ES1) - Distance(from, ES2));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            //Who has the shortest second leg is not dominated
+            sign = Math.Sign(Distance(ES1, to) - Distance(ES2, to));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            if (ES1isNotDominated && ES2isNotDominated)
+                return 0;
+
+            //Who has the shortest overall distance is not dominated
+            sign = Math.Sign(Distance(from, ES1) + Distance(ES1, to) - Distance(from, ES2) - Distance(ES2, to));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            if (ES1isNotDominated && ES2isNotDominated)
+                return 0;
+
+            //Who has the overall shortest time including FF refuel is not dominated
+            sign = Math.Sign(TravelTime(from, ES1) + TravelTime(ES1, to) + BatteryCapacity(VehicleCategories.EV) / ES1.RechargingRate - (TravelTime(from, ES2) + TravelTime(ES2, to) + BatteryCapacity(VehicleCategories.EV) / ES2.RechargingRate));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            if (ES1isNotDominated && ES2isNotDominated)
+                return 0;
+            if (ES1isNotDominated)
+                return 1;
+            else
+                return 2;
         }
         void SetMinAndMaxValuesOfModelSpecificVariables()
         {
@@ -802,7 +893,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddAllCuts()
         {
             AddCut_TimeFeasibilityOfTwoConsecutiveArcs();
-            AddCut_EnergyFeasibilityOfTwoConsecutiveArcs();//17
+            //AddCut_EnergyFeasibilityOfTwoConsecutiveArcs();//17
             AddCut_EnergyFeasibilityOfCustomerBetweenTwoES();//18
             AddCut_TotalNumberOfActiveArcs();
             //AddCut_EnergyConservation();
