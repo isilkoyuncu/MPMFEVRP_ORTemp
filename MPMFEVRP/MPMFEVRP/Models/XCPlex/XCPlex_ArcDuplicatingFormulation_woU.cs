@@ -517,7 +517,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TotalTravelTime();//15
 
             //Some additional cuts
-            AddAllCuts();
+            //AddAllCuts();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();

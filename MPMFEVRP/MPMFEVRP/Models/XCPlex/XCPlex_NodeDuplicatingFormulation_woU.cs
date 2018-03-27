@@ -6,6 +6,7 @@ using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
@@ -344,7 +345,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TotalTravelTime();
 
             //Some additional cuts
-            AddAllCuts();
+            //AddAllCuts();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -477,6 +478,8 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MinNumberOfVehicles() //4-5 b
         {
+            if (numVehicles.Sum() < minNumVeh)
+                return;
             ILinearNumExpr NumberOfVehiclesOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < NumPreprocessedSites; j++)
             {
