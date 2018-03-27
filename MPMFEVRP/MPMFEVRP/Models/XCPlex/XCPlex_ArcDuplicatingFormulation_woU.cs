@@ -611,8 +611,6 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MinNumberOfVehicles() //4-5 b
         {
-            if (numVehicles.Sum() < minNumVeh)
-                return;
             ILinearNumExpr NumberOfVehiclesOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)
             {
@@ -621,7 +619,7 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int r = 0; r < numES; r++)
                     NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, Y[0][r][j]);
             }
-            string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than_or_equal_to_" + (minNumVeh).ToString();
+            string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than" + (minNumVeh).ToString();
             allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
@@ -894,11 +892,9 @@ namespace MPMFEVRP.Models.XCPlex
 
         void AddAllCuts()
         {
-            //AddCut_TimeFeasibilityOfTwoConsecutiveArcs();
-            //AddCut_EnergyFeasibilityOfTwoConsecutiveArcs();//17
-            //AddCut_EnergyFeasibilityOfCustomerBetweenTwoES();//18
+            AddCut_TimeFeasibilityOfTwoConsecutiveArcs();
+            AddCut_EnergyFeasibilityOfCustomerBetweenTwoES();
             AddCut_TotalNumberOfActiveArcs();
-            //AddCut_EnergyConservation();
         }
         void AddCut_TimeFeasibilityOfTwoConsecutiveArcs()//16
         {
@@ -982,7 +978,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddCut_EnergyFeasibilityOfTwoConsecutiveArcs()//17
         {
             ILinearNumExpr EnergyFeasibilityOfTwoConsecutiveArcs = LinearNumExpr();
-            for (int k = 1; k < numNonESNodes; k++)//This was starting at 0
+            for (int k = 1; k < numNonESNodes; k++)
             {
                 Site through = preprocessedSites[k];
 
@@ -1043,12 +1039,12 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void AddCut_EnergyFeasibilityOfCustomerBetweenTwoES()//18
+        void AddCut_EnergyFeasibilityOfCustomerBetweenTwoES()
         {
             for (int r1 = 0; r1 < numES; r1++)
             {
                 Site ES1 = ExternalStations[r1];
-                for (int j = 1; j < numNonESNodes; j++)//This was starting from 0, which is the depot and the cut didn't make sense because the depot is never in the middle of a tour
+                for (int j = 1; j < numNonESNodes; j++)
                 {
                     Site customer = preprocessedSites[j];
                     for (int r2 = 0; r2 < numES; r2++)
