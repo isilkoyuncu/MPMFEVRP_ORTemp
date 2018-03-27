@@ -611,15 +611,17 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_MinNumberOfVehicles() //4-5 b
         {
+            if (numVehicles.Sum() < minNumVeh)
+                return;
             ILinearNumExpr NumberOfVehiclesOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)
             {
-                for(int v=0;v<numVehCategories;v++)
+                for (int v = 0; v < numVehCategories; v++)
                     NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
                 for (int r = 0; r < numES; r++)
                     NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, Y[0][r][j]);
             }
-            string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than" + (minNumVeh).ToString();
+            string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than_or_equal_to_" + (minNumVeh).ToString();
             allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
         }
         void AddConstraint_MaxEnergyGainAtNonDepotSite()//6
