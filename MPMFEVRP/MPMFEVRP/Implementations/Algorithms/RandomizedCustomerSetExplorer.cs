@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
-    class RandomizedCustomerSetExplorerViaTreeSearch : AlgorithmBase
+    class RandomizedCustomerSetExplorer : AlgorithmBase
     {
         //        XCPlexParameters xCplexParam;
         Vehicle theGDV;
@@ -27,9 +27,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         PartitionedCustomerSetList exploredFeasibleCustomerSets;
         PartitionedCustomerSetList exploredInfeasibleCustomerSets;
 
-        double avgTimePerGDVOptimalTSPSolution, avgTimePerGDVInfeasibleTSPSolution, avgTimePerEVOptimalTSPSolution, avgTimePerEVInfeasibleTSPSolution;
+        PartitionedCustomerSetList InfeasibleCustomerSets, OnlyGDVFeasibleCustomerSets, EVFeasibleCustomerSets;
 
-        public RandomizedCustomerSetExplorerViaTreeSearch() : base()
+        double avgTimePerGDVOptimalTSPSolution, avgTimePerGDVInfeasibleTSPSolution, avgTimePerEVOptimalTSPSolution, avgTimePerEVInfeasibleTSPSolution, avgTimePerTheOtherEVOptimalTSPSolution, avgTimePerTheOtherEVInfeasibleTSPSolution;
+        TripleSolveOutComeStatistics tripleSolveOutcomeStats;
+        string allStats_formatted;
+
+        public RandomizedCustomerSetExplorer() : base()
         {
             AddSpecializedParameters();
         }
@@ -37,6 +41,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 50, UserInputObjectType.TextBox));
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_BEAM_WIDTH, "Beam width", 1));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET, "Minimum # of customers in a set", new List<object>() { 3, 4, 5 }, 4, UserInputObjectType.ComboBox));
         }
 
         public override string GetName()
@@ -66,30 +71,41 @@ namespace MPMFEVRP.Implementations.Algorithms
                 "avgTimePerEVInfeasibleTSPSolution" + avgTimePerEVInfeasibleTSPSolution,
                 "Total GDV time spent on optimal: "+ theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"],
                 "Total GDV time spent on infeasible: "+ theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"],
-                "Total EV time spent on optimal: " + theProblemModel.EV_TSP_TimeSpentAccount["Optimal"],
-                "Total EV time spent on infeasible: " + theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"],
+                "Total EV time spent on optimal (NDF): " + theProblemModel.EV_TSP_TimeSpentAccount["Optimal"],
+                "Total EV time spent on infeasible (NDF): " + theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"],
+                "Total EV time spent on optimal (ADF): " + theProblemModel.TheOtherEV_TSP_TimeSpentAccount["Optimal"],
+                "Total EV time spent on infeasible (ADF): " + theProblemModel.TheOtherEV_TSP_TimeSpentAccount["Infeasible"],
                 "Total # of GDV optimal: "+ theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
                 "Total # of GDV infeasible: "+ theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
-                "Total # of EV optimal: "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
-                "Total # of EV infeasible: "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
+                "Total # of EV optimal (NDF): "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
+                "Total # of EV infeasible (NDF): "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
+                "Total # of EV optimal (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
+                "Total # of EV infeasible (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
                 "Solution Status: " + status.ToString()
             };
-            list.Add("Optimal Comp Time Avgs by Level");
-            Dictionary<int, Tuple<int, double>> optimalCompTimeAvgsByLevel = exploredFeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
-            foreach (int l in optimalCompTimeAvgsByLevel.Keys)
-            {
-                list.Add(l.ToString());
-                list.Add(optimalCompTimeAvgsByLevel[l].Item1.ToString());
-                list.Add(optimalCompTimeAvgsByLevel[l].Item2.ToString());
-            }
-            list.Add("Infeasible Comp Time Avgs by Level");
-            Dictionary<int, Tuple<int, double>> infeasibleCompTimeAvgsByLevel = exploredInfeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
-            foreach (int l in infeasibleCompTimeAvgsByLevel.Keys)
-            {
-                list.Add(l.ToString());
-                list.Add(infeasibleCompTimeAvgsByLevel[l].Item1.ToString());
-                list.Add(infeasibleCompTimeAvgsByLevel[l].Item2.ToString());
-            }
+            //list.Add("Optimal Comp Time Avgs by Level");
+            //Dictionary<int, Tuple<int, double>> optimalCompTimeAvgsByLevel = exploredFeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
+            //foreach (int l in optimalCompTimeAvgsByLevel.Keys)
+            //{
+            //    list.Add(l.ToString());
+            //    list.Add(optimalCompTimeAvgsByLevel[l].Item1.ToString());
+            //    list.Add(optimalCompTimeAvgsByLevel[l].Item2.ToString());
+            //}
+            //list.Add("Infeasible Comp Time Avgs by Level");
+            //Dictionary<int, Tuple<int, double>> infeasibleCompTimeAvgsByLevel = exploredInfeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
+            //foreach (int l in infeasibleCompTimeAvgsByLevel.Keys)
+            //{
+            //    list.Add(l.ToString());
+            //    list.Add(infeasibleCompTimeAvgsByLevel[l].Item1.ToString());
+            //    list.Add(infeasibleCompTimeAvgsByLevel[l].Item2.ToString());
+            //}
+
+            list.Add(Environment.NewLine);
+            list.Add(tripleSolveOutcomeStats.GetSummaryData(theProblemModel.InputFileName));
+
+            list.Add(Environment.NewLine);
+            list.Add(allStats_formatted);
+
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();
             return toReturn;
@@ -112,6 +128,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
             avgTimePerEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+
+            avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            avgTimePerTheOtherEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -127,6 +146,13 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
             PopulateAndPlaceInitialUnexploredCustomerSets();
+
+            InfeasibleCustomerSets = new PartitionedCustomerSetList();
+            OnlyGDVFeasibleCustomerSets = new PartitionedCustomerSetList();
+            EVFeasibleCustomerSets = new PartitionedCustomerSetList();
+
+            tripleSolveOutcomeStats = new TripleSolveOutComeStatistics();
+            allStats_formatted = "instance\t# Customers\tCustomers\tCombined Status\tGDV time\tEV NDF time\tEV ADF time";
         }
         void PopulateAndPlaceInitialUnexploredCustomerSets()
         {
@@ -184,11 +210,30 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             int numCustomerSetsToReport = algorithmParameters.GetParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY).GetIntValue();
+            Random random = new Random(1);
+            string[] csTripleSolveOutcome;
+
+            //for(int i=0; i< numCustomerSetsToReport; i++)
+            //{
+            //    //Randomly generate a customer set
+            //    CustomerSet cs = new CustomerSet(RandomlySelectASetOfCustomers(random));
+            //    //Triple solve
+            //    csTripleSolveOutcome = theProblemModel.TripleSolve(cs);
+            //    //Place in the proper list
+            //    allStats_formatted += Environment.NewLine + cs.NumberOfCustomers.ToString()
+            //        + "\t" + Utils.StringOperations.CombineAndSpaceSeparateArray(cs.Customers.ToArray())
+            //        + "\t" + csTripleSolveOutcome[0]
+            //        + "\t" + csTripleSolveOutcome[1]
+            //        + "\t" + csTripleSolveOutcome[2]
+            //        + "\t" + csTripleSolveOutcome[3];
+            //}
+
+
             int beamWidth = 1;// algorithmParameters.GetParameter(ParameterID.ALG_BEAM_WIDTH).GetIntValue();
             int currentLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;
-
-            while ((unexploredCustomerSets.TotalCount>0)&&((exploredInfeasibleCustomerSets.TotalCount < numCustomerSetsToReport)||(exploredFeasibleCustomerSets.TotalCount<numCustomerSetsToReport)))
+            int nOptimizedCustomerSets = 0;
+            while ((unexploredCustomerSets.TotalCount > 0) && (nOptimizedCustomerSets < numCustomerSetsToReport))
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
 
@@ -209,14 +254,92 @@ namespace MPMFEVRP.Implementations.Algorithms
                         CustomerSet candidate = new CustomerSet(theParent);
                         candidate.Extend(customerID);
                         theParent.MakeCustomerImpossible(customerID);
-                        OptimizeAndEvaluateForLists(candidate);
-                        Console.WriteLine("Working on "+theProblemModel.InputFileName+"; another child evaluated, now we have " + exploredFeasibleCustomerSets.TotalCount.ToString() + " feasible and " + exploredInfeasibleCustomerSets.TotalCount.ToString() + " infeasible");
+
+                        //OptimizeAndEvaluateForLists(candidate);
+                        //Triple solve
+                        csTripleSolveOutcome = theProblemModel.TripleSolve(candidate);
+                        //Place in the proper list
+                        if (csTripleSolveOutcome[0] != "Infeasible")
+                            unexploredCustomerSets.Add(candidate);
+                        allStats_formatted += Environment.NewLine + theProblemModel.InputFileName
+                            + "\t" + candidate.NumberOfCustomers.ToString()
+                            + "\t" + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray())
+                            + "\t" + csTripleSolveOutcome[0]
+                            + "\t" + csTripleSolveOutcome[1]
+                            + "\t" + csTripleSolveOutcome[2]
+                            + "\t" + csTripleSolveOutcome[3];
+
+                        if (candidate.NumberOfCustomers >= algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET).GetValue<int>())
+                            nOptimizedCustomerSets++;
+
+                        tripleSolveOutcomeStats.AddToData(candidate.NumberOfCustomers, csTripleSolveOutcome);
                     }//foreach (string customerID in remainingCustomers)
 
                     //end of the level, moving on to the next level
                     currentLevel++;
                 }
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
+        }
+
+        List<string> RandomlySelectASetOfCustomers(Random rnd)
+        {
+            int n = rnd.Next(algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET).GetValue<int>(), algorithmParameters.GetParameter(ParameterID.ALG_MAX_NUM_CUSTOMERS_IN_A_SET).GetValue<int>() + 1);
+
+            List<string> allCustomerIDs = theProblemModel.SRD.GetCustomerIDs();
+            List<string> outcome = new List<string>();
+            while (outcome.Count < n)
+            {
+                string newCustID = allCustomerIDs[rnd.Next(0, allCustomerIDs.Count)];
+                if (!outcome.Contains(newCustID))
+                    outcome.Add(newCustID);
+            }
+            return outcome;
+        }
+    }
+
+    class TripleSolveOutComeStatistics
+    {
+        SortedDictionary<Tuple<string, int>, List<double>> theData_GDV;
+        SortedDictionary<Tuple<string, int>, List<double>> theData_EV_NDF;
+        SortedDictionary<Tuple<string, int>, List<double>> theData_EV_ADF;
+
+        internal TripleSolveOutComeStatistics()
+        {
+            theData_GDV = new SortedDictionary<Tuple<string, int>, List<double>>();
+            theData_EV_NDF = new SortedDictionary<Tuple<string, int>, List<double>>();
+            theData_EV_ADF = new SortedDictionary<Tuple<string, int>, List<double>>();
+        }
+
+        internal void AddToData(int nCustomers, string[] csTripleSolveOutcome)
+        {
+            Tuple<string, int> key = new Tuple<string, int>(csTripleSolveOutcome[0], nCustomers);
+            if (!theData_GDV.ContainsKey(key))
+            {
+                theData_GDV.Add(key, new List<double>());
+                theData_EV_NDF.Add(key, new List<double>());
+                theData_EV_ADF.Add(key, new List<double>());
+            }
+            theData_GDV[key].Add(double.Parse(csTripleSolveOutcome[1]));
+            theData_EV_NDF[key].Add(double.Parse(csTripleSolveOutcome[2]));
+            theData_EV_ADF[key].Add(double.Parse(csTripleSolveOutcome[3]));
+        }
+
+        internal string GetSummaryData(string instance)
+        {
+            string outcome = instance+"\tStatus\t# Customers\t# Customer Sets (Sample Size)\tAvg. GDV Time\tAvg. EV NDF Time\tAvg. EV ADF";
+
+            foreach(Tuple<string, int> key in theData_GDV.Keys)
+            {
+                outcome += Environment.NewLine + instance
+                    + "\t" + key.Item1
+                    + "\t" + key.Item2
+                    + "\t" + theData_GDV[key].Count
+                    + "\t" + theData_GDV[key].Average().ToString()
+                    + "\t" + theData_EV_NDF[key].Average().ToString()
+                    + "\t" + theData_EV_ADF[key].Average().ToString();
+            }
+
+            return outcome;
         }
     }
 }

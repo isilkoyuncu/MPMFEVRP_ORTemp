@@ -153,6 +153,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
         /// <returns></returns>
         public Dictionary<int, Tuple<int,double>> GetSolutionTimeStatisticsByLevel(VehicleCategories vc)
         {
+            if (TotalCount == 0)
+                return null;
+
             Dictionary<int, Tuple<int, double>> outcome = new Dictionary<int, Tuple<int, double>>();
 
             int lMin = GetHighestNonemptyLevel();
