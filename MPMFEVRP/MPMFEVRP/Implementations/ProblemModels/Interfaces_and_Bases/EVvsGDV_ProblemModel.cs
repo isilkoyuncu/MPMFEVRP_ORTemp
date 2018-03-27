@@ -20,6 +20,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected XCPlexVRPBase EV_TSPSolver;
         public Dictionary<string, int> EV_TSP_NumberOfCustomerSetsByStatus { get { return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
         public Dictionary<string, double> EV_TSP_TimeSpentAccount { get { return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
+        //TheOther is created only for two EV_TSP vs. 1 GDV_TSP model comparison 
+        protected XCPlexVRPBase TheOtherEV_TSPSolver;
+        public Dictionary<string, int> TheOtherEV_TSP_NumberOfCustomerSetsByStatus { get { return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
+        public Dictionary<string, double> TheOtherEV_TSP_TimeSpentAccount { get { return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
         protected XCPlexVRPBase GDV_TSPSolver;
         public Dictionary<string, int> GDV_TSP_NumberOfCustomerSetsByStatus { get { return GDV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
         public Dictionary<string, double> GDV_TSP_TimeSpentAccount { get { return GDV_TSPSolver.TotalTimeInSolveOnStatus; } }
@@ -59,6 +63,11 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
             }
            else if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
+            {
+                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+                GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            }
+           else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
                 GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
@@ -402,6 +411,42 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 }
             }
             sw.Close();
+        }
+
+        public string[] TripleSolve(CustomerSet customerSet)
+        {
+            if (TheOtherEV_TSPSolver == null)
+                InitializeForTripleSolve();
+
+            GDV_TSPSolver.RefineDecisionVariables(customerSet);
+            GDV_TSPSolver.Solve_and_PostProcess();
+
+            EV_TSPSolver.RefineDecisionVariables(customerSet);
+            EV_TSPSolver.Solve_and_PostProcess();
+
+            TheOtherEV_TSPSolver.RefineDecisionVariables(customerSet);
+            TheOtherEV_TSPSolver.Solve_and_PostProcess();
+
+            string csStatus = GDV_TSPSolver.GetStatus().ToString();
+            string EVNDFStatus = EV_TSPSolver.GetStatus().ToString();
+            string EVADFStatus = TheOtherEV_TSPSolver.GetStatus().ToString();
+            if (EVNDFStatus != EVADFStatus)
+                throw new Exception("NDF and ADF found different statuses for the same customer set!");
+            else
+                if (EVNDFStatus != csStatus)
+            {
+                if ((csStatus == "Optimal") && (EVNDFStatus == "Infeasible"))
+                    csStatus = "GDVOnly";
+                else
+                    throw new Exception("Some unrecognized status combination obtained!");
+            }
+            return new string[] {csStatus, GDV_TSPSolver.CPUtime.ToString(), EV_TSPSolver.CPUtime.ToString(), TheOtherEV_TSPSolver.CPUtime.ToString() };
+        }
+        void InitializeForTripleSolve()
+        {
+            GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
         }
     }
 }
