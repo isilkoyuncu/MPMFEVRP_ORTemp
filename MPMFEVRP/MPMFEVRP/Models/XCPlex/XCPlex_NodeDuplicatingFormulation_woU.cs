@@ -55,8 +55,39 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXVariablesTo0();
+            //rig_IKfromADFEMH10();
         }
+        void rig_IKfromADFEMH10()
+        {
+            X[0][34][0].LB = 1.0;
+            X[34][41][0].LB = 1.0;
+            X[41][35][0].LB = 1.0;
+            X[35][31][0].LB = 1.0;
+            X[31][38][0].LB = 1.0;
+            X[38][0][0].LB = 1.0;
 
+            X[0][39][0].LB = 1.0;
+            X[39][42][0].LB = 1.0;
+            X[42][28][0].LB = 1.0;
+            X[28][29][0].LB = 1.0;
+            X[29][37][0].LB = 1.0;
+            X[37][0][0].LB = 1.0;
+
+            X[0][43][0].LB = 1.0;
+            X[43][40][0].LB = 1.0;
+            X[40][25][0].LB = 1.0;
+            X[25][27][0].LB = 1.0;
+            X[27][30][0].LB = 1.0;
+            X[30][36][0].LB = 1.0;
+            X[36][0][0].LB = 1.0;
+
+            X[0][19][0].LB = 1.0;
+            X[19][26][0].LB = 1.0;
+            X[26][44][0].LB = 1.0;
+            X[44][32][0].LB = 1.0;
+            X[32][33][0].LB = 1.0;
+            X[33][0][0].LB = 1.0;
+        }
         void SetUndesiredXVariablesTo0()
         {
             //No arc from a node to itself
@@ -99,6 +130,76 @@ namespace MPMFEVRP.Models.XCPlex
                             X[i][j][v].UB = 0.0;
                             X[j][i][v].UB = 0.0;
                         }
+        }
+        /// <summary>
+        /// Returns 0, 1, or 2 based on the comparison of two YArcs
+        /// </summary>
+        /// <param name="nonES1"></param>
+        /// <param name="nonES2"></param>
+        /// <param name="r1"></param>
+        /// <param name="r2"></param>
+        /// <returns>1 if the first one dominates, 2 if the second dominates, 0 if both are nondominated</returns>
+        int Dominates(int nonES1, int nonES2, int r1, int r2)
+        {
+            Site from = preprocessedSites[nonES1];
+            Site to = preprocessedSites[nonES2];
+            Site ES1 = preprocessedSites[r1];
+            Site ES2 = preprocessedSites[r2];
+            bool ES1isNotDominated = false;
+            bool ES2isNotDominated = false;
+
+            //Who has the shortest first leg is not dominated
+            int sign = Math.Sign(Distance(from, ES1) - Distance(from, ES2));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            //Who has the shortest second leg is not dominated
+            sign = Math.Sign(Distance(ES1, to) - Distance(ES2, to));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            if (ES1isNotDominated && ES2isNotDominated)
+                return 0;
+
+            //Who has the shortest overall distance is not dominated
+            sign = Math.Sign(Distance(from, ES1) + Distance(ES1, to) - Distance(from, ES2) - Distance(ES2, to));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            if (ES1isNotDominated && ES2isNotDominated)
+                return 0;
+
+            //Who has the overall shortest time including FF refuel is not dominated
+            sign = Math.Sign(TravelTime(from, ES1) + TravelTime(ES1, to) + BatteryCapacity(VehicleCategories.EV) / ES1.RechargingRate - (TravelTime(from, ES2) + TravelTime(ES2, to) + BatteryCapacity(VehicleCategories.EV) / ES2.RechargingRate));
+            if (sign != 0)
+            {
+                if (sign == -1)
+                    ES1isNotDominated = true;
+                else
+                    ES2isNotDominated = true;
+            }
+
+            if (ES1isNotDominated && ES2isNotDominated)
+                return 0;
+            if (ES1isNotDominated)
+                return 1;
+            else
+                return 2;
         }
         void SetMinAndMaxValuesOfModelSpecificVariables()
         {
@@ -213,12 +314,13 @@ namespace MPMFEVRP.Models.XCPlex
         {
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
+            //AddConstraint_EliminateDominatedESVisits();
             AddConstraint_NumberOfVisitsPerCustomerNode();//1
             AddConstraint_NumberOfEvVisitsPerESNode();//2
             AddConstraint_NoGDVVisitToESNodes();//3
             AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//4
             AddConstraint_MaxNumberOfVehiclesPerCategory();//5
-//            AddConstraint_MinNumberOfVehicles();//5 b
+            AddConstraint_MinNumberOfVehicles();//5 b
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
 
             if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)
@@ -247,7 +349,45 @@ namespace MPMFEVRP.Models.XCPlex
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
         }
-        
+        void AddConstraint_EliminateDominatedESVisits()
+        {
+            //Between two ESs, check for domination and kill the dominated one
+            for (int i = 0; i < NumPreprocessedSites; i++)
+                for (int j = 0; j < NumPreprocessedSites; j++)
+                    if (preprocessedSites[i].SiteType != SiteTypes.ExternalStation && preprocessedSites[j].SiteType != SiteTypes.ExternalStation)
+                        for (int r1 = FirstESNodeIndex; r1 <= LastESNodeIndex; r1++)
+                        {
+                            if (X[i][r1][vIndex_EV].UB + X[r1][j][vIndex_EV].UB <= 1.0)
+                                continue;
+                            for (int r2 = FirstESNodeIndex; r2 <= LastESNodeIndex; r2++)
+                            {
+                                if (r2 == r1)
+                                    continue;
+                                if (X[i][r2][vIndex_EV].UB + X[r2][j][vIndex_EV].UB <= 1.0)
+                                    continue;
+                                ILinearNumExpr EliminateDominatedESVisits = LinearNumExpr();
+                                string constraint_name="";
+                                int dom = Dominates(i, j, r1, r2);
+                                if (dom == 1)
+                                {
+                                    EliminateDominatedESVisits.AddTerm(1.0, X[i][r2][vIndex_EV]);
+                                    EliminateDominatedESVisits.AddTerm(1.0, X[r2][j][vIndex_EV]);
+                                    constraint_name = "The_ES_node_" + r2.ToString() + "_is_dominated_by_ES_node_" + r1.ToString() + "_from_node_"+ i.ToString() + "_to_node_" + j.ToString();
+                                    allConstraints_list.Add(AddLe(EliminateDominatedESVisits, 1.0, constraint_name));
+                                }
+                                if (dom == 2)
+                                {
+                                    EliminateDominatedESVisits.AddTerm(1.0, X[i][r1][vIndex_EV]);
+                                    EliminateDominatedESVisits.AddTerm(1.0, X[r1][j][vIndex_EV]);
+                                    constraint_name = "The_ES_node_" + r1.ToString() + "_is_dominated_by_ES_node_" + r2.ToString() + "_from_node_" + i.ToString() + "_to_node_" + j.ToString();
+                                    allConstraints_list.Add(AddLe(EliminateDominatedESVisits, 1.0, constraint_name));
+                                }
+                                
+                                EliminateDominatedESVisits.Clear();
+                            }
+                        }
+            
+        }
         void AddConstraint_NumberOfVisitsPerCustomerNode()//1
         {
             firstCustomerVisitationConstraintIndex = allConstraints_list.Count;
@@ -595,32 +735,28 @@ namespace MPMFEVRP.Models.XCPlex
                                             TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.5, X[k][r1][vIndex_EV]);
                                             TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.5, X[r1][j][vIndex_EV]);
                                             string constraint_name = "No_arc_pair_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString() + "_through_ES_" + r1.ToString();
-                                            allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
+                                            allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.5, constraint_name));
                                             TimeFeasibilityOfTwoConsecutiveArcs.Clear();
                                         }
-                                        //else
-                                        //{
-                                        //    for (int r2 = FirstESNodeIndex; r2 <= LastESNodeIndex; r2++)
-                                        //        if (r2 != r1)
-                                        //        {
-                                        //            Site ES2 = preprocessedSites[r2];
-                                        //            double fixedChargeTimeAtES2 = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity / ES2.RechargingRate;
-                                        //            if (fixedChargeTimeAtES1 + fixedChargeTimeAtES2 + minValue_T[i] + ServiceDuration(from) + TravelTime(from, through) + ServiceDuration(through) + TravelTime(through, to) > maxValue_T[j])//ES1 was fine by itself but not together with ES2
-                                        //            {
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.5, X[i][r1][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.2, X[r1][k][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.2, X[k][r1][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.5, X[r1][j][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.5, X[i][r2][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.2, X[r2][k][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.2, X[k][r2][vIndex_EV]);
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(0.5, X[r2][j][vIndex_EV]);
-                                        //                string constraint_name = "No_arc_pair_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString() + "_through_ESs_" + r1.ToString() + "_and_" + r2.ToString();
-                                        //                allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
-                                        //                TimeFeasibilityOfTwoConsecutiveArcs.Clear();
-                                        //            }
-                                        //        }
-                                        //}
+                                        else
+                                        {
+                                            for (int r2 = FirstESNodeIndex; r2 <= LastESNodeIndex; r2++)
+                                                if (r2 != r1)
+                                                {
+                                                    Site ES2 = preprocessedSites[r2];
+                                                    double fixedChargeTimeAtES2 = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity / ES2.RechargingRate;
+                                                    if (fixedChargeTimeAtES1 + fixedChargeTimeAtES2 + minValue_T[i] + ServiceDuration(from) + TravelTime(from, through) + ServiceDuration(through) + TravelTime(through, to) > maxValue_T[j])//ES1 was fine by itself but not together with ES2
+                                                    {
+                                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][r1][vIndex_EV]);
+                                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[r1][k][vIndex_EV]);
+                                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][r2][vIndex_EV]);
+                                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[r2][j][vIndex_EV]);
+                                                        string constraint_name = "No_arc_pair_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString() + "_through_ESs_" + r1.ToString() + "_and_" + r2.ToString();
+                                                        allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 3.0, constraint_name));
+                                                        TimeFeasibilityOfTwoConsecutiveArcs.Clear();
+                                                    }
+                                                }
+                                        }
                                     }
                                 }
                             }
