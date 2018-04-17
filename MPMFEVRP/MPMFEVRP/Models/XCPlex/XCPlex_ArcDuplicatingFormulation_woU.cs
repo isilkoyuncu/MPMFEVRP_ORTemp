@@ -489,7 +489,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//2
             //AddConstraint_NumberOfVisitsPerCustomerNode2();
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
-            AddConstraint_MaxNumberOfEVs();//4
+            //AddConstraint_MaxNumberOfEVs();//4
             AddConstraint_MaxNumberOfGDvs();//5
             AddConstraint_MinNumberOfVehicles();//4-5 b
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6

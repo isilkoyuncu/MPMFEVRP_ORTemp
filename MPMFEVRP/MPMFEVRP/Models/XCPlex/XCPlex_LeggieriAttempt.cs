@@ -25,7 +25,7 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[][][] X; double[][][] X_LB, X_UB;
         INumVar[][][] Y; double[][][] Y_LB, Y_UB;
         INumVar[][] Z; double[][] Z_LB, Z_UB;
-        INumVar[][] W; double[][] W_LB, W_UB;
+        //INumVar[][] W; double[][] W_LB, W_UB;
         INumVar[] Epsilon;
         INumVar[] Delta;
         INumVar[] T;
@@ -57,7 +57,7 @@ namespace MPMFEVRP.Models.XCPlex
 
             //dvs: Z_ij and W_ij
             AddTwoDimensionalDecisionVariable("Z", Z_LB, Z_UB, NumVarType.Int, numNonESNodes, numNonESNodes, out Z);
-            AddTwoDimensionalDecisionVariable("W", W_LB, W_UB, NumVarType.Int, numNonESNodes, numNonESNodes, out W);
+            //AddTwoDimensionalDecisionVariable("W", W_LB, W_UB, NumVarType.Int, numNonESNodes, numNonESNodes, out W);
 
             //auxiliaries (T_j, Delta_j, Epsilon_j)
             AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numNonESNodes, out T);
@@ -314,8 +314,8 @@ namespace MPMFEVRP.Models.XCPlex
             Y_UB = new double[numNonESNodes][][];
             Z_LB = new double[numNonESNodes][];
             Z_UB = new double[numNonESNodes][];
-            W_LB = new double[numNonESNodes][];
-            W_UB = new double[numNonESNodes][];
+            //W_LB = new double[numNonESNodes][];
+            //W_UB = new double[numNonESNodes][];
             BigTVarRecharge = new double[numNonESNodes][][];
 
             RHS_forNodeCoverage = new double[numNonESNodes];
@@ -347,16 +347,16 @@ namespace MPMFEVRP.Models.XCPlex
                 X_UB[i] = new double[numNonESNodes][];
                 Z_LB[i] = new double[numNonESNodes];
                 Z_UB[i] = new double[numNonESNodes];
-                W_LB[i] = new double[numNonESNodes];
-                W_UB[i] = new double[numNonESNodes];
+                //W_LB[i] = new double[numNonESNodes];
+                //W_UB[i] = new double[numNonESNodes];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     X_LB[i][j] = new double[numVehCategories];
                     X_UB[i][j] = new double[numVehCategories];
                     Z_LB[i][j] = 0.0;
                     Z_UB[i][j] = 1.0;
-                    W_LB[i][j] = 0.0;
-                    W_UB[i][j] = 1.0;
+                    //W_LB[i][j] = 0.0;
+                    //W_UB[i][j] = 1.0;
                     for (int v = 0; v < numVehCategories; v++)
                     {
                         X_LB[i][j][v] = 0.0;
@@ -504,13 +504,11 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
             AddConstraint_SetEVArcs();//1
-            AddConstraint_SetGDVArcs();//2
+            //AddConstraint_SetGDVArcs();//2
             AddConstraint_NumberOfIncomingVehiclesPerCustomerNode();//3
-            //AddConstraint_IncomingEVTotalEqualsOutgoingEVTotal();//4
-            AddConstraint_OutgoingEVTotalEqualsOutgoingEVTotal();//4b
+            AddConstraint_IncomingEVTotalEqualsOutgoingEVTotal();//4
             AddConstraint_IncomingGDVTotalEqualsOutgoingGDVTotal();//5
-            AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//5b
-            AddConstraint_MaxNumberOfEVs();//6
+            //AddConstraint_MaxNumberOfEVs();//6
             AddConstraint_MaxNumberOfGDvs();//7
             AddConstraint_MinNumberOfVehicles();//8
             AddConstraint_MaxEnergyGainAtNonDepotSite();//9
@@ -539,7 +537,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TotalTravelTime();//20
 
             //Some additional cuts
-            //AddAllCuts();
+            AddAllCuts();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -562,22 +560,22 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             }
         }
-        void AddConstraint_SetGDVArcs() //2
-        {
-            for (int j = 0; j < numNonESNodes; j++)//Index 0 is the depot
-            {
-                for (int i = 0; i < numNonESNodes; i++)
-                {
-                    ILinearNumExpr SetWVariables = LinearNumExpr();
-                    SetWVariables.AddTerm(1.0, W[i][j]);
+        //void AddConstraint_SetGDVArcs() //2
+        //{
+        //    for (int j = 0; j < numNonESNodes; j++)//Index 0 is the depot
+        //    {
+        //        for (int i = 0; i < numNonESNodes; i++)
+        //        {
+        //            ILinearNumExpr SetWVariables = LinearNumExpr();
+        //            SetWVariables.AddTerm(1.0, W[i][j]);
 
-                    SetWVariables.AddTerm(-1.0, X[i][j][vIndex_GDV]);
+        //            SetWVariables.AddTerm(-1.0, X[i][j][vIndex_GDV]);
 
-                    string constraint_name = "Nodes_" + i.ToString() + "_" + j.ToString() + "_are_visited_or_not_by_a_GDV";
-                    allConstraints_list.Add(AddEq(SetWVariables, 0.0, constraint_name));
-                }
-            }
-        }
+        //            string constraint_name = "Nodes_" + i.ToString() + "_" + j.ToString() + "_are_visited_or_not_by_a_GDV";
+        //            allConstraints_list.Add(AddEq(SetWVariables, 0.0, constraint_name));
+        //        }
+        //    }
+        //}
         void AddConstraint_NumberOfIncomingVehiclesPerCustomerNode() //3
         {
             firstCustomerVisitationConstraintIndex = allConstraints_list.Count;
@@ -588,27 +586,13 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int i = 0; i < numNonESNodes; i++)
                 {
                     IncomingZandWToCustomerNodes.AddTerm(1.0, Z[i][j]);
-                    IncomingZandWToCustomerNodes.AddTerm(1.0, W[i][j]);
+                    IncomingZandWToCustomerNodes.AddTerm(1.0, X[i][j][vIndex_GDV]);
                 }
                 string constraint_name = "Exactly_one_vehicle_must_arrive_the_customer_node_" + j.ToString();
                 allConstraints_list.Add(AddEq(IncomingZandWToCustomerNodes, 1.0, constraint_name));
             }
         }
         void AddConstraint_IncomingEVTotalEqualsOutgoingEVTotal() //4
-        {
-            for (int i = 0; i < numNonESNodes; i++)//Index 0 is the depot
-            {
-                ILinearNumExpr IncomingZandWToCustomerNodes = LinearNumExpr();
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    IncomingZandWToCustomerNodes.AddTerm(1.0, Z[i][j]);
-                    IncomingZandWToCustomerNodes.AddTerm(-1.0, Z[j][i]);
-                }
-                string constraint_name = "Exactly_one_vehicle_must_arrive_the_customer_node_" + i.ToString();
-                allConstraints_list.Add(AddEq(IncomingZandWToCustomerNodes, 0.0, constraint_name));
-            }
-        }
-        void AddConstraint_OutgoingEVTotalEqualsOutgoingEVTotal() //4b
         {
             for (int j = 0; j < numNonESNodes; j++)//Index 0 is the depot
             {
@@ -629,32 +613,11 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr OutgoingZandWToCustomerNodes = LinearNumExpr();
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    OutgoingZandWToCustomerNodes.AddTerm(1.0, W[i][j]);
-                    OutgoingZandWToCustomerNodes.AddTerm(-1.0, W[j][i]);
+                    OutgoingZandWToCustomerNodes.AddTerm(1.0, X[i][j][vIndex_GDV]);
+                    OutgoingZandWToCustomerNodes.AddTerm(-1.0, X[j][i][vIndex_GDV]);
                 }
                 string constraint_name = "Exactly_one_vehicle_must_arrive_the_customer_node_" + i.ToString();
                 allConstraints_list.Add(AddEq(OutgoingZandWToCustomerNodes, 0.0, constraint_name));
-            }
-        }
-        void AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV()//5b
-        {
-            for (int j = 0; j < numNonESNodes; j++)
-            {
-                ILinearNumExpr IncomingXYTotalMinusOutgoingXYTotal = LinearNumExpr();
-
-                for (int i = 0; i < numNonESNodes; i++)
-                {
-                    IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, X[i][j][vIndex_EV]);
-                    IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, X[j][i][vIndex_EV]);
-                    for (int r = 0; r < numES; r++)
-                    {
-                        IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, Y[i][r][j]);
-                        IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, Y[j][r][i]);
-                    }
-                }
-                string constraint_name = "Number_of_EVs_incoming_to_node_" + j.ToString() + "_equals_to_outgoing_EVs";
-                allConstraints_list.Add(AddEq(IncomingXYTotalMinusOutgoingXYTotal, 0.0, constraint_name));
-
             }
         }
         void AddConstraint_MaxNumberOfEVs()//6
@@ -672,7 +635,7 @@ namespace MPMFEVRP.Models.XCPlex
             ILinearNumExpr NumberOfGDVsOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)
             {
-                NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, W[0][j]);
+                NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, X[0][j][vIndex_GDV]);
             }
             string constraint_name = "Number_of_GDVs_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_GDV].ToString();
             allConstraints_list.Add(AddLe(NumberOfGDVsOutgoingFromTheDepot, numVehicles[vIndex_GDV], constraint_name));
@@ -685,7 +648,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j = 1; j < numNonESNodes; j++)
             {
                 NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, Z[0][j]);
-                NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, W[0][j]);
+                NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, X[0][j][vIndex_GDV]);
             }
             string constraint_name = "Number_of_vehicles_outgoing_from_node_0_must_be_greater_than_or_equal_to_" + (minNumVeh).ToString();
             allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
@@ -1144,15 +1107,11 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    for (int v = 0; v < 2; v++)
-                        totalArcFlow.AddTerm(1.0, X[i][j][v]);
-                    totalArcFlow_EV.AddTerm(1.0, X[i][j][vIndex_EV]);
+                    totalArcFlow.AddTerm(1.0, X[i][j][vIndex_GDV]);
+                    totalArcFlow.AddTerm(1.0, Z[i][j]);
+
+                    totalArcFlow_EV.AddTerm(1.0, Z[i][j]);
                     totalArcFlow_GDV.AddTerm(1.0, X[i][j][vIndex_GDV]);
-                    for (int r = 0; r < numES; r++)
-                    {
-                        totalArcFlow.AddTerm(1.0, Y[i][r][j]);
-                        totalArcFlow_EV.AddTerm(1.0, Y[i][r][j]);
-                    }
                 }
             string constraintName_overall = "Total_number_of_active_arcs_cannot_exceed_" + nActiveArcs.ToString();
             allConstraints_list.Add(AddLe(totalArcFlow, (double)nActiveArcs, constraintName_overall));
