@@ -444,9 +444,11 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void InitializeForTripleSolve()
         {
-            GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            //GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+            GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            //TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
         }
     }
 }

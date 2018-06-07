@@ -83,7 +83,7 @@
             // panel_multi_problemCharacteristics
             // 
             this.panel_multi_problemCharacteristics.Location = new System.Drawing.Point(6, 463);
-            this.panel_multi_problemCharacteristics.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel_multi_problemCharacteristics.Margin = new System.Windows.Forms.Padding(2);
             this.panel_multi_problemCharacteristics.Name = "panel_multi_problemCharacteristics";
             this.panel_multi_problemCharacteristics.Size = new System.Drawing.Size(353, 188);
             this.panel_multi_problemCharacteristics.TabIndex = 25;
@@ -306,7 +306,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(970, 683);
+            this.ClientSize = new System.Drawing.Size(970, 743);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);

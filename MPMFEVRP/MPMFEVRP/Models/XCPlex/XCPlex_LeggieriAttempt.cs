@@ -1308,7 +1308,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         public override string GetModelName()
         {
-            return "Arc Duplicating without U";
+            return "Arc Duplicating without U: Leggieri attempt";
         }
         public override void RefineDecisionVariables(CustomerSet cS)
         {

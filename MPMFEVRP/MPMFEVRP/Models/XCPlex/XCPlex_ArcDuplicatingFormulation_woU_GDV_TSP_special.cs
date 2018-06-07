@@ -169,9 +169,9 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationFollowingACustomerVisit();//12
             AddConstraint_ArrivalTimeLimits();//14
             AddConstraint_TotalTravelTime();//15
-            AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
-            //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
-            AddConstraint_TotalNumberOfActiveArcs();
+            //AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
+            ////AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
+            //AddConstraint_TotalNumberOfActiveArcs();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();

@@ -301,10 +301,10 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_TimeRegulationFromDepotThroughAnESVisit();//13b
             AddConstraint_ArrivalTimeLimits();//14
             AddConstraint_TotalTravelTime();//15
-            AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
-            //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
-            AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
-            AddConstraint_TotalNumberOfActiveArcs();
+            //AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
+            ////AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
+            //AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
+            //AddConstraint_TotalNumberOfActiveArcs();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();

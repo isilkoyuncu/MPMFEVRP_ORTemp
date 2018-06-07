@@ -320,7 +320,9 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NumberOfEvVisitsPerESNode();//2
             AddConstraint_NoGDVVisitToESNodes();//3
             AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//4
-            AddConstraint_MaxNumberOfVehiclesPerCategory();//5
+            //AddConstraint_MaxNumberOfVehiclesPerCategory();//5
+            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
+                AddConstraint_MaxNumberOfGDVs();
             AddConstraint_MinNumberOfVehicles();//5 b
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
 
@@ -475,6 +477,16 @@ namespace MPMFEVRP.Models.XCPlex
                 allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
                 NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
             }
+        }
+        void AddConstraint_MaxNumberOfGDVs()//5
+        {
+            int v = vIndex_GDV;
+            ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
+            for (int j = 1; j < NumPreprocessedSites; j++)
+                NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
+            string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[v].ToString();
+            allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
+            NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
         }
         void AddConstraint_MinNumberOfVehicles() //4-5 b
         {
