@@ -55,7 +55,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 //System.Windows.Forms.MessageBox.Show("Time feasible with: " + numRoutes + " routes and " + numESVisits + " ES visits.");
                 while (!IsDistanceFeasible())
                 {
-                    System.Windows.Forms.MessageBox.Show("Distance infeasible with: " + numRoutes + " routes and " + numESVisits + " ES visits.");
+                    //System.Windows.Forms.MessageBox.Show("Distance infeasible with: " + numRoutes + " routes and " + numESVisits + " ES visits.");
                     numESVisits++;
                 }
                 //System.Windows.Forms.MessageBox.Show("Distance feasible with: " + numRoutes + " routes and " + numESVisits + " ES visits.");

@@ -320,10 +320,16 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NumberOfEvVisitsPerESNode();//2
             AddConstraint_NoGDVVisitToESNodes();//3
             AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//4
-            //AddConstraint_MaxNumberOfVehiclesPerCategory();//5
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
-                AddConstraint_MaxNumberOfGDVs();
-            AddConstraint_MinNumberOfVehicles();//5 b
+
+            if(theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
+                AddConstraint_MaxNumberOfVehiclesPerCategory();//5
+            else //Minimize
+            {
+                AddConstraint_MinNumberOfVehicles();//5 b
+                if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
+                    AddConstraint_MaxNumberOfGDVs();
+            }
+
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
 
             if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial)

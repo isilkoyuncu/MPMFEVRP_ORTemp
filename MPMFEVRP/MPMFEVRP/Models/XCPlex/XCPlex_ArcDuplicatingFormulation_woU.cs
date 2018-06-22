@@ -67,32 +67,19 @@ namespace MPMFEVRP.Models.XCPlex
         void rig_IKfromNDFEMH()
         {
 
-            X[0][4][0].LB = 1.0;
-            X[4][10][0].LB = 1.0;
-            X[10][0][0].LB = 1.0;
+            X[0][2][0].LB = 1.0;
+            X[2][10][0].LB = 1.0;
+            X[10][3][0].LB = 1.0;
+            X[3][5][0].LB = 1.0;
+            X[5][11][0].LB = 1.0;
+            X[11][0][0].LB = 1.0;
 
-            X[0][6][0].LB = 1.0;
-            X[6][15][0].LB = 1.0;
-            Y[15][2][3].LB = 1.0;
-            X[3][13][0].LB = 1.0;
-            X[13][12][0].LB = 1.0;
-            X[12][5][0].LB = 1.0;
-            X[5][0][0].LB = 1.0;
-
-            X[0][8][0].LB = 1.0;
-            X[8][19][0].LB = 1.0;
-            X[19][14][0].LB = 1.0;
-            X[14][7][0].LB = 1.0;
-            Y[7][3][11].LB = 1.0;
-            X[11][18][0].LB = 1.0;
-            X[18][9][0].LB = 1.0;
-            X[9][0][0].LB = 1.0;                
-            
-            X[0][20][0].LB = 1.0;
-            X[20][16][0].LB = 1.0;
-            X[16][2][0].LB = 1.0;
-            Y[2][3][17].LB = 1.0;
-            X[17][1][0].LB = 1.0;
+            //X[0][2][0].LB = 1.0;
+            //X[2][7][0].LB = 1.0;
+            //X[7][3][0].LB = 1.0;
+            //X[3][4][0].LB = 1.0;
+            //X[4][8][0].LB = 1.0;
+            //X[8][0][0].LB = 1.0;
 
         }
         void rig_IK()
@@ -481,18 +468,24 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected override void AddAllConstraints()
         {
-            //rig_IKfromNDFEMH();
+            rig_IKfromNDFEMH();
 
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerCustomerNode();//1
             AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//2
-            //AddConstraint_NumberOfVisitsPerCustomerNode2();
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
-            //AddConstraint_MaxNumberOfEVs();//4
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
+            if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
+            {
+                AddConstraint_MaxNumberOfEVs();//4
                 AddConstraint_MaxNumberOfGDvs();//5
-            AddConstraint_MinNumberOfVehicles();//4-5 b
+            }
+            else //Minimize
+            {
+                AddConstraint_MinNumberOfVehicles();//4-5 b
+                if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
+                    AddConstraint_MaxNumberOfGDvs();//5
+            }
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
             AddConstraint_DepartureSOCFromCustomerNode();//7
             AddConstraint_DepartureSOCFromESNodeUB();//8

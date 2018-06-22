@@ -124,6 +124,7 @@
     <Compile Include="Forms\TS_Runs.Designer.cs">
       <DependentUpon>TS_Runs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Implementations\Algorithms\BranchAndPrice.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedCustomerSetExplorer.cs" />
@@ -170,6 +171,9 @@
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
     <Compile Include="Implementations\Problems\Interfaces_and_Bases\EVvsGDV_Problem.cs" />
     <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\EVvsGDV_ProblemModel.cs" />
+    <Compile Include="Models\ColumnGeneration\ColumnGenerationAlgorithm.cs" />
+    <Compile Include="Models\ColumnGeneration\LabelingAlgMaxProfitNoIS.cs" />
+    <Compile Include="Models\ColumnGeneration\Labels.cs" />
     <Compile Include="Models\ObjectiveFunctionCoefficientsPackage.cs" />
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
