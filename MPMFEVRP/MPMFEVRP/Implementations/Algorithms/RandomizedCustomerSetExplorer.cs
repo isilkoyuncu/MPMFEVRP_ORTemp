@@ -33,6 +33,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         TripleSolveOutComeStatistics tripleSolveOutcomeStats;
         string allStats_formatted;
 
+        List<CustomerSetWithVMTs> customerSetsWithVMTs;
+        List<CustomerSetWithVMTs> CustomerSetsWithVMTs { get => customerSetsWithVMTs; }
+
         public RandomizedCustomerSetExplorer() : base()
         {
             AddSpecializedParameters();
@@ -153,6 +156,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             tripleSolveOutcomeStats = new TripleSolveOutComeStatistics();
             allStats_formatted = "instance\t# Customers\tCustomers\tCombined Status\tGDV time\tEV NDF time\tEV ADF time";
+
+            customerSetsWithVMTs = new List<CustomerSetWithVMTs>();
         }
         void PopulateAndPlaceInitialUnexploredCustomerSets()
         {
@@ -233,6 +238,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             int currentLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;
             int nOptimizedCustomerSets = 0;
+            RouteOptimizationStatus ros;
             while ((unexploredCustomerSets.TotalCount > 0) && (nOptimizedCustomerSets < numCustomerSetsToReport))
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
@@ -269,6 +275,22 @@ namespace MPMFEVRP.Implementations.Algorithms
                             + "\t" + csTripleSolveOutcome[2]
                             + "\t" + csTripleSolveOutcome[3];
 
+                        ros = InterpretTripleSolutionStatus(csTripleSolveOutcome[0]);
+                        switch (ros)
+                        {
+                            case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
+                                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros));
+                                break;
+                            case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
+                                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4])));
+                                break;
+                            case RouteOptimizationStatus.OptimizedForBothGDVandEV:
+                                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4]), vmt_EV: double.Parse(csTripleSolveOutcome[5])));
+                                break;
+                            default:
+                                throw new Exception("This should never happen!");
+                        }
+
                         if (candidate.NumberOfCustomers >= algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET).GetValue<int>())
                             nOptimizedCustomerSets++;
 
@@ -279,6 +301,21 @@ namespace MPMFEVRP.Implementations.Algorithms
                     currentLevel++;
                 }
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
+        }
+
+        RouteOptimizationStatus InterpretTripleSolutionStatus(string tripleSolutionStatus)
+        {
+            switch (tripleSolutionStatus)
+            {
+                case "Optimal":
+                    return RouteOptimizationStatus.OptimizedForBothGDVandEV;
+                case "Infeasible":
+                    return RouteOptimizationStatus.InfeasibleForBothGDVandEV;
+                case "GDVOnly":
+                    return RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV;
+                default:
+                    throw new Exception("InterpretTripleSolutionStatus invoked with the wrong input!");
+            }
         }
 
         List<string> RandomlySelectASetOfCustomers(Random rnd)

@@ -413,6 +413,14 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             sw.Close();
         }
 
+        /// <summary>
+        /// The output is a string array
+        /// [0] is the "status," which is "Optimal," "Infeasible" or "GDVOnly," meaning it is Optimal for GDV but Infeasible for EV.
+        /// [1-3] are the computation times with GDV, EV_NDF and EV_ADF, respectively
+        /// [4-5] are the GDV_VMT and EV_VMT, respectively
+        /// </summary>
+        /// <param name="customerSet"></param>
+        /// <returns></returns>
         public string[] TripleSolve(CustomerSet customerSet)
         {
             if (TheOtherEV_TSPSolver == null)
@@ -440,7 +448,12 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 else
                     throw new Exception("Some unrecognized status combination obtained!");
             }
-            return new string[] {csStatus, GDV_TSPSolver.CPUtime.ToString(), EV_TSPSolver.CPUtime.ToString(), TheOtherEV_TSPSolver.CPUtime.ToString() };
+            return new string[] 
+            {
+                csStatus,
+                GDV_TSPSolver.CPUtime.ToString(), EV_TSPSolver.CPUtime.ToString(), TheOtherEV_TSPSolver.CPUtime.ToString(),
+                (csStatus=="Infeasible")?"-1.0":GDV_TSPSolver.ObjValue.ToString(), (EVNDFStatus=="Infeasible")?"-1.0":EV_TSPSolver.ObjValue.ToString()
+            };
         }
         void InitializeForTripleSolve()
         {

@@ -93,6 +93,7 @@
     <Compile Include="Domains\SiteWithAuxiliaryVariables.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
+    <Compile Include="Domains\SolutionDomain\CustomerSetsWithVMTs.cs" />
     <Compile Include="Domains\SolutionDomain\IndividualESVisitDataPackage.cs" />
     <Compile Include="Domains\SolutionDomain\ObjectiveFunctionInputDataPackage.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
