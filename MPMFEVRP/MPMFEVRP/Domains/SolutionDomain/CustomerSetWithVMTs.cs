@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Domains.ProblemDomain;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -22,6 +23,19 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         double vmt_EV;
         public double VMT_EV { get => vmt_EV; }
+
+        public double GetVMT(VehicleCategories vehicleCategory)
+        {
+            switch (vehicleCategory)
+            {
+                case VehicleCategories.EV:
+                    return vmt_EV;
+                case VehicleCategories.GDV:
+                    return vmt_GDV;
+                default:
+                    throw new Exception("CustomerSetWithVMTs.GetVMT doesn't account for all VehicleCategories!");
+            }
+        }
 
         RouteOptimizationStatus[] premature = new RouteOptimizationStatus[] { RouteOptimizationStatus.NotYetOptimized, RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV };
         RouteOptimizationStatus[] requiresPositiveVMT_GDV = new RouteOptimizationStatus[] { RouteOptimizationStatus.OptimizedForBothGDVandEV, RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV };

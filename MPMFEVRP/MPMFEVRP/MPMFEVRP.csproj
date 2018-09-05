@@ -93,10 +93,11 @@
     <Compile Include="Domains\SiteWithAuxiliaryVariables.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSet.cs" />
     <Compile Include="Domains\SolutionDomain\CustomerSetList.cs" />
-    <Compile Include="Domains\SolutionDomain\CustomerSetsWithVMTs.cs" />
+    <Compile Include="Domains\SolutionDomain\CustomerSetWithVMTs.cs" />
     <Compile Include="Domains\SolutionDomain\IndividualESVisitDataPackage.cs" />
     <Compile Include="Domains\SolutionDomain\ObjectiveFunctionInputDataPackage.cs" />
     <Compile Include="Domains\SolutionDomain\PartitionedCustomerSetList.cs" />
+    <Compile Include="Domains\SolutionDomain\RandomSubsetOfCustomerSetsWithVMTs.cs" />
     <Compile Include="Domains\SolutionDomain\RouteOptimizationOutcome.cs" />
     <Compile Include="Domains\SolutionDomain\SiteVisit.cs" />
     <Compile Include="Domains\SolutionDomain\VehicleSpecificRoute.cs" />
@@ -182,6 +183,7 @@
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special.cs" />
     <Compile Include="Models\XCPlex\XCPlex_LeggieriAttempt.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woU.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_SetCovering_wSetOfCustomerSetswVMTs.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SupplementaryInterfaces\IWriter.cs" />
     <Compile Include="Implementations\Problems\Interfaces_and_Bases\ProblemBase.cs" />

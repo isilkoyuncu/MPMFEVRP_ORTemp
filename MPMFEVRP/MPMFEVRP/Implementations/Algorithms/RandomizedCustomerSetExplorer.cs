@@ -3,6 +3,7 @@ using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.Implementations.ProblemModels;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Models;
 using MPMFEVRP.Models.XCPlex;
@@ -35,6 +36,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         List<CustomerSetWithVMTs> customerSetsWithVMTs;
         List<CustomerSetWithVMTs> CustomerSetsWithVMTs { get => customerSetsWithVMTs; }
+
+        RandomSubsetOfCustomerSetsWithVMTs randomSubsetOfCustomerSetsWithVMTs;
+
+        XCPlex_SetCovering_wSetOfCustomerSetswVMTs setCoveringModel;
+        XCPlexParameters setCoverXCplexParameters;
 
         public RandomizedCustomerSetExplorer() : base()
         {
@@ -158,6 +164,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             allStats_formatted = "instance\t# Customers\tCustomers\tCombined Status\tGDV time\tEV NDF time\tEV ADF time";
 
             customerSetsWithVMTs = new List<CustomerSetWithVMTs>();
+            //The members of the "unexploredCustomerSets" will only be used as parents below, hence, we need to include them in customerSetsWithVMTs here
+            foreach (CustomerSet unexpCS in unexploredCustomerSets.ToCustomerSetList())
+                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(unexpCS, unexpCS.RouteOptimizationOutcome.Status, vmt_GDV: unexpCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetVehicleMilesTraveled(), vmt_EV: unexpCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetVehicleMilesTraveled()));//TODO This code is not robust, it assumes that each customer can be visited directly by either type of vehicles.
+
+            setCoverXCplexParameters = new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming);
+
         }
         void PopulateAndPlaceInitialUnexploredCustomerSets()
         {
@@ -301,6 +313,18 @@ namespace MPMFEVRP.Implementations.Algorithms
                     currentLevel++;
                 }
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
+
+            for (int index_RandomSubset=0;index_RandomSubset< numCustomerSetsToReport; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
+            {
+                //Select the subset of customer sets to use
+                randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), 0.5);//TODO: Consider making this parametric
+
+                //Set covering model --> shadow prices
+                setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel));//TODO: How do we differentiate between EMH and YC problems here?
+                setCoveringModel.Solve();
+                Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
+            }
+            
         }
 
         RouteOptimizationStatus InterpretTripleSolutionStatus(string tripleSolutionStatus)
