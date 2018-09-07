@@ -317,6 +317,7 @@ namespace MPMFEVRP.Models.XCPlex
             if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_THREADS))
                 SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_THREADS].Value.ToString()));
             SetParam(Cplex.Param.MIP.Display, 4);
+            //SetParam(Cplex.Param.Threads, 8);
         }
         protected void InitializeOutputVariables()
         {
