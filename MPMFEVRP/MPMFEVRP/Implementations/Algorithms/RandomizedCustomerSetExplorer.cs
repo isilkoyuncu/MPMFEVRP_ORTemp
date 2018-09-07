@@ -33,6 +33,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         double avgTimePerGDVOptimalTSPSolution, avgTimePerGDVInfeasibleTSPSolution, avgTimePerEVOptimalTSPSolution, avgTimePerEVInfeasibleTSPSolution, avgTimePerTheOtherEVOptimalTSPSolution, avgTimePerTheOtherEVInfeasibleTSPSolution;
         TripleSolveOutComeStatistics tripleSolveOutcomeStats;
         string allStats_formatted;
+        string orienteeringresults_formatted;
 
         List<CustomerSetWithVMTs> customerSetsWithVMTs;
         List<CustomerSetWithVMTs> CustomerSetsWithVMTs { get => customerSetsWithVMTs; }
@@ -41,6 +42,10 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         XCPlex_SetCovering_wSetOfCustomerSetswVMTs setCoveringModel;
         XCPlexParameters setCoverXCplexParameters;
+
+        double customerSetSelectionProbability;
+        bool compareToGDV_CG;
+        bool compareToEV_NDF_CG;
 
         public RandomizedCustomerSetExplorer() : base()
         {
@@ -51,6 +56,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 50, UserInputObjectType.TextBox));
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_BEAM_WIDTH, "Beam width", 1));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET, "Minimum # of customers in a set", new List<object>() { 3, 4, 5 }, 4, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET, "CS Selection Probability", new List<object>() { 0.01, 0.1, 0.5, 0.9, 0.99 },0.5, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM, "Compare to GDV pricing (CG) problem?", new List<object>() { bool.TrueString, bool.FalseString }, bool.FalseString, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM, "Compare to EV pricing (CG) problem w/ NDF model?", new List<object>() { bool.TrueString, bool.FalseString }, bool.TrueString, UserInputObjectType.ComboBox));
         }
 
         public override string GetName()
@@ -115,6 +123,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             list.Add(Environment.NewLine);
             list.Add(allStats_formatted);
 
+            list.Add(Environment.NewLine);
+            list.Add(orienteeringresults_formatted);
+
             string[] toReturn = new string[list.Count];
             toReturn = list.ToArray();
             return toReturn;
@@ -170,6 +181,34 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             setCoverXCplexParameters = new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming);
 
+            customerSetSelectionProbability = algorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET).GetDoubleValue();
+            compareToGDV_CG = bool.Parse(algorithmParameters.GetParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM).GetStringValue());
+            compareToEV_NDF_CG = bool.Parse(algorithmParameters.GetParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM).GetStringValue());
+
+            orienteeringresults_formatted = Initialize_orienteeringresults_formatted();
+        }
+        string Initialize_orienteeringresults_formatted()
+        {
+            List<string> theList = new List<string>();
+            theList.Add("instance");
+            theList.Add("Observation #");
+            if (compareToGDV_CG)
+            {
+                theList.Add("GDV:Status");
+                theList.Add("GDV:CPUTime");
+                theList.Add("GDV:ObjValue");
+            }
+            if (compareToEV_NDF_CG)
+            {
+                theList.Add("EV_NDF:Status");
+                theList.Add("EV_NDF:CPUTime");
+                theList.Add("EV_NDF:ObjValue");
+            }
+            theList.Add("EV_ADF:Status");
+            theList.Add("EV_ADF:CPUTime");
+            theList.Add("EV_ADF:ObjValue");
+
+            return String.Join("\t", theList.ToArray());
         }
         void PopulateAndPlaceInitialUnexploredCustomerSets()
         {
@@ -229,22 +268,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             int numCustomerSetsToReport = algorithmParameters.GetParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY).GetIntValue();
             Random random = new Random(1);
             string[] csTripleSolveOutcome;
-
-            //for(int i=0; i< numCustomerSetsToReport; i++)
-            //{
-            //    //Randomly generate a customer set
-            //    CustomerSet cs = new CustomerSet(RandomlySelectASetOfCustomers(random));
-            //    //Triple solve
-            //    csTripleSolveOutcome = theProblemModel.TripleSolve(cs);
-            //    //Place in the proper list
-            //    allStats_formatted += Environment.NewLine + cs.NumberOfCustomers.ToString()
-            //        + "\t" + Utils.StringOperations.CombineAndSpaceSeparateArray(cs.Customers.ToArray())
-            //        + "\t" + csTripleSolveOutcome[0]
-            //        + "\t" + csTripleSolveOutcome[1]
-            //        + "\t" + csTripleSolveOutcome[2]
-            //        + "\t" + csTripleSolveOutcome[3];
-            //}
-
 
             int beamWidth = 1;// algorithmParameters.GetParameter(ParameterID.ALG_BEAM_WIDTH).GetIntValue();
             int currentLevel;
@@ -314,15 +337,24 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
 
+            string[] tripleOrienteeringSolutionOutcome;
             for (int index_RandomSubset=0;index_RandomSubset< numCustomerSetsToReport; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
             {
                 //Select the subset of customer sets to use
-                randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), 0.5);//TODO: Consider making this parametric
+                randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), customerSetSelectionProbability);
 
                 //Set covering model --> shadow prices
                 setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel));//TODO: How do we differentiate between EMH and YC problems here?
-                setCoveringModel.Solve();
+                setCoveringModel.Solve_and_PostProcess();
+                //CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)setCoveringModel.GetCompleteSolution(typeof(CustomerSetBasedSolution));
                 Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
+
+                //Solve a new model with a single vehicle to selectively visit some (out of all) customers in order to find a negative reduced cost route.
+                tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices);
+                orienteeringresults_formatted += Environment.NewLine + theProblemModel.InputFileName
+                            + "\t" + index_RandomSubset.ToString();
+                for (int i = 0; i < tripleOrienteeringSolutionOutcome.Length; i++)
+                    orienteeringresults_formatted += "\t" + tripleOrienteeringSolutionOutcome[i];
             }
             
         }
@@ -356,6 +388,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
             return outcome;
         }
+
+        //string
     }
 
     class TripleSolveOutComeStatistics

@@ -37,6 +37,12 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam)
         {
+            if (xCplexParam.TSP)//This is just pre-cautionary, the right input for a TSP model should already specify "ExactlyOnce"
+                customerCoverageConstraint = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
+        }
+        public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
+            :base(theProblemModel, xCplexParam, customerCoverageConstraint)
+        {
         }
 
         protected override void DefineDecisionVariables()
@@ -398,7 +404,7 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int v = 0; v < numVehCategories; v++)
                 objFunction.AddTerm(GetVehicleFixedCost(base.vehicleCategories[v]), X[0][j][v]);
             //Now adding the objective function to the model
-            AddMaximize(objFunction);
+            objective = AddMaximize(objFunction);
         }
         void AddMinTypeObjectiveFunction()
         {
@@ -464,7 +470,7 @@ namespace MPMFEVRP.Models.XCPlex
                         objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
             }
             //Now adding the objective function to the model
-            AddMinimize(objFunction);
+            objective = AddMinimize(objFunction);
         }
         protected override void AddAllConstraints()
         {
@@ -535,17 +541,23 @@ namespace MPMFEVRP.Models.XCPlex
                 }
                 string constraint_name;
 
-                if (xCplexParam.TSP || theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
+                switch (customerCoverageConstraint)
                 {
-                    constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
-                    allConstraints_list.Add(AddEq(IncomingXandYToCustomerNodes, RHS_forNodeCoverage[j], constraint_name));
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce:
+                        constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
+                        allConstraints_list.Add(AddEq(IncomingXandYToCustomerNodes, RHS_forNodeCoverage[j], constraint_name));
+                        break;
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce:
+                        constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
+                        allConstraints_list.Add(AddLe(IncomingXandYToCustomerNodes, 1.0, constraint_name));
+                        break;
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce:
+                        throw new System.Exception("AddConstraint_NumberOfVisitsPerCustomerNode invoked for CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce, which must not happen for a VRP!");
+                    default:
+                        throw new System.Exception("AddConstraint_NumberOfVisitsPerCustomerNode doesn't account for all CustomerCoverageConstraint_EachCustomerMustBeCovered!");
                 }
-                else
-                {
-                    constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
-                    allConstraints_list.Add(AddLe(IncomingXandYToCustomerNodes, 1.0, constraint_name));
-                }
-            }
+
+           }
         }
         void AddConstraint_NumberOfVisitsPerCustomerNode2() //1
         {
@@ -910,7 +922,8 @@ namespace MPMFEVRP.Models.XCPlex
 
             string constraint_name = "Total_Travel_Time";
             double rhs = (xCplexParam.TSP ? 1 : theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV)) * theProblemModel.CRD.TMax;
-            rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
+            if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
+                rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
 
         }
@@ -1368,7 +1381,84 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        
+
+        public override void RefineObjectiveFunctionCoefficients(Dictionary<string,double> customerCoverageConstraintShadowPrices)
+        {
+            //rig_MY_ShadowPricesCheck();
+            Remove(objective);
+            AddMinCostObjectiveFunction(customerCoverageConstraintShadowPrices);
+            
+        }
+        void AddMinCostObjectiveFunction(Dictionary<string, double> customerCoverageConstraintShadowPrices)
+        {
+            ILinearNumExpr objFunction = LinearNumExpr();
+            //Second term Part I: distance-based costs from customer to customer directly
+            for (int i = 0; i < numNonESNodes; i++)
+            {
+                Site sFrom = preprocessedSites[i];
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    Site sTo = preprocessedSites[j];
+                    for (int v = 0; v < numVehCategories; v++)
+                        if (sFrom.SiteType == SiteTypes.Customer)
+                        {
+
+                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo) - customerCoverageConstraintShadowPrices[sFrom.ID], X[i][j][v]);
+
+                            double sp = customerCoverageConstraintShadowPrices[sFrom.ID];
+                        }
+                        else
+                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
+                }
+            }
+            //Second term Part II: distance-based costs from customer to customer through an ES
+            for (int i = 0; i < numNonESNodes; i++)
+            {
+                Site sFrom = preprocessedSites[i];
+                for (int r = 0; r < numES; r++)
+                {
+                    Site ES = ExternalStations[r];
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sTo = preprocessedSites[j];
+                        if (sFrom.SiteType == SiteTypes.Customer)
+                            objFunction.AddTerm(GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)) - customerCoverageConstraintShadowPrices[sFrom.ID], Y[i][r][j]);
+                        else
+                            objFunction.AddTerm(GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)), Y[i][r][j]);
+                    }
+                }
+            }
+            //Third term: vehicle fixed costs
+            for (int j = 0; j < numNonESNodes; j++)
+                for (int v = 0; v < numVehCategories; v++)
+                    objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+
+            //Now adding the objective function to the model
+            objective = AddMinimize(objFunction);
+        }
+        void rig_MY_ShadowPricesCheck()
+        {
+            int indexFrom, indexTo;
+            string[] customersInOrder = new string[] { "C19", "C20", "C4", "C5", "C8" };
+            List<int> nodeIndicesInOrder = new List<int>();
+            for(int i=0; i< customersInOrder.Length; i++)
+                for(int j=0;j<preprocessedSites.Length;j++)
+                    if(preprocessedSites[j].ID == customersInOrder[i])
+                    {
+                        nodeIndicesInOrder.Add(j);
+                        continue;
+                    }
+            nodeIndicesInOrder.Add(0);//the depot
+
+            indexTo = nodeIndicesInOrder[0];
+            for (int i = 0; i < nodeIndicesInOrder.Count; i++)
+            {
+                indexFrom = (i>0)?indexTo:0;
+                indexTo = nodeIndicesInOrder[i];
+                X[indexFrom][indexTo][0].LB = 1.0;
+            }
+        }
+
     }
 }
 

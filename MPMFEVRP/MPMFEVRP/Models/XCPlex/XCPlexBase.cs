@@ -18,6 +18,7 @@ namespace MPMFEVRP.Models.XCPlex
         protected NumVarType variable_type = NumVarType.Int;
         protected List<INumVar> allVariables_list;
         protected INumVar[] allVariables_array;
+        protected IObjective objective;
         protected List<IRange> allConstraints_list;
         protected IRange[] allConstraints_array;
         protected XCPlexSolutionStatus solutionStatus;
@@ -54,6 +55,8 @@ namespace MPMFEVRP.Models.XCPlex
         protected VehicleCategories[] vehicleCategories = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
         protected int numVehCategories;
 
+        protected CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint;
+
         public System.IO.TextWriter TWoutput;
 
         public XCPlexBase()
@@ -63,6 +66,41 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
         {
+            numberOfTimesSolveFoundStatus = new Dictionary<string, int>();
+            totalTimeInSolveOnStatus = new Dictionary<string, double>();
+
+            this.theProblemModel = theProblemModel;
+
+            numVehCategories = theProblemModel.VRD.NumVehicleCategories;
+            if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlexBase number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
+
+            this.xCplexParam = xCplexParam;
+            XCPlexRelaxation relaxation;
+            relaxation = xCplexParam.Relaxation;
+            if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
+                )
+                variable_type = NumVarType.Float;
+
+            //Model Specific Initialization
+            Initialize();
+
+            //now we are ready to put the model together and then solve it
+            //Define the variables
+            DefineDecisionVariables();
+            //Objective function
+            AddTheObjectiveFunction();
+            //Constraints
+            AddAllConstraints();
+            //Cplex parameters
+            SetCplexParameters();
+            //output variables
+            InitializeOutputVariables();
+        }
+        public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
+        {
+            this.customerCoverageConstraint = customerCoverageConstraint;
+
             numberOfTimesSolveFoundStatus = new Dictionary<string, int>();
             totalTimeInSolveOnStatus = new Dictionary<string, double>();
 

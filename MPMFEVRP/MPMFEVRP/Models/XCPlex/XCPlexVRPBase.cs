@@ -38,9 +38,18 @@ namespace MPMFEVRP.Models.XCPlex
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
         protected int minNumVeh=0;
+
         public XCPlexVRPBase() { }
 
-        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) : base(theProblemModel, xCplexParam) { }
+        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) 
+            : base(theProblemModel, xCplexParam, theProblemModel.CoverConstraintType)
+        {
+        }
+
+        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint) 
+            : base(theProblemModel, xCplexParam, customerCoverageConstraint)
+        {
+        }
 
         protected override void Initialize()
         {
@@ -569,6 +578,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         public abstract List<VehicleSpecificRoute> GetVehicleSpecificRoutes();
         public abstract void RefineDecisionVariables(CustomerSet cS);
+        public abstract void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices);
 
         protected double Distance(Site from, Site to)
         {

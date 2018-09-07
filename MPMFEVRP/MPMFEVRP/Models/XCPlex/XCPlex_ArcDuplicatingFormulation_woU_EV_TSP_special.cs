@@ -890,6 +890,11 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
+
+        public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

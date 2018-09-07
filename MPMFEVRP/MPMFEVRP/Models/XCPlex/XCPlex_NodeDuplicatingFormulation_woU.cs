@@ -34,7 +34,15 @@ namespace MPMFEVRP.Models.XCPlex
 
         public XCPlex_NodeDuplicatingFormulation_woU() { } //Empty constructor
         public XCPlex_NodeDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam) { } //XCPlex VRP Constructor
+            : base(theProblemModel, xCplexParam)
+        {
+            if (xCplexParam.TSP)//This is just pre-cautionary, the right input for a TSP model should already specify "ExactlyOnce"
+                customerCoverageConstraint = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
+        } //XCPlex VRP Constructor
+        public XCPlex_NodeDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
+            : base(theProblemModel, xCplexParam, customerCoverageConstraint)
+        {
+        }
 
         protected override void DefineDecisionVariables()
         {
@@ -271,7 +279,7 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int v = 0; v < numVehCategories; v++)
                     objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
             //Now adding the objective function to the model
-            AddMaximize(objFunction);
+            objective = AddMaximize(objFunction);
         }
         void AddMinTypeObjectiveFunction()
         {
@@ -309,7 +317,7 @@ namespace MPMFEVRP.Models.XCPlex
                         objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
 
             }//Now adding the objective function to the model
-            AddMinimize(objFunction);
+            objective = AddMinimize(objFunction);
         }
         protected override void AddAllConstraints()
         {
@@ -410,23 +418,20 @@ namespace MPMFEVRP.Models.XCPlex
 
                 string constraint_name;
 
-                if (xCplexParam.TSP)//TODO: I don't think we should be checking for "TSP" separately, isn't it the same thing as "exactly once"?
+                switch (customerCoverageConstraint)
                 {
-                    constraint_name = "The_customer_node_" + j.ToString()+"_must_be_visited";
-                    allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, RHS_forNodeCoverage[j], constraint_name));
-                }
-                else
-                {
-                    if (theProblemModel.CoverConstraintType == CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
-                    {
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce:
                         constraint_name = "Exactly_one_vehicle_must_visit_the_customer_node_" + j.ToString();
                         allConstraints_list.Add(AddEq(NumberOfVehiclesVisitingTheCustomerNode, 1.0, constraint_name));
-                    }
-                    else
-                    {
+                        break;
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce:
                         constraint_name = "At_most_one_vehicle_can_visit_node_" + j.ToString();
                         allConstraints_list.Add(AddLe(NumberOfVehiclesVisitingTheCustomerNode, 1.0, constraint_name));
-                    }
+                        break;
+                    case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce:
+                        throw new System.Exception("AddConstraint_NumberOfVisitsPerCustomerNode invoked for CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce, which must not happen for a VRP!");
+                    default:
+                        throw new System.Exception("AddConstraint_NumberOfVisitsPerCustomerNode doesn't account for all CustomerCoverageConstraint_EachCustomerMustBeCovered!");
                 }
                 NumberOfVehiclesVisitingTheCustomerNode.Clear();
             }
@@ -696,7 +701,8 @@ namespace MPMFEVRP.Models.XCPlex
             }
             string constraint_name = "Total_Travel_Time";
             double rhs = (numVehicles[vIndex_EV]+numVehicles[vIndex_GDV]) * theProblemModel.CRD.TMax;
-            rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
+            if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
+                rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
             TotalTravelTime.Clear();
         }
@@ -1039,5 +1045,37 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
+
+        public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
+        {
+            Remove(objective);
+            AddMinCostObjectiveFunction(customerCoverageConstraintShadowPrices);
+        }
+        void AddMinCostObjectiveFunction(Dictionary<string, double> customerCoverageConstraintShadowPrices)
+        {
+            ILinearNumExpr objFunction = LinearNumExpr();
+            //First term: distance-based costs
+            for (int i = 0; i < NumPreprocessedSites; i++)
+            {
+                Site sFrom = preprocessedSites[i];
+                for (int j = 0; j < NumPreprocessedSites; j++)
+                {
+                    Site sTo = preprocessedSites[j];
+                    for (int v = 0; v < numVehCategories; v++)
+                        if (sFrom.SiteType == SiteTypes.Customer)
+                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo) - customerCoverageConstraintShadowPrices[sFrom.ID], X[i][j][v]);
+                        else
+                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(sFrom, sTo), X[i][j][v]);
+                }
+            }
+            //Second term: vehicle fixed costs
+            for (int j = 0; j < NumPreprocessedSites; j++)
+                for (int v = 0; v < numVehCategories; v++)
+                    objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+
+            //Now adding the objective function to the model
+            objective = AddMinimize(objFunction);
+        }
+
     }
 }

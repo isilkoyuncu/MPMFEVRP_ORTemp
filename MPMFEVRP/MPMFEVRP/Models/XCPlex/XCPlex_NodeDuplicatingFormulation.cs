@@ -551,5 +551,10 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "Node Duplicating";
         }
+
+        public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
