@@ -53,9 +53,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 50, UserInputObjectType.TextBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY, "Minimum # of infeasible customer sets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 1000, UserInputObjectType.TextBox));
             //algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_BEAM_WIDTH, "Beam width", 1));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET, "Minimum # of customers in a set", new List<object>() { 3, 4, 5 }, 4, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS, "Number of random subsets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 100, UserInputObjectType.TextBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET, "CS Selection Probability", new List<object>() { 0.01, 0.1, 0.5, 0.9, 0.99 },0.5, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM, "Compare to GDV pricing (CG) problem?", new List<object>() { bool.TrueString, bool.FalseString }, bool.FalseString, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM, "Compare to EV pricing (CG) problem w/ NDF model?", new List<object>() { bool.TrueString, bool.FalseString }, bool.TrueString, UserInputObjectType.ComboBox));
@@ -338,19 +339,20 @@ namespace MPMFEVRP.Implementations.Algorithms
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
 
             string[] tripleOrienteeringSolutionOutcome;
-            for (int index_RandomSubset=0;index_RandomSubset< numCustomerSetsToReport; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
+            int numRandomSubsets = algorithmParameters.GetParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS).GetIntValue();
+            for (int index_RandomSubset=0;index_RandomSubset< numRandomSubsets; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
             {
                 //Select the subset of customer sets to use
                 randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), customerSetSelectionProbability);
 
                 //Set covering model --> shadow prices
-                setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel));//TODO: How do we differentiate between EMH and YC problems here?
+                setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel), unlimitedGDVAndEV: (theProblemModel is EVvsGDV_MinCost_VRP_Model));
                 setCoveringModel.Solve_and_PostProcess();
                 //CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)setCoveringModel.GetCompleteSolution(typeof(CustomerSetBasedSolution));
                 Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
 
                 //Solve a new model with a single vehicle to selectively visit some (out of all) customers in order to find a negative reduced cost route.
-                tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices);
+                tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices, compareToGDV: compareToGDV_CG, compareToEV_NDF: compareToEV_NDF_CG);
                 orienteeringresults_formatted += Environment.NewLine + theProblemModel.InputFileName
                             + "\t" + index_RandomSubset.ToString();
                 for (int i = 0; i < tripleOrienteeringSolutionOutcome.Length; i++)

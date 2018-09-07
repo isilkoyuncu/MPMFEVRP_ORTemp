@@ -488,11 +488,11 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             EV_ADF_OrienteeringSolver.Solve_and_PostProcess();
 
             //Time for output now
-            if (compareToEV_NDF)
-            {
-                if (Math.Abs(EV_NDF_OrienteeringSolver.ObjValue - EV_ADF_OrienteeringSolver.ObjValue) > 0.00001)
-                    throw new Exception("EV_NDF and EV_ADF Orienteering Solvers found different solutions!");
-            }
+            //if (compareToEV_NDF)
+            //{
+            //    if (Math.Abs(EV_NDF_OrienteeringSolver.ObjValue - EV_ADF_OrienteeringSolver.ObjValue) > 0.00001)
+            //        throw new Exception("EV_NDF and EV_ADF Orienteering Solvers found different solutions!");
+            //}
 
             List<string> outcome = new List<string>();
             if (compareToGDV)
@@ -515,9 +515,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void InitializeForTripleOrienteeringSolve()
         {
-            GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, runtimeLimit_Seconds:30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, runtimeLimit_Seconds: 30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, runtimeLimit_Seconds: 30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
         }
     }
 }

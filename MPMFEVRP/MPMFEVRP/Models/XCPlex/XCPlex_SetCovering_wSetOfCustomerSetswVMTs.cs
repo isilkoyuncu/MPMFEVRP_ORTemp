@@ -23,7 +23,7 @@ namespace MPMFEVRP.Models.XCPlex
         int[] overrideNumberOfVehicles;
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
         public XCPlex_SetCovering_wSetOfCustomerSetswVMTs() { }
-        public XCPlex_SetCovering_wSetOfCustomerSetswVMTs(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, RandomSubsetOfCustomerSetsWithVMTs setOfCustomerSets, bool noGDVUnlimitedEV = false)
+        public XCPlex_SetCovering_wSetOfCustomerSetswVMTs(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, RandomSubsetOfCustomerSetsWithVMTs setOfCustomerSets, bool noGDVUnlimitedEV = false, bool unlimitedGDVAndEV = false)
         {
             //verification:
             if (setOfCustomerSets == null)
@@ -55,6 +55,11 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 overrideNumberOfVehicles[vIndex_EV] = theProblemModel.SRD.NumCustomers;
                 overrideNumberOfVehicles[1 - vIndex_EV] = 0;
+            }
+            if(unlimitedGDVAndEV)
+            {
+                overrideNumberOfVehicles[vIndex_EV] = theProblemModel.SRD.NumCustomers;
+                overrideNumberOfVehicles[1 - vIndex_EV] = theProblemModel.SRD.NumCustomers;
             }
 
             //now we are ready to put the model together and then solve it
