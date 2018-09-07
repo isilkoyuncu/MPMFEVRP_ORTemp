@@ -468,7 +468,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected override void AddAllConstraints()
         {
-            rig_IKfromNDFEMH();
+         //   rig_IKfromNDFEMH();
 
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
