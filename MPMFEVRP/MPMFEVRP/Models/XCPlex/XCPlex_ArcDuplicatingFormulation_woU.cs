@@ -263,18 +263,26 @@ namespace MPMFEVRP.Models.XCPlex
             if (ES1isNotDominated && ES2isNotDominated)
                 return 0;
 
-            //Who has the shortest overall distance is not dominated
-            sign = Math.Sign(Distance(from, ES1) + Distance(ES1, to) - Distance(from, ES2) - Distance(ES2, to));
-            if (sign != 0)
-            {
-                if (sign == -1)
-                    ES1isNotDominated = true;
-                else
-                    ES2isNotDominated = true;
-            }
+            ////Who has the shortest overall distance is not dominated
+            //sign = Math.Sign(Distance(from, ES1) + Distance(ES1, to) - Distance(from, ES2) - Distance(ES2, to));
+            //if (sign != 0)
+            //{
+            //    if (sign == -1)
+            //    {
+            //        if (!ES1isNotDominated)
+            //            Console.WriteLine("ES1 was not non-dominated before, now it is, thanks to total distance check!");
+            //        ES1isNotDominated = true;
+            //    }
+            //    else
+            //    {
+            //        if (!ES2isNotDominated)
+            //            Console.WriteLine("ES2 was not non-dominated before, now it is, thanks to total distance check!");
+            //        ES2isNotDominated = true;
+            //    }
+            //}
 
-            if (ES1isNotDominated && ES2isNotDominated)
-                return 0;
+            //if (ES1isNotDominated && ES2isNotDominated)
+            //    return 0;
 
             //Who has the overall shortest time including FF refuel is not dominated
             sign = Math.Sign(TravelTime(from, ES1) + TravelTime(ES1, to) + BatteryCapacity(VehicleCategories.EV) / ES1.RechargingRate - (TravelTime(from, ES2) + TravelTime(ES2, to) + BatteryCapacity(VehicleCategories.EV) / ES2.RechargingRate));
