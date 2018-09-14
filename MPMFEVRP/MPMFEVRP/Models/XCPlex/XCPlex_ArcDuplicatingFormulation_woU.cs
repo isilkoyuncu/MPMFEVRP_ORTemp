@@ -194,9 +194,9 @@ namespace MPMFEVRP.Models.XCPlex
                                 double toESEnergyConsumption = EnergyConsumption(sFrom, ES, VehicleCategories.EV);
                                 if (toESEnergyConsumption > directEnergyConsumption)
                                 {
-                                    double directArrivalSOE = Math.Min(maxValue_Delta[i] + maxValue_Epsilon[i], BatteryCapacity(VehicleCategories.EV)) - directEnergyConsumption;
+                                    double directArrivalSOE_wMinDelta = minValue_Delta[i] + maxValue_Epsilon[i] - directEnergyConsumption;
                                     double fromESArrivalSOE = BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(ES, sTo, VehicleCategories.EV);
-                                    if (directArrivalSOE >= fromESArrivalSOE)//No benefit in going through ES
+                                    if (directArrivalSOE_wMinDelta >= fromESArrivalSOE) //No benefit in going through ES
                                         Y[i][r][j].UB = 0.0;
                                 }
                             }

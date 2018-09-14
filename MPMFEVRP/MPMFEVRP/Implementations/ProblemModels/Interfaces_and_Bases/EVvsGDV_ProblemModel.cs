@@ -515,9 +515,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void InitializeForTripleOrienteeringSolve()
         {
-            GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, runtimeLimit_Seconds:30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, runtimeLimit_Seconds: 30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, runtimeLimit_Seconds: 30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, limitComputationTime:true, runtimeLimit_Seconds:30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: true, runtimeLimit_Seconds: 30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: true, runtimeLimit_Seconds: 30.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
         }
     }
 }
