@@ -70,66 +70,7 @@ namespace MPMFEVRP.Models.XCPlex
             SetUndesiredXYVariablesTo0();
             //rig_IKfromNDFEMH();
         }
-        void rig_IKfromNDFEMH()
-        {
-
-            X[0][2][0].LB = 1.0;
-            X[2][10][0].LB = 1.0;
-            X[10][3][0].LB = 1.0;
-            X[3][5][0].LB = 1.0;
-            X[5][11][0].LB = 1.0;
-            X[11][0][0].LB = 1.0;
-
-            //X[0][2][0].LB = 1.0;
-            //X[2][7][0].LB = 1.0;
-            //X[7][3][0].LB = 1.0;
-            //X[3][4][0].LB = 1.0;
-            //X[4][8][0].LB = 1.0;
-            //X[8][0][0].LB = 1.0;
-
-        }
-        void rig_IK()
-        {
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int j = 0; j < numNonESNodes; j++)
-                    for (int v = 0; v < numVehCategories; v++)
-                    {
-                        X[i][j][v].LB = 0.0;
-                        X[i][j][v].UB = 0.0;
-                    }
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int r = 0; r < numES; r++)
-                    for (int j = 0; j < numNonESNodes; j++)
-                    {
-                        Y[i][r][j].LB = 0.0;
-                        Y[i][r][j].UB = 0.0;
-                    }
-            IKTestsToDelete ikTest = new IKTestsToDelete();
-            List<List<int>> routes = ikTest.Routes;
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    int from = routes[0].IndexOf(i);
-                    if (from >= 0)
-                        if (routes[0].ElementAt(from + 1) == j)
-                        {
-                            X[i][j][0].LB = 1.0;
-                            X[i][j][0].UB = 1.0;
-                        }
-                }
-            for(int rt = 1; rt<routes.Count;rt++)
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    int from = routes[rt].IndexOf(i);
-                    if (from >= 0)
-                        if (routes[rt].ElementAt(from + 1) == j)
-                        {
-                            X[i][j][1].LB = 1.0;
-                            X[i][j][1].UB = 1.0;
-                        }
-                }
-        }
+        
         void SetUndesiredXYVariablesTo0()
         {
             T[0].LB = theProblemModel.CRD.TMax;
@@ -482,23 +423,19 @@ namespace MPMFEVRP.Models.XCPlex
         }
         protected override void AddAllConstraints()
         {
-         //   rig_IKfromNDFEMH();
-
             allConstraints_list = new List<IRange>();
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerCustomerNode();//1
             AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//2
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
+            AddConstraint_MaxNumberOfGDvs();//5
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
             {
                 AddConstraint_MaxNumberOfEVs();//4
-                AddConstraint_MaxNumberOfGDvs();//5
             }
             else //Minimize
             {
-                AddConstraint_MinNumberOfVehicles();//4-5 b
-                if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
-                    AddConstraint_MaxNumberOfGDvs();//5
+                AddConstraint_MinNumberOfVehicles();//4-5 b                
             }
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
             AddConstraint_DepartureSOCFromCustomerNode();//7
@@ -649,6 +586,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j = 1; j < numNonESNodes; j++)
             {
                 NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, X[0][j][vIndex_GDV]);
+                NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, X[j][0][vIndex_GDV]);
             }
             string constraint_name = "Number_of_GDVs_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_GDV].ToString();
             allConstraints_list.Add(AddLe(NumberOfGDVsOutgoingFromTheDepot, numVehicles[vIndex_GDV], constraint_name));
@@ -1352,20 +1290,23 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
 
-            if (totalTravelTimeConstraintIndex >= 0)
-                allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
-            if (totalNumberOfActiveArcsConstraintIndex >= 0)
+            if (xCplexParam.TSP)
             {
-                allConstraints_array[totalNumberOfActiveArcsConstraintIndex].UB = (double)(cS.NumberOfCustomers + 1);
-                if (numVehicles[vIndex_GDV] == 0)//EV_TSP
+                if (totalTravelTimeConstraintIndex >= 0)
+                    allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
+                if (totalNumberOfActiveArcsConstraintIndex >= 0)
                 {
-                    allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 1].UB = (double)(cS.NumberOfCustomers + 1);
-                    allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 2].UB = 0.0;
-                }
-                else//GDV-TSP
-                {
-                    allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 1].UB = 0.0;
-                    allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 2].UB = (double)(cS.NumberOfCustomers + 1);
+                    allConstraints_array[totalNumberOfActiveArcsConstraintIndex].UB = (double)(cS.NumberOfCustomers + 1);
+                    if (numVehicles[vIndex_GDV] == 0)//EV_TSP
+                    {
+                        allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 1].UB = (double)(cS.NumberOfCustomers + 1);
+                        allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 2].UB = 0.0;
+                    }
+                    else//GDV-TSP
+                    {
+                        allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 1].UB = 0.0;
+                        allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 2].UB = (double)(cS.NumberOfCustomers + 1);
+                    }
                 }
             }
         }
