@@ -44,6 +44,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         XCPlexParameters setCoverXCplexParameters;
 
         double customerSetSelectionProbability;
+        bool usePricingRuntimeLimit;
+        double pricingRuntimeLimit;
         bool compareToGDV_CG;
         bool compareToEV_NDF_CG;
 
@@ -58,8 +60,11 @@ namespace MPMFEVRP.Implementations.Algorithms
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET, "Minimum # of customers in a set", new List<object>() { 3, 4, 5 }, 4, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS, "Number of random subsets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 100, UserInputObjectType.TextBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET, "CS Selection Probability", new List<object>() { 0.01, 0.1, 0.5, 0.9, 0.99 },0.5, UserInputObjectType.ComboBox));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM, "Compare to GDV pricing (CG) problem?", new List<object>() { bool.TrueString, bool.FalseString }, bool.FalseString, UserInputObjectType.ComboBox));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM, "Compare to EV pricing (CG) problem w/ NDF model?", new List<object>() { bool.TrueString, bool.FalseString }, bool.TrueString, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_PRICING_USE_RUNTIME_LIMIT,"Use pricing problem runtime limit", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRICING_RUNTIME_LIMIT, "Runtime limit for the pricing problem solver(s)", new List<object>() { 1, 10, 30, 60, 600, 3600, 36000 }, 1, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM, "Compare to GDV pricing (CG) problem?", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM, "Compare to EV pricing (CG) problem w/ NDF model?", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+
         }
 
         public override string GetName()
@@ -183,8 +188,10 @@ namespace MPMFEVRP.Implementations.Algorithms
             setCoverXCplexParameters = new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming);
 
             customerSetSelectionProbability = algorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET).GetDoubleValue();
-            compareToGDV_CG = bool.Parse(algorithmParameters.GetParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM).GetStringValue());
-            compareToEV_NDF_CG = bool.Parse(algorithmParameters.GetParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM).GetStringValue());
+            usePricingRuntimeLimit = algorithmParameters.GetParameter(ParameterID.ALG_PROB_PRICING_USE_RUNTIME_LIMIT).GetBoolValue();
+            pricingRuntimeLimit = algorithmParameters.GetParameter(ParameterID.ALG_PRICING_RUNTIME_LIMIT).GetDoubleValue();
+            compareToGDV_CG = algorithmParameters.GetParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM).GetBoolValue();
+            compareToEV_NDF_CG = algorithmParameters.GetParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM).GetBoolValue();
 
             orienteeringresults_formatted = Initialize_orienteeringresults_formatted();
         }
@@ -352,7 +359,14 @@ namespace MPMFEVRP.Implementations.Algorithms
                 Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
 
                 //Solve a new model with a single vehicle to selectively visit some (out of all) customers in order to find a negative reduced cost route.
-                tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices, compareToGDV: compareToGDV_CG, compareToEV_NDF: compareToEV_NDF_CG);
+
+                Console.WriteLine();
+                Console.WriteLine("*******************************************************************");
+                Console.WriteLine("Pricing problem: #" + index_RandomSubset.ToString());
+                Console.WriteLine("*******************************************************************");
+                Console.WriteLine();
+
+                tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices, useRuntimeLimit: usePricingRuntimeLimit, runTimeLimit: pricingRuntimeLimit, compareToGDV: compareToGDV_CG, compareToEV_NDF: compareToEV_NDF_CG);
                 orienteeringresults_formatted += Environment.NewLine + theProblemModel.InputFileName
                             + "\t" + index_RandomSubset.ToString();
                 for (int i = 0; i < tripleOrienteeringSolutionOutcome.Length; i++)
