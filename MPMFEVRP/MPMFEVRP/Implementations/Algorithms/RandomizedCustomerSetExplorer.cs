@@ -61,7 +61,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS, "Number of random subsets", new List<object>() { 1, 5, 10, 50, 100, 500, 1000 }, 100, UserInputObjectType.TextBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET, "CS Selection Probability", new List<object>() { 0.01, 0.1, 0.5, 0.9, 0.99 },0.5, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_PRICING_USE_RUNTIME_LIMIT,"Use pricing problem runtime limit", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRICING_RUNTIME_LIMIT, "Runtime limit for the pricing problem solver(s)", new List<object>() { 1, 10, 30, 60, 600, 3600, 36000 }, 1, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRICING_RUNTIME_LIMIT, "Runtime limit for the pricing problem solver(s)", new List<object>() { 1.0, 10.0, 30.0, 60.0, 600.0, 3600.0, 36000.0 }, 1.0, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_GDV_PRICINGPROBLEM, "Compare to GDV pricing (CG) problem?", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_COMPARE_TO_EV_NDF_PRICINGPROBLEM, "Compare to EV pricing (CG) problem w/ NDF model?", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
 
