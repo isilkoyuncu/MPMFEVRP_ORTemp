@@ -75,7 +75,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     model = new XCPlex_NodeDuplicatingFormulation_woU(theProblemModel, XcplexParam);
                     break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
-                    model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam);
+                    model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 case XCPlex_Formulation.LeggieriAttempt:
                     model = new XCPlex_LeggieriAttempt(theProblemModel, XcplexParam);

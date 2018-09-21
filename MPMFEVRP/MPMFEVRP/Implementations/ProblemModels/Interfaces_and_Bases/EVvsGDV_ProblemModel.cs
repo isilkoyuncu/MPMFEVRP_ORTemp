@@ -69,8 +69,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             }
            else if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
             {
-                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-                GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
+                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+                GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             }
            else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
             {
@@ -462,9 +462,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void InitializeForTripleSolve()
         {
-            GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true));
-            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
-            TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true));
+            GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+            TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
         }
 
         public string[] TripleOrienteeringSolve(Dictionary<string, double> customerCoverageConstraintShadowPrices, bool useRuntimeLimit = false, double runTimeLimit = double.MaxValue, bool compareToGDV = false, bool compareToEV_NDF = false)

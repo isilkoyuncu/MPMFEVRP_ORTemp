@@ -329,13 +329,14 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NoGDVVisitToESNodes();//3
             AddConstraint_IncomingXTotalEqualsOutgoingXTotal();//4
 
-            if(theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
-                AddConstraint_MaxNumberOfVehiclesPerCategory();//5
+            if ((xCplexParam.TSP) || (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT))//This is the case for both TSP and Orienteering models encountered. For the broader model, we don't impose any constraints. MinimizeVMT objective check is made to simply understand the EMH problems.
+                AddConstraint_MaxNumberOfGDVs();
+
+            if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
+                AddConstraint_MaxNumberOfEVs();//5
             else //Minimize
             {
                 AddConstraint_MinNumberOfVehicles();//5 b
-                if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
-                    AddConstraint_MaxNumberOfGDVs();
             }
 
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
@@ -477,26 +478,22 @@ namespace MPMFEVRP.Models.XCPlex
                     IncomingXTotalMinusOutgoingXTotal.Clear();
                 }
         }
-        void AddConstraint_MaxNumberOfVehiclesPerCategory()//5
+        void AddConstraint_MaxNumberOfEVs()//5
         {
-            for (int v = 0; v < numVehCategories; v++)
-            {
-                ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
-                for (int j = 1; j < NumPreprocessedSites; j++)
-                    NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
-                string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[v].ToString();
-                allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
-                NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
-            }
+            ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
+            for (int j = 1; j < NumPreprocessedSites; j++)
+                NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][j][vIndex_EV]);
+            string constraint_name = "Number_of_Vehicles_of_category_" + vIndex_EV.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_EV].ToString();
+            allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[vIndex_EV], constraint_name));
+            NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
         }
         void AddConstraint_MaxNumberOfGDVs()//5
         {
-            int v = vIndex_GDV;
             ILinearNumExpr NumberOfVehiclesPerCategoryOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < NumPreprocessedSites; j++)
-                NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
-            string constraint_name = "Number_of_Vehicles_of_category_" + v.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[v].ToString();
-            allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[v], constraint_name));
+                NumberOfVehiclesPerCategoryOutgoingFromTheDepot.AddTerm(1.0, X[0][j][vIndex_GDV]);
+            string constraint_name = "Number_of_Vehicles_of_category_" + vIndex_GDV.ToString() + "_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_GDV].ToString();
+            allConstraints_list.Add(AddLe(NumberOfVehiclesPerCategoryOutgoingFromTheDepot, numVehicles[vIndex_GDV], constraint_name));
             NumberOfVehiclesPerCategoryOutgoingFromTheDepot.Clear();
         }
         void AddConstraint_MinNumberOfVehicles() //4-5 b

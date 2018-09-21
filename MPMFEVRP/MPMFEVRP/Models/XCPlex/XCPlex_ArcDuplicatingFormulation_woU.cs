@@ -34,12 +34,12 @@ namespace MPMFEVRP.Models.XCPlex
         List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
 
         public XCPlex_ArcDuplicatingFormulation_woU() { }
-        public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
-            : base(theProblemModel, xCplexParam)
-        {
-            if (xCplexParam.TSP)//This is just pre-cautionary, the right input for a TSP model should already specify "ExactlyOnce"
-                customerCoverageConstraint = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
-        }
+        //public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
+        //    : base(theProblemModel, xCplexParam)
+        //{
+        //    //if (xCplexParam.TSP)//This is just pre-cautionary, the right input for a TSP model should already specify "ExactlyOnce"
+        //    //    customerCoverageConstraint = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
+        //}
         public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
             :base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
@@ -428,7 +428,10 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_NumberOfVisitsPerCustomerNode();//1
             AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//2
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
-            AddConstraint_MaxNumberOfGDvs();//5
+
+            if ((xCplexParam.TSP)||(theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT))//This is the case for both TSP and Orienteering models encountered. For the broader model, we don't impose any constraints. MinimizeVMT objective check is made to simply understand the EMH problems.
+                AddConstraint_MaxNumberOfGDvs();//5
+
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
             {
                 AddConstraint_MaxNumberOfEVs();//4
