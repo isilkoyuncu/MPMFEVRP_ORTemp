@@ -586,7 +586,6 @@ namespace MPMFEVRP.Models.XCPlex
             for (int j = 1; j < numNonESNodes; j++)
             {
                 NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, X[0][j][vIndex_GDV]);
-                NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, X[j][0][vIndex_GDV]);
             }
             string constraint_name = "Number_of_GDVs_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_GDV].ToString();
             allConstraints_list.Add(AddLe(NumberOfGDVsOutgoingFromTheDepot, numVehicles[vIndex_GDV], constraint_name));
