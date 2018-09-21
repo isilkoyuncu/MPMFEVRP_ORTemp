@@ -1290,13 +1290,14 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
 
-            if (xCplexParam.TSP)
+
+            if (totalTravelTimeConstraintIndex >= 0)
+                allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
+            if (totalNumberOfActiveArcsConstraintIndex >= 0)
             {
-                if (totalTravelTimeConstraintIndex >= 0)
-                    allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
-                if (totalNumberOfActiveArcsConstraintIndex >= 0)
+                allConstraints_array[totalNumberOfActiveArcsConstraintIndex].UB = (double)(cS.NumberOfCustomers + 1);
+                if (xCplexParam.TSP)
                 {
-                    allConstraints_array[totalNumberOfActiveArcsConstraintIndex].UB = (double)(cS.NumberOfCustomers + 1);
                     if (numVehicles[vIndex_GDV] == 0)//EV_TSP
                     {
                         allConstraints_array[totalNumberOfActiveArcsConstraintIndex + 1].UB = (double)(cS.NumberOfCustomers + 1);
