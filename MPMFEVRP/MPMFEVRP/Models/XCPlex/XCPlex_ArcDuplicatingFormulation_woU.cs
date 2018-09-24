@@ -73,10 +73,13 @@ namespace MPMFEVRP.Models.XCPlex
         
         void SetUndesiredXYVariablesTo0()
         {
+            //TODO: Why do we have to set the following here? Wouldn't they more naturally fit wherever we calculate other auxiliary variable bounds?
             T[0].LB = theProblemModel.CRD.TMax;
             T[0].UB = theProblemModel.CRD.TMax;
             Epsilon[0].LB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
             Epsilon[0].UB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+
+            //NewPerspectiveOnArcDominationAndAuxiliaryVariableBounds();
 
             //No arc from a node to itself
             for (int j = 0; j < numNonESNodes; j++)
@@ -164,6 +167,16 @@ namespace MPMFEVRP.Models.XCPlex
                         }
                     }
         }
+
+        void NewPerspectiveOnArcDominationAndAuxiliaryVariableBounds()//This procedure's name will certainly change! Not sure at the moment whether this will be a constraint or cut, or an overarching structure that'll direct to the proper subprocedures.
+        {
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+
+                }//for all i and j non-ES
+        }
+
         /// <summary>
         /// Returns 0, 1, or 2 based on the comparison of two YArcs
         /// </summary>
@@ -875,7 +888,6 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
 
         }
-
 
         void AddAllCuts()
         {
