@@ -6,6 +6,6 @@
     public enum CustomerCoverageConstraint_EachCustomerMustBeCovered { ExactlyOnce, AtMostOnce, AtLeastOnce };
     public enum RechargingDurationAndAllowableDepartureStatusFromES { Fixed_Full, Variable_Full, Variable_Partial };
     
-        
+    public enum RefuelingPathDominance { IncumbentDominates, NeitherDominates, BothAreTheSame, ChallengerDominates };
 
 }

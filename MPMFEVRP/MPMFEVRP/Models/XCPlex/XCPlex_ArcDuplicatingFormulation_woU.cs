@@ -170,11 +170,24 @@ namespace MPMFEVRP.Models.XCPlex
 
         void NewPerspectiveOnArcDominationAndAuxiliaryVariableBounds()//This procedure's name will certainly change! Not sure at the moment whether this will be a constraint or cut, or an overarching structure that'll direct to the proper subprocedures.
         {
+            RefuelingPathGenerator refuelingPathGenerator = new RefuelingPathGenerator();
+            Dictionary<int, int> countByNumberOfRefuelingStops = new Dictionary<int, int>();
+
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
-                {
-
-                }//for all i and j non-ES
+                    if (i != j)
+                    {
+                        Console.WriteLine("i = " + i.ToString() + ", j = " + j.ToString());
+                        RefuelingPathList refuelingPaths = refuelingPathGenerator.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD, minNumberOfRefuelingStops: 0, maxNumberOfRefuelingStops: 4);
+                        Dictionary<int, int> tempCountByNumberOfRefuelingStops = refuelingPaths.CountByNumberOfRefuelingStops();
+                        foreach(int k in tempCountByNumberOfRefuelingStops.Keys)
+                        {
+                            if (!countByNumberOfRefuelingStops.ContainsKey(k))
+                                countByNumberOfRefuelingStops.Add(k, 0);
+                            countByNumberOfRefuelingStops[k] += tempCountByNumberOfRefuelingStops[k];
+                        }
+                        //Some reporting regarding the distribution of refueling paths per number of refueling stops is needed  
+                    }//for all i and j non-ES
         }
 
         /// <summary>

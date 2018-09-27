@@ -177,6 +177,9 @@
     <Compile Include="Models\ColumnGeneration\LabelingAlgMaxProfitNoIS.cs" />
     <Compile Include="Models\ColumnGeneration\Labels.cs" />
     <Compile Include="Models\ObjectiveFunctionCoefficientsPackage.cs" />
+    <Compile Include="Models\RefuelingPath.cs" />
+    <Compile Include="Models\RefuelingPathGenerator.cs" />
+    <Compile Include="Models\RefuelingPathList.cs" />
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />
