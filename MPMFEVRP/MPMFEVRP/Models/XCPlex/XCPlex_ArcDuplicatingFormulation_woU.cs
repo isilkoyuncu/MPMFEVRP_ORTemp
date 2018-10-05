@@ -166,8 +166,38 @@ namespace MPMFEVRP.Models.XCPlex
                                 Y[i][r1][j].UB = 0.0;
                         }
                     }
+            //Rig_IK_EMH10();
         }
+        void Rig_IK_EMH10()
+        {
+            X[0][12][0].LB = 1.0;
+            X[12][6][0].LB = 1.0;
+            X[6][3][0].LB = 1.0;
+            X[3][1][0].LB = 1.0;
+            X[1][16][0].LB = 1.0;
+            X[16][19][0].LB = 1.0;
+            X[19][0][0].LB = 1.0;
 
+            X[0][14][0].LB = 1.0;
+            X[14][7][0].LB = 1.0;
+            X[7][11][0].LB = 1.0;
+            X[11][17][0].LB = 1.0;
+            X[17][10][0].LB = 1.0;
+            X[10][0][0].LB = 1.0;
+
+            X[0][15][0].LB = 1.0;
+            X[15][18][0].LB = 1.0;
+            X[18][4][0].LB = 1.0;
+            X[4][5][0].LB = 1.0;
+            X[5][13][0].LB = 1.0;
+            X[13][0][0].LB = 1.0;
+
+            Y[0][3][2].LB = 1.0;
+            X[2][20][0].LB = 1.0;
+            X[20][8][0].LB = 1.0;
+            X[8][9][0].LB = 1.0;
+            X[9][0][0].LB = 1.0;
+        }
         void NewPerspectiveOnArcDominationAndAuxiliaryVariableBounds()//This procedure's name will certainly change! Not sure at the moment whether this will be a constraint or cut, or an overarching structure that'll direct to the proper subprocedures.
         {
             RefuelingPathGenerator refuelingPathGenerator = new RefuelingPathGenerator();
@@ -346,8 +376,12 @@ namespace MPMFEVRP.Models.XCPlex
                 Site s = preprocessedSites[j];
                 if (s.SiteType == SiteTypes.Customer)
                     for (int i = 0; i < numNonESNodes; i++)
+                    {
                         for (int v = 0; v < numVehCategories; v++)
                         objFunction.AddTerm(Prize(s, vehicleCategories[v]), X[i][j][v]);
+                        for (int r = 0; r < numES; r++)
+                            objFunction.AddTerm(Prize(s, vehicleCategories[vIndex_EV]), Y[i][r][j]);
+                    }
             }
             //Second term Part I: distance-based costs from customer to customer directly
             for (int i = 0; i < numNonESNodes; i++)
@@ -377,7 +411,7 @@ namespace MPMFEVRP.Models.XCPlex
             //Third term: vehicle fixed costs
             for (int j = 0; j < numNonESNodes; j++)
                 for (int v = 0; v < numVehCategories; v++)
-                objFunction.AddTerm(GetVehicleFixedCost(base.vehicleCategories[v]), X[0][j][v]);
+                objFunction.AddTerm(-1.0 * GetVehicleFixedCost(base.vehicleCategories[v]), X[0][j][v]);
             //Now adding the objective function to the model
             objective = AddMaximize(objFunction);
         }
@@ -456,11 +490,12 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
 
             if ((xCplexParam.TSP)||(theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT))//This is the case for both TSP and Orienteering models encountered. For the broader model, we don't impose any constraints. MinimizeVMT objective check is made to simply understand the EMH problems.
-                AddConstraint_MaxNumberOfGDvs();//5
+                AddConstraint_MaxNumberOfGDVs();//5
 
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
             {
                 AddConstraint_MaxNumberOfEVs();//4
+                AddConstraint_MaxNumberOfGDVs();
             }
             else //Minimize
             {
@@ -609,7 +644,7 @@ namespace MPMFEVRP.Models.XCPlex
             string constraint_name = "Number_of_EVs_outgoing_from_node_0_cannot_exceed_" + numVehicles[vIndex_EV].ToString();
             allConstraints_list.Add(AddLe(NumberOfEVsOutgoingFromTheDepot, numVehicles[vIndex_EV], constraint_name));
         }
-        void AddConstraint_MaxNumberOfGDvs()//5
+        void AddConstraint_MaxNumberOfGDVs()//5
         {
             ILinearNumExpr NumberOfGDVsOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)

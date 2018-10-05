@@ -64,38 +64,38 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXVariablesTo0();
-            //rig_IKfromADFEMH10();
+            Rig_IKEMH10();
         }
-        void rig_IKfromADFEMH10()
+        void Rig_IKEMH10()
         {
-            X[0][34][0].LB = 1.0;
-            X[34][41][0].LB = 1.0;
-            X[41][35][0].LB = 1.0;
-            X[35][31][0].LB = 1.0;
-            X[31][38][0].LB = 1.0;
-            X[38][0][0].LB = 1.0;
+            X[0][12 + 24][0].LB = 1.0;
+            X[12 + 24][6 + 24][0].LB = 1.0;
+            X[6 + 24][3 + 24][0].LB = 1.0;
+            X[3 + 24][1 + 24][0].LB = 1.0;
+            X[1 + 24][16 + 24][0].LB = 1.0;
+            X[16 + 24][19 + 24][0].LB = 1.0;
+            X[19 + 24][0][0].LB = 1.0;
 
-            X[0][39][0].LB = 1.0;
-            X[39][42][0].LB = 1.0;
-            X[42][28][0].LB = 1.0;
-            X[28][29][0].LB = 1.0;
-            X[29][37][0].LB = 1.0;
-            X[37][0][0].LB = 1.0;
+            X[0][14 + 24][0].LB = 1.0;
+            X[14 + 24][7 + 24][0].LB = 1.0;
+            X[7 + 24][11 + 24][0].LB = 1.0;
+            X[11 + 24][17 + 24][0].LB = 1.0;
+            X[17 + 24][10 + 24][0].LB = 1.0;
+            X[10 + 24][0][0].LB = 1.0;
 
-            X[0][43][0].LB = 1.0;
-            X[43][40][0].LB = 1.0;
-            X[40][25][0].LB = 1.0;
-            X[25][27][0].LB = 1.0;
-            X[27][30][0].LB = 1.0;
-            X[30][36][0].LB = 1.0;
-            X[36][0][0].LB = 1.0;
+            X[0][15 + 24][0].LB = 1.0;
+            X[15 + 24][18 + 24][0].LB = 1.0;
+            X[18 + 24][4 + 24][0].LB = 1.0;
+            X[4 + 24][5 + 24][0].LB = 1.0;
+            X[5 + 24][13 + 24][0].LB = 1.0;
+            X[13 + 24][0][0].LB = 1.0;
 
-            X[0][19][0].LB = 1.0;
-            X[19][26][0].LB = 1.0;
-            X[26][44][0].LB = 1.0;
-            X[44][32][0].LB = 1.0;
-            X[32][33][0].LB = 1.0;
-            X[33][0][0].LB = 1.0;
+            X[0][24][0].LB = 1.0;
+            X[24][2 + 24][0].LB = 1.0;
+            X[2 + 24][20 + 24][0].LB = 1.0;
+            X[20 + 24][8 + 24][0].LB = 1.0;
+            X[8 + 24][9 + 24][0].LB = 1.0;
+            X[9 + 24][0][0].LB = 1.0;
         }
         void SetUndesiredXVariablesTo0()
         {
@@ -333,7 +333,10 @@ namespace MPMFEVRP.Models.XCPlex
                 AddConstraint_MaxNumberOfGDVs();
 
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
+            {
                 AddConstraint_MaxNumberOfEVs();//5
+                AddConstraint_MaxNumberOfGDVs();
+            }
             else //Minimize
             {
                 AddConstraint_MinNumberOfVehicles();//5 b
