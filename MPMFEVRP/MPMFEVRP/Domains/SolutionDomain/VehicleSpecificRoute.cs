@@ -53,33 +53,38 @@ namespace MPMFEVRP.Domains.SolutionDomain
             //nondepotSiteIDsInOrder CANNOT contain the depot!
             if ((nondepotSiteIDsInOrder != null) && (nondepotSiteIDsInOrder.Contains(theProblemModel.SRD.GetSingleDepotID())))
                 throw new Exception("VehicleSpecificRoute invoked with a nondepotSiteIDsInOrder that contains the depot!");
+            //////////////////////////////////////////////////////////////
             int ESCounter = 0;
-            List<string> visitedESsExtracted = new List<string>();
-            foreach (string sID in nondepotSiteIDsInOrder)
-                if (theProblemModel.SRD.GetSiteByID(sID).SiteType == SiteTypes.ExternalStation)
-                {
-                    visitedESsExtracted.Add(sID);
-                    ESCounter++;
-                }
             RechargingDurationAndAllowableDepartureStatusFromES rechargePolicy = theProblemModel.ProblemCharacteristics.GetParameter(Models.ParameterID.PRB_RECHARGING_ASSUMPTION).GetValue<RechargingDurationAndAllowableDepartureStatusFromES>();
             IndividualRouteESVisits ESVisitsToUse = new IndividualRouteESVisits();
-            switch (rechargePolicy)
-            {
-                case RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full:
-                    //In this case, don't bother to provide ESStayDurations beforehand, we'll just ignore it for robustness
-                    for (int i = 0; i < ESCounter; i++)
-                        ESVisitsToUse.Add(new IndividualESVisitDataPackage(visitedESsExtracted[i],Utils.Calculators.MaxStayDurationAtSite(theProblemModel.SRD.GetSiteByID(visitedESsExtracted[i]), vehicle))); //TODO unit test: all 15mins for EMH problems
-                    break;
-                case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full:
-                    //In this case too, don't bother to provide ESStayDurations beforehand, we'll just ignore it for robustness. We'll instead calculate them JIT right before adding that siteVisit
-                    //Hence, ESStayDurationsToUse stays empty until the time of use
-                    break;
-                case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial:
-                    if ((ESVisits == null) || (ESVisits.Count != ESCounter))
-                        throw new Exception("VehicleSpecificRoute invoked with a wrongly populated ESStayDurations list!");
-                    ESVisitsToUse = ESVisits;
-                    break;
+            if (vehicle.Category == VehicleCategories.EV)
+            {               
+                List<string> visitedESsExtracted = new List<string>();
+                foreach (string sID in nondepotSiteIDsInOrder)
+                    if (theProblemModel.SRD.GetSiteByID(sID).SiteType == SiteTypes.ExternalStation)
+                    {
+                        visitedESsExtracted.Add(sID);
+                        ESCounter++;
+                    }
+                switch (rechargePolicy)
+                {
+                    case RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full:
+                        //In this case, don't bother to provide ESStayDurations beforehand, we'll just ignore it for robustness
+                        for (int i = 0; i < ESCounter; i++)
+                            ESVisitsToUse.Add(new IndividualESVisitDataPackage(visitedESsExtracted[i], Utils.Calculators.MaxStayDurationAtSite(theProblemModel.SRD.GetSiteByID(visitedESsExtracted[i]), vehicle))); //TODO unit test: all 15mins for EMH problems
+                        break;
+                    case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full:
+                        //In this case too, don't bother to provide ESStayDurations beforehand, we'll just ignore it for robustness. We'll instead calculate them JIT right before adding that siteVisit
+                        //Hence, ESStayDurationsToUse stays empty until the time of use
+                        break;
+                    case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial:
+                        if ((ESVisits == null) || (ESVisits.Count != ESCounter))
+                            throw new Exception("VehicleSpecificRoute invoked with a wrongly populated ESStayDurations list!");
+                        ESVisitsToUse = ESVisits;
+                        break;
+                }
             }
+            //////////////////////////////////
             if ((nondepotSiteIDsInOrder == null) || (nondepotSiteIDsInOrder.Count == 0))
                 return;
             if (!alwaysClosedLoop)
@@ -96,10 +101,15 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     siteVisits.Add(new SiteVisit(siteVisits.Last(), currentSite, theProblemModel.SRD.GetDistance(previousSiteID, currentSiteID), theProblemModel.SRD.GetTravelTime(previousSiteID, currentSiteID), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(previousSiteID, currentSiteID), stayDuration: currentSite.ServiceDuration));
                 else//site type is ES
                 {
-                    if (rechargePolicy == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full)
-                        ESVisitsToUse.Add(new IndividualESVisitDataPackage(currentSite.ID, Utils.Calculators.MaxStayDurationAtSite(currentSite, vehicle)));
-                    siteVisits.Add(new SiteVisit(siteVisits.Last(), currentSite, theProblemModel.SRD.GetDistance(previousSiteID, currentSiteID), theProblemModel.SRD.GetTravelTime(previousSiteID, currentSiteID), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(previousSiteID, currentSiteID), stayDuration: ESVisitsToUse.GetFirstUnprocessedVisitStayDurationToES(currentSiteID)));
-                    ESCounter++;
+                    /////////////////
+                    if (vehicle.Category == VehicleCategories.EV)
+                    {
+                        if (rechargePolicy == RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full)
+                            ESVisitsToUse.Add(new IndividualESVisitDataPackage(currentSite.ID, Utils.Calculators.MaxStayDurationAtSite(currentSite, vehicle)));
+                        siteVisits.Add(new SiteVisit(siteVisits.Last(), currentSite, theProblemModel.SRD.GetDistance(previousSiteID, currentSiteID), theProblemModel.SRD.GetTravelTime(previousSiteID, currentSiteID), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(previousSiteID, currentSiteID), stayDuration: ESVisitsToUse.GetFirstUnprocessedVisitStayDurationToES(currentSiteID)));
+                        ESCounter++;
+                    }
+                    /////////////////////////
                 }
             }//foreach(string siteID in nondepotSiteIDsInOrder)
             if (alwaysClosedLoop)

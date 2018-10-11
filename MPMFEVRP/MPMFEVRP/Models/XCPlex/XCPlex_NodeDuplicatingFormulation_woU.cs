@@ -64,7 +64,7 @@ namespace MPMFEVRP.Models.XCPlex
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
             SetUndesiredXVariablesTo0();
-            Rig_IKEMH10();
+            //Rig_IKEMH10();
         }
         void Rig_IKEMH10()
         {
@@ -335,7 +335,7 @@ namespace MPMFEVRP.Models.XCPlex
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
             {
                 AddConstraint_MaxNumberOfEVs();//5
-                AddConstraint_MaxNumberOfGDVs();
+                //AddConstraint_MaxNumberOfGDVs();
             }
             else //Minimize
             {

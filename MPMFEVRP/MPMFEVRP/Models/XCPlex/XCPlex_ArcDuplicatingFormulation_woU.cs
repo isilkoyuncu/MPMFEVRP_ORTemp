@@ -495,7 +495,7 @@ namespace MPMFEVRP.Models.XCPlex
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)
             {
                 AddConstraint_MaxNumberOfEVs();//4
-                AddConstraint_MaxNumberOfGDVs();
+                //AddConstraint_MaxNumberOfGDVs();//5
             }
             else //Minimize
             {
