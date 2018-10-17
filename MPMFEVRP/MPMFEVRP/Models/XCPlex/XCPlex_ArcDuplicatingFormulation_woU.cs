@@ -410,8 +410,12 @@ namespace MPMFEVRP.Models.XCPlex
             }
             //Third term: vehicle fixed costs
             for (int j = 0; j < numNonESNodes; j++)
+            {
                 for (int v = 0; v < numVehCategories; v++)
-                objFunction.AddTerm(-1.0 * GetVehicleFixedCost(base.vehicleCategories[v]), X[0][j][v]);
+                    objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[v]), X[0][j][v]);
+                for (int r = 0; r < numES; r++)
+                    objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[vIndex_EV]), Y[0][r][j]);
+            }
             //Now adding the objective function to the model
             objective = AddMaximize(objFunction);
         }
