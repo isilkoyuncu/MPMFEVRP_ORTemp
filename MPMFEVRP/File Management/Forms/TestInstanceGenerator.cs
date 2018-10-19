@@ -123,8 +123,8 @@ namespace Instance_Generation.Forms
                     comboBox_GDV.Items.Add(veh.ID);
                 }
             }
-            comboBox_EV.SelectedItem = comboBox_EV.Items[0];
-            comboBox_GDV.SelectedItem = comboBox_GDV.Items[0];
+            comboBox_EV.SelectedItem = comboBox_EV.Items[1];
+            comboBox_GDV.SelectedItem = comboBox_GDV.Items[1];
         }
         private void Button_SelectInputFile_Click(object sender, EventArgs e)
         {
@@ -256,7 +256,7 @@ namespace Instance_Generation.Forms
             if (comboBox_BasePricingPolicy.Items[comboBox_BasePricingPolicy.SelectedIndex].ToString() == BasePricingPolicy.Identical.ToString())
             {
                 label_BasePriceDollar.Text = "$ Amount (per visit)";
-                textBox_BasePriceDollar.Text = "30";
+                textBox_BasePriceDollar.Text = "50";
             }
             else
             {
@@ -457,7 +457,7 @@ namespace Instance_Generation.Forms
             writer = new KoyuncuYavuzFileWriter(filename, fc.NumberOfNodes, VehData, CCData,
                 fc.NodeID, fc.NodeType, fc.X, fc.Y, fc.Demand, fc.TimeWindowStart, fc.TimeWindowEnd, fc.CustomerServiceDuration, fc.Gamma, fc.Prize, fc.TravelSpeed, fc.UseGeogPosition ,fc.Distance);
             writer.Write();
-            System.Windows.Forms.MessageBox.Show("Files were written successfully!");
+            //System.Windows.Forms.MessageBox.Show("Files were written successfully!");
         }
         bool VerifyUserInput()
         {
@@ -470,11 +470,12 @@ namespace Instance_Generation.Forms
                 MessageBox.Show("nEVPremPayCustomers > nCustomers");
                 return false;
             }
-            if (nISS > nEVPremPayCustomers)
-            {
-                MessageBox.Show("nISS > nEVPremPayCustomers");
-                return false;
-            }
+            // We decided not to impose this rule anymore!
+            //if (nISS > nEVPremPayCustomers)
+            //{
+            //    MessageBox.Show("nISS > nEVPremPayCustomers");
+            //    return false;
+            //}
             if (reader != null)
                 if (nESS != reader.getNumESS())
                 {

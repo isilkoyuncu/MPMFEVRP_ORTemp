@@ -496,7 +496,7 @@
             this.textBox_nEVPremiumPayingCustomers.Name = "textBox_nEVPremiumPayingCustomers";
             this.textBox_nEVPremiumPayingCustomers.Size = new System.Drawing.Size(59, 20);
             this.textBox_nEVPremiumPayingCustomers.TabIndex = 51;
-            this.textBox_nEVPremiumPayingCustomers.Text = "1";
+            this.textBox_nEVPremiumPayingCustomers.Text = "0";
             // 
             // label_nEVPremiumPayingCustomers
             // 
@@ -549,7 +549,7 @@
             this.textBox_nISS_L3.Name = "textBox_nISS_L3";
             this.textBox_nISS_L3.Size = new System.Drawing.Size(21, 20);
             this.textBox_nISS_L3.TabIndex = 57;
-            this.textBox_nISS_L3.Text = "1";
+            this.textBox_nISS_L3.Text = "0";
             this.textBox_nISS_L3.TextChanged += new System.EventHandler(this.TextBox_nISS_L3_TextChanged);
             // 
             // label_L3
@@ -616,7 +616,7 @@
             this.textBox_nESS_L3.Name = "textBox_nESS_L3";
             this.textBox_nESS_L3.Size = new System.Drawing.Size(21, 20);
             this.textBox_nESS_L3.TabIndex = 68;
-            this.textBox_nESS_L3.Text = "3";
+            this.textBox_nESS_L3.Text = "4";
             this.textBox_nESS_L3.TextChanged += new System.EventHandler(this.TextBox_nESS_L3_TextChanged);
             // 
             // textBox_nESS_L2
@@ -669,7 +669,7 @@
             this.textBox_EVPrizeCoef.Name = "textBox_EVPrizeCoef";
             this.textBox_EVPrizeCoef.Size = new System.Drawing.Size(59, 20);
             this.textBox_EVPrizeCoef.TabIndex = 87;
-            this.textBox_EVPrizeCoef.Text = "1.50";
+            this.textBox_EVPrizeCoef.Text = "1.20";
             // 
             // label_TripChargeDollar
             // 
@@ -924,7 +924,7 @@
             this.textBox_L3kwhPerMin.Name = "textBox_L3kwhPerMin";
             this.textBox_L3kwhPerMin.Size = new System.Drawing.Size(59, 20);
             this.textBox_L3kwhPerMin.TabIndex = 93;
-            this.textBox_L3kwhPerMin.Text = "0.8";
+            this.textBox_L3kwhPerMin.Text = "4";
             this.textBox_L3kwhPerMin.TextChanged += new System.EventHandler(this.TextBox_L3kwhPerMin_TextChanged);
             // 
             // textBox_L2kwhPerMin
@@ -933,7 +933,7 @@
             this.textBox_L2kwhPerMin.Name = "textBox_L2kwhPerMin";
             this.textBox_L2kwhPerMin.Size = new System.Drawing.Size(59, 20);
             this.textBox_L2kwhPerMin.TabIndex = 92;
-            this.textBox_L2kwhPerMin.Text = "0.25";
+            this.textBox_L2kwhPerMin.Text = "0.5";
             // 
             // textBox_L1kwhPerMin
             // 
@@ -941,7 +941,7 @@
             this.textBox_L1kwhPerMin.Name = "textBox_L1kwhPerMin";
             this.textBox_L1kwhPerMin.Size = new System.Drawing.Size(59, 20);
             this.textBox_L1kwhPerMin.TabIndex = 91;
-            this.textBox_L1kwhPerMin.Text = "0.0625";
+            this.textBox_L1kwhPerMin.Text = "0.125";
             // 
             // label_level3
             // 

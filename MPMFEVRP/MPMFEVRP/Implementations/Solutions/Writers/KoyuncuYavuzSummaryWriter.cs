@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
 
         public void WriteHeader()
         {
-            sw.WriteLine("InstanceName\tAlgorithmName\tParameter1\tParameter2\tCPUtime\tSolutionStatus\tUB(BestInt)\tLB(Relaxed)\tGap");
+            sw.WriteLine("InstanceName\tAlgorithmName\tParameter1\tParameter2\tCPUtime\tSolutionStatus\tUB(BestInt)\tLB(Relaxed)\tGap\tnEVs\tnGDVs\tnESs");
         }
         public void Write()
         {

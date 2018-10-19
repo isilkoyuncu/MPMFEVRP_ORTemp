@@ -51,8 +51,33 @@ namespace MPMFEVRP.Implementations.Solutions.Readers
                 outputSumm.Add(cellsInCurrentRow[cellsInCurrentRow.Length-1]);
                 blankRowPosition++;
             }
+            int nGDV = 0;
+            int nEV = 0;
+            int nESs = 0;
+            while (allRows[blankRowPosition+2] != "\r")
+            {
+                cellsInCurrentRow = allRows[blankRowPosition+2].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+                if (cellsInCurrentRow[1].Contains("EV"))
+                {
+                    nEV++;
+                }
+                else if (cellsInCurrentRow[1].Contains("GDV"))
+                {
+                    nGDV++;
+                }
+                else
+                    throw new NotImplementedException();
+                if (cellsInCurrentRow[0].Contains("BD"))
+                {
+                    nESs++;
+                }
+                blankRowPosition++;
+            }
+            outputSumm.Add(nEV.ToString());
+            outputSumm.Add(nGDV.ToString());
+            outputSumm.Add(nESs.ToString());
             int nTabularRows = blankRowPosition;
-            instanceSolutionSummary = new string[nTabularRows];
+            instanceSolutionSummary = new string[outputSumm.Count];
             instanceSolutionSummary = outputSumm.ToArray();
         }
     }

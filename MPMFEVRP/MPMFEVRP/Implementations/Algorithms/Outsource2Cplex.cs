@@ -21,7 +21,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU, XCPlex_Formulation.LeggieriAttempt }, XCPlex_Formulation.NodeDuplicatingwoU, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.NodeDuplicating, XCPlex_Formulation.ArcDuplicating, XCPlex_Formulation.NodeDuplicatingwoU, XCPlex_Formulation.ArcDuplicatingwoU, XCPlex_Formulation.EVRPwRefuelingPaths }, XCPlex_Formulation.NodeDuplicatingwoU, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_THREADS, "# of Threads", ListPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RELAXATION, "Cplex Relaxation", new List<object>() { XCPlexRelaxation.None, XCPlexRelaxation.LinearProgramming }, XCPlexRelaxation.None, UserInputObjectType.ComboBox));
@@ -77,8 +77,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 case XCPlex_Formulation.ArcDuplicatingwoU:
                     model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
-                case XCPlex_Formulation.LeggieriAttempt:
-                    model = new XCPlex_LeggieriAttempt(theProblemModel, XcplexParam);
+                case XCPlex_Formulation.EVRPwRefuelingPaths:
+                    model = new XCPlex_EVRPwRefuelingPaths(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 default:
                     throw new Exception("XCplex model type does not exist, thus cannot be built.");

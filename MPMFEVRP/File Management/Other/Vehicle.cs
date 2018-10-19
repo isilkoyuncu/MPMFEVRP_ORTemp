@@ -50,13 +50,13 @@ namespace Instance_Generation.Other
                     maxChargingRate = 0.0;
                     break;
                 case Vehicles.EMH_60KWH:
-                    id = "EMH AVF 60kWh 0.2kWh/mile";
+                    id = "EMH AVF 60kWh 0.2kWh/mile";//300 miles range
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
                     batteryCapacity = 60.0;
                     consumptionRate = 0.20;
-                    fixedCost = 0.0;//40
-                    variableCostPerMile = 1.0;// 0.0388;
+                    fixedCost = 60.0;
+                    variableCostPerMile = 0.05;
                     maxChargingRate = 60.0/15.0;
                     break;
                 case Vehicles.EMH_1_6L_4cyl_Automatic:
@@ -65,8 +65,8 @@ namespace Instance_Generation.Other
                     loadCapacity = 200;
                     batteryCapacity = 0;
                     consumptionRate = 0;
-                    fixedCost = 0.0;//30
-                    variableCostPerMile = 1.0;// 0.0656;
+                    fixedCost = 40.0;
+                    variableCostPerMile = 0.1;
                     maxChargingRate = 0.0;
                     break;
                 case Vehicles.Ford_Focus_Electric_2016_23KWH:
