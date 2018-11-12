@@ -96,15 +96,23 @@ namespace MPMFEVRP.Implementations.Algorithms
                         string customerToAdd = SelectACustomer(visitableCustomers, currentCS);
                         localStartTime = DateTime.Now;
                         CustomerSet extendedCS = new CustomerSet(currentCS);
-                        extendedCS.ExtendAndOptimize(customerToAdd, theProblemModel); //Extend function also optimizes the extended customer set
-                        extensionCompTime += (DateTime.Now - localStartTime).TotalMilliseconds;
-
-                        csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (trialSolution.NumCS_assigned2EV < numberOfEVs));
-                        //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
-                        if (csSuccessfullyUpdated)
+                        if (currentCS.ImpossibleOtherCustomers.Contains(customerToAdd))
                         {
                             visitableCustomers.Remove(customerToAdd);
-                            currentCS = extendedCS;
+                            csSuccessfullyUpdated = true;
+                        }                          
+                        else
+                        {
+                            extendedCS.ExtendAndOptimize(customerToAdd, theProblemModel); //Extend function also optimizes the extended customer set
+                            extensionCompTime += (DateTime.Now - localStartTime).TotalMilliseconds;
+
+                            csSuccessfullyUpdated = ExtendedCSIsFeasibleForDesiredVehicleCategory(extendedCS, (trialSolution.NumCS_assigned2EV < numberOfEVs));
+                            //For EV or GDV (whichever needed), we decided to keep or discard the extendedCS
+                            if (csSuccessfullyUpdated)
+                            {
+                                visitableCustomers.Remove(customerToAdd);
+                                currentCS = extendedCS;
+                            }
                         }
                     } while (csSuccessfullyUpdated && visitableCustomers.Count > 0);
 

@@ -1122,8 +1122,8 @@ namespace MPMFEVRP.Models.XCPlex
         {
             totalNumberOfActiveArcsConstraintIndex = allConstraints_list.Count;
 
-            int nActiveArcs = numVehicles[0] + numVehicles[1] + numCustomers;
-            int nActiveArcs_EV = numVehicles[vIndex_EV] + numCustomers;
+            int nActiveArcs = numVehicles[0] + numVehicles[1] + numCustomers + numES;
+            int nActiveArcs_EV = numVehicles[vIndex_EV] + numCustomers + numES;
             int nActiveArcs_GDV = numVehicles[vIndex_GDV] + numCustomers;
             ILinearNumExpr totalArcFlow = LinearNumExpr();
             ILinearNumExpr totalArcFlow_EV = LinearNumExpr();
