@@ -115,7 +115,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (alwaysClosedLoop)
                 siteVisits.Add(new SiteVisit(siteVisits.Last(), theProblemModel.SRD.GetSingleDepotSite(), theProblemModel.SRD.GetDistance(siteVisits.Last().SiteID, theProblemModel.SRD.GetSingleDepotID()), theProblemModel.SRD.GetTravelTime(siteVisits.Last().SiteID, theProblemModel.SRD.GetSingleDepotID()), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(siteVisits.Last().SiteID, theProblemModel.SRD.GetSingleDepotID())));
         }
-        public VehicleSpecificRoute(VehicleSpecificRoute twinVSR)
+            public VehicleSpecificRoute(VehicleSpecificRoute twinVSR)
         {
             problemModel = twinVSR.problemModel;
             vehicle = twinVSR.vehicle;
@@ -130,6 +130,41 @@ namespace MPMFEVRP.Domains.SolutionDomain
             eodTotalRechargeAmount = twinVSR.eodTotalRechargeAmount;
         }
 
+        public VehicleSpecificRoute(VehicleSpecificRoute gdvVSR, bool rechargeAmountsNeedCalculation)
+        {
+            problemModel = gdvVSR.problemModel;
+            vehicle = problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
+            alwaysClosedLoop = gdvVSR.alwaysClosedLoop;
+
+            siteVisits = new List<SiteVisit>();
+            foreach (SiteVisit sv in gdvVSR.siteVisits)
+                siteVisits.Add(new SiteVisit(sv));
+            if (rechargeAmountsNeedCalculation)
+            {
+                iSTotalRechargeAmount = CalculateISTotalRechargeAmount(gdvVSR);
+                eSTotalRechargeAmount = 0.0;
+                eodTotalRechargeAmount = CalculateEodTotalRechargeAmount(gdvVSR);
+                rechargeAmountsCalculated = true;
+            }
+
+        }
+        double CalculateISTotalRechargeAmount (VehicleSpecificRoute gdvVSR)
+        {
+            double totalISrecharge = 0.0;
+            double SOC = problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+            for (int i = 0; i < gdvVSR.ListOfVisitedSiteIncludingDepotIDs.Count - 1; i++)
+            {
+                SOC = SOC - problemModel.SRD.GetEVEnergyConsumption(gdvVSR.ListOfVisitedSiteIncludingDepotIDs[i], gdvVSR.ListOfVisitedSiteIncludingDepotIDs[i + 1]);
+                //double tempRechargeAmount = Math.Min(problemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - SOC)
+                //totalISrecharge = totalISrecharge + 
+            }
+            return 0.0;
+        }
+        double CalculateEodTotalRechargeAmount(VehicleSpecificRoute gdvVSR)
+        {
+
+            return 0.0;
+        }
         //Other methods
         public double GetVehicleMilesTraveled() { return siteVisits.Last().CumulativeTravelDistance; }
 

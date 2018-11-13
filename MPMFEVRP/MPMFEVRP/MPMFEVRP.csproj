@@ -127,6 +127,7 @@
       <DependentUpon>TS_Runs.cs</DependentUpon>
     </Compile>
     <Compile Include="Implementations\Algorithms\BranchAndPrice.cs" />
+    <Compile Include="Implementations\Algorithms\ColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedCustomerSetExplorer.cs" />
@@ -180,6 +181,8 @@
     <Compile Include="Models\RefuelingPath.cs" />
     <Compile Include="Models\RefuelingPathGenerator.cs" />
     <Compile Include="Models\RefuelingPathList.cs" />
+    <Compile Include="Models\XCPlex\XCPlexADF_EVSingleCustomerSet.cs" />
+    <Compile Include="Models\XCPlex\XCPlexADF_GDVSingleCustomerSet.cs" />
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />

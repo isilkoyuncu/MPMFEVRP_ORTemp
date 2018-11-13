@@ -141,13 +141,60 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //else: we are looking at an EV problem with a provided GDV-optimal route
             //First, we must check for AFV-feasibility of the provided GDV-optimal route
             //Make an AFV-optimized route out of the given GDV-optimized route:
+
             VehicleSpecificRoute fittedRoute = FitGDVOptimalRouteToEV(GDVOptimalRoute, vehicle);
             if (fittedRoute.Feasible)//if the fitted route is feasible:
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: fittedRoute);
             if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);          
+
+
             //If none of the previous conditions worked, we must solve an EV-TSP
             return RouteOptimize(CS, vehicle);
+        }
+        public VehicleSpecificRouteOptimizationOutcome NewEVRouteOptimize(CustomerSet CS, Vehicle theEV, VehicleSpecificRoute GDVOptimalRoute)
+        {
+            //We are looking at an EV problem with a provided GDV-optimal route
+            //First, we must check for AFV-feasibility of the provided GDV-optimal route
+            //Make an AFV-optimized route out of the given GDV-optimized route:
+            
+            VehicleSpecificRoute EVfittedRoute = NewFitGDVOptimalRouteToEV(GDVOptimalRoute, theEV);
+           
+            if ((EVfittedRoute.Feasible == CheckAFVFeasibilityOfGDVOptimalRoute(GDVOptimalRoute))&& EVfittedRoute.Feasible)//if the fitted route is feasible:
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: EVfittedRoute);
+            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            //If none of the previous conditions worked, we must solve an EV-TSP
+            return RouteOptimize(CS, theEV);
+        }
+        public VehicleSpecificRouteOptimizationOutcome NewRouteOptimize(CustomerSet CS, Vehicle vehicle)
+        {
+            XCPlexVRPBase TSPsolver = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
+
+            if (vehicle.Category == VehicleCategories.EV)
+            {
+                TSPsolver = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
+            }
+            else if(vehicle.Category == VehicleCategories.GDV)
+            {
+                TSPsolver = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
+            }
+            TSPsolver.RefineDecisionVariables(CS);
+            TSPsolver.ExportModel("model.lp");
+            TSPsolver.Solve_and_PostProcess();
+            VehicleSpecificRouteOptimizationOutcome vsroo;
+            if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
+            {
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            }
+            else if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Optimal)
+            {
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: TSPsolver.GetVehicleSpecificRoutes().First());
+                TSPsolver.ClearModel();
+            }
+            else
+                throw new Exception("The TSPsolver.SolutionStatus is neither infeasible nor optimal for vehicle category: " + vehicle.Category.ToString());
+            return vsroo;
         }
         VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
@@ -171,6 +218,15 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             else
                 return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
         }
+        VehicleSpecificRoute NewFitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
+        {
+            if (GDVOptimalRoute == null)//The GDVOptimalRoute was not provided
+                throw new Exception("The GDVOptimalRoute was not provided to FitGDVOptimalRouteToEV!");
+            else if (vehicle.Category != VehicleCategories.EV)
+                throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
+            else
+                return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
+        }
         bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
         {
             //Return true if and only if the GDV-Optimal route must be AFV-infeasible based on the data
@@ -181,14 +237,23 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         
         /* We never use the following two methods?? */
-        bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRouteOptimizationOutcome GDVOptimalRoute) //TODO either delete or update: we never use this method, actually we need the fitted route to check the feasibility
+        bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRoute GDVOptimalRoute)
         {
             //Return true if and only if the GDV-Optimal Route is AFV-Feasible (in which case it's known to be AFV-Optimal as well
-
             if (GDVOptimalRoute == null)//The GDVOptimalRoute that was not provided cannot be feasible
-                return false;
+                throw new Exception("The GDV optimal is not provided to CheckAFVFeasibilityOfGDVOptimalRoute method.");
 
-            return false;//TODO Do the actual checking here!
+            List<string> sitesVisitedOnTheRoute = GDVOptimalRoute.ListOfVisitedSiteIncludingDepotIDs;
+
+            double SOC = VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+            for (int i = 0; i < sitesVisitedOnTheRoute.Count - 1; i++)
+            {
+                SOC = SOC - SRD.GetEVEnergyConsumption(sitesVisitedOnTheRoute[i], sitesVisitedOnTheRoute[i + 1]) + (SRD.GetSiteByID(sitesVisitedOnTheRoute[i + 1]).ServiceDuration * SRD.GetSiteByID(sitesVisitedOnTheRoute[i + 1]).RechargingRate);
+                SOC = Math.Min(SOC, VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
+                if (SOC < 0.0)
+                    return false;
+            }
+            return true;
         }
         public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1) //ISSUE (#7): Is this the solver's responsibility or the problem model's? We already have the code in the solver
         {
