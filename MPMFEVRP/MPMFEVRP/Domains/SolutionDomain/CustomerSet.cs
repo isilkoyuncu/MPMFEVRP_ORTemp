@@ -106,7 +106,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 {
                     if (possibleOtherCustomers.Count == 0)
                     {
-                        populatePossibleOtherCustomers(theProblemModel.SRD.GetCustomerIDs());
+                        PopulatePossibleOtherCustomers(theProblemModel.SRD.GetCustomerIDs());
                     }
                     possibleOtherCustomers.Remove(customer);
                     customers.Add(customer);
@@ -124,7 +124,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     }
                     routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
                     UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
-                    identifyNewImpossibleOtherCustomers(theProblemModel);
+                    IdentifyNewImpossibleOtherCustomers(theProblemModel);
                 }
                 else
                     throw new Exception("Customer was placed in the impossible list before, know before asking to extend!");
@@ -155,7 +155,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             routeOptimizationOutcome = theProblemModel.RouteOptimize(this);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
-            identifyNewImpossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
         public void Optimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null, bool requireGDVSolutionBeforeEV = true)
         {
@@ -186,9 +186,54 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
             }
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
-            identifyNewImpossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
+        }
+        
+        public void NewExtend(string customer)
+        {
+            possibleOtherCustomers.Remove(customer);
+            customers.Add(customer);
+            customers.Sort();
+            routeOptimizationOutcome = new RouteOptimizationOutcome();
+        }
+        public void NewOptimize(EVvsGDV_ProblemModel theProblemModel)
+        {
+            routeOptimizationOutcome = theProblemModel.NewRouteOptimize(this);
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
+        public void NewOptimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null, bool requireGDVSolutionBeforeEV = true)
+        {
+            //This method makes heavy use of the problem model
+            //A closer look therein reveals that the intelligence of checking whether GDV-optimal route is EV-feasible and if the customer set is definitely EV-infeasible are invoked
+            //Since those more-detailed methods use very deep info from problem model, it sounds reasonable, but we may also migrate them over to the customer set class in the future, upon assuring that all information tehy need are actually publicly given out by the problem model
+
+            if (vehicle.Category == VehicleCategories.GDV)
+            {
+                if ((vsroo_GDV != null) && (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.NotYetOptimized))
+                    throw new Exception("CustomerSet.Optimize seems to be invoked to optimize for a GDV, with a GDV-optimal route already at hand!");
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV_new = theProblemModel.NewRouteOptimize(this, vehicle);
+                routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV_new });
+            }
+            else//It's an EV, and the customer set must have been optimized for a GDV beforehand
+            {
+                VehicleSpecificRouteOptimizationOutcome vsroo_EV;
+                if (requireGDVSolutionBeforeEV)
+                {
+                    if ((vsroo_GDV == null) || (vsroo_GDV.Status != VehicleSpecificRouteOptimizationStatus.Optimized))
+                        throw new Exception("CustomerSet.Optimize invoked to optimize for an EV, without a GDV-optimal route at hand!");
+                    vsroo_EV = theProblemModel.NewEVRouteOptimize(this, vehicle, GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+                }
+                else
+                {
+                    vsroo_EV = theProblemModel.NewRouteOptimize(this, vehicle);
+                }
+                routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_EV });
+            }
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
+        }
         public void Remove(string customer)
         {
             if (customers.Contains(customer))
@@ -231,7 +276,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return false;
         }
 
-        void populatePossibleOtherCustomers(List<string> allCustomers)
+        void PopulatePossibleOtherCustomers(List<string> allCustomers)
         {
             possibleOtherCustomers.Clear();
             foreach(string customer in allCustomers)
@@ -243,7 +288,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 possibleOtherCustomers.Add(customer);
             }
         }
-        void identifyNewImpossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
+        void IdentifyNewImpossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
         {
             //This method assumes that the customer set has already been optimized
             //This method focuses only on GDV feasibility

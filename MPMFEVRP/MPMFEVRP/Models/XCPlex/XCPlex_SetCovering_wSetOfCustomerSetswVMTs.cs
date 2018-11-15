@@ -25,10 +25,6 @@ namespace MPMFEVRP.Models.XCPlex
         public XCPlex_SetCovering_wSetOfCustomerSetswVMTs() { }
         public XCPlex_SetCovering_wSetOfCustomerSetswVMTs(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, RandomSubsetOfCustomerSetsWithVMTs setOfCustomerSets, bool noGDVUnlimitedEV = false, bool unlimitedGDVAndEV = false)
         {
-            //verification:
-            if (setOfCustomerSets == null)
-                throw new System.Exception("XCPlex_SetCovering_wSetOfCustomerSetswVMTs invoked with a null setOfCustomerSets!");
-
             //implementation:
             this.theProblemModel = theProblemModel;
             this.xCplexParam = xCplexParam;
@@ -38,25 +34,20 @@ namespace MPMFEVRP.Models.XCPlex
                 //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
                 )
                 variable_type = NumVarType.Float;
-            this.setOfCustomerSets = setOfCustomerSets;
-            if (setOfCustomerSets != null)
-            {
-                nCustomerSets = setOfCustomerSets.RandomlySelectedCustomerSets.Count;
-                customerSetsWithVMTs_array = new CustomerSetWithVMTs[nCustomerSets];
-                for (int i = 0; i < nCustomerSets; i++)
-                    customerSetsWithVMTs_array[i] = setOfCustomerSets.RandomlySelectedCustomerSets[i];
-            }
-            else
-            {
-                throw new System.Exception("XCPlex_SetCovering_wSetOfCustomerSetswVMTs invoked with a null setOfCustomerSets and this was not caught in the verification section of the constructor!!");
-            }
+            this.setOfCustomerSets = setOfCustomerSets ?? throw new System.Exception("XCPlex_SetCovering_wSetOfCustomerSetswVMTs invoked with a null setOfCustomerSets!");
+
+            nCustomerSets = setOfCustomerSets.RandomlySelectedCustomerSets.Count;
+            customerSetsWithVMTs_array = new CustomerSetWithVMTs[nCustomerSets];
+            for (int i = 0; i < nCustomerSets; i++)
+                customerSetsWithVMTs_array[i] = setOfCustomerSets.RandomlySelectedCustomerSets[i];
+
             overrideNumberOfVehicles = new int[2];
             if (noGDVUnlimitedEV)
             {
                 overrideNumberOfVehicles[vIndex_EV] = theProblemModel.SRD.NumCustomers;
                 overrideNumberOfVehicles[1 - vIndex_EV] = 0;
             }
-            if(unlimitedGDVAndEV)
+            if (unlimitedGDVAndEV)
             {
                 overrideNumberOfVehicles[vIndex_EV] = theProblemModel.SRD.NumCustomers;
                 overrideNumberOfVehicles[1 - vIndex_EV] = theProblemModel.SRD.NumCustomers;

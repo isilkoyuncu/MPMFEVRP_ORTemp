@@ -121,18 +121,20 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr numTimesCustomerServed = LinearNumExpr();
                 for (int i = 0; i < nCustomerSets; i++)
                 {
-                    if (customerSetArray[i].Customers.Contains(customerID))
-                    {
-                        if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.EV))
+                    if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.EV))
+                        if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[0].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                         {
+
                             numTimesCustomerServed.AddTerm(1.0, z[i][0]);
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
                         }
-                        else if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
-                        {
+                        else { }
+                    else if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
+                    {
+                        if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[1].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
-                        }
                     }
+
                 }//for i
                 string constraint_name = "Customer_" + customerID +"_must_be_covered_";
                 switch (coverConstraintType)
@@ -162,13 +164,17 @@ namespace MPMFEVRP.Models.XCPlex
                 {
                     numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][v]);
                 }//for i
-                int nv = overrideNumberOfVehicles == null ? theProblemModel.NumVehicles[v] : overrideNumberOfVehicles[v];
-                string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + nv.ToString() + "times";
-                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, nv, constraint_name));
+                //int nv = overrideNumberOfVehicles == null ? theProblemModel.NumVehicles[v] : overrideNumberOfVehicles[v];
+                string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + theProblemModel.NumVehicles[v].ToString() + "times";
+                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, theProblemModel.NumVehicles[v], constraint_name));
             }
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
+            int[,] z = GetZVariablesSetTo1();
+            double [,] objective = GetObjValuesForZSetTo1();
+            
+
             if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
@@ -190,6 +196,16 @@ namespace MPMFEVRP.Models.XCPlex
                     if (GetValue(z[cs][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                         outcome[cs, v] = 1;
 
+            return outcome;
+        }
+        public double [,] GetObjValuesForZSetTo1()
+        {
+            VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
+            double[,] outcome = new double[nCustomerSets, theProblemModel.VRD.NumVehicleCategories];
+            for (int cs = 0; cs < nCustomerSets; cs++)
+                for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
+                    if (GetValue(z[cs][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                        outcome[cs, v] = theProblemModel.CalculateObjectiveFunctionValue(customerSetArray[cs].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage());
             return outcome;
         }
         public override string GetModelName()

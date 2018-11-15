@@ -52,6 +52,22 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return null;
         }
 
+        public VehicleSpecificRouteOptimizationOutcome Retrieve_vsroo(CustomerSet candidate, Vehicle vehicle)
+        {
+            for (int i = 0; i < this.Count; i++)
+                if (this[i].IsIdentical(candidate))
+                    return this[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vehicle.Category);
+            return null;
+        }
+
+        public CustomerSet Retrieve_CS(CustomerSet candidate)
+        {
+            for (int i = 0; i < this.Count; i++)
+                if (this[i].IsIdentical(candidate))
+                    return this[i];
+            return null;
+        }
+
         public CustomerSetList Pop(int numberToPop)
         {
             if (popStrategyDefined)

@@ -1030,8 +1030,7 @@ namespace MPMFEVRP.Models.XCPlex
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
-            foreach (VehicleCategories vc in vehicleCategories)
-                outcome.AddRange(GetVehicleSpecificRoutes(vc));
+            outcome.AddRange(GetVehicleSpecificRoutes(VehicleCategories.EV));
             return outcome;
         }
         public List<VehicleSpecificRoute> GetVehicleSpecificRoutes(VehicleCategories vehicleCategory)
@@ -1078,10 +1077,10 @@ namespace MPMFEVRP.Models.XCPlex
         public void GetDecisionVariableValues()
         {
             //System.IO.StreamWriter sw = new System.IO.StreamWriter("routes.txt");
-            double[,,] xValues = new double[numNonESNodes, numNonESNodes, numVehCategories];
+            double[,] xValues = new double[numNonESNodes, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
-                    xValues[i, j, 0] = GetValue(X[i][j]);//CONSULT (w/ Isil): Why only 0 when xValues is defined over all numVehCategories? IK: This was just debugging purposes, since EMH does not have any GDVs, I only wrote [0].
+                    xValues[i, j] = GetValue(X[i][j]);//CONSULT (w/ Isil): Why only 0 when xValues is defined over all numVehCategories? IK: This was just debugging purposes, since EMH does not have any GDVs, I only wrote [0].
             double[,,] yValues = new double[numNonESNodes, numES, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int r = 0; r < numES; r++)

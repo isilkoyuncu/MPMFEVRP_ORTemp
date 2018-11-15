@@ -152,6 +152,37 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //If none of the previous conditions worked, we must solve an EV-TSP
             return RouteOptimize(CS, vehicle);
         }
+        public RouteOptimizationOutcome NewRouteOptimize(CustomerSet CS)
+        {
+            //TODO unit test: the following should combine all EV and GDVs with Concat, Concat works as long as the lists are not null. Since we create new instances here, even though the GetVehiclesOfCategory method returns nothing, they shouldn't be null.
+            List<Vehicle> EVvehicles = new List<Vehicle>(VRD.GetVehiclesOfCategory(VehicleCategories.EV));
+            List<Vehicle> GDVvehicles = new List<Vehicle>(VRD.GetVehiclesOfCategory(VehicleCategories.GDV));
+            return NewRouteOptimize(CS, EVvehicles.Concat(GDVvehicles).ToList());
+        }
+        public RouteOptimizationOutcome NewRouteOptimize(CustomerSet CS, List<Vehicle> vehicles)
+        {
+            //This method is designed to work with exactly one GDV and exactly one EV
+            int GDVPositionInList = 0;
+            int EVPositionInList = 1;
+            if (vehicles.Count != 2)
+                throw new Exception("EVvsGDV_ProblemModel.RouteOptimize must be invoked with a list of 2 vehicles!");
+            if (vehicles[0].Category == vehicles[1].Category)
+                throw new Exception("EVvsGDV_ProblemModel.RouteOptimize must be invoked with exactly one GDV and one EV!");
+            if (vehicles[0].Category == VehicleCategories.EV)
+            {
+                GDVPositionInList = 1;
+                EVPositionInList = 0;
+            }
+
+            List<VehicleSpecificRouteOptimizationOutcome> theList = new List<VehicleSpecificRouteOptimizationOutcome>();
+            VehicleSpecificRouteOptimizationOutcome vsroo_GDV = NewRouteOptimize(CS, vehicles[GDVPositionInList]);
+            if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
+                return new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV);
+            theList.Add(vsroo_GDV);
+            VehicleSpecificRouteOptimizationOutcome vsroo_EV = NewEVRouteOptimize(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
+            theList.Add(vsroo_EV);
+            return new RouteOptimizationOutcome(theList);
+        }
         public VehicleSpecificRouteOptimizationOutcome NewEVRouteOptimize(CustomerSet CS, Vehicle theEV, VehicleSpecificRoute GDVOptimalRoute)
         {
             //We are looking at an EV problem with a provided GDV-optimal route
@@ -165,7 +196,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
             //If none of the previous conditions worked, we must solve an EV-TSP
-            return RouteOptimize(CS, theEV);
+            return NewRouteOptimize(CS, theEV);
         }
         public VehicleSpecificRouteOptimizationOutcome NewRouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
