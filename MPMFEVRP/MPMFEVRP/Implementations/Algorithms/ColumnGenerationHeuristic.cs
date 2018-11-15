@@ -49,6 +49,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         double totalReassignmentTime_GDV2EV;
         double totalRunTimeMiliSec = 0.0;
         DateTime globalStartTime;
+        DateTime globalFinishTime;
+        double[] iterationTime;
 
         public ColumnGenerationHeuristic()
         {
@@ -58,7 +60,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "30"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.WeightedNormalizedProbSelection, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.UniformAmongTheBestPercentage, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 30, 50 }, 30, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "Power", "2.0"));
         }
@@ -86,6 +88,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             stats.UpperBound = double.MaxValue;
             allSolutions = new List<CustomerSetBasedSolution>();
 
+            iterationTime = new double[poolSize];
             totalTimeSpentExtendingCustSet = 0.0;
             totalCompTimeBeforeSetCover = 0.0;
             totalReassignmentTime_GDV2EV = 0.0;
@@ -97,8 +100,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             DateTime localStartTime;
             DateTime localFinishTime;
 
+            //CustomerSet customerSet = new CustomerSet(new List<string> { "C5", "C8", "C19", "C20" });
+            //VehicleSpecificRouteOptimizationOutcome vsroo = theProblemModel.NewRouteOptimize(customerSet).GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV);
+
             for (int k = 0; k < poolSize; k++) //this is kind of the number of random starting points, in order not to stuck in a local optima
             {
+                localStartTime = DateTime.Now;
                 random = new Random(randomSeed + k);
                 //Start with an empty customer set and customers2visit = all customers
                 List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set
@@ -109,6 +116,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                     //finish a route when there is no customer left in the visitableCustomersForCS
                     do
                     {
+                        DateTime extendStartTime;
+                        DateTime extendFinishTime;
                         string customer2add = SelectACustomer(visitableCustomersForCS, currentCS); //Extend the CS with one customer from visitableCustomersForCS; here k plays a role for randomness
                         CustomerSet tempExtendedCS = new CustomerSet(currentCS);
                         tempExtendedCS.NewExtend(customer2add);
@@ -120,16 +129,22 @@ namespace MPMFEVRP.Implementations.Algorithms
                         }
                         else
                         {
+                            extendStartTime = DateTime.Now;
                             tempExtendedCS.NewOptimize(theProblemModel);
+                            extendFinishTime = DateTime.Now;
+                            totalTimeSpentExtendingCustSet = totalTimeSpentExtendingCustSet + (extendFinishTime - extendStartTime).TotalMilliseconds;
                         }
                         UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
                         currentCS = UpdateCurrentState(currentCS, customer2add, tempExtendedCS, isCSretrievedFromArchive, visitableCustomersForCS, vsrooList_GDV, vsrooList_EV);
                     } while (visitableCustomersForCS.Count > 0);
                     visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
                 } while (visitableCustomers.Count > 0);
-
+                localFinishTime = DateTime.Now;
+                iterationTime[k] = (localFinishTime - localStartTime).TotalMilliseconds;
             }
             solution = SetCover();
+            globalFinishTime = DateTime.Now;
+            totalRunTimeMiliSec = (globalFinishTime - globalStartTime).TotalMilliseconds;
             //CustomerSet customerSet;
             //RouteOptimizationOutcome routeOptimizationOutcome;
             //double tempSec = 0.0;
@@ -150,7 +165,46 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string[] GetOutputSummary()
         {
-            throw new NotImplementedException();
+            List<string> list = new List<string>{
+                 //Algorithm Name has to be the first entry for output file name purposes
+                "Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).Value.ToString(),
+                //Run time limit has to be the second entry for output file name purposes
+                "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Value.ToString(),
+                
+                //Optional
+                "Parameter: ",
+                //algorithmParameters.GetAllParameters();
+                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
+                //list.Add(asString);
+                
+                //Necessary statistics
+                "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
+                "Solution Status: " + status.ToString()
+            };
+            switch (status)
+            {
+                case AlgorithmSolutionStatus.NotYetSolved:
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
+                    {
+                        break;
+                    }
+                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        list.Add("UB(Best Int): " + stats.UpperBound.ToString());
+                        list.Add("LB(Relaxed): " + stats.LowerBound.ToString());
+                        break;
+                    }
+            }
+            string[] toReturn = new string[list.Count];
+            toReturn = list.ToArray();
+            return toReturn;
         }
 
         public override bool setListener(IListener listener)
@@ -160,12 +214,59 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedConclude()
         {
-            throw new NotImplementedException();
+            //Given that the instance is solved, we need to update status and statistics from it
+            status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
+            stats.RunTimeMilliSeconds = (long)totalRunTimeMiliSec;
+            stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
+            stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
+            GetOutputSummary();
+            //Create solution based on status: Not yet solved, infeasible, no feasible soln found, feasible, optimal
+            switch (status)
+            {
+                case AlgorithmSolutionStatus.NotYetSolved:
+                    {
+                        //Actual Run Time:N/A, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
+                        bestSolutionFound = new CustomerSetBasedSolution();
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Infeasible://When it is profit maximization, we shouldn't observe this case
+                    {
+                        //Actual Run Time:Report, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
+                        bestSolutionFound = new CustomerSetBasedSolution();
+                        break;
+                    }
+                case AlgorithmSolutionStatus.NoFeasibleSolutionFound:
+                    {
+                        //Actual Run Time=Limit:Report, Complete Solution-LB:N/A, Best Solution-UB:N/A, Best Solution Found:N/A
+                        bestSolutionFound = new CustomerSetBasedSolution();
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Feasible:
+                    {
+                        //Actual Run Time=Limit:Report, Complete Solution-LB:Report, Best Solution-UB:Report, Best Solution Found:Report
+                        bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+                        break;
+                    }
+                case AlgorithmSolutionStatus.Optimal:
+                    {
+                        //Actual Run Time:Report<Limit, Complete Solution-LB = Best Solution-UB:Report, Best Solution Found:Report
+                        bestSolutionFound = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+                        break;
+                    }
+                default:
+                    break;
+            }
+            bestSolutionFound.Status = status;
+            bestSolutionFound.UpperBound = CPlexExtender.UpperBound_XCPlex;
+            bestSolutionFound.LowerBound = CPlexExtender.LowerBound_XCPlex;
         }
 
         public override void SpecializedReset()
         {
-            throw new NotImplementedException();
+            CPlexExtender.ClearModel();
+            CPlexExtender.Dispose();
+            CPlexExtender.End();
+            GC.Collect();
         }
 
         string SelectACustomer(List<string> VisitableCustomers, CustomerSet currentCS)
@@ -279,15 +380,17 @@ namespace MPMFEVRP.Implementations.Algorithms
                     vsrooList_GDV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
                     exploredCustomerSetMasterList.Add(tempExtendedCS);
                 }
-                visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
+                //visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
             }
             else if (feas4GDV)
             {
                 // only GDV feasible, in this case run a mini algorithm that will give you some feasible routes for only gdv!!
                 // do not update current CS or anything related to EV
             }
-            else
-                visitableCustomersForCS = new List<string>();
+            //else
+            //    visitableCustomersForCS = new List<string>();
+            visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
+
             return currentCS;
         }
 
@@ -299,6 +402,51 @@ namespace MPMFEVRP.Implementations.Algorithms
             CPlexExtender.Solve_and_PostProcess();
             outcome = (CustomerSetBasedSolution)CPlexExtender.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             return outcome;
+        }
+        void DecompressArcDuplicatingFormulationVariables(double[] allVariableValues)
+        {
+            double[][] X_value;
+            double[][][] Y_value;
+            double[] T_value;
+            double[] delta_value;
+            double[] epsilon_value;
+
+            int numCustomers = theProblemModel.SRD.NumCustomers;
+            int numES = theProblemModel.SRD.NumES;
+            int counter = 0;
+            X_value = new double[numCustomers + 1][];
+            for (int i = 0; i <= numCustomers; i++)
+            {
+                X_value[i] = new double[numCustomers + 1];
+                for (int j = 0; j <= numCustomers; j++)
+                {
+                    X_value[i][j] = allVariableValues[counter++];
+                }
+            }
+
+            Y_value = new double[numCustomers + 1][][];
+            for (int i = 0; i <= numCustomers; i++)
+            {
+                Y_value[i] = new double[numES][];
+                for (int r = 0; r < numES; r++)
+                {
+                    Y_value[i][r] = new double[numCustomers + 1];
+                    for (int j = 0; j <= numCustomers; j++)
+                        Y_value[i][r][j] = allVariableValues[counter++];
+                }
+            }
+
+            T_value = new double[numCustomers + 1];
+            for (int j = 0; j <= numCustomers; j++)
+                T_value[j] = allVariableValues[counter++];
+
+            delta_value = new double[numCustomers + 1];
+            for (int j = 0; j <= numCustomers; j++)
+                delta_value[j] = allVariableValues[counter++];
+
+            epsilon_value = new double[numCustomers + 1];
+            for (int j = 0; j <= numCustomers; j++)
+                epsilon_value[j] = allVariableValues[counter++];
         }
     }
 }

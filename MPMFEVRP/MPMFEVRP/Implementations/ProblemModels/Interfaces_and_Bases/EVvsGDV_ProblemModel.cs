@@ -211,17 +211,24 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 TSPsolver = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
             }
             TSPsolver.RefineDecisionVariables(CS);
-            TSPsolver.ExportModel("model.lp");
+            //TSPsolver.ExportModel("model.lp");
             TSPsolver.Solve_and_PostProcess();
             VehicleSpecificRouteOptimizationOutcome vsroo;
             if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
             {
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                TSPsolver.ClearModel();
+                TSPsolver.Dispose();
+                TSPsolver.End();
+                //GC.Collect();
             }
             else if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: TSPsolver.GetVehicleSpecificRoutes().First());
                 TSPsolver.ClearModel();
+                TSPsolver.Dispose();
+                TSPsolver.End();
+                //GC.Collect();
             }
             else
                 throw new Exception("The TSPsolver.SolutionStatus is neither infeasible nor optimal for vehicle category: " + vehicle.Category.ToString());
