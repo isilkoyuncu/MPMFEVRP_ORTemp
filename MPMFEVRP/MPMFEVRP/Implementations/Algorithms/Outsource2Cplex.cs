@@ -148,7 +148,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             CPlexExtender.ClearModel();
             CPlexExtender.Dispose();
             CPlexExtender.End();
-            GC.Collect();
+            //GC.Collect();
         }
 
         public override string[] GetOutputSummary()

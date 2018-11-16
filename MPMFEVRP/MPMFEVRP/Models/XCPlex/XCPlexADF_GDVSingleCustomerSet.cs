@@ -192,11 +192,13 @@ namespace MPMFEVRP.Models.XCPlex
             if (addTotalNumberOfActiveArcsCut)
                 AddCut_TotalNumberOfActiveArcs();
 
-                //Some additional cuts
-                //AddAllCuts();
+            //Some additional cuts
+            //AddAllCuts();
 
-                //All constraints added
-                allConstraints_array = allConstraints_list.ToArray();
+            //All constraints added
+            allConstraints_array = allConstraints_list.ToArray();
+            allConstraints_list = null;
+
         }
 
         void AddConstraint_NumberOfVisitsPerCustomerNode() //1

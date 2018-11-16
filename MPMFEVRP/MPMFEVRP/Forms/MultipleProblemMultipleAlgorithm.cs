@@ -177,7 +177,7 @@ namespace MPMFEVRP.Forms
                 {
                     //TODO The following line is from the template, which simply assumes that each problem can be worked using only a single model, and there is exactly one problem(type) in the entire project.
                     //Now that we have enriched the project, the line below must be corrected to handle different problem models for different problems
-
+                    GC.Collect();
                     if (problemModel == null)
                     {
                         MessageBox.Show("Please load a problem first!", "No problem!");
@@ -211,7 +211,60 @@ namespace MPMFEVRP.Forms
                     }
                 }
             }
+            problemModels.Clear();
+            algorithms.Clear();
+            ReleaseMemory.FlushMemory();
         }
+
+        //TODO: this commented out button run removes used problem models and algorithms
+
+        //private void Button_run_Click(object sender, EventArgs e)
+        //{
+        //    solutions = new BindingList<ISolution>();
+        //    do
+        //    {
+        //        do
+        //        {
+        //            //TODO The following line is from the template, which simply assumes that each problem can be worked using only a single model, and there is exactly one problem(type) in the entire project.
+        //            //Now that we have enriched the project, the line below must be corrected to handle different problem models for different problems
+
+        //            if (problemModels.First() == null)
+        //            {
+        //                MessageBox.Show("Please load a problem first!", "No problem!");
+        //            }
+        //            else
+        //            {
+        //                algorithms.First().Initialize(problemModels.First());
+        //                Log("Algorithm " + algorithms.First().ToString() + " is initialized.");
+
+        //                Log("Algorithm " + algorithms.First().ToString() + " started running.");
+        //                algorithms.First().Run();
+
+        //                Log("Algorithm " + algorithms.First().ToString() + " finished.");
+        //                Log("================");
+        //                algorithms.First().Conclude();
+        //                theSolution = algorithms.First().Solution;
+        //                solutions.Add(theSolution);
+        //                if (theSolution == null)
+        //                {
+        //                    writer = new IndividualSolutionWriter(problemModels.First().InputFileName, algorithms.First().GetOutputSummary(), null, null);
+        //                    writer.Write();
+        //                }
+        //                else
+        //                {
+        //                    Log("Solution " + theSolution.ToString() + " started writing.");
+        //                    writer = new IndividualSolutionWriter(problemModels.First().InputFileName, algorithms.First().GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
+        //                    writer.Write();
+        //                }
+        //                Log("**************RESET************");
+        //                algorithms.First().Reset();
+        //                problemModels.RemoveAt(0);
+        //            }
+        //        } while (problemModels.Count > 0);
+        //        algorithms.RemoveAt(0);
+        //    } while (algorithms.Count > 0);
+
+        //}
 
         private void LinkLabel_deleteSelectedProblem_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -288,6 +341,7 @@ namespace MPMFEVRP.Forms
             {
                 MessageBox.Show("There is something wrong while loading problem from the whole data!", "Problem loading error!");
             }
+            problems = new BindingList<IProblem>();
         }
     }
 }

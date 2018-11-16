@@ -51,7 +51,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
             lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
 
-            CreateTSPSolvers(TSPModelType);
+            if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATETSPSOLVERS).GetBoolValue())
+                CreateTSPSolvers(TSPModelType);
             
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
@@ -152,6 +153,20 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //If none of the previous conditions worked, we must solve an EV-TSP
             return RouteOptimize(CS, vehicle);
         }
+        VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
+        {
+            XCPlexVRPBase solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
+            solver.RefineDecisionVariables(CS);
+            solver.Solve_and_PostProcess();
+            VehicleSpecificRouteOptimizationOutcome vsroo;
+            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            else//optimal
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
+//            solver.ClearModel();
+            return vsroo;
+        }
+
         public RouteOptimizationOutcome NewRouteOptimize(CustomerSet CS)
         {
             //TODO unit test: the following should combine all EV and GDVs with Concat, Concat works as long as the lists are not null. Since we create new instances here, even though the GetVehiclesOfCategory method returns nothing, they shouldn't be null.
@@ -181,6 +196,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             theList.Add(vsroo_GDV);
             VehicleSpecificRouteOptimizationOutcome vsroo_EV = NewEVRouteOptimize(CS, vehicles[EVPositionInList], GDVOptimalRoute: vsroo_GDV.VSOptimizedRoute);
             theList.Add(vsroo_EV);
+            vsroo_EV = null;
+            vsroo_GDV = null;
             return new RouteOptimizationOutcome(theList);
         }
         public VehicleSpecificRouteOptimizationOutcome NewEVRouteOptimize(CustomerSet CS, Vehicle theEV, VehicleSpecificRoute GDVOptimalRoute)
@@ -188,10 +205,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //We are looking at an EV problem with a provided GDV-optimal route
             //First, we must check for AFV-feasibility of the provided GDV-optimal route
             //Make an AFV-optimized route out of the given GDV-optimized route:
-            
+
             VehicleSpecificRoute EVfittedRoute = NewFitGDVOptimalRouteToEV(GDVOptimalRoute, theEV);
-           
-            if ((EVfittedRoute.Feasible == CheckAFVFeasibilityOfGDVOptimalRoute(GDVOptimalRoute))&& EVfittedRoute.Feasible)//if the fitted route is feasible:
+
+            if ((EVfittedRoute.Feasible == CheckAFVFeasibilityOfGDVOptimalRoute(GDVOptimalRoute)) && EVfittedRoute.Feasible)//if the fitted route is feasible:
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: EVfittedRoute);
             if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
@@ -206,7 +223,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             {
                 TSPsolver = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
             }
-            else if(vehicle.Category == VehicleCategories.GDV)
+            else if (vehicle.Category == VehicleCategories.GDV)
             {
                 TSPsolver = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
             }
@@ -217,36 +234,21 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
             {
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
-                TSPsolver.ClearModel();
-                TSPsolver.Dispose();
-                TSPsolver.End();
-                //GC.Collect();
             }
             else if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: TSPsolver.GetVehicleSpecificRoutes().First());
-                TSPsolver.ClearModel();
-                TSPsolver.Dispose();
-                TSPsolver.End();
-                //GC.Collect();
             }
             else
                 throw new Exception("The TSPsolver.SolutionStatus is neither infeasible nor optimal for vehicle category: " + vehicle.Category.ToString());
+            TSPsolver.ClearModel();
+            TSPsolver.Dispose();
+            TSPsolver.End();
+            //GC.Collect();
             return vsroo;
         }
-        VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
-        {
-            XCPlexVRPBase solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
-            solver.RefineDecisionVariables(CS);
-            solver.Solve_and_PostProcess();
-            VehicleSpecificRouteOptimizationOutcome vsroo;
-            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
-                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
-            else//optimal
-                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
-//            solver.ClearModel();
-            return vsroo;
-        }
+
+
         VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
         {
             if (GDVOptimalRoute == null)//The GDVOptimalRoute was not provided
