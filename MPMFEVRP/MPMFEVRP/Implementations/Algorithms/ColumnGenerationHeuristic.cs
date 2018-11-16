@@ -29,6 +29,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         double closestPercentSelect;
         double power;
         double runTimeLimitInSeconds = 0.0;
+        double searchTimeLimit = 0.0;
+        int infeasibleCountLimit= 0;
+
+        bool couldNotExtend = false;
 
         XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam;
@@ -45,8 +49,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         //Local statistics
         double totalTimeSpentExtendingCustSet;
-        double totalCompTimeBeforeSetCover;
-        double totalReassignmentTime_GDV2EV;
+        //double totalCompTimeBeforeSetCover;
+        //double totalReassignmentTime_GDV2EV;
         double totalRunTimeMiliSec = 0.0;
         DateTime globalStartTime;
         DateTime globalFinishTime;
@@ -63,6 +67,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.UniformAmongTheBestPercentage, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 10, 30, 50 }, 30, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "Power", "2.0"));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SEARCH_TILIM, "Infeasible Search Tilim", "5"));
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -81,7 +86,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTION_POWER).GetDoubleValue();
             runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
+            searchTimeLimit = AlgorithmParameters.GetParameter(ParameterID.ALG_SEARCH_TILIM).GetIntValue();
             XcplexParam = new XCPlexParameters();
+
+            exploredCustomerSetMasterList = new CustomerSetList();
+            vsrooList_GDV = new List<VehicleSpecificRouteOptimizationOutcome>();
+            vsrooList_EV = new List<VehicleSpecificRouteOptimizationOutcome>();
 
             //Solution stat
             status = AlgorithmSolutionStatus.NotYetSolved;
@@ -90,8 +100,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             iterationTime = new double[poolSize];
             totalTimeSpentExtendingCustSet = 0.0;
-            totalCompTimeBeforeSetCover = 0.0;
-            totalReassignmentTime_GDV2EV = 0.0;
+            //totalCompTimeBeforeSetCover = 0.0;
+            //totalReassignmentTime_GDV2EV = 0.0;
+            infeasibleCountLimit = 5;
         }
 
         public override void SpecializedRun()
@@ -114,6 +125,9 @@ namespace MPMFEVRP.Implementations.Algorithms
                     CustomerSet currentCS = new CustomerSet(); //Start a new "customer set" <- route
                     List<string> visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomers, currentCS);
                     //finish a route when there is no customer left in the visitableCustomersForCS
+                    double extensionTime = 0.0;
+                    bool feasibleBack2Back = true;
+                    int countInfeasible = 0;
                     do
                     {
                         DateTime extendStartTime;
@@ -125,6 +139,17 @@ namespace MPMFEVRP.Implementations.Algorithms
                         if (exploredCustomerSetMasterList.Includes(tempExtendedCS))
                         {
                             tempExtendedCS = exploredCustomerSetMasterList.Retrieve_CS(tempExtendedCS); //retrieve the info needed from exploredCustomerSetList
+                            if (!feas4EV)
+                                feasibleBack2Back = false;
+                            else
+                                feasibleBack2Back = true;
+                            UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
+                            if (feasibleBack2Back == false && !feas4EV)
+                            {
+                                countInfeasible++;
+                                if (countInfeasible > infeasibleCountLimit)
+                                    visitableCustomersForCS = new List<string>();
+                            }
                             isCSretrievedFromArchive = true;
                         }
                         else
@@ -132,15 +157,26 @@ namespace MPMFEVRP.Implementations.Algorithms
                             extendStartTime = DateTime.Now;
                             tempExtendedCS.NewOptimize(theProblemModel);
                             extendFinishTime = DateTime.Now;
-                            totalTimeSpentExtendingCustSet = totalTimeSpentExtendingCustSet + (extendFinishTime - extendStartTime).TotalMilliseconds;
+                            if (!feas4EV)
+                                feasibleBack2Back = false;
+                            else
+                                feasibleBack2Back = true;
+                            UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
+                            if (feasibleBack2Back == false && !feas4EV)
+                            {
+                                extensionTime = extensionTime + totalTimeSpentExtendingCustSet + (extendFinishTime - extendStartTime).TotalSeconds;
+                                if (extensionTime > searchTimeLimit)
+                                    visitableCustomersForCS = new List<string>();
+                            }
                         }
-                        UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
                         currentCS = UpdateCurrentState(currentCS, customer2add, tempExtendedCS, isCSretrievedFromArchive, visitableCustomersForCS, vsrooList_GDV, vsrooList_EV);
                     } while (visitableCustomersForCS.Count > 0);
                     visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
                 } while (visitableCustomers.Count > 0);
                 localFinishTime = DateTime.Now;
-                iterationTime[k] = (localFinishTime - localStartTime).TotalMilliseconds;
+                iterationTime[k] = (localFinishTime - localStartTime).TotalSeconds;
+                if (runTimeLimitInSeconds < iterationTime.Sum())
+                    break;
             }
             solution = SetCover();
             globalFinishTime = DateTime.Now;
@@ -374,21 +410,20 @@ namespace MPMFEVRP.Implementations.Algorithms
             if (feas4EV)
             {
                 currentCS = new CustomerSet(tempExtendedCS);
-                if (!isCSretrievedFromArchive)
-                {
-                    vsrooList_EV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV));
-                    vsrooList_GDV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
-                    exploredCustomerSetMasterList.Add(tempExtendedCS);
-                }
-                //visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
             }
             else if (feas4GDV)
             {
                 // only GDV feasible, in this case run a mini algorithm that will give you some feasible routes for only gdv!!
                 // do not update current CS or anything related to EV
             }
-            //else
-            //    visitableCustomersForCS = new List<string>();
+            else
+                couldNotExtend = true;
+            if (!isCSretrievedFromArchive)
+            {
+                vsrooList_EV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV));
+                vsrooList_GDV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
+                exploredCustomerSetMasterList.Add(tempExtendedCS);
+            }
             visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
 
             return currentCS;

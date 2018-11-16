@@ -16,7 +16,7 @@ namespace MPMFEVRP.Models.XCPlex
         int vIndex_EV = 0;//TODO: Use this in all places
         INumVar[][] z;//[customerSet][2: 0 of EV, 1 for GDV]
         ILinearNumExpr obj;//Because of the enumerative and space consuming nature of the problem with 2 vehicle categories, it's more practical to create the obj expression beforehand and only add it later
-        int nCustomerSets;
+        int nFeasibleCustomerSets = 0;
         CustomerSet[] customerSetArray;
         int[] overrideNumberOfVehicles;
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
@@ -33,18 +33,21 @@ namespace MPMFEVRP.Models.XCPlex
                 variable_type = NumVarType.Float;
             if (cs_List != null)
             {
-                nCustomerSets = cs_List.Count;
-                customerSetArray = new CustomerSet[nCustomerSets];
-                for (int i = 0; i < nCustomerSets; i++)
-                {
-                    customerSetArray[i] = cs_List[i];
-                }
+                for (int j = 0; j < cs_List.Count; j++)
+                    if (cs_List[j].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
+                        nFeasibleCustomerSets = nFeasibleCustomerSets + 1;
+
+                customerSetArray = new CustomerSet[nFeasibleCustomerSets];
+                int count = 0;
+                for (int j = 0; j < cs_List.Count; j++)
+                    if (cs_List[j].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
+                        customerSetArray[count++] = cs_List[j];
             }
             else
             {
-                nCustomerSets = theProblemModel.CustomerSetArchive.Count;
-                customerSetArray = new CustomerSet[nCustomerSets];
-                for (int i = 0; i < nCustomerSets; i++)
+                nFeasibleCustomerSets = theProblemModel.CustomerSetArchive.Count;
+                customerSetArray = new CustomerSet[nFeasibleCustomerSets];
+                for (int i = 0; i < nFeasibleCustomerSets; i++)
                 {
                     customerSetArray[i] = theProblemModel.CustomerSetArchive[i];
                 }
@@ -75,18 +78,18 @@ namespace MPMFEVRP.Models.XCPlex
             obj = LinearNumExpr();
             VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
 
-            string[][] z_name = new string[nCustomerSets][];
-            z = new INumVar[nCustomerSets][];
-            for (int i = 0; i < nCustomerSets; i++)
+            string[][] z_name = new string[nFeasibleCustomerSets][];
+            z = new INumVar[nFeasibleCustomerSets][];
+            for (int i = 0; i < nFeasibleCustomerSets; i++)
             {
                 z_name[i] = new string[2];
                 z[i] = new INumVar[2];
                 for (int v = 0; v < 2; v++)
                 {
-                    z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
-                    z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
-                    obj.AddTerm(theProblemModel.CalculateObjectiveFunctionValue(customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage()), z[i][v]);
-                    allVariables_list.Add(z[i][v]);
+                        z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
+                        z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
+                        obj.AddTerm(theProblemModel.CalculateObjectiveFunctionValue(customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage()), z[i][v]);
+                        allVariables_list.Add(z[i][v]);
                 }
             }
             //All variables defined
@@ -119,10 +122,10 @@ namespace MPMFEVRP.Models.XCPlex
             foreach (string customerID in customerIDs)
             {
                 ILinearNumExpr numTimesCustomerServed = LinearNumExpr();
-                for (int i = 0; i < nCustomerSets; i++)
+                for (int i = 0; i < nFeasibleCustomerSets; i++)
                 {
                     if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.EV))
-                        if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[0].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
+                        if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[1].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                         {
 
                             numTimesCustomerServed.AddTerm(1.0, z[i][0]);
@@ -131,7 +134,7 @@ namespace MPMFEVRP.Models.XCPlex
                         else { }
                     else if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
                     {
-                        if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[1].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
+                        if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[0].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
                     }
 
@@ -160,7 +163,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
             {
                 ILinearNumExpr numTimesVehicleTypeIsUsed = LinearNumExpr();
-                for (int i = 0; i < nCustomerSets; i++)
+                for (int i = 0; i < nFeasibleCustomerSets; i++)
                 {
                     numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][v]);
                 }//for i
@@ -190,8 +193,8 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public int[,] GetZVariablesSetTo1()
         {
-            int[,] outcome = new int[nCustomerSets, theProblemModel.VRD.NumVehicleCategories];
-            for (int cs = 0; cs < nCustomerSets; cs++)
+            int[,] outcome = new int[nFeasibleCustomerSets, theProblemModel.VRD.NumVehicleCategories];
+            for (int cs = 0; cs < nFeasibleCustomerSets; cs++)
                 for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
                     if (GetValue(z[cs][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                         outcome[cs, v] = 1;
@@ -201,8 +204,8 @@ namespace MPMFEVRP.Models.XCPlex
         public double [,] GetObjValuesForZSetTo1()
         {
             VehicleCategories[] vc = new VehicleCategories[] { VehicleCategories.EV, VehicleCategories.GDV };
-            double[,] outcome = new double[nCustomerSets, theProblemModel.VRD.NumVehicleCategories];
-            for (int cs = 0; cs < nCustomerSets; cs++)
+            double[,] outcome = new double[nFeasibleCustomerSets, theProblemModel.VRD.NumVehicleCategories];
+            for (int cs = 0; cs < nFeasibleCustomerSets; cs++)
                 for (int v = 0; v < theProblemModel.VRD.NumVehicleCategories; v++)
                     if (GetValue(z[cs][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                         outcome[cs, v] = theProblemModel.CalculateObjectiveFunctionValue(customerSetArray[cs].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage());
