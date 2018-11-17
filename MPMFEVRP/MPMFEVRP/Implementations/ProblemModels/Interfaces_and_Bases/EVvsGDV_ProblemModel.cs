@@ -51,7 +51,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
             lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
 
-            CreateTSPSolvers(TSPModelType);
+            if (problemCharacteristics.GetParameter(ParameterID.PRB_CREATETSPSOLVERS).GetBoolValue())
+                CreateTSPSolvers(TSPModelType);
             
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
