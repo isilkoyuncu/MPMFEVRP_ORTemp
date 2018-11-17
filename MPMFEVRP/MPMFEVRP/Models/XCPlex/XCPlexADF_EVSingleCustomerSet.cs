@@ -446,7 +446,6 @@ namespace MPMFEVRP.Models.XCPlex
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
-            allConstraints_list = null;
         }
 
         void AddConstraint_NumberOfVisitsPerCustomerNode() //1
@@ -480,7 +479,7 @@ namespace MPMFEVRP.Models.XCPlex
                     default:
                         throw new System.Exception("AddConstraint_NumberOfVisitsPerCustomerNode doesn't account for all CustomerCoverageConstraint_EachCustomerMustBeCovered!");
                 }
-                IncomingXandYToCustomerNodes.Clear();
+
             }
         }
         void AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV()//2
