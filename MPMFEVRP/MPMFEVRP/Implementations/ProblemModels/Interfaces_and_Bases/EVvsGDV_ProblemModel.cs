@@ -32,6 +32,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected XCPlexVRPBase EV_NDF_OrienteeringSolver;
         protected XCPlexVRPBase EV_ADF_OrienteeringSolver;
 
+        XCPlexADF_EVSingleCustomerSet TSPsolverEV;
+        XCPlexADF_GDVSingleCustomerSet TSPsolverGDV;
+
 
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
@@ -56,6 +59,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
+
+            CreateNewTspSolvers();
+        }
+        void CreateNewTspSolvers()
+        {
+            TSPsolverEV = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            TSPsolverGDV = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
         }
         public string GetInstanceName(string inputFileName)
         {
@@ -201,39 +211,27 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         public VehicleSpecificRouteOptimizationOutcome NewRouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
-            XCPlexVRPBase TSPsolver = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
-
+            VehicleSpecificRouteOptimizationOutcome vsroo;
+            XCPlexVRPBase solver = TSPsolverGDV;
             if (vehicle.Category == VehicleCategories.EV)
             {
-                TSPsolver = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
+                solver = TSPsolverEV;
             }
-            else if(vehicle.Category == VehicleCategories.GDV)
+            solver.RefineDecisionVariables(CS);
+            //solver.ExportModel("model.lp");
+            solver.Solve_and_PostProcess();
+            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
             {
-                TSPsolver = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: vehicle.Category, tSP: true, tighterAuxBounds: true), coverConstraintType, CS);
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
             }
-            TSPsolver.RefineDecisionVariables(CS);
-            //TSPsolver.ExportModel("model.lp");
-            TSPsolver.Solve_and_PostProcess();
-            VehicleSpecificRouteOptimizationOutcome vsroo;
-            if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
+            else if (solver.SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
-                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
-                TSPsolver.ClearModel();
-                TSPsolver.Dispose();
-                TSPsolver.End();
-                //GC.Collect();
-            }
-            else if (TSPsolver.SolutionStatus == XCPlexSolutionStatus.Optimal)
-            {
-                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, TSPsolver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: TSPsolver.GetVehicleSpecificRoutes().First());
-                TSPsolver.ClearModel();
-                TSPsolver.Dispose();
-                TSPsolver.End();
-                //GC.Collect();
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First());
             }
             else
-                throw new Exception("The TSPsolver.SolutionStatus is neither infeasible nor optimal for vehicle category: " + vehicle.Category.ToString());
+                throw new Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + vehicle.Category.ToString());
             return vsroo;
+
         }
         VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
         {

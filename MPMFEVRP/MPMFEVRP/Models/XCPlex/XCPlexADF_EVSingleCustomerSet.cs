@@ -13,9 +13,6 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlexADF_EVSingleCustomerSet : XCPlexVRPBase
     {
-        CustomerSet customerSet;
-        Vehicle theVehicle;
-
         int numNonESNodes;
         int numCustomers, numES;
 
@@ -39,14 +36,7 @@ namespace MPMFEVRP.Models.XCPlex
         List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
 
         public XCPlexADF_EVSingleCustomerSet() { }
-
-        public XCPlexADF_EVSingleCustomerSet(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint, CustomerSet customerSet)
-            : base(theProblemModel, xCplexParam, customerCoverageConstraint)
-        {
-            this.customerSet = customerSet;
-            theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(xCplexParam.VehCategory);
-        }
-        
+     
         public XCPlexADF_EVSingleCustomerSet(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
             : base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
@@ -486,14 +476,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             for (int j = 0; j < numNonESNodes; j++)
             {
-                if (RHS_forNodeCoverage[j] > 0.0)
-                {
+                
                     ILinearNumExpr IncomingXYTotalMinusOutgoingXYTotal = LinearNumExpr();
 
                     for (int i = 0; i < numNonESNodes; i++)
                     {
-                        if (RHS_forNodeCoverage[i] > 0.0)
-                        {
+                        
                             IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, X[i][j]);
                             IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, X[j][i]);
                             for (int r = 0; r < numES; r++)
@@ -501,11 +489,11 @@ namespace MPMFEVRP.Models.XCPlex
                                 IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, Y[i][r][j]);
                                 IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, Y[j][r][i]);
                             }
-                        }
+                        
                     }
                     string constraint_name = "Number_of_EVs_incoming_to_node_" + j.ToString() + "_equals_to_outgoing_EVs";
                     allConstraints_list.Add(AddEq(IncomingXYTotalMinusOutgoingXYTotal, 0.0, constraint_name));
-                }
+               
             }
         }
         void AddConstraint_DepartingNumberOfEVs()//4
@@ -513,12 +501,11 @@ namespace MPMFEVRP.Models.XCPlex
             ILinearNumExpr NumberOfEVsOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)
             {
-                if (RHS_forNodeCoverage[j] > 0.0)
-                {
+                
                     NumberOfEVsOutgoingFromTheDepot.AddTerm(1.0, X[0][j]);
                     for (int r = 0; r < numES; r++)
                         NumberOfEVsOutgoingFromTheDepot.AddTerm(1.0, Y[0][r][j]);
-                }
+                
             }
             if (customerCoverageConstraint == CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
             {
@@ -537,45 +524,41 @@ namespace MPMFEVRP.Models.XCPlex
         {
             for (int j = 1; j < numNonESNodes; j++)
             {
-                if (RHS_forNodeCoverage[j] > 0.0)
-                {
+                
                     ILinearNumExpr EnergyGainAtNonDepotSite = LinearNumExpr();
                     EnergyGainAtNonDepotSite.AddTerm(1.0, Epsilon[j]);
                     for (int i = 0; i < numNonESNodes; i++)
                     {
-                        if (RHS_forNodeCoverage[i] > 0.0)
-                        {
+                        
                             EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j]);
                             for (int r = 0; r < numES; r++)
                                 EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], Y[i][r][j]);
-                        }
+                        
                     }
                     string constraint_name = "Max_Energy_Gain_At_NonDepot_Site_" + j.ToString();
                     allConstraints_list.Add(AddLe(EnergyGainAtNonDepotSite, 0.0, constraint_name));
-                }
+                
             }
         }
         void AddConstraint_DepartureSOCFromCustomerNode()//7
         {
             for (int j = 1; j <= numCustomers; j++)//Index 0 is the depot
             {
-                if (RHS_forNodeCoverage[j] > 0.0)
-                {
+                
                     ILinearNumExpr DepartureSOCFromCustomer = LinearNumExpr();
                     DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
                     DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
                     for (int i = 0; i < numNonESNodes; i++)
                     {
-                        if (RHS_forNodeCoverage[i] > 0.0)
-                        {
+                        
                             DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j]);
                             for (int r = 0; r < numES; r++)
                                 DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), Y[i][r][j]);
-                        }
+                        
                     }
                     string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
                     allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, minValue_Delta[j], constraint_name));
-                }
+                
             }
         }
         void AddConstraint_DepartureSOCFromESNodeUB()//8
@@ -585,8 +568,7 @@ namespace MPMFEVRP.Models.XCPlex
                 Site from = ExternalStations[r];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    if (RHS_forNodeCoverage[j] > 0.0)
-                    {
+                    
                         Site to = preprocessedSites[j];
                         ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                         DepartureSOCFromES.AddTerm(1.0, Delta[j]);
@@ -594,7 +576,7 @@ namespace MPMFEVRP.Models.XCPlex
                             DepartureSOCFromES.AddTerm(EnergyConsumption(from, to, VehicleCategories.EV), Y[i][r][j]);
                         string constraint_name = "Departure_SOC(UB)_From_ES_" + r.ToString() + "_going_to_customer_" + j.ToString();
                         allConstraints_list.Add(AddLe(DepartureSOCFromES, BatteryCapacity(VehicleCategories.EV), constraint_name));
-                    }
+                    
                 }
             }
         }
@@ -1200,19 +1182,30 @@ namespace MPMFEVRP.Models.XCPlex
                     if (cS.Customers.Contains(preprocessedSites[j].ID))
                     {
                         RHS_forNodeCoverage[j] = 1.0;
+                        X[i][j].UB = 1.0;
+                        X[j][i].UB = 1.0;
+                        for (int r = 0; r < numES; r++)
+                        {
+                            Y[i][r][j].UB = 1.0;
+                            Y[j][r][i].UB = 1.0;
+
+                        }
                     }
                     else
                     {
                         RHS_forNodeCoverage[j] = 0.0;
                         X[i][j].UB = 0.0;
+                        X[j][i].UB = 0.0;
                         for (int r = 0; r < numES; r++)
                         {
                             Y[i][r][j].UB = 0.0;
+                            Y[j][r][i].UB = 0.0;
+
                         }
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
-            RefineRHSofTotalTravelConstraints();
+            RefineRHSofTotalTravelConstraints(cS);
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
@@ -1234,20 +1227,20 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        void RefineRHSofTotalTravelConstraints()
+        void RefineRHSofTotalTravelConstraints(CustomerSet cS)
         {
             int c=0;
             if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
             {
                 c = totalTravelTimeConstraintIndex;
-                allConstraints_array[c].UB = allConstraints_array[c].UB - theProblemModel.SRD.GetTotalCustomerServiceTime(customerSet.Customers);
-                allConstraints_array[c].LB = allConstraints_array[c].LB - theProblemModel.SRD.GetTotalCustomerServiceTime(customerSet.Customers);
+                allConstraints_array[c].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
+                //allConstraints_array[c].LB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
             }
             if (addTotalNumberOfActiveArcsCut)
             {
                 c = totalNumberOfActiveArcsConstraintIndex;
-                allConstraints_array[c].UB = allConstraints_array[c].UB + customerSet.NumberOfCustomers;
-                allConstraints_array[c].LB = allConstraints_array[c].LB + customerSet.NumberOfCustomers;
+                allConstraints_array[c].UB = theProblemModel.CRD.TMax + cS.NumberOfCustomers;
+                //allConstraints_array[c].LB = theProblemModel.CRD.TMax + cS.NumberOfCustomers;
             }
         }
 

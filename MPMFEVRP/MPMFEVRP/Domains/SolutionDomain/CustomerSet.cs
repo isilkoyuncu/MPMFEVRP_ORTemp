@@ -249,6 +249,29 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new Exception("Cannot remove customer at a position that doesn't exist!");
         }
 
+        public static void NewRandomSwap(CustomerSet CS1, CustomerSet CS2, Random rand, CustomerSetList exploredCustomerSetMasterList, EVvsGDV_ProblemModel theProblemModel)
+        {
+            string c1, c2;
+            int i = rand.Next(CS1.customers.Count);
+            int j = rand.Next(CS2.customers.Count);
+            c1 = CS1.customers[i];
+            c2 = CS2.customers[j];
+            CS1.RemoveAt(i);
+            CS2.RemoveAt(j);
+            CS2.NewExtend(c1);
+            if (!exploredCustomerSetMasterList.Includes(CS2))
+            {
+                CS2.NewOptimize(theProblemModel);
+                exploredCustomerSetMasterList.Add(CS2);
+            }
+            CS1.NewExtend(c2);
+            if (!exploredCustomerSetMasterList.Includes(CS1))
+            {
+                CS1.NewOptimize(theProblemModel);
+                exploredCustomerSetMasterList.Add(CS1);
+            }
+        }
+
         public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2, EVvsGDV_ProblemModel theProblemModel)
         {
             string c1, c2;

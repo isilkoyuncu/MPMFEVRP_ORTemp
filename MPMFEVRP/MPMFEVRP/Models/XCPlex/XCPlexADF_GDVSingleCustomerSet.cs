@@ -13,9 +13,6 @@ namespace MPMFEVRP.Models.XCPlex
 {
     public class XCPlexADF_GDVSingleCustomerSet : XCPlexVRPBase
     {
-        CustomerSet customerSet;
-        Vehicle theVehicle;
-
         int numNonESNodes;
         int numCustomers;
 
@@ -33,13 +30,7 @@ namespace MPMFEVRP.Models.XCPlex
         IndividualRouteESVisits singleRouteESvisits;
         List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
         public XCPlexADF_GDVSingleCustomerSet() { }
-        public XCPlexADF_GDVSingleCustomerSet(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint, CustomerSet customerSet)
-            : base(theProblemModel, xCplexParam, customerCoverageConstraint)
-        {
-            this.customerSet = customerSet;
-            theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(xCplexParam.VehCategory);
-        }
-
+        
         public XCPlexADF_GDVSingleCustomerSet(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
             : base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
@@ -234,21 +225,19 @@ namespace MPMFEVRP.Models.XCPlex
         {
             for (int j = 0; j < numNonESNodes; j++)
             {
-                if (RHS_forNodeCoverage[j] > 0.0)
-                {
+                
                     ILinearNumExpr IncomingXTotalMinusOutgoingXTotal = LinearNumExpr();
 
                     for (int i = 0; i < numNonESNodes; i++)
                     {
-                        if (RHS_forNodeCoverage[i] > 0.0)
-                        {
+                        
                             IncomingXTotalMinusOutgoingXTotal.AddTerm(1.0, X[i][j]);
                             IncomingXTotalMinusOutgoingXTotal.AddTerm(-1.0, X[j][i]);
-                        }
+                        
                     }
                     string constraint_name = "Number_of_EVs_incoming_to_node_" + j.ToString() + "_equals_to_outgoing_EVs";
                     allConstraints_list.Add(AddEq(IncomingXTotalMinusOutgoingXTotal, 0.0, constraint_name));
-                }
+                
             }
         }
         void AddConstraint_DepartingNumberOfGDVs()//3
@@ -256,10 +245,9 @@ namespace MPMFEVRP.Models.XCPlex
             ILinearNumExpr NumberOfGDVsOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)
             {
-                if (RHS_forNodeCoverage[j] > 0.0)
-                {
+                
                     NumberOfGDVsOutgoingFromTheDepot.AddTerm(1.0, X[0][j]);
-                }
+                
             }
             if (customerCoverageConstraint == CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
             {
@@ -498,15 +486,18 @@ namespace MPMFEVRP.Models.XCPlex
                     if (cS.Customers.Contains(preprocessedSites[j].ID))
                     {
                         RHS_forNodeCoverage[j] = 1.0;
+                        X[i][j].UB = 1.0;
+                        X[j][i].UB = 1.0;
                     }
                     else
                     {
                         RHS_forNodeCoverage[j] = 0.0;
                         X[i][j].UB = 0.0;
+                        X[j][i].UB = 0.0;
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
-            RefineRHSofTotalTravelConstraints();
+            RefineRHSofTotalTravelConstraints(cS);
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
@@ -528,20 +519,20 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        void RefineRHSofTotalTravelConstraints()
+        void RefineRHSofTotalTravelConstraints(CustomerSet cS)
         {
             int c = 0;
             if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
             {
                 c = totalTravelTimeConstraintIndex;
-                allConstraints_array[c].UB = allConstraints_array[c].UB - theProblemModel.SRD.GetTotalCustomerServiceTime(customerSet.Customers);
-                allConstraints_array[c].LB = allConstraints_array[c].LB - theProblemModel.SRD.GetTotalCustomerServiceTime(customerSet.Customers);
+                allConstraints_array[c].UB = theProblemModel.CRD.TMax - 30.0 * RHS_forNodeCoverage.Sum();//theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
+                //allConstraints_array[c].LB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
             }
             if (addTotalNumberOfActiveArcsCut)
             {
                 c = totalNumberOfActiveArcsConstraintIndex;
-                allConstraints_array[c].UB = allConstraints_array[c].UB + customerSet.NumberOfCustomers;
-                allConstraints_array[c].LB = allConstraints_array[c].LB + customerSet.NumberOfCustomers;
+                allConstraints_array[c].UB = theProblemModel.CRD.TMax + cS.NumberOfCustomers;
+                //allConstraints_array[c].LB = allConstraints_array[c].LB + cS.NumberOfCustomers;
             }
         }
 
