@@ -7,4 +7,6 @@
     public enum PartialSolutionComparison { IncumbentDominates, IncumbentPreferable, ChallengerPreferable, ChallengerDominates };
 
     public enum CustomerSetExtensionStatus {Success, Failure};//Extended: success
+
+    public enum OptimizationComparisonStatus { NoVMTIncrease, OnlyES}
 }

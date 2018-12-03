@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -48,6 +49,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         double pricingRuntimeLimit;
         bool compareToGDV_CG;
         bool compareToEV_NDF_CG;
+
+        GDVvsAFV_OptimizationComparisonStatistics _OptimizationComparisonStatistics;
 
         public RandomizedCustomerSetExplorer() : base()
         {
@@ -157,6 +160,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
             avgTimePerTheOtherEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+
+            _OptimizationComparisonStatistics.WriteToFile(theProblemModel.InputFileName + "_OptimizationComparisonStatistics");
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
@@ -172,6 +177,10 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             unexploredCustomerSets = new PartitionedCustomerSetList(popStrategy);
             PopulateAndPlaceInitialUnexploredCustomerSets();
+
+            _OptimizationComparisonStatistics = new GDVvsAFV_OptimizationComparisonStatistics();
+            foreach (CustomerSet cs in unexploredCustomerSets.ToCustomerSetList())
+                _OptimizationComparisonStatistics.RecordObservation(cs.RouteOptimizationOutcome);
 
             InfeasibleCustomerSets = new PartitionedCustomerSetList();
             OnlyGDVFeasibleCustomerSets = new PartitionedCustomerSetList();
@@ -304,40 +313,41 @@ namespace MPMFEVRP.Implementations.Algorithms
                         candidate.Extend(customerID);
                         theParent.MakeCustomerImpossible(customerID);
 
-                        //OptimizeAndEvaluateForLists(candidate);
-                        //Triple solve
-                        csTripleSolveOutcome = theProblemModel.TripleSolve(candidate);
-                        //Place in the proper list
-                        if (csTripleSolveOutcome[0] != "Infeasible")
-                            unexploredCustomerSets.Add(candidate);
-                        allStats_formatted += Environment.NewLine + theProblemModel.InputFileName
-                            + "\t" + candidate.NumberOfCustomers.ToString()
-                            + "\t" + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray())
-                            + "\t" + csTripleSolveOutcome[0]
-                            + "\t" + csTripleSolveOutcome[1]
-                            + "\t" + csTripleSolveOutcome[2]
-                            + "\t" + csTripleSolveOutcome[3];
+                        OptimizeAndEvaluateForLists(candidate);
+                        _OptimizationComparisonStatistics.RecordObservation(candidate.RouteOptimizationOutcome);
+                        ////Triple solve
+                        //csTripleSolveOutcome = theProblemModel.TripleSolve(candidate);
+                        ////Place in the proper list
+                        //if (csTripleSolveOutcome[0] != "Infeasible")
+                        //    unexploredCustomerSets.Add(candidate);
+                        //allStats_formatted += Environment.NewLine + theProblemModel.InputFileName
+                        //    + "\t" + candidate.NumberOfCustomers.ToString()
+                        //    + "\t" + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray())
+                        //    + "\t" + csTripleSolveOutcome[0]
+                        //    + "\t" + csTripleSolveOutcome[1]
+                        //    + "\t" + csTripleSolveOutcome[2]
+                        //    + "\t" + csTripleSolveOutcome[3];
 
-                        ros = InterpretTripleSolutionStatus(csTripleSolveOutcome[0]);
-                        switch (ros)
-                        {
-                            case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
-                                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros));
-                                break;
-                            case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
-                                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4])));
-                                break;
-                            case RouteOptimizationStatus.OptimizedForBothGDVandEV:
-                                customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4]), vmt_EV: double.Parse(csTripleSolveOutcome[5])));
-                                break;
-                            default:
-                                throw new Exception("This should never happen!");
-                        }
+                        //ros = InterpretTripleSolutionStatus(csTripleSolveOutcome[0]);
+                        //switch (ros)
+                        //{
+                        //    case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
+                        //        customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros));
+                        //        break;
+                        //    case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
+                        //        customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4])));
+                        //        break;
+                        //    case RouteOptimizationStatus.OptimizedForBothGDVandEV:
+                        //        customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4]), vmt_EV: double.Parse(csTripleSolveOutcome[5])));
+                        //        break;
+                        //    default:
+                        //        throw new Exception("This should never happen!");
+                        //}
 
                         if (candidate.NumberOfCustomers >= algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET).GetValue<int>())
                             nOptimizedCustomerSets++;
 
-                        tripleSolveOutcomeStats.AddToData(candidate.NumberOfCustomers, csTripleSolveOutcome);
+                        //tripleSolveOutcomeStats.AddToData(candidate.NumberOfCustomers, csTripleSolveOutcome);
                     }//foreach (string customerID in remainingCustomers)
 
                     //end of the level, moving on to the next level
@@ -345,33 +355,33 @@ namespace MPMFEVRP.Implementations.Algorithms
                 }
             }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
 
-            string[] tripleOrienteeringSolutionOutcome;
-            int numRandomSubsets = algorithmParameters.GetParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS).GetIntValue();
-            for (int index_RandomSubset=0;index_RandomSubset< numRandomSubsets; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
-            {
-                //Select the subset of customer sets to use
-                randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), customerSetSelectionProbability);
+            //string[] tripleOrienteeringSolutionOutcome;
+            //int numRandomSubsets = algorithmParameters.GetParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS).GetIntValue();
+            //for (int index_RandomSubset=0;index_RandomSubset< numRandomSubsets; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
+            //{
+            //    //Select the subset of customer sets to use
+            //    randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), customerSetSelectionProbability);
 
-                //Set covering model --> shadow prices
-                setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel), unlimitedGDVAndEV: (theProblemModel is EVvsGDV_MinCost_VRP_Model));
-                setCoveringModel.Solve_and_PostProcess();
-                //CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)setCoveringModel.GetCompleteSolution(typeof(CustomerSetBasedSolution));
-                Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
+            //    //Set covering model --> shadow prices
+            //    setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel), unlimitedGDVAndEV: (theProblemModel is EVvsGDV_MinCost_VRP_Model));
+            //    setCoveringModel.Solve_and_PostProcess();
+            //    //CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)setCoveringModel.GetCompleteSolution(typeof(CustomerSetBasedSolution));
+            //    Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
 
-                //Solve a new model with a single vehicle to selectively visit some (out of all) customers in order to find a negative reduced cost route.
+            //    //Solve a new model with a single vehicle to selectively visit some (out of all) customers in order to find a negative reduced cost route.
 
-                Console.WriteLine();
-                Console.WriteLine("*******************************************************************");
-                Console.WriteLine("Pricing problem: #" + index_RandomSubset.ToString());
-                Console.WriteLine("*******************************************************************");
-                Console.WriteLine();
+            //    Console.WriteLine();
+            //    Console.WriteLine("*******************************************************************");
+            //    Console.WriteLine("Pricing problem: #" + index_RandomSubset.ToString());
+            //    Console.WriteLine("*******************************************************************");
+            //    Console.WriteLine();
 
-                tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices, useRuntimeLimit: usePricingRuntimeLimit, runTimeLimit: pricingRuntimeLimit, compareToGDV: compareToGDV_CG, compareToEV_NDF: compareToEV_NDF_CG);
-                orienteeringresults_formatted += Environment.NewLine + theProblemModel.InputFileName
-                            + "\t" + index_RandomSubset.ToString();
-                for (int i = 0; i < tripleOrienteeringSolutionOutcome.Length; i++)
-                    orienteeringresults_formatted += "\t" + tripleOrienteeringSolutionOutcome[i];
-            }
+            //    tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices, useRuntimeLimit: usePricingRuntimeLimit, runTimeLimit: pricingRuntimeLimit, compareToGDV: compareToGDV_CG, compareToEV_NDF: compareToEV_NDF_CG);
+            //    orienteeringresults_formatted += Environment.NewLine + theProblemModel.InputFileName
+            //                + "\t" + index_RandomSubset.ToString();
+            //    for (int i = 0; i < tripleOrienteeringSolutionOutcome.Length; i++)
+            //        orienteeringresults_formatted += "\t" + tripleOrienteeringSolutionOutcome[i];
+            //}
             
         }
 
