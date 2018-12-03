@@ -60,6 +60,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
 
+            CreateTSPSolvers(typeof(XCPlex_ArcDuplicatingFormulation_woU));
             CreateNewTspSolvers();
         }
         void CreateNewTspSolvers()
