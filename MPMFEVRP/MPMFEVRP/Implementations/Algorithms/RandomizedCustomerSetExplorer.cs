@@ -161,7 +161,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
             avgTimePerTheOtherEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
 
-            _OptimizationComparisonStatistics.WriteToFile(theProblemModel.InputFileName + "_OptimizationComparisonStatistics");
+
+
+            _OptimizationComparisonStatistics.WriteToFile(StringOperations.AppendToFilename(theProblemModel.InputFileName,"_OptimizationComparisonStatistics"));
         }
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)

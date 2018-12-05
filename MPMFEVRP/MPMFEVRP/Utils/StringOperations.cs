@@ -67,6 +67,11 @@ namespace MPMFEVRP.Utils
         {
             return sourceDirectory + file_name + file_extension;
         }
+        public static string AppendToFilename(string full_file_name, string text_to_append_to_filename)
+        {
+            string[] split = SeparateFullFileName(full_file_name);
+            return CombineFullFileName(split[1] + text_to_append_to_filename, split[2], split[0]);
+        }
 
         public static void CompareTwoCustomerSetArchive(string filesdirectory)
         {
