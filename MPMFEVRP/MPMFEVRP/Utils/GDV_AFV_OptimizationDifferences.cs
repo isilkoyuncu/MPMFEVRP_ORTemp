@@ -30,7 +30,7 @@ namespace MPMFEVRP.Utils
         int lastDifferentPosition;
         public int LastDifferentPosition => lastDifferentPosition;
 
-        public int RangeOfDifferentPositions => lastDifferentPosition - firstDifferentPosition;
+        public int RangeOfDifferentPositions => lastDifferentPosition - firstDifferentPosition + 1;
 
         int nSameNonIntermediatePositions;
         public int NSameNonIntermediatePositions => nSameNonIntermediatePositions;
@@ -69,7 +69,7 @@ namespace MPMFEVRP.Utils
                     nDifferentPositions++;
                 }
             }
-            nSameNonIntermediatePositions = SymElim_ListOfCustomers_AFV.Count - RangeOfDifferentPositions - 1;
+            nSameNonIntermediatePositions = SymElim_ListOfCustomers_AFV.Count - RangeOfDifferentPositions;
         }
 
         public static string GetHeaderRow()
