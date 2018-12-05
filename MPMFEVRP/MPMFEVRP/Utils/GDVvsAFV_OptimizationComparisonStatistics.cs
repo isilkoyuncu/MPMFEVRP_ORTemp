@@ -16,6 +16,8 @@ namespace MPMFEVRP.Utils
         List<GDV_AFV_OptimizationDifferences> optDifferences;
         public List<GDV_AFV_OptimizationDifferences> OptimizationDifferences => optDifferences;
 
+        int nDexsCaught;
+
         public GDVvsAFV_OptimizationComparisonStatistics()
         {
             rosCounts = new Dictionary<RouteOptimizationStatus, int>();
@@ -23,13 +25,25 @@ namespace MPMFEVRP.Utils
                 rosCounts.Add(ros, 0);
 
             optDifferences = new List<GDV_AFV_OptimizationDifferences>();
+
+            nDexsCaught = 0;
         }
 
         public void RecordObservation(RouteOptimizationOutcome roo)
         {
             rosCounts[roo.Status]++;
             if (roo.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)
-                optDifferences.Add(new GDV_AFV_OptimizationDifferences(roo));
+            {
+                try
+                {
+                    optDifferences.Add(new GDV_AFV_OptimizationDifferences(roo));
+                }
+                catch (DifferentRoutesVisitDifferentSetsOfCustomersException dex)
+                {
+                    //throw dex;
+                    nDexsCaught++;
+                }
+            }
         }
 
         public void WriteToFile(string filename)

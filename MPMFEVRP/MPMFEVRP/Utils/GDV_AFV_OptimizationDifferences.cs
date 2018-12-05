@@ -57,7 +57,7 @@ namespace MPMFEVRP.Utils
             if (SymElim_ListOfCustomers_GDV.First().CompareTo(SymElim_ListOfCustomers_GDV.Last()) > -1)
                 SymElim_ListOfCustomers_GDV.Reverse();
             if (SymElim_ListOfCustomers_AFV.Count != SymElim_ListOfCustomers_GDV.Count)
-                throw new Exception("GDV and AFV optimal routes visit different sets of customers!");
+                throw new DifferentRoutesVisitDifferentSetsOfCustomersException(); //Exception("GDV and AFV optimal routes visit different sets of customers!");
             nDifferentPositions = 0;
             for(int p = 0; p< SymElim_ListOfCustomers_AFV.Count; p++)
             {
@@ -86,5 +86,11 @@ namespace MPMFEVRP.Utils
                 RangeOfDifferentPositions.ToString() + "\t" +
                 nSameNonIntermediatePositions.ToString();
         }
+
+    }
+
+    public class DifferentRoutesVisitDifferentSetsOfCustomersException : Exception
+    {
+
     }
 }

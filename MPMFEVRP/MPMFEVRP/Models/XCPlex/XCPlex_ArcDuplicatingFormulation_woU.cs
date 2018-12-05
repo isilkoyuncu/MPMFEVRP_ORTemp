@@ -503,6 +503,8 @@ namespace MPMFEVRP.Models.XCPlex
             }
             else //Minimize
             {
+                AddConstraint_MaxNumberOfEVs();//4
+
                 AddConstraint_MinNumberOfVehicles();//4-5 b                
             }
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6

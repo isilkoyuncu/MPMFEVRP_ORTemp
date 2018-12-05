@@ -115,6 +115,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedRun()
         {
+
+            CustomerSet currentCS1 = new CustomerSet(new List<string>() { "C08", "C10" });
+            currentCS1.NewOptimize(theProblemModel);
+
+
             globalStartTime = DateTime.Now;
             DateTime localStartTime;
             DateTime localFinishTime;
