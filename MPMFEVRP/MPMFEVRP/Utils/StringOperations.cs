@@ -43,7 +43,7 @@ namespace MPMFEVRP.Utils
             bool startFound = false, endFound = false;
             char characterSought = '.';
             char[] characterArray = fullFileName.ToCharArray();
-            for (int i = characterArray.Length - 1; !startFound; i--)
+            for (int i = characterArray.Length - 1; ((!startFound)&&(i>=0)); i--)
                 if (characterArray[i] == characterSought)
                 {
                     if (endFound)
@@ -58,8 +58,8 @@ namespace MPMFEVRP.Utils
                         characterSought = '\\';
                     }
                 }
-            string sourceDirectory = fullFileName.Substring(0,filenameStart);
-            string file_name = fullFileName.Substring(filenameStart, filenameEnd - filenameStart + 1);
+            string sourceDirectory = startFound? fullFileName.Substring(0, filenameStart): "";
+            string file_name = startFound ?fullFileName.Substring(filenameStart, filenameEnd - filenameStart + 1) : fullFileName.Substring(0, filenameEnd + 1);
             string file_extension = fullFileName.Substring(filenameEnd + 1);
             return new string[] { sourceDirectory, file_name, file_extension };
         }

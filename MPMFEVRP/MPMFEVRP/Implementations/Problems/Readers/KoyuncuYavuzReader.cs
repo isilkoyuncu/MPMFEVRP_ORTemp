@@ -220,7 +220,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         public string GetRecommendedOutputFileFullName()
         {
             string output = "";// sourceDirectory;
-            output += "KoyuncuYavuz_";//This is the prefix
+            //output += "KoyuncuYavuz_";//This is the prefix//TODO: Adding the prefix was causing in some places to see the prefix before source directory, which doesn't make any sense. So, I (MY) have disabled the addition of this prefix for now.
             output += file_name;
             output += file_extension;
             return output;
