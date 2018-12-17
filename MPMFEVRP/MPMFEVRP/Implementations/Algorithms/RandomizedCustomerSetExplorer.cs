@@ -182,7 +182,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             _OptimizationComparisonStatistics = new GDVvsAFV_OptimizationComparisonStatistics();
             foreach (CustomerSet cs in unexploredCustomerSets.ToCustomerSetList())
-                _OptimizationComparisonStatistics.RecordObservation(cs.RouteOptimizationOutcome);
+                _OptimizationComparisonStatistics.RecordObservation(cs.Customers.Count, cs.RouteOptimizationOutcome);
 
             InfeasibleCustomerSets = new PartitionedCustomerSetList();
             OnlyGDVFeasibleCustomerSets = new PartitionedCustomerSetList();
@@ -297,7 +297,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
 
-                while (currentLevel <= deepestPossibleLevel)
+                while ((currentLevel <= deepestPossibleLevel) && (nOptimizedCustomerSets < numCustomerSetsToReport))
                 {
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
@@ -316,7 +316,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                         theParent.MakeCustomerImpossible(customerID);
 
                         OptimizeAndEvaluateForLists(candidate);
-                        _OptimizationComparisonStatistics.RecordObservation(candidate.RouteOptimizationOutcome);
+                        if (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized)
+                            continue;
+
+                        _OptimizationComparisonStatistics.RecordObservation(candidate.Customers.Count, candidate.RouteOptimizationOutcome);
                         ////Triple solve
                         //csTripleSolveOutcome = theProblemModel.TripleSolve(candidate);
                         ////Place in the proper list
@@ -347,10 +350,14 @@ namespace MPMFEVRP.Implementations.Algorithms
                         //}
 
                         if (candidate.NumberOfCustomers >= algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET).GetValue<int>())
+                        {
                             nOptimizedCustomerSets++;
+                            if (nOptimizedCustomerSets >= numCustomerSetsToReport)
+                                break;
+                        }
 
                         //tripleSolveOutcomeStats.AddToData(candidate.NumberOfCustomers, csTripleSolveOutcome);
-                    }//foreach (string customerID in remainingCustomers)
+                        }//foreach (string customerID in remainingCustomers)
 
                     //end of the level, moving on to the next level
                     currentLevel++;
