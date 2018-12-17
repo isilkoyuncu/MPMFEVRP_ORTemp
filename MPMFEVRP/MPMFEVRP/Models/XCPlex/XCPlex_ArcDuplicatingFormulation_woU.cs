@@ -1378,6 +1378,8 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
             }
+
+            allRoutesESVisits.Clear();
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
