@@ -153,7 +153,7 @@ namespace Instance_Generation.FileConverters
             PopulateDistancesMatrix();
 
             //Removal of infeasible customers
-            //RemoveInfeasibleCustomers(new List<CustomerRemovalCriteria>() { CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit, CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength });
+            RemoveInfeasibleCustomers(new List<CustomerRemovalCriteria>() { CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit, CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength });
         }
 
         void PopulateIDColumn()
