@@ -1206,6 +1206,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
             RefineRHSofTotalTravelConstraints(cS);
+            allRoutesESVisits.Clear();
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {

@@ -82,7 +82,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
            else if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-                GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+                GDV_TSPSolver = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+                //GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             }
            else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
             {
