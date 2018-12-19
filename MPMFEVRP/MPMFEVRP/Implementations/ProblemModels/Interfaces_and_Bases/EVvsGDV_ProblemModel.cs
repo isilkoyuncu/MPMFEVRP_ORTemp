@@ -55,13 +55,12 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
 
             if (problemCharacteristics.GetParameter(ParameterID.PRB_CREATETSPSOLVERS).GetBoolValue())
-                CreateTSPSolvers(TSPModelType);
-            
+                CreateNewTspSolvers();
+
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
 
             CreateTSPSolvers(typeof(XCPlex_ArcDuplicatingFormulation_woU));
-            CreateNewTspSolvers();
         }
         void CreateNewTspSolvers()
         {
