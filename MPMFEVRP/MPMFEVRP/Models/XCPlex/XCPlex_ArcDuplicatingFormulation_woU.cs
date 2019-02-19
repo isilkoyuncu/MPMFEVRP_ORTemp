@@ -945,6 +945,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         void AddAllCuts()
         {
+            //AddCut_DeltaTime();
             AddCut_TimeFeasibilityOfTwoConsecutiveArcs();
             AddCut_EnergyFeasibilityOfCustomerBetweenTwoES();
             AddCut_TotalNumberOfActiveArcs();
@@ -1174,6 +1175,20 @@ namespace MPMFEVRP.Models.XCPlex
             EnergyConservation.Clear();
         }
 
+        void AddCut_DeltaTime()
+        {
+            double energyConsumptionPerMinute = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate;
+            for (int j = 1; j < numNonESNodes; j++)
+            {
+                ILinearNumExpr DeltaTimeRelationship = LinearNumExpr();
+
+                DeltaTimeRelationship.AddTerm(1.0, T[j]);
+                DeltaTimeRelationship.AddTerm(1.0/energyConsumptionPerMinute, Delta[j]);
+
+                string constraint_name = "DeltaTimeRelationship_" + j.ToString();
+                allConstraints_list.Add(AddGe(DeltaTimeRelationship, (BatteryCapacity(VehicleCategories.EV)/energyConsumptionPerMinute), constraint_name));
+            }           
+        }
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
