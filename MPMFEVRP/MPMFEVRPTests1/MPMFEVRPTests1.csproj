@@ -57,6 +57,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Models\RefuelingPathGeneratorTests.cs" />
     <Compile Include="Models\XCPlex\XCPlex_EVRPwRefuelingPathsMacroLevelTests.cs" />
     <Compile Include="Models\XCPlex\XCPlex_EVRPwRefuelingPathsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

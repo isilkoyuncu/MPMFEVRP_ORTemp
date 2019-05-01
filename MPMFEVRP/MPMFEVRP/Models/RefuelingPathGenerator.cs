@@ -90,5 +90,20 @@ namespace MPMFEVRP.Models
 
             return output;
         }
+
+        /// <summary>
+        /// This is the new (May'19) method to generate all non-dominated refueling paths using Andelmin&Bartolini's approach.
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="destination"></param>
+        /// <param name="externalStations"></param>
+        /// <param name="SRD"></param>
+        /// <returns></returns>
+        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
+        {
+            return null;
+        }
+
+        public
     }
 }
