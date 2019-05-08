@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
+using Facet.Combinatorics;
 
 namespace MPMFEVRP.Models
 {
@@ -104,6 +105,45 @@ namespace MPMFEVRP.Models
             return null;
         }
 
-        
+        public List<List<SiteWithAuxiliaryVariables>> EnumerateAllRefuelingPaths(List<SiteWithAuxiliaryVariables> externalStations)
+        {
+
+            List<List<int>> output = new List<List<int>>();
+            List<int> list = new List<int>();
+            for (int i = 0; i <= externalStations.Count; i++)
+            {
+                list.Add(i);
+            }
+            List<List<SiteWithAuxiliaryVariables>> output2 = new List<List<SiteWithAuxiliaryVariables>>();           
+            for (int i = 1; i <= externalStations.Count; i++)
+            {
+                DateTime sdate = DateTime.Now;
+                //Facet.Combinatorics.Variations<SiteWithAuxiliaryVariables> var = new Facet.Combinatorics.Variations<SiteWithAuxiliaryVariables>(externalStations, i);
+                Facet.Combinatorics.Variations<int> var = new Facet.Combinatorics.Variations<int>(list, i);
+                for (int k = 0; k < var.Count(); k++)
+                    output.Add(var.ElementAt(k).ToList());
+                DateTime fdate = DateTime.Now;
+                TimeSpan diff = fdate - sdate;
+                double miliseconds = diff.TotalMilliseconds;
+                int a = 3;
+            }
+
+            return output2;
+        }
+        public RefuelingPathList GenerateNondominatedRefuelingPathsBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
+        {
+            if(SRD.GetEVEnergyConsumption(origin.ID,destination.ID)<60)
+            {
+
+            }
+            RefuelingPathList outcome = new RefuelingPathList();
+
+            List<List<SiteWithAuxiliaryVariables>> refuelPath = new List<List<SiteWithAuxiliaryVariables>>();
+
+
+
+
+            return outcome;
+        }
     }
 }

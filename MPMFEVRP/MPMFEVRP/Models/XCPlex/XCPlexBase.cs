@@ -277,6 +277,39 @@ namespace MPMFEVRP.Models.XCPlex
             DecisionVariables.Add(dv_name, dv);
         }
 
+        protected void AddFourDimensionalDecisionVariable(string name, double[][][][] lowerBound, double[][][][] upperBound, NumVarType type, out INumVar[][][][] dv)
+        {
+            string dv_name = name;
+            int le1 = lowerBound.GetLength(0);
+            int le2 = lowerBound.GetLength(1);
+            int le3 = lowerBound.GetLength(2);
+
+            dv = new INumVar[le1][][][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
+            for (int i = 0; i < le1; i++)
+            {
+                dv[i] = new INumVar[le2][][];
+                for (int j = 0; j < le2; j++)
+                {
+                    dv[i][j] = new INumVar[le3][];
+                    for (int v = 0; v < le3; v++)
+                    {
+                        int le4 = lowerBound[i][j][v].Length;
+                        for (int p = 0; p < le4; p++)
+                        {
+                            dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + p.ToString() + ")";
+                            dv[i][j][v][p] = NumVar(lowerBound[i][j][v][p], upperBound[i][j][v][p], newType, dv_name);
+                            allVariables_list.Add(dv[i][j][v][p]);
+                        }
+                    }
+                }
+            }
+            DecisionVariables.Add(dv_name, dv);
+        }
+
+
         public T[] GetOneDimensionalDecisionVariableResult<T>(String name)
         {
             return GetValues(((INumVar[])DecisionVariables[name]))      // get values of the decision variable

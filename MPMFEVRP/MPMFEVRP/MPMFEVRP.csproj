@@ -233,6 +233,12 @@
     <Compile Include="Utils\GDV_AFV_OptimizationDifferences.cs" />
     <Compile Include="Utils\NetworkGraphicalUtil.cs" />
     <Compile Include="Utils\ParamUtil.cs" />
+    <Compile Include="Utils\permlib\Combinations.cs" />
+    <Compile Include="Utils\permlib\GenerateOption.cs" />
+    <Compile Include="Utils\permlib\IMetaCollection.cs" />
+    <Compile Include="Utils\permlib\Permutations.cs" />
+    <Compile Include="Utils\permlib\SmallPrimeUtility.cs" />
+    <Compile Include="Utils\permlib\Variations.cs" />
     <Compile Include="Utils\ProblemModelUtil.cs" />
     <Compile Include="Utils\ProblemUtil.cs" />
     <Compile Include="Utils\RandomArrayOperations.cs" />
