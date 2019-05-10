@@ -22,6 +22,7 @@ namespace MPMFEVRPTests1.Models.XCPlex
         [TestMethod]
         public void ADFTest()
         {
+            toCplex.AlgorithmParameters.UpdateParameter(MPMFEVRP.Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
             toCplex.Run();
             toCplex.Conclude();
             ISolution solution = toCplex.Solution;
@@ -49,7 +50,7 @@ namespace MPMFEVRPTests1.Models.XCPlex
             EMH_Problem theProblem = new EMH_Problem(pdp);
             //The problem has been created
             EMH_ProblemModel theProblemModel = new EMH_ProblemModel(theProblem, null);
-            toCplex = new Outsource2Cplex();//constructed with ADF byt default 
+            toCplex = new Outsource2Cplex(); 
             toCplex.Initialize(theProblemModel);
         }
 
