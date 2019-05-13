@@ -110,16 +110,23 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 }
             throw new Exception("No site found!");
         }
-        public List<string> GetClosenessOrder(string nodeID)
+        public List<string> GetClosenessOrder(string nodeID, Site[] onlyES = null)
         {
-            Dictionary<double, string> preOrder = new Dictionary<double, string>();
+            Dictionary<string, double> preOrder = new Dictionary<string, double>();
             List<string> toReturn = new List<string>();
-            foreach (Site s in siteArray)
-            {
-                preOrder.Add(GetDistance(nodeID, s.ID), s.ID);
-                toReturn.Add(s.ID);
-            }
-            var sortedDict = from entry in preOrder orderby entry.Key ascending select entry;
+            if (onlyES == null)
+                foreach (Site s in siteArray)
+                {
+                    preOrder.Add(s.ID, GetDistance(nodeID, s.ID));
+                }
+
+            else
+                foreach (Site es in onlyES)
+                {
+                    preOrder.Add(es.ID, GetDistance(nodeID, es.ID));
+                }
+            var sortedDict = from entry in preOrder orderby entry.Value ascending select entry.Key;
+            toReturn = sortedDict.ToList();
             return toReturn;
         }
         public string GetSiteIdRequiresMinimumEnergyFromSite(string nodeID)

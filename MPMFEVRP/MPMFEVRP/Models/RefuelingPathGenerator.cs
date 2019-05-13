@@ -102,37 +102,7 @@ namespace MPMFEVRP.Models
         /// <returns></returns>
         public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
         {
-            return null;
-        }
-
-        public List<List<SiteWithAuxiliaryVariables>> EnumerateAllRefuelingPaths(List<SiteWithAuxiliaryVariables> externalStations)
-        {
-
-            List<List<int>> output = new List<List<int>>();
-            List<int> list = new List<int>();
-            for (int i = 0; i <= externalStations.Count; i++)
-            {
-                list.Add(i);
-            }
-            List<List<SiteWithAuxiliaryVariables>> output2 = new List<List<SiteWithAuxiliaryVariables>>();           
-            for (int i = 1; i <= externalStations.Count; i++)
-            {
-                DateTime sdate = DateTime.Now;
-                //Facet.Combinatorics.Variations<SiteWithAuxiliaryVariables> var = new Facet.Combinatorics.Variations<SiteWithAuxiliaryVariables>(externalStations, i);
-                Facet.Combinatorics.Variations<int> var = new Facet.Combinatorics.Variations<int>(list, i);
-                for (int k = 0; k < var.Count(); k++)
-                    output.Add(var.ElementAt(k).ToList());
-                DateTime fdate = DateTime.Now;
-                TimeSpan diff = fdate - sdate;
-                double miliseconds = diff.TotalMilliseconds;
-                int a = 3;
-            }
-
-            return output2;
-        }
-        public RefuelingPathList GenerateNondominatedRefuelingPathsBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
-        {
-            if(SRD.GetEVEnergyConsumption(origin.ID,destination.ID)<60)
+            if (SRD.GetEVEnergyConsumption(origin.ID, destination.ID) < 60)
             {
 
             }
@@ -144,6 +114,23 @@ namespace MPMFEVRP.Models
 
 
             return outcome;
+        }
+
+        /// <summary>
+        /// This method ENUMERATES all refueling stops, however it is very slow!! Do not use it unless you want to test something with a small number of ESs such as 4-6.
+        /// </summary>
+        /// <param name="externalStations"></param>
+        /// <returns></returns>
+        public List<List<SiteWithAuxiliaryVariables>> EnumerateAllRefuelingPaths(List<SiteWithAuxiliaryVariables> externalStations)
+        {
+            List<List<SiteWithAuxiliaryVariables>> output = new List<List<SiteWithAuxiliaryVariables>>();           
+            for (int i = 1; i <= externalStations.Count; i++)
+            {
+                Facet.Combinatorics.Variations<SiteWithAuxiliaryVariables> var = new Facet.Combinatorics.Variations<SiteWithAuxiliaryVariables>(externalStations, i);
+                for (int k = 0; k < var.Count(); k++)
+                    output.Add(var.ElementAt(k).ToList());
+            }
+            return output;
         }
     }
 }

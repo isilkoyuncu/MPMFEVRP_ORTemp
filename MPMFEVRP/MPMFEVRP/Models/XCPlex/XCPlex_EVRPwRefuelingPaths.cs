@@ -60,13 +60,12 @@ namespace MPMFEVRP.Models.XCPlex
         {
             rpg = new RefuelingPathGenerator();
             rpl = new RefuelingPathList();
-            //for (int i=0; i<numNonESNodes; i++)
-            //    for(int j=0; j<numNonESNodes; j++)
-            //    {
-            //        rpl = rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD, 0, numES);
-            //    }
-            rpg.EnumerateAllRefuelingPaths(ExternalStations);
-       
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    rpl.AddRange(rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD, 0, numES));
+                }
+
         }
         void SetMinAndMaxValuesOfModelSpecificVariables()
         {
