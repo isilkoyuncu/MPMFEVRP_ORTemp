@@ -68,6 +68,13 @@ namespace MPMFEVRP.Domains.ProblemDomain
                     outcome.Add(s.ID);
             return outcome;
         }
+        public List<string> GetAllIDs()
+        {
+            List<string> outcome = new List<string>();
+            foreach (Site s in siteArray)
+                outcome.Add(s.ID);
+            return outcome;
+        }
         public double GetTotalCustomerServiceTime()
         {
             double outcome = 0;

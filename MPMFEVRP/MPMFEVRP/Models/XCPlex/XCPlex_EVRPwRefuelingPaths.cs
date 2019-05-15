@@ -16,6 +16,7 @@ namespace MPMFEVRP.Models.XCPlex
         int numCustomers, numES, numNonESNodes;
         RefuelingPathGenerator rpg;
         RefuelingPathList rpl;
+        AllPairsShortestPaths apss;
 
         INumVar[][][][] X; double[][][][] X_LB, X_UB; //X_ijvp=1 if a vehicle v travels from i to j using refueling path p, for v=GDV p is always 0
         INumVar[][][] U; double[][][] U_LB, U_UB; //U_ijp total travel time from i to j including the refueling time on refueling path p
@@ -58,12 +59,16 @@ namespace MPMFEVRP.Models.XCPlex
 
         void SetNondominatedRefuelingPaths()
         {
-            rpg = new RefuelingPathGenerator();
+            apss = new AllPairsShortestPaths(theProblemModel.SRD.Distance, theProblemModel.SRD.GetAllIDs().ToArray());
+            
+            rpg = new RefuelingPathGenerator(apss);
             rpl = new RefuelingPathList();
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    rpl.AddRange(rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD, 0, numES));
+                    rpg.GenerateSingleESNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD);
+
+                    //rpl.AddRange(rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD, 0, numES));
                 }
 
         }

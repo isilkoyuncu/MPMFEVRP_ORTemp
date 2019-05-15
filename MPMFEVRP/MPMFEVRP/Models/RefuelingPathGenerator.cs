@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
 using Facet.Combinatorics;
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Models
 {
@@ -13,10 +14,14 @@ namespace MPMFEVRP.Models
         int maxPossibleNumberOfRefuelingStops = 4;
 
         Dictionary<int, List<List<SiteWithAuxiliaryVariables>>> allEnumeratedRefuelingStops;
-
+        AllPairsShortestPaths apss;
         public RefuelingPathGenerator()
         {
             allEnumeratedRefuelingStops = new Dictionary<int, List<List<SiteWithAuxiliaryVariables>>>();
+        }
+        public RefuelingPathGenerator(AllPairsShortestPaths apss)
+        {
+            this.apss = apss;
         }
 
         public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
@@ -102,18 +107,60 @@ namespace MPMFEVRP.Models
         /// <returns></returns>
         public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
         {
-            if (SRD.GetEVEnergyConsumption(origin.ID, destination.ID) < 60)
-            {
-
-            }
             RefuelingPathList outcome = new RefuelingPathList();
+            List<SiteWithAuxiliaryVariables> refuelingStops = new List<SiteWithAuxiliaryVariables>();
+            RefuelingPath refuelingPath;
 
-            List<List<SiteWithAuxiliaryVariables>> refuelPath = new List<List<SiteWithAuxiliaryVariables>>();
 
-
+            //Add direct arc
+            if (SRD.GetEVEnergyConsumption(origin.ID, destination.ID) < origin.DeltaPrimeMax)
+            {
+                refuelingPath = new RefuelingPath(origin, destination, refuelingStops, SRD);
+                int addResult = outcome.AddIfNondominated(refuelingPath);
+            }
+            //Add one-, two- or more-stops refueling paths
+            foreach (SiteWithAuxiliaryVariables ES in externalStations)
+            {
+                refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables> { ES }, SRD);
+                if (refuelingPath.Feasible)
+                {
+                    int addResult = outcome.AddIfNondominated(refuelingPath);
+                }
+            }
 
 
             return outcome;
+        }
+
+        public RefuelingPathList GenerateSingleESNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
+        {
+            RefuelingPathList outcome = new RefuelingPathList();
+            RefuelingPath refuelingPath;
+            foreach (SiteWithAuxiliaryVariables ES in externalStations)
+            {
+                refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables> {ES}, SRD);
+                if (refuelingPath.Feasible)
+                {
+                    int addResult = outcome.AddIfNondominated(refuelingPath);
+                }
+            }
+            return outcome;
+        }
+        public RefuelingPathList GenerateSingleESNonDominatedBetweenODPairIK(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
+        {
+            RefuelingPathList outcome = new RefuelingPathList();
+            List<SiteWithAuxiliaryVariables> singleESvisits = new List<SiteWithAuxiliaryVariables>();
+            SiteWithAuxiliaryVariables minFromOrigin, minOverall, minToDestination;
+            RefuelingPath refuelingPath;
+            //Hypothesis: There will be at most three options here: 1-Closest to the origin, 2-Closest to the destination, 3-Overall minimizer
+                       
+            foreach (SiteWithAuxiliaryVariables ES in externalStations)
+            {
+                
+            }
+            
+            return outcome;
+
         }
 
         /// <summary>

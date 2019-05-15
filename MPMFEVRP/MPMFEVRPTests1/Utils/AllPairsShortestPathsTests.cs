@@ -17,22 +17,26 @@ namespace MPMFEVRP.Utils.Tests
     {
         AllPairsShortestPaths apss;
         double[,] distances, shortestDistances;
-        List<int>[,] shortestPaths;
+        List<string>[,] shortestPaths;
+        string[] IDs;
 
         [TestMethod()]
         public void ModifiedFloydWarshallTest()
         {
-            apss.ModifiedFloydWarshall(distances);
+            apss.ModifiedFloydWarshall();
             for (int i = 0; i < distances.GetLength(0); i++)
                 for (int j = 0; j < distances.GetLength(0); j++)
                 {
                     Assert.AreEqual(shortestDistances[i, j], apss.ShortestDistance[i, j]);
                     Assert.AreEqual(shortestPaths[i, j].Count, apss.ShortestPaths[i, j].Count);
-                        for(int k=0; k<shortestPaths[i, j].Count;k++)
-                            Assert.AreEqual(shortestPaths[i, j][k], apss.ShortestPaths[i, j][k]);
+                    for (int k = 0; k < shortestPaths[i, j].Count; k++)
+                        Assert.AreEqual(shortestPaths[i, j][k], apss.ShortestPaths[i, j][k]);
                 }
-
-
+            List<string>[] actualFrom2 = new List<string>[] { new List<string> { "2", "3", "0" }, new List<string> { "2", "3", "0", "1" }, new List<string> { "2", "2" }, new List<string> { "2", "3" } };
+            List<string>[] methodFrom2 = apss.GetShortestPathsFrom("2");
+            
+            for (int i = 0; i < distances.GetLength(0); i++)
+                Assert.AreEqual(methodFrom2[i], actualFrom2[i]);
         }
 
         [TestInitialize()]
@@ -53,11 +57,13 @@ namespace MPMFEVRP.Utils.Tests
                                                 {3.0, 6.0, 0.0 , 1.0 },
                                                 {2.0, 5.0, 7.0 , 0.0 }};
 
-            shortestPaths = new List<int>[,] { { new List<int> {0,0 } , new List<int> { 0,1 }, new List<int>{ 0,1,2 } , new List<int> { 0,1,2,3 } },
-                                               { new List<int> { 1,2,3,0} , new List<int> { 1,1  }, new List<int> {1,2 } , new List<int> { 1,2,3 } },
-                                               { new List<int> { 2,3,0} , new List<int> { 2,3,0,1  }, new List<int> { 2,2 } , new List<int> { 2,3 } },
-                                               { new List<int> { 3,0} , new List<int> { 3,0,1}, new List<int> {3,0,1,2 } , new List<int> {3,3} }};
-            apss = new AllPairsShortestPaths(distances);
+            shortestPaths = new List<string>[,] { { new List<string> {"0","0" } , new List<string> { "0","1" }, new List<string>{ "0","1","2" } , new List<string> { "0","1","2","3" } },
+                                               { new List<string> { "1", "2", "3", "0" } , new List<string> { "1", "1" }, new List<string> { "1", "2" } , new List<string> { "1", "2", "3" } },
+                                               { new List<string> { "2", "3", "0" } , new List<string> { "2", "3", "0", "1"  }, new List<string> { "2", "2" } , new List<string> { "2", "3" } },
+                                               { new List<string> { "3", "0" } , new List<string> { "3", "0", "1"}, new List<string> { "3", "0", "1", "2" } , new List<string> { "3", "3" } }};
+            IDs = new string[] { "0", "1", "2", "3" };
+
+            apss = new AllPairsShortestPaths(distances, IDs);
         }
     }
 }
