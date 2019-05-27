@@ -36,7 +36,11 @@ namespace MPMFEVRP.Utils.Tests
             List<string>[] methodFrom2 = apss.GetShortestPathsFrom("2");
             
             for (int i = 0; i < distances.GetLength(0); i++)
-                Assert.AreEqual(methodFrom2[i], actualFrom2[i]);
+            {
+                Assert.AreEqual(methodFrom2[i].Count, actualFrom2[i].Count);
+                for(int index=0;index<methodFrom2[i].Count;index++)
+                    Assert.AreEqual(methodFrom2[i][index], actualFrom2[i][index]);
+            }
         }
 
         [TestInitialize()]
