@@ -16,6 +16,7 @@ namespace MPMFEVRP.Domains.ProblemDomain.Tests
     {
         private EMH_ProblemModel theProblemModel;
         List<string> actualClosenessFromTheDepot;
+        double[,] actualEs2esDistanceMatrix;
         [TestMethod()]
         public void GetClosenessOrderTest()
         {
@@ -36,6 +37,21 @@ namespace MPMFEVRP.Domains.ProblemDomain.Tests
             }
         }
 
+        [TestMethod()]
+        public void GetES2ESDistanceMatrixTest()
+        {
+            actualEs2esDistanceMatrix = new double[,] { {0.0,136.98214,89.62465,97.63018},
+                                                        {136.98214,0.0,199.00686,192.15173},
+                                                        {89.62465,199.00686,0.0,169.55728},
+                                                        {97.63018,192.15173,169.55728,0.0}};
+            double[,] es2esDist = theProblemModel.SRD.GetES2ESDistanceMatrix();
+            for (int i = 0; i < actualEs2esDistanceMatrix.GetLength(0); i++)
+            {
+                for(int j=0; j< actualEs2esDistanceMatrix.GetLength(1); j++)
+                Assert.AreEqual(actualEs2esDistanceMatrix[i,j], es2esDist[i,j]);
+            }
+        }
+
         [TestInitialize()]
         public void TestInit()
         {
@@ -46,5 +62,7 @@ namespace MPMFEVRP.Domains.ProblemDomain.Tests
             //The problem has been created
             theProblemModel = new EMH_ProblemModel(theProblem, null);
         }
+
+        
     }
 }

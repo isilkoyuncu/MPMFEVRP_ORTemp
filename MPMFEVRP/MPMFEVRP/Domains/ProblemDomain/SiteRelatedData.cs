@@ -179,6 +179,49 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
             return distance;
         }
+        public double[,] GetES2ESDistanceMatrix()
+        {
+            double[,] outcome = new double[NumES, NumES];
+            int from = -1, to = -1;
+
+            for (int i = 0; i < siteArray.Length; i++)
+            {
+                if (siteArray[i].SiteType == SiteTypes.ExternalStation)
+                {
+                    from++;
+                    for (int j = 0; j < siteArray.Length; j++)
+                    {
+                        if (siteArray[j].SiteType == SiteTypes.ExternalStation)
+                            outcome[from, ++to] = Distance[i, j];
+                    }
+                    to = -1;
+                }
+            }
+
+            return outcome;
+        }
+        public double[,] GetCust2CustDistanceMatrix()
+        {
+            double[,] outcome = new double[NumCustomers, NumCustomers];
+            int from = -1, to = -1;
+
+            for (int i = 0; i < siteArray.Length; i++)
+            {
+                if (siteArray[i].SiteType == SiteTypes.Customer)
+                {
+                    from++;
+                    for (int j = 0; j < siteArray.Length; j++)
+                    {
+                        if (siteArray[j].SiteType == SiteTypes.Customer)
+                            outcome[from, ++to] = Distance[i, j];
+                    }
+                    to = -1;
+                }
+            }
+
+            return outcome;
+        }
+
         public double GetTravelTime(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
