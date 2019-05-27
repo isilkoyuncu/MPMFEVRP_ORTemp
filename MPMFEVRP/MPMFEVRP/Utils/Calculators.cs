@@ -98,5 +98,19 @@ namespace MPMFEVRP.Utils
                     return maxSOCGainAtSite / effectiveRechargingRate;
             }
         }
+
+        public static double[,] SetUnreachable2Inf(double[,] dist, double Dmax)
+        {
+            double[,] outcome = new double[dist.GetLength(0), dist.GetLength(1)];
+            for (int i = 0; i < dist.GetLength(0); i++)
+                for (int j = 0; j < dist.GetLength(1); j++)
+                {
+                    if (dist[i, j] > Dmax)
+                        outcome[i, j] = Double.MaxValue;
+                    else
+                        outcome[i, j] = dist[i, j];
+                }
+            return outcome;
+        }
     }
 }
