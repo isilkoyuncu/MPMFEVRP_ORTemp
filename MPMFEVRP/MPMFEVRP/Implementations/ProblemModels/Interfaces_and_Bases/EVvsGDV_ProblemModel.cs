@@ -259,14 +259,18 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             else
                 return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
         }
-        VehicleSpecificRoute NewFitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
+        VehicleSpecificRoute NewFitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)//TODO: The name of this method is worse than horrible! Must fix it.
         {
             if (GDVOptimalRoute == null)//The GDVOptimalRoute was not provided
-                throw new Exception("The GDVOptimalRoute was not provided to FitGDVOptimalRouteToEV!");
-            else if (vehicle.Category != VehicleCategories.EV)
-                throw new Exception("FitGDVOptimalRouteToEV invoked for a non-EV!");
-            else
-                return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
+                throw new ArgumentException("The GDVOptimalRoute was not provided to FitGDVOptimalRouteToEV!");
+            if (!GDVOptimalRoute.Feasible)
+                throw new ArgumentException("EVvsGDV_ProblemModel.NewFitGDVOptimalRouteToEV invoked with an infeasible GDV route!");
+            if(GDVOptimalRoute.NumberOfCustomersVisited == 0)
+                throw new ArgumentException("EVvsGDV_ProblemModel.NewFitGDVOptimalRouteToEV invoked with a GDV route that serves no customers!");
+            if (vehicle.Category != VehicleCategories.EV)
+                throw new ArgumentException("FitGDVOptimalRouteToEV invoked for a non-EV!");
+
+            return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
         }
         AFVInfOfCustomerSet ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
         {
@@ -314,7 +318,6 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             }
         }
 
-        /* We never use the following two methods?? */
         bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRoute GDVOptimalRoute)
         {
             //Return true if and only if the GDV-Optimal Route is AFV-Feasible (in which case it's known to be AFV-Optimal as well
