@@ -1174,7 +1174,7 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list.Add(AddLe(EnergyConservation, numVehicles[vIndex_EV] * BatteryCapacity(VehicleCategories.EV), constraint_name));
             EnergyConservation.Clear();
         }
-
+        
         void AddCut_DeltaTime()
         {
             double energyConsumptionPerMinute = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate;

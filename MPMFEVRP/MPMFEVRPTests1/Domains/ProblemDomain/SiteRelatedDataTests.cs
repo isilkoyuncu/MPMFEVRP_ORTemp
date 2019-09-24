@@ -30,7 +30,7 @@ namespace MPMFEVRP.Domains.ProblemDomain.Tests
 
             actualClosenessFromTheDepot = new List<string>() { "D2", "BD12", "BD13", "BD20" };
             closenessFromTheDepot = new List<string>();
-            closenessFromTheDepot = theProblemModel.SRD.GetClosenessOrder("BD12", theProblemModel.SRD.GetSitesList(SiteTypes.ExternalStation).ToArray());
+            closenessFromTheDepot = theProblemModel.SRD.GetClosenessOrder("D", theProblemModel.SRD.GetSitesList(SiteTypes.ExternalStation).ToArray());
             for (int i = 0; i < actualClosenessFromTheDepot.Count; i++)
             {
                 Assert.AreEqual(actualClosenessFromTheDepot[i], closenessFromTheDepot[i]);

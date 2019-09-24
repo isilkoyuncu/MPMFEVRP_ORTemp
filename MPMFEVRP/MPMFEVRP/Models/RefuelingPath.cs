@@ -106,7 +106,13 @@ namespace MPMFEVRP.Models
             maximumDepartureTimeAtOrigin = destination.TLS - totalTime;
             timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TES + origin.ServiceDuration));
         }
-
+        public List<string> GetRefuelingStopIDs()
+        {
+            List<string> outcome = new List<string>();
+            foreach (SiteWithAuxiliaryVariables swav in refuelingStops)
+                outcome.Add(swav.ID);
+            return outcome;
+        }
         public RefuelingPathDominance CheckDominance(RefuelingPath theOtherRP)
         {
             List<int> signs = new List<int>();//-1 for the incumbent (this), +1 from the challenger (theOtherRP), 0 for equality

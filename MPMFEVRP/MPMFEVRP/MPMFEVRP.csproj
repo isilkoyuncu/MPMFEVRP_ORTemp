@@ -82,6 +82,7 @@
   <ItemGroup>
     <Compile Include="Domains\AlgorithmDomain\AlgorithmEnums.cs" />
     <Compile Include="Domains\AlgorithmDomain\AlgorithmStatistics.cs" />
+    <Compile Include="Domains\ProblemDomain\Arc.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemDataPackage.cs" />
     <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemConstants.cs" />
@@ -128,8 +129,10 @@
     </Compile>
     <Compile Include="Implementations\Algorithms\BranchAndPrice.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationHeuristic.cs" />
+    <Compile Include="Implementations\Algorithms\ColumnGenerationWithVirtualGDVRecoveries.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
+    <Compile Include="Implementations\Algorithms\PathBasedApproach.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedCustomerSetExplorer.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
@@ -187,9 +190,9 @@
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special.cs" />
-    <Compile Include="Models\XCPlex\XCPlex_LeggieriAttempt.cs" />
     <Compile Include="Models\XCPlex\XCPlex_EVRPwRefuelingPaths.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woU.cs" />
+    <Compile Include="Models\XCPlex\XCplex_RefuelingPathReplacement.cs" />
     <Compile Include="Models\XCPlex\XCPlex_SetCovering_wSetOfCustomerSetswVMTs.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SupplementaryInterfaces\IWriter.cs" />

@@ -59,6 +59,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Domains\ProblemDomain\SiteRelatedDataTests.cs" />
+    <Compile Include="Implementations\Algorithms\PathBasedApproachTests.cs" />
     <Compile Include="Models\RefuelingPathGeneratorTests.cs" />
     <Compile Include="Models\XCPlex\XCPlex_EVRPwRefuelingPathsMacroLevelTests.cs" />
     <Compile Include="Models\XCPlex\XCPlex_EVRPwRefuelingPathsTests.cs" />

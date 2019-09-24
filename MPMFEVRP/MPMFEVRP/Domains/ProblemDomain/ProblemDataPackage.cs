@@ -1,6 +1,9 @@
 ﻿using MPMFEVRP.Implementations.Problems.Readers;
 using MPMFEVRP.Utils;
 using System.Collections.Generic;
+using System.Linq;
+using System;
+using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Domains.ProblemDomain
 {
@@ -8,12 +11,10 @@ namespace MPMFEVRP.Domains.ProblemDomain
     {
         string inputFileName;   //For record only
         public string InputFileName { get { return inputFileName; } set { inputFileName = value; } }
-        SiteRelatedData srd;
-        public SiteRelatedData SRD { get { return srd; } }
-        VehicleRelatedData vrd;
-        public VehicleRelatedData VRD { get { return vrd; } }
-        ContextRelatedData crd;
-        public ContextRelatedData CRD { get { return crd; } }
+
+        SiteRelatedData srd;           public SiteRelatedData SRD { get { return srd; } }
+        VehicleRelatedData vrd;        public VehicleRelatedData VRD { get { return vrd; } }
+        ContextRelatedData crd;        public ContextRelatedData CRD { get { return crd; } }
 
         public ProblemDataPackage() { }
         public ProblemDataPackage(KoyuncuYavuzReader reader)
@@ -57,6 +58,26 @@ namespace MPMFEVRP.Domains.ProblemDomain
             vrd = new VehicleRelatedData(numVehicleCategories, reader.GetVehicleArray());
             crd = new ContextRelatedData(reader.GetTravelSpeed(), srd.GetSingleDepotSite().DueDate, 2); //ISSUE (#5) For LAMBDA we entered 2 for now; we'd love to experiment on it.
         }
+        public RefuelingPathList PopulateRefuelingPathsBetween(RefuelingPathGenerator rpg, SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination)
+        {
+            return rpg.GenerateNonDominatedBetweenODPair(origin, destination, SRD.GetSWAVsList(SiteTypes.ExternalStation), SRD);
+        }
+        public RefuelingPathList PopulateAllNonDominatedRPs(RefuelingPathGenerator rpg, SiteRelatedData SRD)
+        {
+            List<SiteWithAuxiliaryVariables> nonESnodes = SRD.GetAllNonESSWAVsList();
+            List<SiteWithAuxiliaryVariables> ESnodes = SRD.GetSWAVsList(SiteTypes.ExternalStation);
+
+            RefuelingPathList allNonDominatedArcs = new RefuelingPathList();
+            RefuelingPathList nonDominatedRPs = new RefuelingPathList();
+            foreach (SiteWithAuxiliaryVariables from in nonESnodes)
+            {
+                foreach (SiteWithAuxiliaryVariables to in nonESnodes)
+                    if (from.ID != to.ID)
+                        nonDominatedRPs = rpg.GenerateNonDominatedBetweenODPair(from, to, ESnodes, SRD);
+                allNonDominatedArcs.AddRange(nonDominatedRPs);
+            }
+            return allNonDominatedArcs;
+        }
         public ProblemDataPackage(ProblemDataPackage twinPDP)
         {
             inputFileName = twinPDP.InputFileName;
@@ -65,6 +86,5 @@ namespace MPMFEVRP.Domains.ProblemDomain
             vrd = new VehicleRelatedData(twinPDP.VRD);
             crd = new ContextRelatedData(twinPDP.CRD);
         }
-
     }
 }

@@ -23,6 +23,8 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public double[,] TimeConsumption { get { return timeConsumption; } }
         public double[,,] EnergyConsumption { get { return energyConsumption; } }
 
+        SiteWithAuxiliaryVariables[] allOriginalSWAVs; public SiteWithAuxiliaryVariables[] AllOriginalSWAVs { get { return allOriginalSWAVs; } }
+
         public SiteRelatedData() { }
         public SiteRelatedData(int numCustomers, int numES, int numNodes, Site[] siteArray, double[,] distance, double[,] timeConsumption, double[,,] energyConsumption)
         {
@@ -33,6 +35,9 @@ namespace MPMFEVRP.Domains.ProblemDomain
             this.distance = distance;
             this.timeConsumption = timeConsumption;
             this.energyConsumption = energyConsumption;
+            allOriginalSWAVs = new SiteWithAuxiliaryVariables[siteArray.Length];
+            for (int i = 0; i < siteArray.Length; i++)
+                allOriginalSWAVs[i] = new SiteWithAuxiliaryVariables(siteArray[i]);
         }
         public SiteRelatedData(SiteRelatedData twinSRD)
         {
@@ -43,19 +48,45 @@ namespace MPMFEVRP.Domains.ProblemDomain
             distance = twinSRD.Distance;
             timeConsumption = twinSRD.TimeConsumption;
             energyConsumption = twinSRD.EnergyConsumption;
+            allOriginalSWAVs = twinSRD.GetAllSWAVsArray();
         }
         public Site[] GetAllSitesArray()
         {
             return siteArray;
         }
+        public SiteWithAuxiliaryVariables[] GetAllSWAVsArray()
+        {
+            return allOriginalSWAVs;
+        }
         public List<Site> GetAllSitesList()
         {
             return siteArray.ToList();
         }
+        public List<SiteWithAuxiliaryVariables> GetAllSWAVsList()
+        {
+            return allOriginalSWAVs.ToList();
+        }
+        public List<SiteWithAuxiliaryVariables> GetAllNonESSWAVsList()
+        {
+            List<SiteWithAuxiliaryVariables> outcome = new List<SiteWithAuxiliaryVariables>();
+            foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+                if (swav.SiteType != SiteTypes.ExternalStation)
+                    outcome.Add(swav);
+            return outcome;
+        }
+
         public List<Site> GetSitesList(SiteTypes siteType)
         {
             List<Site> outcome = new List<Site>();
             foreach (Site s in siteArray)
+                if (s.SiteType == siteType)
+                    outcome.Add(s);
+            return outcome;
+        }
+        public List<SiteWithAuxiliaryVariables> GetSWAVsList(SiteTypes siteType)
+        {
+            List<SiteWithAuxiliaryVariables> outcome = new List<SiteWithAuxiliaryVariables>();
+            foreach (SiteWithAuxiliaryVariables s in allOriginalSWAVs)
                 if (s.SiteType == siteType)
                     outcome.Add(s);
             return outcome;
@@ -65,6 +96,14 @@ namespace MPMFEVRP.Domains.ProblemDomain
             List<string> outcome = new List<string>();
             foreach (Site s in siteArray)
                 if (s.SiteType == SiteTypes.Customer)
+                    outcome.Add(s.ID);
+            return outcome;
+        }
+        public List<string> GetESIDs()
+        {
+            List<string> outcome = new List<string>();
+            foreach (Site s in siteArray)
+                if (s.SiteType == SiteTypes.ExternalStation)
                     outcome.Add(s.ID);
             return outcome;
         }
@@ -108,6 +147,15 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 }
             throw new Exception("No depot found!");
         }
+        public SiteWithAuxiliaryVariables GetSingleDepotSWAV()
+        {
+            foreach (SiteWithAuxiliaryVariables s in allOriginalSWAVs)
+                if (s.SiteType == SiteTypes.Depot)
+                {
+                    return s;
+                }
+            throw new Exception("No depot found!");
+        }
         public Site GetSiteByID(string siteID)
         {
             foreach (Site s in siteArray)
@@ -117,6 +165,16 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 }
             throw new Exception("No site found!");
         }
+        public SiteWithAuxiliaryVariables GetSWAVByID(string svawID)
+        {
+            foreach (SiteWithAuxiliaryVariables s in allOriginalSWAVs)
+                if (s.ID == svawID)
+                {
+                    return s;
+                }
+            throw new Exception("No site found!");
+        }
+
         public List<string> GetClosenessOrder(string nodeID, Site[] onlyES = null)
         {
             Dictionary<string, double> preOrder = new Dictionary<string, double>();

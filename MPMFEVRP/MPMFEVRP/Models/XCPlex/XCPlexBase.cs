@@ -408,7 +408,6 @@ namespace MPMFEVRP.Models.XCPlex
                 case "Infeasible":
                     solutionStatus = XCPlexSolutionStatus.Infeasible;
                     break;
-                //break;//unreachable because of the "return" in the previous line
                 case "Unknown":
                     solutionStatus = XCPlexSolutionStatus.NoFeasibleSolutionFound;
                     break;

@@ -2,6 +2,7 @@
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
+using MPMFEVRP.Models;
 
 
 namespace MPMFEVRP.Domains.SolutionDomain
@@ -28,7 +29,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
         public VehicleSpecificRouteOptimizationStatus GetVehicleSpecificRouteOptimizationStatus(VehicleCategories vehCategory) { return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vehCategory).Status; }
 
-        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } } //TODO: I just moved this from problem model, resolve errors due to this.
+        bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
 
         public ObjectiveFunctionInputDataPackage OFIDP { get { return routeOptimizationOutcome.OFIDP; } } 
 
@@ -68,7 +69,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 impossibleOtherCustomers.Add(c);
             }
-            // TODO unit test to check if this works as intended
+            
             retrievedFromArchive = false;
             if (copyROO)
                 routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
@@ -98,7 +99,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return true;
         }
 
-        public void ExtendAndOptimize(string customer, EVvsGDV_ProblemModel theProblemModel)//Keep for now but consider deleting after seeing at least one method fully working iwth the new architecture
+        public void ExtendAndOptimize(string customer, EVvsGDV_ProblemModel theProblemModel)//Keep for now but consider deleting after seeing at least one method fully working with the new architecture
         {
             if (!customers.Contains(customer))
             {
@@ -201,8 +202,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             routeOptimizationOutcome = theProblemModel.NewRouteOptimize(this);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
-        }
-
+        }        
         public void NewOptimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null, bool requireGDVSolutionBeforeEV = true)
         {
             //This method makes heavy use of the problem model
@@ -234,6 +234,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
+        
         public void Remove(string customer)
         {
             if (customers.Contains(customer))

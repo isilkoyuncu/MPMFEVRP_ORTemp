@@ -68,6 +68,28 @@ namespace MPMFEVRP.Utils
             return Math.Min(batteryCap, ((tMax - minStayAndTravelDuration) * effectiveRechargingRate));
         }
 
+        public static double MaxSOCGainAtESSite(SiteRelatedData SRD, ContextRelatedData CRD, Site ES, Vehicle vehicle)
+        {
+            double batteryCap = vehicle.BatteryCapacity;
+            double effectiveRechargingRate = Math.Min(ES.RechargingRate, vehicle.MaxChargingRate);
+            double tMax = CRD.TMax;
+            double minStayAndTravelDuration = double.MaxValue;
+            string theDepotID = SRD.GetSingleDepotID();
+            foreach (Site otherSite in SRD.GetAllSitesArray())
+            {
+                double minTotalTravel = Math.Min(SRD.GetTravelTime(theDepotID, otherSite.ID) +
+                                                 SRD.GetTravelTime(otherSite.ID, ES.ID) +
+                                                 SRD.GetTravelTime(ES.ID, theDepotID),
+                                                 SRD.GetTravelTime(theDepotID, ES.ID) +
+                                                 SRD.GetTravelTime(ES.ID, otherSite.ID) +
+                                                 SRD.GetTravelTime(otherSite.ID, theDepotID));
+
+                if (minStayAndTravelDuration > otherSite.ServiceDuration + minTotalTravel)
+                    minStayAndTravelDuration = otherSite.ServiceDuration + minTotalTravel;
+            }
+            return Math.Min(batteryCap, ((tMax - minStayAndTravelDuration) * effectiveRechargingRate));
+        }
+
         public static double MaxSOCGainAtSite(Site site, Vehicle vehicle, double maxStayDuration)
         {
             double batteryCap = vehicle.BatteryCapacity;

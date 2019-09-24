@@ -15,8 +15,15 @@ namespace MPMFEVRP.Utils
         double[,] shortestDistance; public double[,] ShortestDistance { get { return shortestDistance; } }
         List<string>[,] shortestPaths; public List<string>[,] ShortestPaths { get { return shortestPaths; } }
         int verticesCount;
-
+        public AllPairsShortestPaths()
+        {
+        }
         public AllPairsShortestPaths(double[,] distances, string[] IDs)
+        {
+            InitializeAndSolveAPSS(distances, IDs);
+            ModifiedFloydWarshall();
+        }
+        public void InitializeAndSolveAPSS(double[,] distances, string[] IDs)
         {
             if (distances.GetLength(0) != IDs.Length)
                 throw new Exception("Arrays of different lengths are not compatible to calculate the all pairs shortest paths.");
@@ -37,7 +44,15 @@ namespace MPMFEVRP.Utils
             }
             ModifiedFloydWarshall();
         }
-
+        public double[,] ModifyDistanceMatrix(double[,] distances, double Dmax)
+        {
+            double[,] outcome = distances;
+            for (int i = 0; i < distances.GetLength(0); i++)
+                for (int j = 0; j < distances.GetLength(1); j++)
+                    if (outcome[i, j] > Dmax)
+                        outcome[i, j] = double.MaxValue;
+            return outcome;
+        }
         /// <summary>
         /// Modified as follows...
         /// </summary>
@@ -74,6 +89,26 @@ namespace MPMFEVRP.Utils
                     for (int j = 0; j < verticesCount; j++)
                     {
                         outcome[j] = shortestPaths[i, j];
+                    }
+                    break;
+                }
+            }
+            return outcome;
+        }
+        public List<string> GetShortestPathBetween(string fromID, string toID)
+        {
+            List<string> outcome = new List<string>();
+            for (int i = 0; i < verticesCount; i++)
+            {
+                if (IDs[i] == fromID)
+                {
+                    for (int j = 0; j < verticesCount; j++)
+                    {
+                        if (shortestPaths[i, j].Last() == toID)
+                        {
+                            outcome = shortestPaths[i, j];
+                            break;
+                        }
                     }
                     break;
                 }

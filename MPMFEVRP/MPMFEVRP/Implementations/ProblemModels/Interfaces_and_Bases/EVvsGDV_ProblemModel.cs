@@ -9,11 +9,11 @@ using MPMFEVRP.Models.XCPlex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 {
-    public abstract class EVvsGDV_ProblemModel: ProblemModelBase
+    public abstract class EVvsGDV_ProblemModel : ProblemModelBase
     {
         protected string problemName;
 
@@ -35,6 +35,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         XCPlexADF_EVSingleCustomerSet TSPsolverEV;
         XCPlexADF_GDVSingleCustomerSet TSPsolverGDV;
 
+        XCplex_RefuelingPathReplacement pathReplacementSolver;
 
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
@@ -53,6 +54,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
             lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
+            CalculateBoundsForAllOriginalSWAVs();
+            //pdp.UpdateARD(rechargingDuration_status);
 
             if (problemCharacteristics.GetParameter(ParameterID.PRB_CREATETSPSOLVERS).GetBoolValue())
                 CreateNewTspSolvers();
@@ -73,18 +76,18 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void CreateTSPSolvers(Type TSPModelType)
         {
-           if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
+            if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
             {
-                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds:true));
+                EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
                 GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
             }
-           else if(TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
+            else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
                 GDV_TSPSolver = new XCPlexADF_GDVSingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
                 //GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             }
-           else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
+            else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
                 GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
@@ -127,7 +130,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             int EVPositionInList = 1;
             if (vehicles.Count != 2)
                 throw new Exception("EVvsGDV_ProblemModel.RouteOptimize must be invoked with a list of 2 vehicles!");
-            if (vehicles[0].Category== vehicles[1].Category)
+            if (vehicles[0].Category == vehicles[1].Category)
                 throw new Exception("EVvsGDV_ProblemModel.RouteOptimize must be invoked with exactly one GDV and one EV!");
             if (vehicles[0].Category == VehicleCategories.EV)
             {
@@ -157,8 +160,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             VehicleSpecificRoute fittedRoute = FitGDVOptimalRouteToEV(GDVOptimalRoute, vehicle);
             if (fittedRoute.Feasible)//if the fitted route is feasible:
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: fittedRoute);
-            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);          
+            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute) == AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved)
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
 
 
             //If none of the previous conditions worked, we must solve an EV-TSP
@@ -200,12 +203,12 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             //We are looking at an EV problem with a provided GDV-optimal route
             //First, we must check for AFV-feasibility of the provided GDV-optimal route
             //Make an AFV-optimized route out of the given GDV-optimized route:
-            
+
             VehicleSpecificRoute EVfittedRoute = NewFitGDVOptimalRouteToEV(GDVOptimalRoute, theEV);
-           
-            if ((EVfittedRoute.Feasible == CheckAFVFeasibilityOfGDVOptimalRoute(GDVOptimalRoute))&& EVfittedRoute.Feasible)//if the fitted route is feasible:
+
+            if ((EVfittedRoute.Feasible == CheckAFVFeasibilityOfGDVOptimalRoute(GDVOptimalRoute)) && EVfittedRoute.Feasible)//if the fitted route is feasible:
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: EVfittedRoute);
-            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute))
+            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute) == AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved)
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
             //If none of the previous conditions worked, we must solve an EV-TSP
             return NewRouteOptimize(CS, theEV);
@@ -244,7 +247,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else//optimal
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
-//            solver.ClearModel();
+                                                                                                                                                                                                                      //            solver.ClearModel();
             return vsroo;
         }
         VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
@@ -265,15 +268,52 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             else
                 return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
         }
-        bool ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
+        AFVInfOfCustomerSet ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
         {
-            //Return true if and only if the GDV-Optimal route must be AFV-infeasible based on the data
-            //This method may be a little confusing because it returns true when infeasible
-            //For now we ignore this method //TODO: Develop the analytically provable conditions of AFV-infeasibility of a given GDV-feasible route
+            Vehicle theAFV = VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
+            double batteryCap = theAFV.BatteryCapacity;
+            double energyConsumpRate = theAFV.ConsumptionRate;
+            double refuelingRate = Double.MinValue;
 
-            return false;
+            foreach (Site es in SRD.GetSitesList(SiteTypes.ExternalStation))
+                if (refuelingRate < es.RechargingRate)
+                    refuelingRate = es.RechargingRate;
+            refuelingRate = Math.Min(refuelingRate, theAFV.MaxChargingRate);
+
+            //This method returns enum: AFVInfOfCustomerSet outcomes are as follows: AFVInfeasibilityOfCSProved, AFVFeasibilityOfCSProved, and AFVInfeasibilityOfCSUnkown
+            switch (rechargingDuration_status)
+            {
+                case RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full:
+                    {
+                        if (!SRD.GetSitesList(SiteTypes.Customer).Any(z => z.RechargingRate > 0.0)) //No internal station case
+                        {
+                            VehicleSpecificRoute EVfittedRoute = NewFitGDVOptimalRouteToEV(GDVOptimalRoute, theAFV);
+                            double endOfRouteNetEnergy = batteryCap - (EVfittedRoute.GetVehicleMilesTraveled() * energyConsumpRate);
+                            if (endOfRouteNetEnergy > 0.0)
+                                throw new Exception("ProveAFVInfeasibilityOfCustomerSet method is called for a feasble EVfittedRoute.");
+                            else
+                            {
+                                double extraTimeNeeded = (Math.Ceiling(endOfRouteNetEnergy / batteryCap)) * (batteryCap / refuelingRate);
+                                if (extraTimeNeeded > CRD.TMax - GDVOptimalRoute.GetTotalTime())
+                                    return AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved;
+                            }
+                        }
+
+                        return AFVInfOfCustomerSet.AFVInfeasibilityOfCSUnkown;
+                    }
+                case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full:
+                    {
+                        return AFVInfOfCustomerSet.AFVInfeasibilityOfCSUnkown;
+                    }
+                case RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial:
+                    {
+                        return AFVInfOfCustomerSet.AFVInfeasibilityOfCSUnkown;
+                    }
+                default:
+                    throw new Exception("RechargingDuration_status is not specified!");
+            }
         }
-        
+
         /* We never use the following two methods?? */
         bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRoute GDVOptimalRoute)
         {
@@ -293,6 +333,201 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             }
             return true;
         }
+
+        VehicleSpecificRouteOptimizationOutcome RecoverWithRefuelingPathInsertion(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
+        {
+            XCplex_RefuelingPathReplacement solver = pathReplacementSolver;
+            solver.RefineDecisionVariables(GDVOptimalRoute);
+            solver.Solve_and_PostProcess();
+            VehicleSpecificRouteOptimizationOutcome vsroo;
+            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            else//optimal
+                vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetEVRecoveredRoute()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
+                                                                                                                                                                                                                      //            solver.ClearModel();
+            return vsroo;
+        }
+        protected void CalculateBoundsForAllOriginalSWAVs()
+        {
+            CalculateEpsilonBounds();
+            CalculateDeltaBounds();
+            CalculateTBounds();
+        }
+        void CalculateEpsilonBounds()
+        {
+            double epsilonMax = double.MinValue;
+            Vehicle theEV = VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
+            foreach (SiteWithAuxiliaryVariables swav in SRD.AllOriginalSWAVs)
+            {
+                switch (swav.SiteType)
+                {
+                    case SiteTypes.Customer:
+                        epsilonMax = Calculators.MaxSOCGainAtSite(swav, theEV, maxStayDuration: swav.ServiceDuration);
+                        break;
+                    case SiteTypes.ExternalStation:
+                        epsilonMax = Calculators.MaxSOCGainAtESSite(SRD, CRD, swav, theEV);
+                        break;
+                    default:
+                        epsilonMax = 0.0;
+                        break;
+                }
+                swav.UpdateEpsilonBounds(epsilonMax);
+            }
+        }
+        void CalculateDeltaBounds()
+        {
+            //if (!useTighterBounds)
+            //{
+            //    foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
+            //        swav.UpdateDeltaBounds(theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, 0.0);
+            //}
+            //else
+            //{
+            CalculateDeltaMinsViaLabelSetting();
+            CalculateDeltaMaxsViaLabelSetting();
+            //}
+        }
+        void CalculateDeltaMinsViaLabelSetting()
+        {
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(SRD.AllOriginalSWAVs);
+            List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
+
+            foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                if (swav.SiteType == SiteTypes.Depot)
+                    swav.UpdateDeltaMin(0.0);
+                else
+                    swav.UpdateDeltaMin(Math.Max(0, SRD.GetEVEnergyConsumption(swav.ID, SRD.GetSingleDepotID()) - swav.EpsilonMax));
+            
+            while (tempSWAVs.Count != 0)
+            {
+                SiteWithAuxiliaryVariables swavToPerm = tempSWAVs.First();
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                    if (swav.DeltaMin < swavToPerm.DeltaMin)
+                    {
+                        swavToPerm = swav;
+                    }
+                tempSWAVs.Remove(swavToPerm);
+                permSWAVs.Add(swavToPerm);
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                    swav.UpdateDeltaMin(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
+            }
+            if ((SRD.AllOriginalSWAVs.Length) != (permSWAVs.Count))
+                throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
+        }
+        void CalculateDeltaMaxsViaLabelSetting()
+        {
+            List<SiteWithAuxiliaryVariables> tempSWAVs = new List<SiteWithAuxiliaryVariables>(SRD.AllOriginalSWAVs);
+            List<SiteWithAuxiliaryVariables> permSWAVs = new List<SiteWithAuxiliaryVariables>();
+
+            foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                if (swav.SiteType == SiteTypes.Depot)
+                {
+                    swav.UpdateDeltaMax(0.0);
+                    swav.UpdateDeltaPrimeMax(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
+                }
+                else
+                {
+                    swav.UpdateDeltaMax(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - SRD.GetEVEnergyConsumption(SRD.GetSingleDepotID(), swav.ID));
+                    swav.UpdateDeltaPrimeMax(Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, (swav.DeltaMax + swav.EpsilonMax)));
+                }
+            while (tempSWAVs.Count != 0)
+            {
+                SiteWithAuxiliaryVariables swavToPerm = tempSWAVs.First();
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                    if (swav.DeltaPrimeMax > swavToPerm.DeltaPrimeMax)
+                    {
+                        swavToPerm = swav;
+                    }
+                tempSWAVs.Remove(swavToPerm);
+                permSWAVs.Add(swavToPerm);
+                foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
+                {
+                    swav.UpdateDeltaMax(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
+                    swav.UpdateDeltaPrimeMax(Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, (swav.DeltaMax + swav.EpsilonMax)));
+                }
+            }
+            if (SRD.AllOriginalSWAVs.Length != permSWAVs.Count)
+                throw new System.Exception("XCPlexVRPBase.SetDeltaMaxViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
+
+            //Revisiting the depot and its duplicates
+            foreach (SiteWithAuxiliaryVariables swav in SRD.AllOriginalSWAVs)
+                if ((swav.X == SRD.GetSingleDepotSite().X) && (swav.Y == SRD.GetSingleDepotSite().Y))
+                    if (swav.SiteType != SiteTypes.Customer)
+                        swav.UpdateDeltaMax(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - GetMinEnergyConsumptionFromNonDepotToDepot());
+        }
+        void CalculateTBounds()
+        {
+            double tLS = double.MinValue;
+            double tES = double.MaxValue;
+            Site theDepot = SRD.GetSingleDepotSite();
+            foreach (SiteWithAuxiliaryVariables swav in SRD.AllOriginalSWAVs)
+            {
+                if (swav.X == theDepot.X && swav.Y == theDepot.Y)
+                {
+                    if (swav.SiteType != SiteTypes.Depot)
+                    {
+                        tLS = CRD.TMax - GetMinTravelTimeFromDepotDuplicateToDepotThroughANode(swav);
+                        tES = GetMinTravelTimeFromDepotToDepotDuplicateThroughANode(swav);
+                    }
+                    else
+                    {
+                        tLS = CRD.TMax;
+                        tES = 0.0;
+                    }
+                }
+                else
+                {
+                    tLS = CRD.TMax - SRD.GetTravelTime(swav.ID, theDepot.ID);
+                    tES = SRD.GetTravelTime(theDepot.ID, swav.ID);
+                }
+                switch (swav.SiteType)
+                {
+                    case SiteTypes.Customer:
+                        tLS -= swav.ServiceDuration;
+                        break;
+                    case SiteTypes.ExternalStation:
+                        if (RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                            tLS -= (VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate, swav.RechargingRate));
+                        break;
+                    default:
+                        break;
+                }
+                swav.UpdateTBounds(tLS, tES);
+            }
+        }
+        double GetMinTravelTimeFromDepotDuplicateToDepotThroughANode(SiteWithAuxiliaryVariables depotDuplicate)
+        {
+            Site theDepot = SRD.GetSingleDepotSite();
+            double minTravelTime = double.MaxValue;
+            foreach (SiteWithAuxiliaryVariables otherSwav in SRD.AllOriginalSWAVs)
+                if (otherSwav.X != theDepot.X || otherSwav.Y != theDepot.Y)
+                    minTravelTime = Math.Min(minTravelTime, SRD.GetTravelTime(depotDuplicate.ID, otherSwav.ID) + SRD.GetTravelTime(otherSwav.ID, theDepot.ID));
+
+            return minTravelTime;
+        }
+        double GetMinTravelTimeFromDepotToDepotDuplicateThroughANode(SiteWithAuxiliaryVariables depotDuplicate)
+        {
+            Site theDepot = SRD.GetSingleDepotSite();
+            double minTravelTime = double.MaxValue;
+            foreach (SiteWithAuxiliaryVariables otherSwav in SRD.AllOriginalSWAVs)
+                if (otherSwav.X != theDepot.X || otherSwav.Y != theDepot.Y)
+                    minTravelTime = Math.Min(minTravelTime, SRD.GetTravelTime(theDepot.ID, otherSwav.ID) + SRD.GetTravelTime(otherSwav.ID, depotDuplicate.ID));
+
+            return minTravelTime;
+        }
+        double GetMinEnergyConsumptionFromNonDepotToDepot()
+        {
+            Site theDepot = SRD.GetSingleDepotSite();
+            double eMinToDepot = double.MaxValue;
+
+            foreach (SiteWithAuxiliaryVariables swav in SRD.AllOriginalSWAVs)
+                if ((swav.X != SRD.GetSingleDepotSite().X) || (swav.Y != SRD.GetSingleDepotSite().Y))
+                    eMinToDepot = Math.Min(eMinToDepot, SRD.GetEVEnergyConsumption(swav.ID, SRD.GetSingleDepotID()));
+
+            return eMinToDepot;
+        }
+
+
         public VehicleSpecificRoute GetVSRFromFlowVariables(Vehicle vehicle, List<Tuple<int, int, int>> allXSetTo1) //ISSUE (#7): Is this the solver's responsibility or the problem model's? We already have the code in the solver
         {
             List<string> nondepotSiteIDsInOrder = new List<string>();
@@ -330,7 +565,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                     {
                         lastSiteIndex = x.Item2;
                         lastSiteID = SRD.GetSiteID(lastSiteIndex);
-                        if(lastSiteID!=SRD.GetSingleDepotID())
+                        if (lastSiteID != SRD.GetSingleDepotID())
                             nondepotSiteIDsInOrder.Add(lastSiteID);
                         allXSetTo1.Remove(x);
                         extensionDetected = true;
@@ -355,8 +590,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         public int GetNumVehicles(VehicleCategories vc)
         {
-            if(vc==VehicleCategories.EV)
-            return NumVehicles[0];
+            if (vc == VehicleCategories.EV)
+                return NumVehicles[0];
             else
                 return NumVehicles[1];
         }
@@ -556,7 +791,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 else
                     throw new Exception("Some unrecognized status combination obtained!");
             }
-            return new string[] 
+            return new string[]
             {
                 csStatus,
                 GDV_TSPSolver.CPUtime.ToString(), EV_TSPSolver.CPUtime.ToString(), TheOtherEV_TSPSolver.CPUtime.ToString(),
@@ -569,7 +804,6 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
         }
-
         public string[] TripleOrienteeringSolve(Dictionary<string, double> customerCoverageConstraintShadowPrices, bool useRuntimeLimit = false, double runTimeLimit = double.MaxValue, bool compareToGDV = false, bool compareToEV_NDF = false)
         {
             if (GDV_OrienteeringSolver == null)
@@ -591,7 +825,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             EV_ADF_OrienteeringSolver.Solve_and_PostProcess();
 
             //Time for output now
-            if ((compareToEV_NDF)&&(!useRuntimeLimit))
+            if ((compareToEV_NDF) && (!useRuntimeLimit))
             {
                 if (Math.Abs(EV_NDF_OrienteeringSolver.ObjValue - EV_ADF_OrienteeringSolver.ObjValue) > 0.00001)
                     throw new Exception("EV_NDF and EV_ADF Orienteering Solvers found different solutions!");
@@ -622,5 +856,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
             EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
         }
+
+        
     }
 }

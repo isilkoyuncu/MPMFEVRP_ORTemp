@@ -302,7 +302,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_ArrivalTimeLimits();//14
             AddConstraint_TotalTravelTime();//15
             //AddConstraint_TimeFeasibilityOfTwoConsecutiveArcs();//16
-            ////AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
+            //AddConstraint_EnergyFeasibilityOfTwoConsecutiveArcs();//17
             //AddConstraint_EnergyFeasibilityOfCustomerBetweenTwoES();//18
             //AddConstraint_TotalNumberOfActiveArcs();
 
@@ -706,7 +706,25 @@ namespace MPMFEVRP.Models.XCPlex
             string constraintName_overall = "Total_number_of_active_arcs_cannot_exceed_" + nActiveArcs.ToString();
             allConstraints_list.Add(AddLe(totalArcFlow, (double)nActiveArcs, constraintName_overall));
         }
-
+        void AddCut_SymmetryBreak()
+        {
+            ILinearNumExpr SymmetryBreak = LinearNumExpr();
+            for (int i = 1; i < NumPreprocessedSites; i++)
+            {
+                Site site = preprocessedSites[i];
+                SymmetryBreak.AddTerm(1.0 * Distance(site, TheDepot), X[i][0]);
+                SymmetryBreak.AddTerm(-1.0 * Distance(TheDepot, site), X[0][i]);
+                for (int r = 0; r < numES; r++)
+                {
+                    Site through = ExternalStations[r];
+                    SymmetryBreak.AddTerm(1.0 * (Distance(site, through) + Distance(through, TheDepot)), Y[i][r][0]);
+                    SymmetryBreak.AddTerm(-1.0 * (Distance(TheDepot, through) + Distance(through, site)), Y[0][r][i]);
+                }
+            }
+            string constraint_name = "Symmetry break";
+            allConstraints_list.Add(AddGe(SymmetryBreak, 0.0, constraint_name));
+            SymmetryBreak.Clear();
+        }
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();

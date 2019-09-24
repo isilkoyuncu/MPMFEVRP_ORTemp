@@ -7,5 +7,6 @@
     public enum RechargingDurationAndAllowableDepartureStatusFromES { Fixed_Full, Variable_Full, Variable_Partial };
     
     public enum RefuelingPathDominance { IncumbentDominates, NeitherDominates, BothAreTheSame, ChallengerDominates };
-
+    public enum AFVInfOfCustomerSet { AFVInfeasibilityOfCSProved, AFVFeasibilityOfCSProved, AFVInfeasibilityOfCSUnkown };
+    public enum ArcType { RefuelingArc, DirectArc};
 }

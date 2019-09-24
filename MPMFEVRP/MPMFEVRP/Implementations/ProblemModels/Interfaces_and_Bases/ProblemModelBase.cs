@@ -31,7 +31,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
         public RechargingDurationAndAllowableDepartureStatusFromES RechargingDuration_status { get { return rechargingDuration_status; } set { rechargingDuration_status = value; } }
 
-        protected ProblemDataPackage pdp;
+        protected ProblemDataPackage pdp; public ProblemDataPackage PDP { get { return pdp; } }
         public SiteRelatedData SRD { get { return pdp.SRD; } }
         public VehicleRelatedData VRD { get { return pdp.VRD; } }
         public ContextRelatedData CRD { get { return pdp.CRD; } }

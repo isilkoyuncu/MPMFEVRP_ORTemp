@@ -40,12 +40,10 @@ namespace MPMFEVRP.Models
             Add(challenger);
             return outcome;
         }
-
         public int CountByNumberOfRefuelingStops(int numberOfRefuelingStops)
         {
             return this.Where(x => x.RefuelingStops.Count.Equals(numberOfRefuelingStops)).Count();
         }
-
         public Dictionary<int,int> CountByNumberOfRefuelingStops()
         {
             Dictionary<int, int> outcome = new Dictionary<int, int>();
@@ -54,6 +52,18 @@ namespace MPMFEVRP.Models
             {
                 n++;
                 outcome.Add(n, CountByNumberOfRefuelingStops(n));
+            }
+            return outcome;
+        }
+        public RefuelingPathList RetrieveNonDominatedRefuelingPaths(string originID, string destinationID)
+        {
+            RefuelingPathList outcome = new RefuelingPathList();
+            foreach(RefuelingPath rp in this)
+            {
+                if(rp.Origin.ID==originID && rp.Destination.ID==destinationID)
+                {
+                    outcome.Add(rp);
+                }
             }
             return outcome;
         }
