@@ -234,7 +234,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public override string GetModelName()
         {
-            throw new NotImplementedException();
+            return "Refueling path replacement model";
         }
     }
 }
