@@ -180,8 +180,12 @@
     <Compile Include="Models\ColumnGeneration\ColumnGenerationAlgorithm.cs" />
     <Compile Include="Models\ColumnGeneration\LabelingAlgMaxProfitNoIS.cs" />
     <Compile Include="Models\ColumnGeneration\Labels.cs" />
+    <Compile Include="Models\CustomerSetSolvers\CustomerSetSolverWithOnlyAFV.cs" />
+    <Compile Include="Models\CustomerSetSolvers\CustomerSetSolverWithOnlyGDV.cs" />
+    <Compile Include="Models\CustomerSetSolvers\CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs.cs" />
     <Compile Include="Models\CustomerSetSolvers\Interfaces_and_Bases\ICustomerSetSolver.cs" />
     <Compile Include="Models\CustomerSetSolvers\Interfaces_and_Bases\ICustomerSetSolverForASingleVehicleCategory.cs" />
+    <Compile Include="Models\CustomerSetSolvers\PlainCustomerSetSolver_Homogeneous.cs" />
     <Compile Include="Models\ObjectiveFunctionCoefficientsPackage.cs" />
     <Compile Include="Models\RefuelingPath.cs" />
     <Compile Include="Models\RefuelingPathGenerator.cs" />

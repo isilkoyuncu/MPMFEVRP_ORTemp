@@ -8,7 +8,7 @@ using MPMFEVRP.Domains.SolutionDomain;
 
 namespace MPMFEVRP.Models.CustomerSetSolvers.Interfaces_and_Bases
 {
-    interface ICustomerSetSolver
+    public interface ICustomerSetSolver
     {
 
         /// <summary>
