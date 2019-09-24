@@ -203,7 +203,7 @@ namespace MPMFEVRP.Models.XCPlex
         }
         public VehicleSpecificRoute GetEVRecoveredRoute()
         {
-
+            throw new NotImplementedException();
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
         {
