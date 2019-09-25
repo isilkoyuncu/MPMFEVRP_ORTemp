@@ -40,7 +40,7 @@ namespace MPMFEVRP.Models.XCPlex
 
             //Implementation
             this.theProblemModel = theProblemModel;
-            rpg = new RefuelingPathGenerator(theProblemModel.SRD, theProblemModel.VRD, theProblemModel.SRD.GetSWAVsList(SiteTypes.ExternalStation));
+            rpg = new RefuelingPathGenerator(theProblemModel);
             this.xCplexParam = xCplexParam;
             GDV_optRouteIDs = vsroo_GDV.VSOptimizedRoute.ListOfVisitedSiteIncludingDepotIDs;
             GDV_optRoute = GetGDVoptRouteSWAVs();

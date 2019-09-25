@@ -17,17 +17,16 @@ namespace MPMFEVRP.Models.XCPlex
         List<string> GDV_optRouteIDs;
         List<SiteWithAuxiliaryVariables> GDV_optRoute;
 
-        int[] numRefuelingPaths; //[numArcs], since there will be numNodes-1 active arcs
-        RefuelingPathList[] refuelingPathsCS;
+        RefuelingPathList[,] allNondominatedRPs;
 
         int numNonESNodes;
         int numCustomers;
 
-        //int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
-        //int totalTravelTimeConstraintIndex = -1;
-        //int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
+        int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
+        int totalTravelTimeConstraintIndex = -1;
+        int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
 
-        //bool addTotalNumberOfActiveArcsCut = false;
+        bool addTotalNumberOfActiveArcsCut = false;
 
         double[] RHS_forNodeCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
 
@@ -41,8 +40,6 @@ namespace MPMFEVRP.Models.XCPlex
 
         //INumVar[] EnergySlack; double[] EnergySlack_LB, EnergySlack_UB;//Defined for each nonESNode
         //INumVar[] TimeSlack; double[] TimeSlack_LB, TimeSlack_UB;//Defined for each nonESNode
-
-        //protected double[][][] BigTVarRecharge;
 
         //IndividualRouteESVisits singleRouteESvisits;
         //List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
@@ -78,22 +75,23 @@ namespace MPMFEVRP.Models.XCPlex
         {
             PreprocessSites();
             numCustomers = theProblemModel.SRD.NumCustomers;
-            numNonESNodes = numCustomers + 1;
-            rpg = new RefuelingPathGenerator(theProblemModel.SRD, theProblemModel.VRD, theProblemModel.SRD.GetSWAVsList(SiteTypes.ExternalStation));
+            numNonESNodes = numCustomers+1; //customers + thedepot
+            rpg = new RefuelingPathGenerator(theProblemModel);
+            SetNondominatedRPsBetweenODPairs();
             SetMinAndMaxValuesOfModelSpecificVariables();
             
 
             allVariables_list = new List<INumVar>();
 
+            int[,] length3 = new int[numNonESNodes, numNonESNodes];
+
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
-                {
-                    AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numNonESNodes, numNonESNodes,(refuelingPathsCS[i,j].Count), out X);
-                    AddThreeDimensionalDecisionVariable("W", W_LB, W_UB, NumVarType.Float, numNonESNodes, numNonESNodes, (refuelingPathsCS[i,j].Count), out W);
-                    AddThreeDimensionalDecisionVariable("U", U_LB, U_UB, NumVarType.Float, numNonESNodes, numNonESNodes, (refuelingPathsCS[i,j].Count), out U);
-                    AddOneDimensionalDecisionVariable("EnergySlack", EnergySlack_LB, EnergySlack_UB, NumVarType.Float, numNodes, out EnergySlack);
-                    AddOneDimensionalDecisionVariable("TimeSlack", TimeSlack_LB, TimeSlack_UB, NumVarType.Float, numNodes, out TimeSlack);
-                }
+                    length3[i, j] = allNondominatedRPs[i, j].Count;
+
+            AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numNonESNodes, numNonESNodes, length3, out X);
+            AddThreeDimensionalDecisionVariable("W", W_LB, W_UB, NumVarType.Float, numNonESNodes, numNonESNodes, length3, out W);
+            AddThreeDimensionalDecisionVariable("U", U_LB, U_UB, NumVarType.Float, numNonESNodes, numNonESNodes, length3, out U);
 
             //auxiliaries (T_j, Delta_j, Epsilon_j)
             AddOneDimensionalDecisionVariable("T", minValue_T, maxValue_T, NumVarType.Float, numNonESNodes, out T);
@@ -106,214 +104,83 @@ namespace MPMFEVRP.Models.XCPlex
             SetUndesiredXYVariablesTo0();
         }
 
+        void SetNondominatedRPsBetweenODPairs()
+        {
+            allNondominatedRPs = new RefuelingPathList[numNonESNodes, numNonESNodes];
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++) {
+                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD);
+                }
+        }
         void SetUndesiredXYVariablesTo0()
         {
-            //TODO: Why do we have to set the following here? Wouldn't they more naturally fit wherever we calculate other auxiliary variable bounds?
-            T[0].LB = theProblemModel.CRD.TMax;
-            T[0].UB = theProblemModel.CRD.TMax;
-            Epsilon[0].LB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
-            Epsilon[0].UB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
-
-            //NewPerspectiveOnArcDominationAndAuxiliaryVariableBounds();
-
             //No arc from a node to itself
-            for (int j = 0; j < numNonESNodes; j++)
-            {
-                Xold[j][j].UB = 0.0;
-
-                for (int r = 0; r < numES; r++)
-                    X[j][r][j].UB = 0.0;
-            }
-            //No arc from depot to its duplicate
-            for (int j = 0; j < numNonESNodes; j++)
-                for (int r = 0; r < numES; r++)
-                    if ((ExternalStations[r].X == TheDepot.X) && (ExternalStations[r].Y == TheDepot.Y))//Comparing X and Y coordinates to those of the depot makes sures that the ES at hand corresponds to the one at the depot!
-                    {
-                        X[0][r][j].UB = 0.0;
-                        X[j][r][0].UB = 0.0;
-                    }
-            //No arc from a node to another if energy consumption is > capacity
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                Site sFrom = preprocessedSites[i];
                 for (int j = 0; j < numNonESNodes; j++)
-                {
-                    Site sTo = preprocessedSites[j];
-                    if (EnergyConsumption(sFrom, sTo, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV))
-                        Xold[i][j].UB = 0.0;
-                }
-            }
-
-            //No arc from a node to an ES or from an ES to a node if energy consumption is > capacity
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int r = 0; r < numES; r++)
-                    for (int j = 0; j < numNonESNodes; j++)
-                    {
-                        Site sFrom = preprocessedSites[i];
-                        Site ES = ExternalStations[r];
-                        Site sTo = preprocessedSites[j];
-                        if (EnergyConsumption(sFrom, ES, VehicleCategories.EV) > Math.Min(maxValue_Delta[i] + maxValue_Epsilon[i], BatteryCapacity(VehicleCategories.EV)) ||
-                            EnergyConsumption(ES, sTo, VehicleCategories.EV) > theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity)
-                            X[i][r][j].UB = 0.0;
-                    }
-
-            //No YArc if it's not more beneficial
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int j = 0; j < numNonESNodes; j++)
-                    if (Xold[i][j].UB == 1.0)//The arc has not been eliminated for some other reason
-                    {
-                        Site sFrom = preprocessedSites[i];
-                        Site sTo = preprocessedSites[j];
-                        double directEnergyConsumption = EnergyConsumption(sFrom, sTo, VehicleCategories.EV);
-                        for (int r = 0; r < numES; r++)
-                            if (X[i][r][j].UB == 1.0)//The arc has not been eliminated for some other reason
-                            {
-                                Site ES = ExternalStations[r];
-                                double toESEnergyConsumption = EnergyConsumption(sFrom, ES, VehicleCategories.EV);
-                                if (toESEnergyConsumption > directEnergyConsumption)
-                                {
-                                    double directArrivalSOE_wMinDelta = minValue_Delta[i] + maxValue_Epsilon[i] - directEnergyConsumption;
-                                    double fromESArrivalSOE = BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(ES, sTo, VehicleCategories.EV);
-                                    if (directArrivalSOE_wMinDelta >= fromESArrivalSOE) //No benefit in going through ES
-                                        X[i][r][j].UB = 0.0;
-                                }
-                            }
-                    }
-
-            //Between two YArcs, check for domination and kill the dominated one
-            for (int i = 0; i < numNonESNodes; i++)
-                for (int j = 0; j < numNonESNodes; j++)
-                    for (int r1 = 0; r1 < numES; r1++)
-                    {
-                        if (X[i][r1][j].UB == 0.0)
-                            continue;
-                        for (int r2 = 0; r2 < numES; r2++)
-                        {
-                            if (r2 == r1)
-                                continue;
-                            if (X[i][r2][j].UB == 0.0)
-                                continue;
-                            int dom = Dominates(i, j, r1, r2);
-                            if (dom == 1)
-                                X[i][r2][j].UB = 0.0;
-                            if (dom == 2)
-                                X[i][r1][j].UB = 0.0;
-                        }
-                    }
+                        X[j][j][0].UB = 0.0;
         }
-        /// <summary>
-        /// Returns 0, 1, or 2 based on the comparison of two YArcs
-        /// </summary>
-        /// <param name="nonES1"></param>
-        /// <param name="nonES2"></param>
-        /// <param name="r1"></param>
-        /// <param name="r2"></param>
-        /// <returns>1 if the first one dominates, 2 if the second dominates, 0 if both are nondominated</returns>
-        int Dominates(int nonES1, int nonES2, int r1, int r2)
-        {
-            Site from = preprocessedSites[nonES1];
-            Site to = preprocessedSites[nonES2];
-            Site ES1 = ExternalStations[r1];
-            Site ES2 = ExternalStations[r2];
-            bool ES1isNotDominated = false;
-            bool ES2isNotDominated = false;
-
-            //Who has the shortest first leg is not dominated
-            int sign = Math.Sign(Distance(from, ES1) - Distance(from, ES2));
-            if (sign != 0)
-            {
-                if (sign == -1)
-                    ES1isNotDominated = true;
-                else
-                    ES2isNotDominated = true;
-            }
-
-            //Who has the shortest second leg is not dominated
-            sign = Math.Sign(Distance(ES1, to) - Distance(ES2, to));
-            if (sign != 0)
-            {
-                if (sign == -1)
-                    ES1isNotDominated = true;
-                else
-                    ES2isNotDominated = true;
-            }
-
-            if (ES1isNotDominated && ES2isNotDominated)
-                return 0;
-
-            //Who has the overall shortest time including FF refuel is not dominated
-            sign = Math.Sign(TravelTime(from, ES1) + TravelTime(ES1, to) + BatteryCapacity(VehicleCategories.EV) / ES1.RechargingRate - (TravelTime(from, ES2) + TravelTime(ES2, to) + BatteryCapacity(VehicleCategories.EV) / ES2.RechargingRate));
-            if (sign != 0)
-            {
-                if (sign == -1)
-                    ES1isNotDominated = true;
-                else
-                    ES2isNotDominated = true;
-            }
-
-            if (ES1isNotDominated && ES2isNotDominated)
-                return 0;
-            if (ES1isNotDominated)
-                return 1;
-            else
-                return 2;
-        }
+        
         void SetMinAndMaxValuesOfModelSpecificVariables()
-        {
-            Xold_LB = new double[numNonESNodes][];
-            Xold_UB = new double[numNonESNodes][];
+        {           
             X_LB = new double[numNonESNodes][][];
             X_UB = new double[numNonESNodes][][];
-            BigTVarRecharge = new double[numNonESNodes][][];
+            W_LB = new double[numNonESNodes][][];
+            W_UB = new double[numNonESNodes][][];
+            U_LB = new double[numNonESNodes][][];
+            U_UB = new double[numNonESNodes][][];
 
             RHS_forNodeCoverage = new double[numNonESNodes];
 
             for (int i = 0; i < numNonESNodes; i++)
             {
-                X_LB[i] = new double[numES][];
-                X_UB[i] = new double[numES][];
-                BigTVarRecharge[i] = new double[numES][];
+                X_LB[i] = new double[numNonESNodes][];
+                X_UB[i] = new double[numNonESNodes][];
+                W_LB[i] = new double[numNonESNodes][];
+                W_UB[i] = new double[numNonESNodes][];
+                U_LB[i] = new double[numNonESNodes][];
+                U_UB[i] = new double[numNonESNodes][];
 
-                for (int r = 0; r < numES; r++)
+                for (int j = 0; j < numNonESNodes; j++)
                 {
-                    X_LB[i][r] = new double[numNonESNodes];
-                    X_UB[i][r] = new double[numNonESNodes];
-                    BigTVarRecharge[i][r] = new double[numNonESNodes];
-                    for (int j = 0; j < numNonESNodes; j++)
+                    int numRPS = allNondominatedRPs[i, j].Count;
+                    X_LB[i][j] = new double[numRPS];
+                    X_UB[i][j] = new double[numRPS];
+                    W_LB[i][j] = new double[numRPS];
+                    W_UB[i][j] = new double[numRPS];
+                    U_LB[i][j] = new double[numRPS];
+                    U_UB[i][j] = new double[numRPS];
+                  
+                    for (int r = 0; r < numRPS; r++)
                     {
-                        X_LB[i][r][j] = 0.0;
-                        X_UB[i][r][j] = 1.0;
-                        BigTVarRecharge[i][r][j] = maxValue_T[i] - minValue_T[j] + TravelTime(preprocessedSites[i], ExternalStations[r]) + TravelTime(ExternalStations[r], preprocessedSites[j]) + (BatteryCapacity(VehicleCategories.EV) + EnergyConsumption(preprocessedSites[i], ExternalStations[r], VehicleCategories.EV)) / RechargingRate(ExternalStations[r]);
+                        X_LB[i][j][r] = 0.0;
+                        X_UB[i][j][r] = 1.0;
+
+                        W_LB[i][j][r] = 0.0;
+                        W_UB[i][j][r] = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity* allNondominatedRPs[i,j][r].RefuelingStops.Count;
+
+                        if (theProblemModel.RechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
+                        {
+                            U_LB[i][j][r] = allNondominatedRPs[i, j][r].TotalTime;
+                            U_UB[i][j][r] = allNondominatedRPs[i, j][r].TotalTime;
+                        }
+                        else
+                            throw new System.Exception("We are only concerned with FF policy for now!");
+
+                        //The following may be useful when we allow VP policy
+                        //U_UB[i][j][r] = W_UB[i][j][r] * theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).MaxChargingRate;
                     }
                 }
                 RHS_forNodeCoverage[i] = 1.0;
             }
 
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                Xold_LB[i] = new double[numNonESNodes];
-                Xold_UB[i] = new double[numNonESNodes];
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    Xold_LB[i][j] = 0.0;
-                    Xold_UB[i][j] = 1.0;
-                }
-            }
+            T[0].LB = theProblemModel.CRD.TMax;
+            T[0].UB = theProblemModel.CRD.TMax;
+            Epsilon[0].LB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+            Epsilon[0].UB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
         }
         public override string GetDescription_AllVariables_Array()
         {
             return
-                "for (int i = 0; i <= numCustomers; i++)\nfor (int j = 0; j <= numCustomers; j++)\nfor (int v = 0; v < fromProblem.NumVehicleCategories; v++)\nX[i][j][v]"
-                + "then\n"
-                + "for (int i = 0; i <= numCustomers; i++)\nfor (int r = 0; r < numES; r++)\nfor (int j = 0; j <= numCustomers; j++)\nY[i][r][j]"
-                + "then\n"
-                + "for (int j = 0; j <= numCustomers; j++)\nfor (int v = 0; v < fromProblem.NumVehicleCategories; v++)\nU[j][v]\n"
-                + "then\n"
-                + "for (int j = 0; j <= numCustomers; j++)\nT[j]\n"
-                + "then\n"
-                + "for (int j = 0; j <= numCustomers; j++)\ndelta[j]\n"
-                + "then\n"
-                + "for (int j = 0; j <= numCustomers; j++)\nepsilon[j]\n";
+                "Need to rewrite this!";
         }
         protected override void AddTheObjectiveFunction()
         {
@@ -324,112 +191,28 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddMaxTypeObjectiveFunction()
         {
-            ILinearNumExpr objFunction = LinearNumExpr();
-            //First term: prize collection
-            for (int j = 0; j < numNonESNodes; j++)
-            {
-                Site s = preprocessedSites[j];
-                if (s.SiteType == SiteTypes.Customer)
-                    for (int i = 0; i < numNonESNodes; i++)
-                    {
-                        objFunction.AddTerm(Prize(s, vehicleCategories[vIndex_EV]), Xold[i][j]);
-                        for (int r = 0; r < numES; r++)
-                            objFunction.AddTerm(Prize(s, vehicleCategories[vIndex_EV]), X[i][r][j]);
-                    }
-            }
-            //Second term Part I: distance-based costs from customer to customer directly
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                Site sFrom = preprocessedSites[i];
-                for (int j = 0; j < numNonESNodes; j++)
-                {
-                    Site sTo = preprocessedSites[j];
-                    objFunction.AddTerm(-1.0 * GetVarCostPerMile(vehicleCategories[vIndex_EV]) * Distance(sFrom, sTo), Xold[i][j]);
-                }
-            }
-            //Second term Part II: distance-based costs from customer to customer through an ES
-            for (int i = 0; i < numNonESNodes; i++)
-            {
-                Site sFrom = preprocessedSites[i];
-                for (int r = 0; r < numES; r++)
-                {
-                    Site ES = ExternalStations[r];
-                    for (int j = 0; j < numNonESNodes; j++)
-                    {
-                        Site sTo = preprocessedSites[j];
-                        objFunction.AddTerm(-1.0 * GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)), X[i][r][j]);
-                    }
-                }
-            }
-            //Third term: vehicle fixed costs
-            for (int j = 0; j < numNonESNodes; j++)
-            {
-                objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[vIndex_EV]), Xold[0][j]);
-                for (int r = 0; r < numES; r++)
-                    objFunction.AddTerm(-1.0 * GetVehicleFixedCost(vehicleCategories[vIndex_EV]), X[0][r][j]);
-            }
-            //Now adding the objective function to the model
-            objective = AddMaximize(objFunction);
+            throw new NotImplementedException();
         }
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
             if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
             {
-                //Second term Part I: distance-based costs from customer to customer directly
                 for (int i = 0; i < numNonESNodes; i++)
                 {
                     Site sFrom = preprocessedSites[i];
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sTo = preprocessedSites[j];
-                        objFunction.AddTerm(Distance(sFrom, sTo), Xold[i][j]);
-                    }
-                }
-                //Second term Part II: distance-based costs from customer to customer through an ES
-                for (int i = 0; i < numNonESNodes; i++)
-                {
-                    Site sFrom = preprocessedSites[i];
-                    for (int r = 0; r < numES; r++)
-                    {
-                        Site ES = ExternalStations[r];
-                        for (int j = 0; j < numNonESNodes; j++)
-                        {
-                            Site sTo = preprocessedSites[j];
-                            objFunction.AddTerm(Distance(sFrom, ES) + Distance(ES, sTo), X[i][r][j]);
-                        }
+                        for(int r=0; r< allNondominatedRPs[i, j].Count; r++)
+                        objFunction.AddTerm(allNondominatedRPs[i, j][r].TotalDistance, X[i][j][r]);
                     }
                 }
             }
             else
             {
-                //Second term Part I: distance-based costs from customer to customer directly
-                for (int i = 0; i < numNonESNodes; i++)
-                {
-                    Site sFrom = preprocessedSites[i];
-                    for (int j = 0; j < numNonESNodes; j++)
-                    {
-                        Site sTo = preprocessedSites[j];
-                        objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[vIndex_EV]) * Distance(sFrom, sTo), Xold[i][j]);
-                    }
-                }
-                //Second term Part II: distance-based costs from customer to customer through an ES
-                for (int i = 0; i < numNonESNodes; i++)
-                {
-                    Site sFrom = preprocessedSites[i];
-                    for (int r = 0; r < numES; r++)
-                    {
-                        Site ES = ExternalStations[r];
-                        for (int j = 0; j < numNonESNodes; j++)
-                        {
-                            Site sTo = preprocessedSites[j];
-                            objFunction.AddTerm(GetVarCostPerMile(VehicleCategories.EV) * (Distance(sFrom, ES) + Distance(ES, sTo)), X[i][r][j]);
-                        }
-                    }
-                }
-                //Third term: vehicle fixed costs
-                for (int j = 0; j < numNonESNodes; j++)
-                    objFunction.AddTerm(GetVehicleFixedCost(vehicleCategories[vIndex_EV]), Xold[0][j]);
+                throw new NotImplementedException();
+                //The old code was repetitive of the distance-based cost calculation given above and it was only capable of multiplying the VMt by the vehicle's $/mile coeff. We can and shoulddo much better than that, for example combining distance- and time-based costs together. Will solve when it's needed :)
             }
             //Now adding the objective function to the model
             objective = AddMinimize(objFunction);
@@ -443,7 +226,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_DepartingNumberOfEVs();
             AddConstraint_MaxEnergyGainAtNonDepotSite();//6
             AddConstraint_DepartureSOCFromCustomerNode();//7
-            AddConstraint_DepartureSOCFromESNodeUB();//8
+            AddConstraint_ArrivalSOE();//8
             AddConstraint_ArrivalSOCToESNodeLB();//9b
             AddConstraint_SOCRegulationFollowingNondepot();//10
             AddConstraint_SOCRegulationFollowingDepot();//11
@@ -473,29 +256,8 @@ namespace MPMFEVRP.Models.XCPlex
             //Some additional cuts
             //AddAllCuts();
 
-            AddCut_SymmetryBreak();
-
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
-        }
-        void AddCut_SymmetryBreak()
-        {
-            ILinearNumExpr SymmetryBreak = LinearNumExpr();
-            for (int i = 1; i < NumPreprocessedSites; i++)
-            {
-                Site site = preprocessedSites[i];
-                SymmetryBreak.AddTerm(1.0 * Distance(site, TheDepot), Xold[i][0]);
-                SymmetryBreak.AddTerm(-1.0 * Distance(TheDepot, site), Xold[0][i]);
-                for (int r = 0; r < numES; r++)
-                {
-                    Site through = ExternalStations[r];
-                    SymmetryBreak.AddTerm(1.0 * (Distance(site, through) + Distance(through, TheDepot)), X[i][r][0]);
-                    SymmetryBreak.AddTerm(-1.0 * (Distance(TheDepot, through) + Distance(through, site)), X[0][r][i]);
-                }
-            }
-            string constraint_name = "Symmetry break";
-            allConstraints_list.Add(AddGe(SymmetryBreak, 0.0, constraint_name));
-            SymmetryBreak.Clear();
         }
         void AddConstraint_NumberOfVisitsPerCustomerNode() //1
         {
@@ -506,10 +268,8 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr IncomingXandYToCustomerNodes = LinearNumExpr();
                 for (int i = 0; i < numNonESNodes; i++)
                 {
-                    IncomingXandYToCustomerNodes.AddTerm(1.0, Xold[i][j]);
-
-                    for (int r = 0; r < numES; r++)
-                        IncomingXandYToCustomerNodes.AddTerm(1.0, X[i][r][j]);
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
+                        IncomingXandYToCustomerNodes.AddTerm(1.0, X[i][j][r]);
                 }
                 string constraint_name;
 
@@ -543,10 +303,10 @@ namespace MPMFEVRP.Models.XCPlex
 
                     IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, Xold[i][j]);
                     IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, Xold[j][i]);
-                    for (int r = 0; r < numES; r++)
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     {
-                        IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, X[i][r][j]);
-                        IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, X[j][r][i]);
+                        IncomingXYTotalMinusOutgoingXYTotal.AddTerm(1.0, X[i][j][r]);
+                        IncomingXYTotalMinusOutgoingXYTotal.AddTerm(-1.0, X[j][i][r]);
                     }
 
                 }
@@ -560,10 +320,8 @@ namespace MPMFEVRP.Models.XCPlex
             ILinearNumExpr NumberOfEVsOutgoingFromTheDepot = LinearNumExpr();
             for (int j = 1; j < numNonESNodes; j++)
             {
-
-                NumberOfEVsOutgoingFromTheDepot.AddTerm(1.0, Xold[0][j]);
-                for (int r = 0; r < numES; r++)
-                    NumberOfEVsOutgoingFromTheDepot.AddTerm(1.0, X[0][r][j]);
+                for (int r = 0; r < allNondominatedRPs[0,j].Count; r++)
+                    NumberOfEVsOutgoingFromTheDepot.AddTerm(1.0, X[0][j][r]);
 
             }
             if (customerCoverageConstraint == CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
@@ -590,8 +348,8 @@ namespace MPMFEVRP.Models.XCPlex
                 {
 
                     EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], Xold[i][j]);
-                    for (int r = 0; r < numES; r++)
-                        EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][r][j]);
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
+                        EnergyGainAtNonDepotSite.AddTerm(-1.0 * maxValue_Epsilon[j], X[i][j][r]);
 
                 }
                 string constraint_name = "Max_Energy_Gain_At_NonDepot_Site_" + j.ToString();
@@ -611,8 +369,8 @@ namespace MPMFEVRP.Models.XCPlex
                 {
 
                     DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), Xold[i][j]);
-                    for (int r = 0; r < numES; r++)
-                        DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][r][j]);
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
+                        DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][r]);
 
                 }
                 string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
@@ -620,19 +378,18 @@ namespace MPMFEVRP.Models.XCPlex
 
             }
         }
-        void AddConstraint_DepartureSOCFromESNodeUB()//8
+        void AddConstraint_ArrivalSOE()//8
         {
-            for (int r = 0; r < numES; r++)
+            for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
             {
-                Site from = ExternalStations[r];
+                Site from = ExternalStations[];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-
                     Site to = preprocessedSites[j];
                     ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                     DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                     for (int i = 0; i < numNonESNodes; i++)
-                        DepartureSOCFromES.AddTerm(EnergyConsumption(from, to, VehicleCategories.EV), X[i][r][j]);
+                        DepartureSOCFromES.AddTerm(EnergyConsumption(from, to, VehicleCategories.EV), X[i][j][r]);
                     string constraint_name = "Departure_SOC(UB)_From_ES_" + r.ToString() + "_going_to_customer_" + j.ToString();
                     allConstraints_list.Add(AddLe(DepartureSOCFromES, BatteryCapacity(VehicleCategories.EV), constraint_name));
 
@@ -641,16 +398,16 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddConstraint_DepartureSOCFromESNodeLB()//9
         {
-            for (int r = 0; r < numES; r++)
+            for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
             {
-                Site ES = ExternalStations[r];
+                Site ES = ExternalStations[];
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site to = preprocessedSites[j];
                     ILinearNumExpr DepartureSOCFromES = LinearNumExpr();
                     DepartureSOCFromES.AddTerm(1.0, Delta[j]);
                     for (int i = 0; i < numNonESNodes; i++)
-                        DepartureSOCFromES.AddTerm((EnergyConsumption(ES, to, VehicleCategories.EV) - BatteryCapacity(VehicleCategories.EV) + minValue_Delta[j]), X[i][r][j]);
+                        DepartureSOCFromES.AddTerm((EnergyConsumption(ES, to, VehicleCategories.EV) - BatteryCapacity(VehicleCategories.EV) + minValue_Delta[j]), X[i][j][r]);
                     string constraint_name = "Departure_SOC(LB)_From_ES_" + r.ToString() + "_going_to_" + j.ToString();
                     allConstraints_list.Add(AddGe(DepartureSOCFromES, minValue_Delta[j], constraint_name));
 
@@ -660,15 +417,15 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_ArrivalSOCToESNodeLB()//9b
         {
             for (int j = 0; j < numNonESNodes; j++)
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                 {
                     Site from = preprocessedSites[j];
-                    Site ES = ExternalStations[r];
+                    Site ES = ExternalStations[];
                     ILinearNumExpr ArrivalSOCFromES = LinearNumExpr();
                     ArrivalSOCFromES.AddTerm(1.0, Delta[j]);
                     ArrivalSOCFromES.AddTerm(1.0, Epsilon[j]);
                     for (int k = 0; k < numNonESNodes; k++)
-                        ArrivalSOCFromES.AddTerm(-1.0 * EnergyConsumption(from, ES, VehicleCategories.EV), X[j][r][k]);
+                        ArrivalSOCFromES.AddTerm(-1.0 * EnergyConsumption(from, ES, VehicleCategories.EV), X[j][k][r]);
                     string constraint_name = "Arrival_SOC(LB)_To_ES_" + r.ToString() + "_from_" + j.ToString();
                     allConstraints_list.Add(AddGe(ArrivalSOCFromES, 0.0, constraint_name));
 
@@ -700,10 +457,10 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr SOCDifference = LinearNumExpr();
                 SOCDifference.AddTerm(1.0, Delta[j]);
                 SOCDifference.AddTerm(EnergyConsumption(TheDepot, sTo, VehicleCategories.EV), Xold[0][j]);
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                 {
-                    Site ES = ExternalStations[r];
-                    SOCDifference.AddTerm(EnergyConsumption(ES, sTo, VehicleCategories.EV), X[0][r][j]);
+                    Site ES = ExternalStations[];
+                    SOCDifference.AddTerm(EnergyConsumption(ES, sTo, VehicleCategories.EV), X[0][j][r]);
                 }
                 string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
                 allConstraints_list.Add(AddLe(SOCDifference, BatteryCapacity(VehicleCategories.EV), constraint_name));
@@ -727,16 +484,16 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_TimeRegulationThroughAnESVisit_FixedTimeRecharging()//13a Only if recharging is full (FF) 
         {
             for (int i = 1; i < numNonESNodes; i++)
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sFrom = preprocessedSites[i];
-                        Site ES = ExternalStations[r];
+                        Site ES = ExternalStations[];
                         Site sTo = preprocessedSites[j];
                         ILinearNumExpr TimeDifference = LinearNumExpr();
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
-                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[i][j]), X[i][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + TravelTime(sFrom, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[i][j]), X[i][j][r]);
                         string constraint_name = "Time_Regulation_from_customer_" + i.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[i][j], constraint_name));
                     }
@@ -744,53 +501,53 @@ namespace MPMFEVRP.Models.XCPlex
         void AddConstraint_TimeRegulationThroughAnESVisits_VariableTimeRecharging()//13b Only in VF, VP cases
         {
             for (int i = 1; i < numNonESNodes; i++)
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sFrom = preprocessedSites[i];
-                        Site ES = ExternalStations[r];
+                        Site ES = ExternalStations[];
                         Site sTo = preprocessedSites[j];
                         ILinearNumExpr TimeDifference = LinearNumExpr();
                         double travelDuration = TravelTime(sFrom, ES) + TravelTime(ES, sTo);
                         double timeSpentDueToEnergyConsumption = (EnergyConsumption(sFrom, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV)) / RechargingRate(ES);
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
-                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + travelDuration + timeSpentDueToEnergyConsumption + BigTVarRecharge[i][r][j]), X[i][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (ServiceDuration(sFrom) + travelDuration + timeSpentDueToEnergyConsumption + BigTVarRecharge[i][j][r]), X[i][j][r]);
                         TimeDifference.AddTerm(-1.0 / RechargingRate(ES), Delta[j]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Delta[i]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Epsilon[i]);
                         string constraint_name = "Time_Regulation_from_customer_" + i.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigTVarRecharge[i][r][j]), constraint_name));
+                        allConstraints_list.Add(AddGe(TimeDifference, -1.0 * (BigTVarRecharge[i][j][r]), constraint_name));
                     }
         }
         void AddConstraint_TimeRegulationThroughAnESVisits_VariableFullTimeRecharging()//13b Only in VF, VP cases
         {
             for (int i = 1; i < numNonESNodes; i++)
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sFrom = preprocessedSites[i];
-                        Site ES = ExternalStations[r];
+                        Site ES = ExternalStations[];
                         Site sTo = preprocessedSites[j];
                         ILinearNumExpr TimeDifference = LinearNumExpr();
                         double travelDuration = TravelTime(sFrom, ES) + TravelTime(ES, sTo);
                         double timeSpentDueToEnergyConsumption = (BatteryCapacity(VehicleCategories.EV) + EnergyConsumption(sFrom, ES, VehicleCategories.EV)) / RechargingRate(ES);
                         TimeDifference.AddTerm(1.0, T[j]);
                         TimeDifference.AddTerm(-1.0, T[i]);
-                        TimeDifference.AddTerm(-1.0 * (BigTVarRecharge[i][r][j]), X[i][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (BigTVarRecharge[i][j][r]), X[i][j][r]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Delta[i]);
                         TimeDifference.AddTerm(1.0 / RechargingRate(ES), Epsilon[i]);
                         string constraint_name = "Time_Regulation_from_customer_" + i.ToString() + "_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
-                        double rhs = -1.0 * BigTVarRecharge[i][r][j] + ServiceDuration(sFrom);
+                        double rhs = -1.0 * BigTVarRecharge[i][j][r] + ServiceDuration(sFrom);
                         allConstraints_list.Add(AddGe(TimeDifference, rhs, constraint_name));
                     }
         }
         void AddConstraint_TimeRegulationFromDepotThroughAnESVisit()//13c
         {
-            for (int r = 0; r < numES; r++)
+            for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    Site ES = ExternalStations[r];
+                    Site ES = ExternalStations[];
                     Site sTo = preprocessedSites[j];
                     ILinearNumExpr TimeDifference = LinearNumExpr();
                     TimeDifference.AddTerm(1.0, T[j]);
@@ -798,13 +555,13 @@ namespace MPMFEVRP.Models.XCPlex
                     // Here we decide whether recharging duration is fixed or depends on the arrival SOC
                     if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                     {
-                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), X[0][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + (BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), X[0][j][r]);
                         string constraint_name = "Time_Regulation_from_depot_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
                     }
                     else
                     {
-                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + ((EnergyConsumption(TheDepot, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV)) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), X[0][r][j]);
+                        TimeDifference.AddTerm(-1.0 * (TravelTime(TheDepot, ES) + ((EnergyConsumption(TheDepot, ES, VehicleCategories.EV) + EnergyConsumption(ES, sTo, VehicleCategories.EV)) / RechargingRate(ES)) + TravelTime(ES, sTo) + BigT[0][j]), X[0][j][r]);
                         TimeDifference.AddTerm(-1.0 / RechargingRate(ES), Delta[j]);
                         string constraint_name = "Time_Regulation_from_depot_through_ES_" + r.ToString() + "_to_node_" + j.ToString();
                         allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j] - BatteryCapacity(VehicleCategories.EV) / RechargingRate(ES), constraint_name));
@@ -820,8 +577,8 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int i = 0; i < numNonESNodes; i++)
                 {
                     TimeDifference.AddTerm((maxValue_T[j] - minValue_T[j]), Xold[i][j]);
-                    for (int r = 0; r < numES; r++)
-                        TimeDifference.AddTerm((maxValue_T[j] - minValue_T[j]), X[i][r][j]);
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
+                        TimeDifference.AddTerm((maxValue_T[j] - minValue_T[j]), X[i][j][r]);
                 }
                 string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
                 allConstraints_list.Add(AddGe(TimeDifference, maxValue_T[j], constraint_name));
@@ -838,10 +595,10 @@ namespace MPMFEVRP.Models.XCPlex
                     Site sFrom = preprocessedSites[i];
                     Site sTo = preprocessedSites[j];
                     TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), Xold[i][j]);
-                    for (int r = 0; r < numES; r++)
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     {
-                        Site ES = ExternalStations[r];
-                        TotalTravelTime.AddTerm((TravelTime(sFrom, ES) + TravelTime(ES, sTo)), X[i][r][j]);
+                        Site ES = ExternalStations[];
+                        TotalTravelTime.AddTerm((TravelTime(sFrom, ES) + TravelTime(ES, sTo)), X[i][j][r]);
                     }
                 }
 
@@ -881,10 +638,10 @@ namespace MPMFEVRP.Models.XCPlex
                                 TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Xold[i][k]);
                                 TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Xold[k][j]);
 
-                                for (int r = 0; r < numES; r++)
+                                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                                 {
-                                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][r][k]);
-                                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][r][j]);
+                                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][r]);
+                                    TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][r]);
                                 }
                                 string constraint_name = "No_arc_pair_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
                                 allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
@@ -892,7 +649,7 @@ namespace MPMFEVRP.Models.XCPlex
                             }
                             else if (rechargingDuration_status == RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full)
                             {
-                                for (int r1 = 0; r1 < numES; r1++)
+                                for (int r1 = 0; r1 < allNondominatedRPs[i,j].Count; r1++)
                                 {
                                     Site ES1 = ExternalStations[r1];
                                     double fixedChargeTimeAtES1 = theProblemModel.VRD.GetVehiclesOfCategory(VehicleCategories.EV)[0].BatteryCapacity / ES1.RechargingRate;
@@ -910,7 +667,7 @@ namespace MPMFEVRP.Models.XCPlex
                                     }
                                     else
                                     {
-                                        for (int r2 = 0; r2 < numES; r2++)
+                                        for (int r2 = 0; r2 < allNondominatedRPs[i,j].Count; r2++)
                                             if (r2 != r1)
                                             {
                                                 Site ES2 = ExternalStations[r2];
@@ -960,16 +717,16 @@ namespace MPMFEVRP.Models.XCPlex
                 }
 
                 //First from ES, then direct
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                 {
-                    Site ES = ExternalStations[r];
+                    Site ES = ExternalStations[];
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site to = preprocessedSites[j];
                         if (EnergyConsumption(ES, through, VehicleCategories.EV) + EnergyConsumption(through, to, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j] + maxValue_Epsilon[k])
                         {
                             for (int i = 0; i < numNonESNodes; i++)
-                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][r][k]);
+                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][r]);
                             EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Xold[k][j]);
                             string constraint_name = "No_arc_from_ES_" + r.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
                             allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
@@ -982,13 +739,13 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int i = 0; i < numNonESNodes; i++)
                 {
                     Site from = preprocessedSites[i];
-                    for (int r = 0; r < numES; r++)
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     {
-                        Site ES = ExternalStations[r];
+                        Site ES = ExternalStations[];
                         if (EnergyConsumption(from, through, VehicleCategories.EV) + EnergyConsumption(through, ES, VehicleCategories.EV) > maxValue_Delta[i] + maxValue_Epsilon[k])
                         {
                             for (int j = 0; j < numNonESNodes; j++)
-                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][r][j]);
+                                EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][r]);
                             EnergyFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, Xold[i][k]);
                             string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "_to_ES_" + r.ToString();
                             allConstraints_list.Add(AddLe(EnergyFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
@@ -1000,13 +757,13 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddCut_EnergyFeasibilityOfCustomerBetweenTwoES()
         {
-            for (int r1 = 0; r1 < numES; r1++)
+            for (int r1 = 0; r1 < allNondominatedRPs[i,j].Count; r1++)
             {
                 Site ES1 = ExternalStations[r1];
                 for (int j = 1; j < numNonESNodes; j++)
                 {
                     Site customer = preprocessedSites[j];
-                    for (int r2 = 0; r2 < numES; r2++)
+                    for (int r2 = 0; r2 < allNondominatedRPs[i,j].Count; r2++)
                     {
                         Site ES2 = ExternalStations[r2];
                         if (EnergyConsumption(ES1, customer, VehicleCategories.EV) + EnergyConsumption(customer, ES2, VehicleCategories.EV) > BatteryCapacity(VehicleCategories.EV) + maxValue_Epsilon[j])//This didn't have the maxValue_Epsilon in it and hence it ignored the SOE gain at ISs
@@ -1030,15 +787,15 @@ namespace MPMFEVRP.Models.XCPlex
         {
             totalNumberOfActiveArcsConstraintIndex = allConstraints_list.Count;
 
-            int nActiveArcs_EV = 1 + numES;
+            int nActiveArcs_EV = 1 + allNondominatedRPs[i,j].Count;
             ILinearNumExpr totalArcFlow_EV = LinearNumExpr();
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     totalArcFlow_EV.AddTerm(1.0, Xold[i][j]);
-                    for (int r = 0; r < numES; r++)
+                    for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     {
-                        totalArcFlow_EV.AddTerm(1.0, X[i][r][j]);
+                        totalArcFlow_EV.AddTerm(1.0, X[i][j][r]);
                     }
                 }
             string constraintName_EV = "Number_of_active_EV_arcs_cannot_exceed_" + nActiveArcs_EV.ToString();
@@ -1050,16 +807,16 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < NumPreprocessedSites; i++)
             {
                 Site sFrom = preprocessedSites[i];
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                 {
-                    Site through = ExternalStations[r];
+                    Site through = ExternalStations[];
                     for (int j = 0; j < NumPreprocessedSites; j++)
                     {
                         Site sTo = preprocessedSites[j];
                         EnergyConservation.AddTerm(EnergyConsumption(sFrom, sTo, VehicleCategories.EV), Xold[i][j]);
                         EnergyConservation.AddTerm(-1.0 * maxValue_Epsilon[j], Xold[i][j]);
-                        EnergyConservation.AddTerm(EnergyConsumption(sFrom, through, VehicleCategories.EV) + EnergyConsumption(through, sTo, VehicleCategories.EV), X[i][r][j]);
-                        EnergyConservation.AddTerm(-1.0 * BatteryCapacity(VehicleCategories.EV), X[i][r][j]);
+                        EnergyConservation.AddTerm(EnergyConsumption(sFrom, through, VehicleCategories.EV) + EnergyConsumption(through, sTo, VehicleCategories.EV), X[i][j][r]);
+                        EnergyConservation.AddTerm(-1.0 * BatteryCapacity(VehicleCategories.EV), X[i][j][r]);
                     }
                 }
             }
@@ -1101,9 +858,9 @@ namespace MPMFEVRP.Models.XCPlex
                     listOfFirstSiteIndices.Add(new List<int>() { j });
                 }
             if (vehicleCategory != VehicleCategories.GDV)
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     for (int j = 0; j < numNonESNodes; j++)
-                        if (GetValue(X[0][r][j]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
+                        if (GetValue(X[0][j][r]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                         {
                             listOfFirstSiteIndices.Add(new List<int>() { r, j });
                         }
@@ -1122,11 +879,11 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                     xValues[i, j] = GetValue(Xold[i][j]);//CONSULT (w/ Isil): Why only 0 when xValues is defined over all numVehCategories? IK: This was just debugging purposes, since EMH does not have any GDVs, I only wrote [0].
-            double[,,] yValues = new double[numNonESNodes, numES, numNonESNodes];
+            double[,,] yValues = new double[numNonESNodes, allNondominatedRPs[i,j].Count, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
-                for (int r = 0; r < numES; r++)
+                for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                     for (int j = 0; j < numNonESNodes; j++)
-                        yValues[i, r, j] = GetValue(X[i][r][j]);
+                        yValues[i, r, j] = GetValue(X[i][j][r]);
 
             double[] epsilonValues = new double[numNonESNodes];
             for (int j = 0; j < numNonESNodes; j++)
@@ -1208,7 +965,7 @@ namespace MPMFEVRP.Models.XCPlex
                     return new List<int>() { nextCustomerIndex };
                 }
             if (vehicleCategory == VehicleCategories.EV)
-                for (int nextESIndex = 0; nextESIndex < numES; nextESIndex++)
+                for (int nextESIndex = 0; nextESIndex < allNondominatedRPs[i,j].Count; nextESIndex++)
                     for (int nextCustomerIndex = 0; nextCustomerIndex < numNonESNodes; nextCustomerIndex++)
                         if (GetValue(X[currentSiteIndex][nextESIndex][nextCustomerIndex]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
                             return new List<int>() { nextESIndex, nextCustomerIndex };
@@ -1217,7 +974,7 @@ namespace MPMFEVRP.Models.XCPlex
         IndividualESVisitDataPackage GetIndividualESVisit(int i, int r, int j)
         {
             Site from = preprocessedSites[i];
-            Site ES = ExternalStations[r];
+            Site ES = ExternalStations[];
             Site to = preprocessedSites[j];
 
             double timeSpentInES = GetValue(T[j]) - TravelTime(from, ES) - ServiceDuration(from) - GetValue(T[i]) - TravelTime(ES, to);
@@ -1242,10 +999,10 @@ namespace MPMFEVRP.Models.XCPlex
                         RHS_forNodeCoverage[j] = 1.0;
                         Xold[i][j].UB = 1.0;
                         Xold[j][i].UB = 1.0;
-                        for (int r = 0; r < numES; r++)
+                        for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                         {
-                            X[i][r][j].UB = 1.0;
-                            X[j][r][i].UB = 1.0;
+                            X[i][j][r].UB = 1.0;
+                            X[j][i][r].UB = 1.0;
 
                         }
                     }
@@ -1254,10 +1011,10 @@ namespace MPMFEVRP.Models.XCPlex
                         RHS_forNodeCoverage[j] = 0.0;
                         Xold[i][j].UB = 0.0;
                         Xold[j][i].UB = 0.0;
-                        for (int r = 0; r < numES; r++)
+                        for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                         {
-                            X[i][r][j].UB = 0.0;
-                            X[j][r][i].UB = 0.0;
+                            X[i][j][r].UB = 0.0;
+                            X[j][i][r].UB = 0.0;
 
                         }
                     }

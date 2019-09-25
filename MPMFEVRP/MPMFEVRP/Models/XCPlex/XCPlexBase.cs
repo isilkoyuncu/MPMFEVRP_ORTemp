@@ -277,6 +277,41 @@ namespace MPMFEVRP.Models.XCPlex
             DecisionVariables.Add(dv_name, dv);
         }
 
+        /// <summary>
+        /// _wTheThirdDimensionConditionalOnTheFirstTwo
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="lowerBound"></param>
+        /// <param name="upperBound"></param>
+        /// <param name="type"></param>
+        /// <param name="length1"></param>
+        /// <param name="length2"></param>
+        /// <param name="length3"></param>
+        /// <param name="dv"></param>
+        protected void AddThreeDimensionalDecisionVariable(String name, double[][][] lowerBound, double[][][] upperBound, NumVarType type, int length1, int length2, int[,] length3, out INumVar[][][] dv)
+        {
+            String dv_name = name;
+            dv = new INumVar[length1][][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
+            for (int i = 0; i < length1; i++)
+            {
+                dv[i] = new INumVar[length2][];
+                for (int j = 0; j < length2; j++)
+                {
+                    dv[i][j] = new INumVar[length3[i,j]];
+                    for (int v = 0; v < length3[i,j]; v++)
+                    {
+                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
+                        dv[i][j][v] = NumVar(lowerBound[i][j][v], upperBound[i][j][v], newType, dv_name);
+                        allVariables_list.Add(dv[i][j][v]);
+                    }
+                }
+            }
+            DecisionVariables.Add(dv_name, dv);
+        }
+
         protected void AddFourDimensionalDecisionVariable(string name, double[][][][] lowerBound, double[][][][] upperBound, NumVarType type, out INumVar[][][][] dv)
         {
             string dv_name = name;

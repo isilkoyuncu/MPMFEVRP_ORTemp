@@ -268,7 +268,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         void CalculateNondominatedRefuelingPaths()
         {
-            rpg = new RefuelingPathGenerator(theProblemModel.SRD, theProblemModel.VRD, externalStations);
+            rpg = new RefuelingPathGenerator(theProblemModel);
             rpl = new RefuelingPathList();
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)

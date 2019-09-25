@@ -55,7 +55,7 @@ namespace MPMFEVRP.Models
             }
             return outcome;
         }
-        public RefuelingPathList RetrieveNonDominatedRefuelingPaths(string originID, string destinationID)
+        public RefuelingPathList RetrieveNonDominatedRefuelingPathsBetweenODPair(string originID, string destinationID)
         {
             RefuelingPathList outcome = new RefuelingPathList();
             foreach(RefuelingPath rp in this)

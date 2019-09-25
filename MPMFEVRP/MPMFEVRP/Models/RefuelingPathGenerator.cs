@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
 using Facet.Combinatorics;
 using MPMFEVRP.Utils;
+using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 
 namespace MPMFEVRP.Models
 {
@@ -25,12 +26,12 @@ namespace MPMFEVRP.Models
         {
             this.apss = apss;
         }
-        public RefuelingPathGenerator(SiteRelatedData SRD, VehicleRelatedData VRD, List<SiteWithAuxiliaryVariables> externalStations)
+        public RefuelingPathGenerator(EVvsGDV_ProblemModel theProblemModel)//(SiteRelatedData SRD, VehicleRelatedData VRD, List<SiteWithAuxiliaryVariables> externalStations)
         {
             apss = new AllPairsShortestPaths();
-            double[,] distances = apss.ModifyDistanceMatrix(SRD.GetES2ESDistanceMatrix(), VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate);
-            apss.InitializeAndSolveAPSS(distances, SRD.GetESIDs().ToArray());
-            GenerateRefuelingStops(externalStations);
+            double[,] distances = apss.ModifyDistanceMatrix(theProblemModel.SRD.GetES2ESDistanceMatrix(), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate);
+            apss.InitializeAndSolveAPSS(distances, theProblemModel.SRD.GetESIDs().ToArray());
+            GenerateRefuelingStops(theProblemModel.SRD.GetSWAVsList(SiteTypes.ExternalStation));
         }
         public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
         {
