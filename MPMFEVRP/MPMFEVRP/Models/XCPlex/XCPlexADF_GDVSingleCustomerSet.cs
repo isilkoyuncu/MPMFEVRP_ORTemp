@@ -186,25 +186,8 @@ namespace MPMFEVRP.Models.XCPlex
             //Some additional cuts
             //AddAllCuts();
 
-            AddCut_SymmetryBreak();
-
-
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
-        }
-
-        void AddCut_SymmetryBreak()
-        {
-            ILinearNumExpr SymmetryBreak = LinearNumExpr();
-            for (int i = 1; i < NumPreprocessedSites; i++)
-            {
-                Site site = preprocessedSites[i];
-                SymmetryBreak.AddTerm(1.0 * Distance(site, TheDepot), X[i][0]);
-                SymmetryBreak.AddTerm(-1.0 * Distance(TheDepot, site), X[0][i]);
-            }
-            string constraint_name = "Symmetry break";
-            allConstraints_list.Add(AddGe(SymmetryBreak, 0.0, constraint_name));
-            SymmetryBreak.Clear();
         }
 
         void AddConstraint_NumberOfVisitsPerCustomerNode() //1
