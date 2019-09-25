@@ -25,11 +25,11 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
         }
 
         //Other methods
-        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence = false)
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence = false)
         {
             //Verificiation
-            if (PreserveCustomerVisitSequence)
-                throw new ArgumentException("CustomerSetSolverWithOnlyGDV.Solve method invoked with PreserveCustomerVisitSequence=true, which cannot happen, because this solver is concerned only with the GDV anyways!");
+            if (preserveCustomerVisitSequence)
+                throw new ArgumentException("CustomerSetSolverWithOnlyGDV.Solve method invoked with preserveCustomerVisitSequence=true, which cannot happen, because this solver is concerned only with the GDV anyways!");
 
             //Implementation
             //Pre-process

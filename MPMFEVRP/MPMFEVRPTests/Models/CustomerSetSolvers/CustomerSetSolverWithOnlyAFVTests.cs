@@ -39,7 +39,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
         {
             CustomerSet cs = new CustomerSet(theProblemModel.SRD.GetCustomerIDs().First(), theProblemModel.SRD.GetCustomerIDs());
 
-            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs);
+            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
             Assert.AreEqual(1, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
@@ -54,7 +54,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             cs.NewExtend("C14");
             cs.NewExtend("C19");
 
-            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs);
+            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
             Assert.AreEqual(4, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
@@ -75,7 +75,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
                 }
             }
 
-            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs);
+            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Infeasible, vsroo.Status);
         }
