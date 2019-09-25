@@ -49,6 +49,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Domains\SolutionDomain\VehicleSpecificRouteTests.cs" />
+    <Compile Include="Models\CustomerSetSolvers\CustomerSetSolverWithOnlyAFVTests.cs" />
     <Compile Include="Models\CustomerSetSolvers\CustomerSetSolverWithOnlyGDVTests.cs" />
     <Compile Include="Models\XCPlex\AllFormulationsFindSameOptimals.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woUvariablesTests.cs" />
