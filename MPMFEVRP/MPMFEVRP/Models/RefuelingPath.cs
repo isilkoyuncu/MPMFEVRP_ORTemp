@@ -29,6 +29,9 @@ namespace MPMFEVRP.Models
         double totalTime;
         public double TotalTime { get => totalTime; }
 
+        double totalEnergyConsumption;
+        public double TotalEnergyConsumption { get => totalEnergyConsumption; }
+
         double firstArcEnergyConsumption;
         public double FirstArcEnergyConsumption { get => firstArcEnergyConsumption; }
 
@@ -75,7 +78,8 @@ namespace MPMFEVRP.Models
 
             totalDistance = 0.0;
             totalTime = 0.0;
-            energyFeasible = true;
+            totalEnergyConsumption = 0.0;
+             energyFeasible = true;
             SiteWithAuxiliaryVariables from = origin;
             List<SiteWithAuxiliaryVariables> to_inSequence = new List<SiteWithAuxiliaryVariables>();
             for (int i = 0; i < refuelingStops.Count; i++)
@@ -91,6 +95,7 @@ namespace MPMFEVRP.Models
                 if (to.SiteType == SiteTypes.ExternalStation)
                     totalTime += (to.EpsilonMax/to.RechargingRate);//TODO: Double-check that this actually adds the full refueling time as I intended!
                 double energyConsumption = SRD.GetEVEnergyConsumption(from_id, to_id);
+                totalEnergyConsumption += energyConsumption;
                 if (from.SiteType != SiteTypes.ExternalStation)
                     firstArcEnergyConsumption = energyConsumption;
                 if (to.SiteType != SiteTypes.ExternalStation)
