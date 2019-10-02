@@ -23,8 +23,6 @@ namespace MPMFEVRP.Models.XCPlex
         int numCustomers;
 
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
-        int totalTravelTimeConstraintIndex = -1;
-        int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
 
         bool addTotalNumberOfActiveArcsCut = false;
 
@@ -108,13 +106,18 @@ namespace MPMFEVRP.Models.XCPlex
             allNondominatedRPs = new RefuelingPathList[numNonESNodes, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++) {
-                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], ExternalStations, theProblemModel.SRD);
+                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD);
                 }
         }
         void SetUndesiredXYVariablesTo0()
         {
+            T[0].LB = theProblemModel.CRD.TMax;
+            T[0].UB = theProblemModel.CRD.TMax;
+            Epsilon[0].LB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+            Epsilon[0].UB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+
             //No arc from a node to itself
-                for (int j = 0; j < numNonESNodes; j++)
+            for (int j = 0; j < numNonESNodes; j++)
                         X[j][j][0].UB = 0.0;
         }
         
@@ -171,10 +174,7 @@ namespace MPMFEVRP.Models.XCPlex
                 RHS_forNodeCoverage[i] = 1.0;
             }
 
-            T[0].LB = theProblemModel.CRD.TMax;
-            T[0].UB = theProblemModel.CRD.TMax;
-            Epsilon[0].LB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
-            Epsilon[0].UB = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity;
+            
         }
         public override string GetDescription_AllVariables_Array()
         {
@@ -195,7 +195,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
+            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
             {
                 for (int i = 0; i < numNonESNodes; i++)
                 {
@@ -222,10 +222,10 @@ namespace MPMFEVRP.Models.XCPlex
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerNode();
             AddConstraint_IncomingXTotalEqualsOutgoingXTotal();
-            AddConstraint_SOCRegulationFromDepot();
-            AddConstraint_SOCRegulationThroughNondepotandDirect();
-            AddConstraint_OriginDepartureSOCThroughRP();
-            AddConstraint_DestinationDepartureSOCThroughRP();
+            //AddConstraint_SOCRegulationFromDepot();
+            //AddConstraint_SOCRegulationThroughNondepotandDirect();
+            //AddConstraint_OriginDepartureSOCThroughRP();
+            //AddConstraint_DestinationDepartureSOCThroughRP();
 
             allConstraints_array = allConstraints_list.ToArray();
         }
@@ -474,8 +474,8 @@ namespace MPMFEVRP.Models.XCPlex
         public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence)
         {
             RHS_forNodeCoverage = new double[numNonESNodes];
-            GDV_optRouteIDs = cS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.ListOfVisitedSiteIncludingDepotIDs;
-            GDV_optRoute = GetGDVoptRouteSWAVs();
+            //GDV_optRouteIDs = cS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.ListOfVisitedSiteIncludingDepotIDs;
+            //GDV_optRoute = GetGDVoptRouteSWAVs();
 
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 1; j < numNonESNodes; j++)
@@ -486,8 +486,10 @@ namespace MPMFEVRP.Models.XCPlex
                         for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                         {
                             X[i][j][r].UB = 1.0;
+                        }
+                        for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
+                        {
                             X[j][i][r].UB = 1.0;
-
                         }
                     }
                     else
@@ -496,13 +498,14 @@ namespace MPMFEVRP.Models.XCPlex
                         for (int r = 0; r < allNondominatedRPs[i,j].Count; r++)
                         {
                             X[i][j][r].UB = 0.0;
+                        }
+                        for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
+                        {
                             X[j][i][r].UB = 0.0;
-
                         }
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
-            RefineRHSofTotalTravelConstraints(cS);
             allRoutesESVisits.Clear();
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
@@ -525,22 +528,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        void RefineRHSofTotalTravelConstraints(CustomerSet cS)
-        {
-            int c = 0;
-            if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
-            {
-                c = totalTravelTimeConstraintIndex;
-                allConstraints_array[c].UB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
-                //allConstraints_array[c].LB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
-            }
-            if (addTotalNumberOfActiveArcsCut)
-            {
-                c = totalNumberOfActiveArcsConstraintIndex;
-                allConstraints_array[c].UB = theProblemModel.CRD.TMax + cS.NumberOfCustomers;
-                //allConstraints_array[c].LB = theProblemModel.CRD.TMax + cS.NumberOfCustomers;
-            }
-        }
+        
 
         public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
         {
@@ -565,7 +553,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 1; i < listOfVisitedSiteIncludingDepotIDs.Count; i++)
             {
                 SiteWithAuxiliaryVariables to = theProblemModel.SRD.GetSWAVByID(listOfVisitedSiteIncludingDepotIDs[i]);
-                outcome.AddRange(theProblemModel.PDP.PopulateRefuelingPathsBetween(rpg, from, to));
+                outcome.AddRange(theProblemModel.SRD.PopulateRefuelingPathsBetween(rpg, from, to));
                 from = theProblemModel.SRD.GetSWAVByID(listOfVisitedSiteIncludingDepotIDs[i]);
             }
             return outcome;
@@ -579,7 +567,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 1; i < listOfVisitedSiteIncludingDepotIDs.Count; i++)
             {
                 SiteWithAuxiliaryVariables to = theProblemModel.SRD.GetSWAVByID(listOfVisitedSiteIncludingDepotIDs[i]);
-                outcome.AddRange(theProblemModel.PDP.PopulateRefuelingPathsBetween(rpg, from, to));
+                outcome.AddRange(theProblemModel.SRD.PopulateRefuelingPathsBetween(rpg, from, to));
                 from = theProblemModel.SRD.GetSWAVByID(listOfVisitedSiteIncludingDepotIDs[i]);
             }
             return outcome;

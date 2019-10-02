@@ -174,7 +174,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i=1; i< listOfVisitedSiteIncludingDepotIDs.Count; i++)
             {
                 SiteWithAuxiliaryVariables to = theProblemModel.SRD.GetSWAVByID(listOfVisitedSiteIncludingDepotIDs[i]);
-                RefuelingPathList tempRPList = theProblemModel.PDP.PopulateRefuelingPathsBetween(rpg, from, to);
+                RefuelingPathList tempRPList = theProblemModel.SRD.PopulateRefuelingPathsBetween(rpg, from, to);
                 outcome.Add(tempRPList);
                 from = theProblemModel.SRD.GetSWAVByID(listOfVisitedSiteIncludingDepotIDs[i]);
             }

@@ -26,14 +26,16 @@ namespace MPMFEVRP.Models
         {
             this.apss = apss;
         }
-        public RefuelingPathGenerator(EVvsGDV_ProblemModel theProblemModel)//(SiteRelatedData SRD, VehicleRelatedData VRD, List<SiteWithAuxiliaryVariables> externalStations)
+        public RefuelingPathGenerator(EVvsGDV_ProblemModel theProblemModel, List<SiteWithAuxiliaryVariables> externalStations=null)//(SiteRelatedData SRD, VehicleRelatedData VRD, List<SiteWithAuxiliaryVariables> externalStations)
         {
+            if (externalStations != null) //Fill this part so that if refueling path generator is initiated with an ES set other than the one in the problem model, constructor will work accordingly
+                throw new NotImplementedException();
             apss = new AllPairsShortestPaths();
             double[,] distances = apss.ModifyDistanceMatrix(theProblemModel.SRD.GetES2ESDistanceMatrix(), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate);
             apss.InitializeAndSolveAPSS(distances, theProblemModel.SRD.GetESIDs().ToArray());
             GenerateRefuelingStops(theProblemModel.SRD.GetSWAVsList(SiteTypes.ExternalStation));
         }
-        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
+        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
         {
             //verification: 
             int nUB = Math.Min(maxNumberOfRefuelingStops, maxPossibleNumberOfRefuelingStops);
@@ -104,7 +106,7 @@ namespace MPMFEVRP.Models
 
             return output;
         }
-        List<List<SiteWithAuxiliaryVariables>> GenerateRefuelingStops(List<SiteWithAuxiliaryVariables> externalStations)
+        void GenerateRefuelingStops(List<SiteWithAuxiliaryVariables> externalStations)
         {
             refuelingStopsList = new List<List<SiteWithAuxiliaryVariables>>();
             List<SiteWithAuxiliaryVariables> refuelingStops = new List<SiteWithAuxiliaryVariables>();
@@ -125,7 +127,6 @@ namespace MPMFEVRP.Models
                         }
                         refuelingStopsList.Add(refuelingStops);
                     }
-            return refuelingStopsList;
         }
         /// <summary>
         /// This is the new (May'19) method to generate all non-dominated refueling paths using Andelmin&Bartolini's approach.
@@ -135,7 +136,7 @@ namespace MPMFEVRP.Models
         /// <param name="externalStations"></param>
         /// <param name="SRD"></param>
         /// <returns></returns>
-        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
+        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations=null)
         {
             RefuelingPathList outcome = new RefuelingPathList();
             RefuelingPath refuelingPath;

@@ -273,7 +273,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                     if (i != j)
-                        rpl.AddRange(rpg.GenerateNonDominatedBetweenODPair(nonESNodes[i], nonESNodes[j], externalStations, theProblemModel.SRD));
+                        rpl.AddRange(rpg.GenerateNonDominatedBetweenODPair(nonESNodes[i], nonESNodes[j], theProblemModel.SRD));
 
             //rpl.AddRange(rpg.GenerateNonDominatedBetweenODPair(nonESNodes[1], nonESNodes[2], externalStations, theProblemModel.SRD));
         }

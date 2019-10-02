@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    public class XCPlexADF_GDVSingleCustomerSet : XCPlexVRPBase
+    public class XCPlex_Model_GDV_SingleCustomerSet : XCPlexVRPBase
     {
         int numNonESNodes;
         int numCustomers;
@@ -29,9 +29,9 @@ namespace MPMFEVRP.Models.XCPlex
 
         IndividualRouteESVisits singleRouteESvisits;
         List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
-        public XCPlexADF_GDVSingleCustomerSet() { }
+        public XCPlex_Model_GDV_SingleCustomerSet() { }
         
-        public XCPlexADF_GDVSingleCustomerSet(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
+        public XCPlex_Model_GDV_SingleCustomerSet(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
             : base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
         }
@@ -54,12 +54,11 @@ namespace MPMFEVRP.Models.XCPlex
             //All variables defined
             allVariables_array = allVariables_list.ToArray();
             //Now we need to set some to the variables to 0
-            SetUndesiredXYVariablesTo0();
+            SetUndesiredXandTVariablesToLimits();
         }
 
-        void SetUndesiredXYVariablesTo0()
+        void SetUndesiredXandTVariablesToLimits()
         {
-            //TODO: Why do we have to set the following here? Wouldn't they more naturally fit wherever we calculate other auxiliary variable bounds?
             T[0].LB = theProblemModel.CRD.TMax;
             T[0].UB = theProblemModel.CRD.TMax;
 

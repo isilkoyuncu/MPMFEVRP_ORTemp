@@ -12,7 +12,7 @@ using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Models.CustomerSetSolvers
 {
-    public class CustomerSetSolverWithOnlyAFV : XCPlex_Model_AFV_TSP, ICustomerSetSolverForASingleVehicleCategory
+    public class CustomerSetSolverWithOnlyAFV : XCPlex_Model_AFV_SingleCustomerSet, ICustomerSetSolverForASingleVehicleCategory
     {
         //Properties
         public VehicleCategories VehicleCategory => VehicleCategories.EV;

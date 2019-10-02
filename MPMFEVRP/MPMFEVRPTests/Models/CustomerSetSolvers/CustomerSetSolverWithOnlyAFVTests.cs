@@ -42,8 +42,10 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
-            Assert.AreEqual(1, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
-            Assert.AreEqual(180.5072, Math.Round(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled(), 4));
+            //Assert.AreEqual(1, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
+            //Assert.AreEqual(180.5072, Math.Round(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled(), 4));
+            Assert.AreEqual(180.5072, Math.Round(theSolver.ObjValue, 4));
+
         }
 
         [TestMethod()]

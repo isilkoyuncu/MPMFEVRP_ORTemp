@@ -59,7 +59,7 @@ namespace MPMFEVRP.Forms
 
             comboBox_multi_TSPModel.Items.AddRange(XCPlexUtil.GetTSPModelNamesForSolver().ToArray());
             comboBox_multi_TSPModel.SelectedIndexChanged += ComboBox_multi_TSPModel_SelectedIndexChanged;
-            comboBox_multi_TSPModel.SelectedIndex = 2;
+            comboBox_multi_TSPModel.SelectedIndex = 3;
         }
 
         private void ComboBox_multi_problems_SelectedIndexChanged(object sender, EventArgs e)

@@ -159,7 +159,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                                     VehicleSpecificRoute vsrGDV = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute;
                                     List<string> GDVoptRoute = vsrGDV.ListOfVisitedSiteIncludingDepotIDs;
                                     tempExtendedCS.NewOptimize(theProblemModel, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), vsrooGDV);
-                                    XCplex_RefuelingPathReplacement cplexRPR = new XCplex_RefuelingPathReplacement(theProblemModel, XcplexParam, tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
+                                    XCPlex_Model_AFV_TSP cplexRPR = new XCPlex_Model_AFV_TSP(theProblemModel, XcplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce); //tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
                                     cplexRPR.Solve_and_PostProcess();
                                     if (tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
                                         if (tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedCustomerSiteIDs.Count != tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count)

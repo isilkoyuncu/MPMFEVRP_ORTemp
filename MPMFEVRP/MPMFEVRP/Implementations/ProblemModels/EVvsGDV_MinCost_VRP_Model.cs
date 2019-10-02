@@ -12,11 +12,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
     {
         public EVvsGDV_MinCost_VRP_Model()
         {
-            EVvsGDV_MinCost_VRP problem = new EVvsGDV_MinCost_VRP();
-            problemName = problem.GetName();
-            objectiveFunctionType = problem.ObjectiveFunctionType;
-            coverConstraintType = problem.CoverConstraintType;
-            rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
+            //EVvsGDV_MinCost_VRP problem = new EVvsGDV_MinCost_VRP();
+            //problemName = problem.GetName();
+            //objectiveFunctionType = problem.ObjectiveFunctionType;
+            //coverConstraintType = problem.CoverConstraintType;
+            //rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full; //TODO delete these because these are unnecessary. Without data, this problem model is useless and we have this empty constructor just to show model on the form
         }//empty constructor
         public EVvsGDV_MinCost_VRP_Model(EVvsGDV_MinCost_VRP problem, Type TSPModelType) : base(problem, TSPModelType) { }
 

@@ -12,7 +12,7 @@ using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Models.CustomerSetSolvers
 {
-    public class CustomerSetSolverWithOnlyGDV : XCPlexADF_GDVSingleCustomerSet, ICustomerSetSolverForASingleVehicleCategory
+    public class CustomerSetSolverWithOnlyGDV : XCPlex_Model_GDV_SingleCustomerSet, ICustomerSetSolverForASingleVehicleCategory
     {
         //Properties
         public VehicleCategories VehicleCategory => VehicleCategories.GDV;

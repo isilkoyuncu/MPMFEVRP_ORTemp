@@ -29,6 +29,12 @@ namespace MPMFEVRP.Models
         double totalTime;
         public double TotalTime { get => totalTime; }
 
+        double totalTravelTime;
+        public double TotalTravelTime { get => totalTravelTime; }
+
+        double totalRefuelingTime;
+        public double TotalRefuelingTime { get => totalRefuelingTime; }
+
         double totalEnergyConsumption;
         public double TotalEnergyConsumption { get => totalEnergyConsumption; }
 
@@ -48,10 +54,29 @@ namespace MPMFEVRP.Models
 
         double minimumDepartureSOEAtOrigin;
         public double MinimumDepartureSOEAtOrigin { get => minimumDepartureSOEAtOrigin; }
+        double minimumArrivalSOEAtDestination;
+        public double MinimumArrivalSOEAtDestination { get => minimumArrivalSOEAtDestination; }
+        double maximumArrivalSOEAtDestination;
+        public double MaximumArrivalSOEAtDestination { get => maximumArrivalSOEAtDestination; }
+        double maximumArrivalSOEAtOrigin;
+        public double MaximumArrivalSOEAtOrigin { get => maximumArrivalSOEAtOrigin; }
 
         double maximumDepartureTimeAtOrigin;
-        public double MaximumDepartureTimeAtOrigin { get => maximumDepartureTimeAtOrigin; }
 
+        double maximumArrivalTimeAtOrigin;
+        public double MaximumArrivalTimeAtOrigin { get => maximumArrivalTimeAtOrigin; }
+
+        double minimumDepartureTimeAtDestination;
+        public double MinimumDepartureTimeAtDestination { get => minimumDepartureTimeAtDestination; }
+
+        double minimumArrivalTimeAtDestination;
+        public double MinimumArrivalTimeAtDestination { get => minimumArrivalTimeAtDestination; }
+
+        double maximumArrivalTimeAtDestination;
+        public double MaximumArrivalTimeAtDestination { get => maximumArrivalTimeAtDestination; }
+
+        double minimumArrivalTimeAtOrigin;
+        public double MinimumArrivalTimeAtOrigin { get => minimumArrivalTimeAtOrigin; }
         /// <summary>
         /// Creates a RefuelingPath between two non-ES nodes and through a (ordered) set of ES nodes. 
         /// </summary>
@@ -78,8 +103,10 @@ namespace MPMFEVRP.Models
 
             totalDistance = 0.0;
             totalTime = 0.0;
+            totalTravelTime = 0.0;
+            totalRefuelingTime = 0.0;
             totalEnergyConsumption = 0.0;
-             energyFeasible = true;
+            energyFeasible = true;
             SiteWithAuxiliaryVariables from = origin;
             List<SiteWithAuxiliaryVariables> to_inSequence = new List<SiteWithAuxiliaryVariables>();
             for (int i = 0; i < refuelingStops.Count; i++)
@@ -91,23 +118,41 @@ namespace MPMFEVRP.Models
                 SiteWithAuxiliaryVariables to = to_inSequence[0];
                 string to_id = to.ID;
                 totalDistance += SRD.GetDistance(from_id, to_id);
-                totalTime += SRD.GetTravelTime(from_id, to_id);
+                totalTravelTime += SRD.GetTravelTime(from_id, to_id);
                 if (to.SiteType == SiteTypes.ExternalStation)
-                    totalTime += (to.EpsilonMax/to.RechargingRate);//TODO: Double-check that this actually adds the full refueling time as I intended!
+                    totalRefuelingTime += (to.EpsilonMax / to.RechargingRate);
                 double energyConsumption = SRD.GetEVEnergyConsumption(from_id, to_id);
                 totalEnergyConsumption += energyConsumption;
                 if (from.SiteType != SiteTypes.ExternalStation)
                     firstArcEnergyConsumption = energyConsumption;
                 if (to.SiteType != SiteTypes.ExternalStation)
                     lastArcEnergyConsumption = energyConsumption;
-                if (energyConsumption > from.DeltaPrimeMax)
-                    energyFeasible = false;
+                energyFeasible = energyConsumption > from.DeltaPrimeMax;
 
                 from = to;
                 to_inSequence.RemoveAt(0);
             }
-
+            totalTime = totalTravelTime + totalRefuelingTime;
             minimumDepartureSOEAtOrigin = firstArcEnergyConsumption;
+            if (refuelingStops.Count == 0)
+            {
+                minimumArrivalSOEAtDestination = destination.DeltaMin;
+                maximumArrivalSOEAtDestination = origin.DeltaPrimeMax - lastArcEnergyConsumption;
+            }
+            else
+            {
+                minimumArrivalSOEAtDestination = refuelingStops.Last().DeltaPrimeMax - lastArcEnergyConsumption;
+                maximumArrivalSOEAtDestination = refuelingStops.Last().DeltaPrimeMax - lastArcEnergyConsumption;
+            }
+            maximumArrivalSOEAtOrigin = origin.DeltaMax;
+
+            maximumArrivalTimeAtOrigin = destination.TLS - totalTime - origin.ServiceDuration;
+            minimumArrivalTimeAtOrigin = origin.TES;
+
+            minimumDepartureTimeAtDestination = origin.TES + totalTime + destination.ServiceDuration;
+            minimumArrivalTimeAtDestination = origin.TES;
+            maximumArrivalTimeAtDestination = destination.TLS;
+
             maximumDepartureTimeAtOrigin = destination.TLS - totalTime;
             timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TES + origin.ServiceDuration));
         }

@@ -15,11 +15,11 @@ namespace MPMFEVRP.Implementations.ProblemModels
 
         public EVvsGDV_MaxProfit_VRP_Model()
         {
-            EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
-            problemName = problem.GetName();
-            objectiveFunctionType = problem.ObjectiveFunctionType;
-            coverConstraintType = problem.CoverConstraintType;
-            rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full;
+            //EVvsGDV_MaxProfit_VRP problem = new EVvsGDV_MaxProfit_VRP();
+            //problemName = problem.GetName();
+            //objectiveFunctionType = problem.ObjectiveFunctionType;
+            //coverConstraintType = problem.CoverConstraintType;
+            //rechargingDuration_status = RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full;
         }//empty constructor
         public override string GetDescription()
         {

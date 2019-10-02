@@ -57,9 +57,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Libraries\GanttChart.dll</HintPath>
     </Reference>
-    <Reference Include="Gurobi75.NET">
-      <HintPath>..\..\..\..\..\..\gurobi751\win64\bin\Gurobi75.NET.dll</HintPath>
-    </Reference>
     <Reference Include="ILOG.Concert, Version=12.9.0.0, Culture=neutral, PublicKeyToken=7906592bc7cc7340, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files\IBM\ILOG\CPLEX_Studio129\cplex\bin\x64_win64\ILOG.Concert.dll</HintPath>
@@ -192,9 +189,10 @@
     <Compile Include="Models\RefuelingPath.cs" />
     <Compile Include="Models\RefuelingPathGenerator.cs" />
     <Compile Include="Models\RefuelingPathList.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_Model_AFV_SingleCustomerSet.cs" />
     <Compile Include="Models\XCPlex\XCPlex_Model_AFV_TSP.cs" />
     <Compile Include="Models\XCPlex\XCPlexADF_EVSingleCustomerSet.cs" />
-    <Compile Include="Models\XCPlex\XCPlexADF_GDVSingleCustomerSet.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_Model_GDV_SingleCustomerSet.cs" />
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />

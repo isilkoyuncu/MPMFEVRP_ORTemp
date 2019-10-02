@@ -57,27 +57,8 @@ namespace MPMFEVRP.Domains.ProblemDomain
             srd = new SiteRelatedData(reader.GetNumberOfCustomers(), reader.GetNumberOfES(), numNodes, reader.GetSiteArray(), distance,timeConsumption,energyConsumption);
             vrd = new VehicleRelatedData(numVehicleCategories, reader.GetVehicleArray());
             crd = new ContextRelatedData(reader.GetTravelSpeed(), srd.GetSingleDepotSite().DueDate, 2); //ISSUE (#5) For LAMBDA we entered 2 for now; we'd love to experiment on it.
-        }
-        public RefuelingPathList PopulateRefuelingPathsBetween(RefuelingPathGenerator rpg, SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination)
-        {
-            return rpg.GenerateNonDominatedBetweenODPair(origin, destination, SRD.GetSWAVsList(SiteTypes.ExternalStation), SRD);
-        }
-        public RefuelingPathList PopulateAllNonDominatedRPs(RefuelingPathGenerator rpg, SiteRelatedData SRD)
-        {
-            List<SiteWithAuxiliaryVariables> nonESnodes = SRD.GetAllNonESSWAVsList();
-            List<SiteWithAuxiliaryVariables> ESnodes = SRD.GetSWAVsList(SiteTypes.ExternalStation);
-
-            RefuelingPathList allNonDominatedArcs = new RefuelingPathList();
-            RefuelingPathList nonDominatedRPs = new RefuelingPathList();
-            foreach (SiteWithAuxiliaryVariables from in nonESnodes)
-            {
-                foreach (SiteWithAuxiliaryVariables to in nonESnodes)
-                    if (from.ID != to.ID)
-                        nonDominatedRPs = rpg.GenerateNonDominatedBetweenODPair(from, to, ESnodes, SRD);
-                allNonDominatedArcs.AddRange(nonDominatedRPs);
-            }
-            return allNonDominatedArcs;
-        }
+        }       
+        
         public ProblemDataPackage(ProblemDataPackage twinPDP)
         {
             inputFileName = twinPDP.InputFileName;

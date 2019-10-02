@@ -75,7 +75,7 @@
             this.groupBox1.Controls.Add(this.listBox_problems);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(368, 739);
+            this.groupBox1.Size = new System.Drawing.Size(368, 752);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Problems";
@@ -85,13 +85,13 @@
             this.panel_multi_problemCharacteristics.Location = new System.Drawing.Point(6, 463);
             this.panel_multi_problemCharacteristics.Margin = new System.Windows.Forms.Padding(2);
             this.panel_multi_problemCharacteristics.Name = "panel_multi_problemCharacteristics";
-            this.panel_multi_problemCharacteristics.Size = new System.Drawing.Size(353, 188);
+            this.panel_multi_problemCharacteristics.Size = new System.Drawing.Size(353, 201);
             this.panel_multi_problemCharacteristics.TabIndex = 25;
             // 
             // button_multi_createProblemModel
             // 
             this.button_multi_createProblemModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_multi_createProblemModel.Location = new System.Drawing.Point(194, 700);
+            this.button_multi_createProblemModel.Location = new System.Drawing.Point(194, 711);
             this.button_multi_createProblemModel.Name = "button_multi_createProblemModel";
             this.button_multi_createProblemModel.Size = new System.Drawing.Size(165, 32);
             this.button_multi_createProblemModel.TabIndex = 24;
@@ -103,7 +103,7 @@
             // 
             this.comboBox_multi_TSPModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_multi_TSPModel.FormattingEnabled = true;
-            this.comboBox_multi_TSPModel.Location = new System.Drawing.Point(6, 674);
+            this.comboBox_multi_TSPModel.Location = new System.Drawing.Point(6, 687);
             this.comboBox_multi_TSPModel.Name = "comboBox_multi_TSPModel";
             this.comboBox_multi_TSPModel.Size = new System.Drawing.Size(354, 21);
             this.comboBox_multi_TSPModel.TabIndex = 23;
@@ -123,7 +123,7 @@
             this.label_multi_TSPModel.AutoSize = true;
             this.label_multi_TSPModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_multi_TSPModel.ForeColor = System.Drawing.Color.Black;
-            this.label_multi_TSPModel.Location = new System.Drawing.Point(4, 654);
+            this.label_multi_TSPModel.Location = new System.Drawing.Point(4, 666);
             this.label_multi_TSPModel.Name = "label_multi_TSPModel";
             this.label_multi_TSPModel.Size = new System.Drawing.Size(162, 17);
             this.label_multi_TSPModel.TabIndex = 22;
@@ -179,7 +179,7 @@
             // button_multi_viewProblem
             // 
             this.button_multi_viewProblem.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_multi_viewProblem.Location = new System.Drawing.Point(6, 700);
+            this.button_multi_viewProblem.Location = new System.Drawing.Point(6, 711);
             this.button_multi_viewProblem.Name = "button_multi_viewProblem";
             this.button_multi_viewProblem.Size = new System.Drawing.Size(180, 32);
             this.button_multi_viewProblem.TabIndex = 5;
@@ -306,7 +306,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(970, 743);
+            this.ClientSize = new System.Drawing.Size(965, 768);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);

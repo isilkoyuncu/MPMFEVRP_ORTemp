@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MPMFEVRP.Models;
 
 namespace MPMFEVRP.Domains.ProblemDomain
 {
@@ -315,6 +316,23 @@ namespace MPMFEVRP.Domains.ProblemDomain
             return eVenergyConsumption;
         }
 
+        public RefuelingPathList PopulateRefuelingPathsBetween(RefuelingPathGenerator rpg, SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination)
+        {
+            return rpg.GenerateNonDominatedBetweenODPair(origin, destination, this);
+        }
+        public RefuelingPathList PopulateAllNonDominatedRPs(RefuelingPathGenerator rpg)
+        {
+            List<SiteWithAuxiliaryVariables> nonESnodes = GetAllNonESSWAVsList();
+            RefuelingPathList allNonDominatedArcs = new RefuelingPathList();
+            RefuelingPathList nonDominatedRPs = new RefuelingPathList();
+            foreach (SiteWithAuxiliaryVariables from in nonESnodes)
+            {
+                foreach (SiteWithAuxiliaryVariables to in nonESnodes)
+                    nonDominatedRPs = rpg.GenerateNonDominatedBetweenODPair(from, to, this);
+                allNonDominatedArcs.AddRange(nonDominatedRPs);
+            }
+            return allNonDominatedArcs;
+        }
         public string GetSiteID(int siteIndex)//TODO: Its only mission is to convert siteIndex to siteID, which will never be used after SiteArray is no longer given out. Update: checked on 11/10/17, this method was still needed and could not be deleted.
         {
                     return siteArray[siteIndex].ID;
