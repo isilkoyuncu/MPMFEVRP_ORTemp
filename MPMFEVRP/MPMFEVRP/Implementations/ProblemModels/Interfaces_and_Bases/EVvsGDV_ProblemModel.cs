@@ -31,7 +31,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected XCPlexVRPBase EV_NDF_OrienteeringSolver;
         protected XCPlexVRPBase EV_ADF_OrienteeringSolver;
 
-        XCPlexADF_EVSingleCustomerSet newTSPsolverEV;
+        //XCPlexADF_EVSingleCustomerSet newTSPsolverEV;
+        XCPlex_Model_AFV_SingleCustomerSet newTSPsolverEV;
         XCPlex_Model_GDV_SingleCustomerSet newTSPsolverGDV;
 
         public bool GDVOptimalRouteFeasibleForEV = false;
@@ -63,7 +64,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void CreateNewTspSolvers()
         {
-            newTSPsolverEV = new XCPlexADF_EVSingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
             newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
         }
         public string GetInstanceName(string inputFileName)

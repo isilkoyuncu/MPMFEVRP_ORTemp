@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using MPMFEVRP.Domains.ProblemDomain;
 using System.Linq;
+using MPMFEVRP.Models.CustomerSetSolvers;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -18,8 +19,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         //Problem parameters
         int numberOfEVs;
         int numberOfGDVs;
-        int totalNumVeh;
-        int numCustomers;
 
         //Algorithm parameters
         int poolSize = 0;
@@ -31,8 +30,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         double runTimeLimitInSeconds = 0.0;
         double searchTimeLimit = 0.0;
         int infeasibleCountLimit = 0;
-
-        bool couldNotExtend = false;
 
         XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam;
@@ -82,8 +79,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             this.theProblemModel = theProblemModel;
             numberOfEVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
             numberOfGDVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
-            totalNumVeh = numberOfEVs + numberOfGDVs;
-            numCustomers = theProblemModel.SRD.NumCustomers;
 
             //Algorithm param
             poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
@@ -159,7 +154,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                                     VehicleSpecificRoute vsrGDV = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute;
                                     List<string> GDVoptRoute = vsrGDV.ListOfVisitedSiteIncludingDepotIDs;
                                     tempExtendedCS.NewOptimize(theProblemModel, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), vsrooGDV);
-                                    XCPlex_Model_AFV_TSP cplexRPR = new XCPlex_Model_AFV_TSP(theProblemModel, XcplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce); //tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
+                                    XCPlex_Model_AFV_SingleCustomerSet cplexRPR = new XCPlex_Model_AFV_SingleCustomerSet(theProblemModel, XcplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce); //tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
                                     cplexRPR.Solve_and_PostProcess();
                                     if (tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
                                         if (tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedCustomerSiteIDs.Count != tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count)
@@ -167,9 +162,14 @@ namespace MPMFEVRP.Implementations.Algorithms
                                             int a = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count;
                                             int b = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count;
                                             int c = a - b;
+                                            List<VehicleCategories> vehicleCategories = new List<VehicleCategories>();
+                                            vehicleCategories.Add(VehicleCategories.GDV);
+                                            vehicleCategories.Add(VehicleCategories.EV);
 
-                                        }
-                                }
+                                            CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs exploiter =new  CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(theProblemModel);
+                                            exploiter.Solve(tempExtendedCS, vehicleCategories,false);
+                                                }
+}
                                 extendFinishTime = DateTime.Now;
                             }
                             UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
@@ -436,7 +436,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 // do not update current CS or anything related to EV
             }
             else
-                couldNotExtend = true;
+
             if (!isCSretrievedFromArchive)
             {
                 vsrooList_EV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV));

@@ -41,15 +41,15 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
 
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
-            Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
+            Assert.AreEqual(180.5072, Math.Round(theSolver.GetBestObjValue(),4));
+
+            //Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
             //Assert.AreEqual(1, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
             //Assert.AreEqual(180.5072, Math.Round(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled(), 4));
-            Assert.AreEqual(180.5072, Math.Round(theSolver.ObjValue, 4));
-
         }
 
         [TestMethod()]
-        public void SolveForThreeCustomersTest()
+        public void SolveForFourCustomersTest()
         {
             CustomerSet cs = new CustomerSet("C6", theProblemModel.SRD.GetCustomerIDs());
             cs.NewExtend("C8");
@@ -59,6 +59,19 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
+            Assert.AreEqual(335.19, Math.Round(theSolver.GetBestObjValue(), 2));
+
+            for (int i = 0; i < theSolver.DeltaValues.Length; i++)
+            {
+                if (theSolver.DeltaValues[i] > theSolver.preprocessedSites[i].DeltaMax)
+                    Assert.Fail();
+                else if (theSolver.DeltaValues[i] < theSolver.preprocessedSites[i].DeltaMin)
+                    Assert.Fail();
+                else if (theSolver.TValues[i] > theSolver.preprocessedSites[i].TLS)
+                    Assert.Fail();
+                else if (theSolver.TValues[i] < theSolver.preprocessedSites[i].TES)
+                    Assert.Fail();
+            }
             Assert.AreEqual(4, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
             Assert.AreEqual(7, vsroo.VSOptimizedRoute.NumberOfSitesVisited);//4 customers + 1 ES + 2 depots
             Assert.AreEqual(335.19, Math.Round(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled(), 2));
@@ -78,7 +91,6 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             }
 
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
-
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Infeasible, vsroo.Status);
         }
     }

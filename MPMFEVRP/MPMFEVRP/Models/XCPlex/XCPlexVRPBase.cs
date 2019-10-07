@@ -21,7 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
         bool useTighterBounds = true;
 
         //The preprocessed (duplicated) ones
-        protected SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use
+        public SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use
         protected int NumPreprocessedSites { get { return preprocessedSites.Length; } }
         protected int FirstESNodeIndex = int.MaxValue, LastESNodeIndex = int.MinValue, FirstCustomerNodeIndex = int.MaxValue, LastCustomerNodeIndex = int.MinValue;
         protected SiteWithAuxiliaryVariables TheDepot { get { return depots.First(); } } //There is a single depot

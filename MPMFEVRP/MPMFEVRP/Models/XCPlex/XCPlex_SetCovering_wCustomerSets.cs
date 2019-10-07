@@ -173,18 +173,18 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)
-        {
-            int[,] z = GetZVariablesSetTo1();
-            double [,] objective = GetObjValuesForZSetTo1();
-            
-
+        { 
             if (SolutionType != typeof(CustomerSetBasedSolution))
                 throw new System.Exception("XCPlex_SetCovering_wCustomerSets prompted to output the wrong Solution type, it only outputs a solution of the CustomerSetBasedSolution type");
 
             if ((solutionStatus == XCPlexSolutionStatus.Feasible) || (solutionStatus == XCPlexSolutionStatus.Optimal))
                 return new CustomerSetBasedSolution(theProblemModel, GetZVariablesSetTo1(), customerSetArray);
             else
-                return null;
+            {
+                CustomerSetBasedSolution csbs = new CustomerSetBasedSolution(theProblemModel);
+                csbs.UpdateUpperLowerBoundsAndStatusForInfeasible();
+                return csbs;
+            }
         }
         public override string GetDescription_AllVariables_Array()
         {

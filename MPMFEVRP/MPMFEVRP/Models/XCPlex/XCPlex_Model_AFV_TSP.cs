@@ -106,7 +106,7 @@ namespace MPMFEVRP.Models.XCPlex
             allNondominatedRPs = new RefuelingPathList[numNonESNodes, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++) {
-                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD);
+                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD);
                 }
         }
         void SetUndesiredXYVariablesTo0()

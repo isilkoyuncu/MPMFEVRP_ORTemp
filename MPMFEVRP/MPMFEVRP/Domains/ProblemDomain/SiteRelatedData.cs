@@ -318,7 +318,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
 
         public RefuelingPathList PopulateRefuelingPathsBetween(RefuelingPathGenerator rpg, SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination)
         {
-            return rpg.GenerateNonDominatedBetweenODPair(origin, destination, this);
+            return rpg.GenerateNonDominatedBetweenODPairIK(origin, destination, this);
         }
         public RefuelingPathList PopulateAllNonDominatedRPs(RefuelingPathGenerator rpg)
         {
@@ -328,7 +328,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
             foreach (SiteWithAuxiliaryVariables from in nonESnodes)
             {
                 foreach (SiteWithAuxiliaryVariables to in nonESnodes)
-                    nonDominatedRPs = rpg.GenerateNonDominatedBetweenODPair(from, to, this);
+                    nonDominatedRPs = rpg.GenerateNonDominatedBetweenODPairIK(from, to, this);
                 allNonDominatedArcs.AddRange(nonDominatedRPs);
             }
             return allNonDominatedArcs;

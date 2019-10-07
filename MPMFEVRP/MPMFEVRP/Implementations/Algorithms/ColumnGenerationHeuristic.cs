@@ -61,7 +61,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         double optFoundTimeSec = 0.0;
         DateTime globalStartTime;
         DateTime globalFinishTime;
-        double[][] iterationTime;
+        List<double>[] iterationTime;
 
         public ColumnGenerationHeuristic()
         {
@@ -105,9 +105,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             stats.UpperBound = double.MaxValue;
             allSolutions = new List<CustomerSetBasedSolution>();
 
-            iterationTime = new double[3][];
+            iterationTime = new List<double>[3];
             for (int i=0; i<3; i++)
-                iterationTime[i] = new double[poolSize];
+                iterationTime[i] = new List<double>();
             totalTimeSpentExtendingCustSet = 0.0;
             //totalCompTimeBeforeSetCover = 0.0;
             //totalReassignmentTime_GDV2EV = 0.0;
@@ -119,10 +119,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             globalStartTime = DateTime.Now;
             DateTime localStartTime;
             DateTime localFinishTime;
+
             for (int i = 1; i <2; i++)
             {
                 //selectedCriterion = (Selection_Criteria)i;
                 int k = 0;
+
                 double objValue = (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Minimize ? double.MaxValue : double.MinValue);
                 double objImprovement = 0.0;
                 do //this is kind of the number of random starting points, in order not to stuck in a local optima
@@ -140,7 +142,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         previousNotEVFeasible = false;
                         countInfeasible = 0;
                         do
-                        {                           
+                        {
                             CustomerSet tempExtendedCS = new CustomerSet(currentCS);
                             string customer2add = SelectACustomer(visitableCustomersForCS, currentCS); //Extend the CS with one customer from visitableCustomersForCS; here k plays a role for randomness
                             tempExtendedCS.NewExtend(customer2add);
@@ -154,7 +156,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                             {
                                 extendStartTime = DateTime.Now;
                                 tempExtendedCS.NewOptimize(theProblemModel);
-                                extendFinishTime = DateTime.Now;                               
+                                extendFinishTime = DateTime.Now;
                             }
                             UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
                             currentCS = UpdateCurrentState(currentCS, customer2add, tempExtendedCS, isCSretrievedFromArchive, visitableCustomersForCS);
@@ -162,25 +164,30 @@ namespace MPMFEVRP.Implementations.Algorithms
                         visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
                     } while (visitableCustomers.Count > 0);
                     localFinishTime = DateTime.Now;
-                    iterationTime[i][k] = (localFinishTime - localStartTime).TotalSeconds;
+                    iterationTime[i].Add((localFinishTime - localStartTime).TotalSeconds);
                     if (runTimeLimitInSeconds < iterationTime[i].Sum())
                         break;
                     solution = SetCover();
-                    if (solution.Status == AlgorithmSolutionStatus.Optimal)
-                    {
-                        //if (solution.UpperBound < 1797.51)
-                        //{
-                        //    globalFinishTime = DateTime.Now;
-                        //    optFoundTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
-                        //}
-                        if (solution.UpperBound < objValue)
-                        {
-                            objImprovement = objValue - solution.UpperBound;
-                            objValue = solution.UpperBound;
-                        }
-                    }
+                    //if (solution.Status == AlgorithmSolutionStatus.Optimal)
+                    //{
+                    //    //if (solution.UpperBound < 1797.51)
+                    //    //{
+                    //    //    globalFinishTime = DateTime.Now;
+                    //    //    optFoundTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
+                    //    //}
+                    //    if (solution.UpperBound < objValue)
+                    //    {
+                    //        objImprovement = objValue - solution.UpperBound;
+                    //        objValue = solution.UpperBound;
+                    //    }
+                    //}
                     k++;
-                } while (k < poolSize && objImprovement > 0.00001);
+                    //actualIter = k;
+                    //if (solution.Status == AlgorithmSolutionStatus.Optimal)
+                    //    if (objImprovement < 0.0000000000000000001)
+                    //        terminate = true;
+
+                } while (iterationTime[i].Sum()< runTimeLimitInSeconds);//(k < poolSize && !terminate);
             }
             solution = SetCover();
             RecoverWithSwap();

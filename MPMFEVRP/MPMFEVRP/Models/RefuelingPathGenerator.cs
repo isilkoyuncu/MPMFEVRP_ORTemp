@@ -136,46 +136,34 @@ namespace MPMFEVRP.Models
         /// <param name="externalStations"></param>
         /// <param name="SRD"></param>
         /// <returns></returns>
-        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations=null)
+        public RefuelingPathList GenerateNonDominatedBetweenODPairIK(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations = null)
         {
             RefuelingPathList outcome = new RefuelingPathList();
             RefuelingPath refuelingPath;
-
-            //Add direct arc
-            if (origin.DeltaPrimeMax - SRD.GetEVEnergyConsumption(origin.ID, destination.ID) >= destination.DeltaMin)
+            if (origin.ID != destination.ID) //no refueling path from itself to itself
             {
-                refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables>() { }, SRD);
-                int addResult = outcome.AddIfNondominated(refuelingPath);
-            }
-            //Add one-or-more-stop refueling paths
-            foreach (List<SiteWithAuxiliaryVariables> rs in refuelingStopsList)
-            {
-                if ((origin.SiteType==SiteTypes.Depot && rs[0].X == SRD.GetSingleDepotSite().X && rs[0].Y == SRD.GetSingleDepotSite().Y) || (destination.SiteType == SiteTypes.Depot && rs[rs.Count - 1].X == SRD.GetSingleDepotSite().X && rs[rs.Count - 1].Y == SRD.GetSingleDepotSite().Y))
+                //Add direct arc
+                if (origin.DeltaPrimeMax - SRD.GetEVEnergyConsumption(origin.ID, destination.ID) >= destination.DeltaMin)
                 {
-                    //Do not add the ES at the depot if first or last 
+                    refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables>() { }, SRD);
+                    int addResult = outcome.AddIfNondominated(refuelingPath);
                 }
-                else
+                //Add one-or-more-stop refueling paths
+                foreach (List<SiteWithAuxiliaryVariables> rs in refuelingStopsList)
                 {
-                    refuelingPath = new RefuelingPath(origin, destination, rs, SRD);
-                    if (refuelingPath.Feasible)
+                    if ((origin.SiteType == SiteTypes.Depot && rs[0].X == SRD.GetSingleDepotSite().X && rs[0].Y == SRD.GetSingleDepotSite().Y) || (destination.SiteType == SiteTypes.Depot && rs[rs.Count - 1].X == SRD.GetSingleDepotSite().X && rs[rs.Count - 1].Y == SRD.GetSingleDepotSite().Y))
                     {
-                        int addResult = outcome.AddIfNondominated(refuelingPath);
+                        //Do not add the ES at the depot if first or last 
+                    }
+                    else
+                    {
+                        refuelingPath = new RefuelingPath(origin, destination, rs, SRD);
+                        if (refuelingPath.Feasible)
+                        {
+                            int addResult = outcome.AddIfNondominated(refuelingPath);
+                        }
                     }
                 }
-            }
-            if (origin.ID == "D" && destination.ID == "C3"){
-                bool check = true; }
-            else if (origin.ID == "C3" && destination.ID == "C14"){
-                bool check = true; }
-            else if (origin.ID == "C14" && destination.ID == "C15"){
-                bool check = true; }
-            else if (origin.ID == "C15" && destination.ID == "C10")
-            {
-                bool check = true;
-            }
-            else if (origin.ID == "C10" && destination.ID == "D")
-            {
-                bool check = true;
             }
             return outcome;
         }

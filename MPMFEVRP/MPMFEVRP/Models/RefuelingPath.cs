@@ -127,7 +127,7 @@ namespace MPMFEVRP.Models
                     firstArcEnergyConsumption = energyConsumption;
                 if (to.SiteType != SiteTypes.ExternalStation)
                     lastArcEnergyConsumption = energyConsumption;
-                energyFeasible = energyConsumption > from.DeltaPrimeMax;
+                    energyFeasible = energyConsumption <= from.DeltaPrimeMax;
 
                 from = to;
                 to_inSequence.RemoveAt(0);
@@ -146,15 +146,22 @@ namespace MPMFEVRP.Models
             }
             maximumArrivalSOEAtOrigin = origin.DeltaMax;
 
-            maximumArrivalTimeAtOrigin = destination.TLS - totalTime - origin.ServiceDuration;
             minimumArrivalTimeAtOrigin = origin.TES;
+            maximumArrivalTimeAtOrigin = origin.TLS;
 
             minimumDepartureTimeAtDestination = origin.TES + totalTime + destination.ServiceDuration;
-            minimumArrivalTimeAtDestination = origin.TES;
+            minimumArrivalTimeAtDestination = destination.TES;
             maximumArrivalTimeAtDestination = destination.TLS;
-
+            
             maximumDepartureTimeAtOrigin = destination.TLS - totalTime;
             timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TES + origin.ServiceDuration));
+            if (Feasible)
+            {
+                string feasibleArc = origin.ID + "_";
+                foreach (string es in GetRefuelingStopIDs())
+                    feasibleArc = feasibleArc + es + "_";
+                feasibleArc = feasibleArc + destination.ID;
+            }
         }
         public List<string> GetRefuelingStopIDs()
         {

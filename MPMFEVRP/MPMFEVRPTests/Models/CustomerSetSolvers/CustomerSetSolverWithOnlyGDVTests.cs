@@ -43,6 +43,21 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             Assert.AreEqual(1, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
             Assert.AreEqual(180.5072, Math.Round(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled(),4));
         }
+        [TestMethod()]
+        public void SolveForFourCustomersTest()
+        {
+            CustomerSet cs = new CustomerSet("C6", theProblemModel.SRD.GetCustomerIDs());
+            cs.NewExtend("C8");
+            cs.NewExtend("C14");
+            cs.NewExtend("C19");
+
+            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs);
+
+            Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
+            Assert.AreEqual(4, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
+            Assert.AreEqual(333.07, Math.Round(vsroo.VSOptimizedRoute.GetVehicleMilesTraveled(), 2));
+            //Assert.AreEqual(335.19, Math.Round(theSolver.GetBestObjValue(), 2));
+        }
 
         [TestMethod()]
         public void SolveForThreeCustomersTest()

@@ -111,7 +111,15 @@ namespace MPMFEVRP.Implementations.Solutions
             status = Domains.AlgorithmDomain.AlgorithmSolutionStatus.Feasible;
         }
 
-        
+        public void UpdateUpperLowerBoundsAndStatusForInfeasible()
+        {
+            if (model.ObjectiveFunctionType == Models.ObjectiveFunctionTypes.Maximize)//If it is a maximization problem, LB is the incumbent solution's objective value
+                lowerBound = double.MinValue;
+            else //If it is a minimization problem, UB is the incumbent solution's objective value
+                upperBound = double.MaxValue;
+            status = Domains.AlgorithmDomain.AlgorithmSolutionStatus.Infeasible;
+        }
+
         public override ComparisonResult CompareTwoSolutions(ISolution solution1, ISolution solution2)
         {
             throw new NotImplementedException();
