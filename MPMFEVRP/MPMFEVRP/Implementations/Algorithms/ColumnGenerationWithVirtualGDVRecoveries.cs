@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using MPMFEVRP.Domains.ProblemDomain;
 using System.Linq;
-using MPMFEVRP.Models.CustomerSetSolvers;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -19,6 +18,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         //Problem parameters
         int numberOfEVs;
         int numberOfGDVs;
+        int totalNumVeh;
+        int numCustomers;
 
         //Algorithm parameters
         int poolSize = 0;
@@ -30,6 +31,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         double runTimeLimitInSeconds = 0.0;
         double searchTimeLimit = 0.0;
         int infeasibleCountLimit = 0;
+
+        bool couldNotExtend = false;
 
         XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam;
@@ -54,10 +57,11 @@ namespace MPMFEVRP.Implementations.Algorithms
         double totalTimeSpentExtendingCustSet;
         //double totalCompTimeBeforeSetCover;
         //double totalReassignmentTime_GDV2EV;
-        double totalRunTimeMiliSec = 0.0;
+        double totalRunTimeSec = 0.0;
+        double optFoundTimeSec = 0.0;
         DateTime globalStartTime;
         DateTime globalFinishTime;
-        double[][] iterationTime;
+        List<double>[] iterationTime;
 
         public ColumnGenerationWithVirtualGDVRecoveries()
         {
@@ -79,6 +83,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             this.theProblemModel = theProblemModel;
             numberOfEVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
             numberOfGDVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
+            totalNumVeh = numberOfEVs + numberOfGDVs;
+            numCustomers = theProblemModel.SRD.NumCustomers;
 
             //Algorithm param
             poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
@@ -99,9 +105,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             stats.UpperBound = double.MaxValue;
             allSolutions = new List<CustomerSetBasedSolution>();
 
-            iterationTime = new double[3][];
+            iterationTime = new List<double>[3];
             for (int i = 0; i < 3; i++)
-                iterationTime[i] = new double[poolSize];
+                iterationTime[i] = new List<double>();
             totalTimeSpentExtendingCustSet = 0.0;
             //totalCompTimeBeforeSetCover = 0.0;
             //totalReassignmentTime_GDV2EV = 0.0;
@@ -113,16 +119,16 @@ namespace MPMFEVRP.Implementations.Algorithms
             globalStartTime = DateTime.Now;
             DateTime localStartTime;
             DateTime localFinishTime;
+
             for (int i = 1; i < 2; i++)
             {
-                selectedCriterion = (Selection_Criteria)i;
+                //selectedCriterion = (Selection_Criteria)i;
                 int k = 0;
                 double objValue = (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Minimize ? double.MaxValue : double.MinValue);
-                double objImprovement = 0.0;
                 do //this is kind of the number of random starting points, in order not to stuck in a local optima
                 {
                     localStartTime = DateTime.Now;
-                    random = new Random(randomSeed + i + k);
+                    random = new Random(randomSeed + k);
                     //Start with an empty customer set and customers2visit = all customers
                     List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set                    
                     do
@@ -147,29 +153,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                             else
                             {
                                 extendStartTime = DateTime.Now;
-                                tempExtendedCS.NewOptimize(theProblemModel, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV));
-                                VehicleSpecificRouteOptimizationOutcome vsrooGDV = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV);
-                                if (vsrooGDV.Status == VehicleSpecificRouteOptimizationStatus.Optimized)
-                                {
-                                    VehicleSpecificRoute vsrGDV = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute;
-                                    List<string> GDVoptRoute = vsrGDV.ListOfVisitedSiteIncludingDepotIDs;
-                                    tempExtendedCS.NewOptimize(theProblemModel, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), vsrooGDV);
-                                    XCPlex_Model_AFV_SingleCustomerSet cplexRPR = new XCPlex_Model_AFV_SingleCustomerSet(theProblemModel, XcplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce); //tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
-                                    cplexRPR.Solve_and_PostProcess();
-                                    if (tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).Status == VehicleSpecificRouteOptimizationStatus.Optimized)
-                                        if (tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedCustomerSiteIDs.Count != tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count)
-                                        {
-                                            int a = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count;
-                                            int b = tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Count;
-                                            int c = a - b;
-                                            List<VehicleCategories> vehicleCategories = new List<VehicleCategories>();
-                                            vehicleCategories.Add(VehicleCategories.GDV);
-                                            vehicleCategories.Add(VehicleCategories.EV);
-
-                                            CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs exploiter =new  CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(theProblemModel);
-                                            exploiter.Solve(tempExtendedCS, vehicleCategories,false);
-                                                }
-}
+                                tempExtendedCS.NewOptimize(theProblemModel);
                                 extendFinishTime = DateTime.Now;
                             }
                             UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
@@ -178,24 +162,38 @@ namespace MPMFEVRP.Implementations.Algorithms
                         visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
                     } while (visitableCustomers.Count > 0);
                     localFinishTime = DateTime.Now;
-                    iterationTime[i][k] = (localFinishTime - localStartTime).TotalSeconds;
-                    if (runTimeLimitInSeconds < iterationTime[i].Sum())
-                        break;
+                    //double x = (localFinishTime - localStartTime).TotalSeconds;
+                    //iterationTime[i].Add(x);
+                    //if (runTimeLimitInSeconds < iterationTime[i].Sum())
+                        //break;
                     solution = SetCover();
-                    if (solution.Status == AlgorithmSolutionStatus.Optimal && solution.UpperBound < objValue)
-                    {
-                        objImprovement = objValue - solution.UpperBound;
-                        objValue = solution.UpperBound;
-                    }
+                    //if (solution.Status == AlgorithmSolutionStatus.Optimal)
+                    //{
+                    //    //if (solution.UpperBound < 1797.51)
+                    //    //{
+                    //    //    globalFinishTime = DateTime.Now;
+                    //    //    optFoundTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
+                    //    //}
+                    //    if (solution.UpperBound < objValue)
+                    //    {
+                    //        objImprovement = objValue - solution.UpperBound;
+                    //        objValue = solution.UpperBound;
+                    //    }
+                    //}
                     k++;
-                } while (k < poolSize || objImprovement > 0.001);
+                    //actualIter = k;
+                    //if (solution.Status == AlgorithmSolutionStatus.Optimal)
+                    //    if (objImprovement < 0.0000000000000000001)
+                    //        terminate = true;
+
+                } while ((localFinishTime-globalStartTime).TotalSeconds < runTimeLimitInSeconds);//(k < poolSize && !terminate);
             }
-            solution = SetCover();
-            RecoverWithSwap();
+            //solution = SetCover();
+            //RecoverWithSwap();
             solution = SetCover();
 
             globalFinishTime = DateTime.Now;
-            totalRunTimeMiliSec = (globalFinishTime - globalStartTime).TotalSeconds;
+            totalRunTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
         }
 
         void RecoverWithSwap()
@@ -203,15 +201,17 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int k = 0; k < poolSize; k++)
             {
                 random = new Random(k);
-                CustomerSet CS1 = new CustomerSet(exploredCustomerSetMasterList[random.Next(exploredCustomerSetMasterList.Count)]);
-                CustomerSet CS2 = new CustomerSet(exploredCustomerSetMasterList[random.Next(exploredCustomerSetMasterList.Count)]);
+                int i = random.Next(exploredCustomerSetMasterList.Count);
+                CustomerSet CS1 = new CustomerSet(exploredCustomerSetMasterList[i]);
+                int j = random.Next(exploredCustomerSetMasterList.Count);
+                CustomerSet CS2 = new CustomerSet(exploredCustomerSetMasterList[j]);
                 CustomerSet.NewRandomSwap(CS1, CS2, random, exploredCustomerSetMasterList, theProblemModel);
             }
         }
 
         public override string GetName()
         {
-            return "Column Generation And Recover Heuristic Exploiting Virtual GDVs";
+            return "Randomized Column Generation with Refueling Path Insert";
 
         }
 
@@ -268,7 +268,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             //Given that the instance is solved, we need to update status and statistics from it
             status = (AlgorithmSolutionStatus)((int)CPlexExtender.SolutionStatus);
-            stats.RunTimeMilliSeconds = (long)totalRunTimeMiliSec;
+            stats.RunTimeMilliSeconds = (long)totalRunTimeSec;
             stats.LowerBound = CPlexExtender.LowerBound_XCPlex;
             stats.UpperBound = CPlexExtender.UpperBound_XCPlex;
             GetOutputSummary();
@@ -436,7 +436,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 // do not update current CS or anything related to EV
             }
             else
-
+                couldNotExtend = true;
             if (!isCSretrievedFromArchive)
             {
                 vsrooList_EV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV));
@@ -493,7 +493,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             else if (CPlexExtender.SolutionStatus == XCPlexSolutionStatus.NotYetSolved)
                 outcome.Status = AlgorithmSolutionStatus.NotYetSolved;
             else if (CPlexExtender.SolutionStatus == XCPlexSolutionStatus.Optimal)
-                outcome.Status = AlgorithmSolutionStatus.Optimal; outcome.UpperBound = CPlexExtender.UpperBound_XCPlex;
+                outcome.Status = AlgorithmSolutionStatus.Optimal;
+            outcome.UpperBound = CPlexExtender.UpperBound_XCPlex;
             outcome.LowerBound = CPlexExtender.LowerBound_XCPlex;
             return outcome;
         }
