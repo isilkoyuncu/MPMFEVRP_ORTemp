@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using MPMFEVRP.Domains.ProblemDomain;
 using System.Linq;
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -20,6 +21,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         int numberOfGDVs;
         int totalNumVeh;
         int numCustomers;
+        //GDVvsAFV_OptimizationComparisonStatistics _OptimizationComparisonStatistics;
 
         //Algorithm parameters
         int poolSize = 0;
@@ -112,6 +114,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             //totalCompTimeBeforeSetCover = 0.0;
             //totalReassignmentTime_GDV2EV = 0.0;
             infeasibleCountLimit = 25;
+
+            //_OptimizationComparisonStatistics = new GDVvsAFV_OptimizationComparisonStatistics();
+            
         }
 
         public override void SpecializedRun()
@@ -154,6 +159,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                             {
                                 extendStartTime = DateTime.Now;
                                 tempExtendedCS.NewOptimize(theProblemModel);
+                                //_OptimizationComparisonStatistics.RecordObservation(tempExtendedCS.Customers.Count, tempExtendedCS.RouteOptimizationOutcome);
                                 extendFinishTime = DateTime.Now;
                             }
                             UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
@@ -311,6 +317,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             bestSolutionFound.Status = status;
             bestSolutionFound.UpperBound = CPlexExtender.UpperBound_XCPlex;
             bestSolutionFound.LowerBound = CPlexExtender.LowerBound_XCPlex;
+            //_OptimizationComparisonStatistics.WriteToFile(StringOperations.AppendToFilename(theProblemModel.InputFileName, "_OptimizationComparisonStatistics"));
         }
 
         public override void SpecializedReset()
