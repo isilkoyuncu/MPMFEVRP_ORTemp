@@ -24,16 +24,16 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
         }
         //Other Methods
-        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence)
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence, VehicleSpecificRoute vsr_GDV)
         {
             //Verification
             if (preserveCustomerVisitSequence) //If we want to preserce cs visit sequence, we must provide a CS that has been optimized with a GDV solver
-                if (customerSet.GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV) != VehicleSpecificRouteOptimizationStatus.Optimized)
+                if (!vsr_GDV.Feasible)
                     throw new ArgumentException("CustomerSetSolverWithOnlyAFV Solve method is invoked with a wrong set of arguments. We want to keep the sequence but we do not provide an optimal GDV specific route.");
 
             //Implementation
             //Pre-process
-            RefineDecisionVariables(customerSet, preserveCustomerVisitSequence);
+            RefineDecisionVariables(customerSet, preserveCustomerVisitSequence, vsr_GDV);
 
             //Solve & Post-process
             Solve_and_PostProcess();
@@ -49,6 +49,11 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             }
             else
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
+        }
+
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence)
+        {
+            throw new NotImplementedException();
         }
     }
 }

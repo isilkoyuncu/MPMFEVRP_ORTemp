@@ -477,7 +477,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "GDV Optimize Single Customer Set";
         }
-        public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence)
+        public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence, VehicleSpecificRoute vsr_GDV)
         {
             RHS_forNodeCoverage = new double[numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
@@ -513,9 +513,9 @@ namespace MPMFEVRP.Models.XCPlex
             //If we want to preserve the sequence, we must have a gdv optimal route!
             if (preserveCustomerVisitSequence)
             {
-                if (cS.GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV) != VehicleSpecificRouteOptimizationStatus.Optimized)
-                    throw new System.Exception("RefineDecisionVariables of afv solver for single customer set wants to keep the route order but it is not given one!");
-                VehicleSpecificRoute vsr = cS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute;
+                //if (cS.GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV) != VehicleSpecificRouteOptimizationStatus.Optimized)
+                //    throw new System.Exception("RefineDecisionVariables of afv solver for single customer set wants to keep the route order but it is not given one!");
+                VehicleSpecificRoute vsr = vsr_GDV;
                 List<int[]> activeArcs = GetOrderedCustomerIndices(vsr);
                 foreach(int[] arc in activeArcs)
                     for(int i=0; i<numNonESNodes; i++)

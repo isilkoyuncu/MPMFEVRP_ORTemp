@@ -16,15 +16,11 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     public class ColumnGenerationWithVirtualGDVRecoveries : AlgorithmBase
     {
-        //Problem parameters
-        int numberOfEVs;
-        int numberOfGDVs;
-        int totalNumVeh;
-        int numCustomers;
         //GDVvsAFV_OptimizationComparisonStatistics _OptimizationComparisonStatistics;
 
         //Algorithm parameters
         int poolSize = 0;
+        bool preserveCustomerVisitSequence = false;
         int randomSeed;
         Random random;
         Selection_Criteria selectedCriterion;
@@ -32,14 +28,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         double power;
         double runTimeLimitInSeconds = 0.0;
         double searchTimeLimit = 0.0;
-        int infeasibleCountLimit = 0;
-
-        bool couldNotExtend = false;
 
         XCPlexBase CPlexExtender = null;
         XCPlexParameters XcplexParam;
 
-        CustomerSetList exploredCustomerSetMasterList = new CustomerSetList();
+        CustomerSetList exploredCustomerSetMasterList;
+        CustomerSetList exploredSingleCustomerSetList;
+
         List<VehicleSpecificRouteOptimizationOutcome> vsrooList_GDV = new List<VehicleSpecificRouteOptimizationOutcome>();
         List<VehicleSpecificRouteOptimizationOutcome> vsrooList_EV = new List<VehicleSpecificRouteOptimizationOutcome>();
 
@@ -60,7 +55,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         //double totalCompTimeBeforeSetCover;
         //double totalReassignmentTime_GDV2EV;
         double totalRunTimeSec = 0.0;
-        double optFoundTimeSec = 0.0;
         DateTime globalStartTime;
         DateTime globalFinishTime;
         List<double>[] iterationTime;
@@ -72,6 +66,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void AddSpecializedParameters()
         {
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "300"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection }, Selection_Criteria.UniformAmongTheBestPercentage, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 5, 10, 15, 20, 25, 30, 50 }, 20, UserInputObjectType.ComboBox));
@@ -83,13 +78,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             //Problem param
             this.theProblemModel = theProblemModel;
-            numberOfEVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
-            numberOfGDVs = theProblemModel.ProblemCharacteristics.GetParameter(ParameterID.PRB_NUM_EV).GetIntValue();
-            totalNumVeh = numberOfEVs + numberOfGDVs;
-            numCustomers = theProblemModel.SRD.NumCustomers;
-
+            
             //Algorithm param
             poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
+            preserveCustomerVisitSequence = algorithmParameters.GetParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE).GetBoolValue();
             randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
             selectedCriterion = (Selection_Criteria)AlgorithmParameters.GetParameter(ParameterID.ALG_SELECTION_CRITERIA).Value;
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
@@ -99,6 +91,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             XcplexParam = new XCPlexParameters();
 
             exploredCustomerSetMasterList = new CustomerSetList();
+            exploredSingleCustomerSetList = new CustomerSetList();
+
             vsrooList_GDV = new List<VehicleSpecificRouteOptimizationOutcome>();
             vsrooList_EV = new List<VehicleSpecificRouteOptimizationOutcome>();
 
@@ -112,90 +106,61 @@ namespace MPMFEVRP.Implementations.Algorithms
                 iterationTime[i] = new List<double>();
             totalTimeSpentExtendingCustSet = 0.0;
             //totalCompTimeBeforeSetCover = 0.0;
-            //totalReassignmentTime_GDV2EV = 0.0;
-            infeasibleCountLimit = 25;
-
-            //_OptimizationComparisonStatistics = new GDVvsAFV_OptimizationComparisonStatistics();
-            
+            //totalReassignmentTime_GDV2EV = 0.0;            
         }
 
         public override void SpecializedRun()
         {
             globalStartTime = DateTime.Now;
-            DateTime localStartTime;
-            DateTime localFinishTime;
-
-            for (int i = 1; i < 2; i++)
+            for (int i = 0; i < theProblemModel.SRD.NumCustomers; i++)
             {
-                //selectedCriterion = (Selection_Criteria)i;
-                int k = 0;
-                double objValue = (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Minimize ? double.MaxValue : double.MinValue);
-                do //this is kind of the number of random starting points, in order not to stuck in a local optima
-                {
-                    localStartTime = DateTime.Now;
-                    random = new Random(randomSeed + k);
-                    //Start with an empty customer set and customers2visit = all customers
-                    List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set                    
-                    do
-                    {
-                        CustomerSet currentCS = new CustomerSet(); //Start a new "customer set" <- route
-                        List<string> visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomers, currentCS);
-                        //finish a route when there is no customer left in the visitableCustomersForCS
-                        extensionTime = 0.0;
-                        previousNotEVFeasible = false;
-                        countInfeasible = 0;
-                        do
-                        {
-                            CustomerSet tempExtendedCS = new CustomerSet(currentCS);
-                            string customer2add = SelectACustomer(visitableCustomersForCS, currentCS); //Extend the CS with one customer from visitableCustomersForCS; here k plays a role for randomness
-                            tempExtendedCS.NewExtend(customer2add);
-                            bool isCSretrievedFromArchive = false; //Consider turining this check off and see how it performs, especially for small number of customers, this check might be more cumbersome than reoptimizing
-                            if (exploredCustomerSetMasterList.Includes(tempExtendedCS))
-                            {
-                                tempExtendedCS = exploredCustomerSetMasterList.Retrieve_CS(tempExtendedCS); //retrieve the info needed from exploredCustomerSetList
-                                isCSretrievedFromArchive = true;
-                            }
-                            else
-                            {
-                                extendStartTime = DateTime.Now;
-                                tempExtendedCS.NewOptimize(theProblemModel);
-                                //_OptimizationComparisonStatistics.RecordObservation(tempExtendedCS.Customers.Count, tempExtendedCS.RouteOptimizationOutcome);
-                                extendFinishTime = DateTime.Now;
-                            }
-                            UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
-                            currentCS = UpdateCurrentState(currentCS, customer2add, tempExtendedCS, isCSretrievedFromArchive, visitableCustomersForCS);
-                        } while (visitableCustomersForCS.Count > 0);
-                        visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
-                    } while (visitableCustomers.Count > 0);
-                    localFinishTime = DateTime.Now;
-                    //double x = (localFinishTime - localStartTime).TotalSeconds;
-                    //iterationTime[i].Add(x);
-                    //if (runTimeLimitInSeconds < iterationTime[i].Sum())
-                        //break;
-                    solution = SetCover();
-                    //if (solution.Status == AlgorithmSolutionStatus.Optimal)
-                    //{
-                    //    //if (solution.UpperBound < 1797.51)
-                    //    //{
-                    //    //    globalFinishTime = DateTime.Now;
-                    //    //    optFoundTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
-                    //    //}
-                    //    if (solution.UpperBound < objValue)
-                    //    {
-                    //        objImprovement = objValue - solution.UpperBound;
-                    //        objValue = solution.UpperBound;
-                    //    }
-                    //}
-                    k++;
-                    //actualIter = k;
-                    //if (solution.Status == AlgorithmSolutionStatus.Optimal)
-                    //    if (objImprovement < 0.0000000000000000001)
-                    //        terminate = true;
-
-                } while ((localFinishTime-globalStartTime).TotalSeconds < runTimeLimitInSeconds);//(k < poolSize && !terminate);
+                CustomerSet currentCS = new CustomerSet(theProblemModel.GetAllCustomerIDs()[i], theProblemModel.GetAllCustomerIDs());
+                currentCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
+                exploredSingleCustomerSetList.Add(currentCS);
             }
-            //solution = SetCover();
-            //RecoverWithSwap();
+            exploredCustomerSetMasterList.AddRange(exploredSingleCustomerSetList);
+            int k = 0;
+            int index = 0;
+            do //this is kind of the number of random starting points, in order not to stuck in a local optima
+            {
+                random = new Random(randomSeed + k);
+                //Start with an empty customer set and customers2visit = all customers
+                List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set  
+                do //(visitableCustomers.Count > 0)
+                {
+                    CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[index]);//Start a new "customer set" <- route
+                    List<string> visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomers, currentCS); //finish a route when there is no customer left in the visitableCustomersForCS
+                    extensionTime = 0.0;
+                    previousNotEVFeasible = false;
+                    countInfeasible = 0;
+                    do //(visitableCustomersForCS.Count > 0)
+                    {
+                        CustomerSet tempExtendedCS = new CustomerSet(currentCS);
+                        string customer2add = SelectACustomer(visitableCustomersForCS, currentCS); //Extend the CS with one customer from visitableCustomersForCS; here k plays a role for randomness
+                        tempExtendedCS.NewExtend(customer2add);
+                        bool isCSretrievedFromArchive = false; //Consider turining this check off and see how it performs, especially for small number of customers, this check might be more cumbersome than reoptimizing
+                        if (exploredCustomerSetMasterList.Includes(tempExtendedCS))
+                        {
+                            tempExtendedCS = exploredCustomerSetMasterList.Retrieve_CS(tempExtendedCS); //retrieve the info needed from exploredCustomerSetList
+                            isCSretrievedFromArchive = true;
+                        }
+                        else
+                        {
+                            extendStartTime = DateTime.Now;
+                            tempExtendedCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
+                            extendFinishTime = DateTime.Now;
+                        }
+                        UpdateFeasibilityStatus4EachVehicleCategory(tempExtendedCS);
+                        if (feas4GDV)
+                            visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomers, tempExtendedCS);
+                        currentCS = UpdateCurrentState(currentCS, customer2add, tempExtendedCS, isCSretrievedFromArchive, visitableCustomersForCS);
+                    } while (visitableCustomersForCS.Count > 0);
+                    visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
+                } while (visitableCustomers.Count > 0);
+                solution = SetCover();
+                k++;
+                index++;
+            } while (index < theProblemModel.SRD.NumCustomers);
             solution = SetCover();
 
             globalFinishTime = DateTime.Now;
@@ -402,6 +367,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             List<string> visitableCustomersForCS = VisitableCustomers;
             visitableCustomersForCS = visitableCustomersForCS.Except(currentCS.ImpossibleOtherCustomers).ToList();
+            visitableCustomersForCS = visitableCustomersForCS.Except(currentCS.Customers).ToList();
             return visitableCustomersForCS;
         }
         void UpdateFeasibilityStatus4EachVehicleCategory(CustomerSet tempExtendedCS)
@@ -430,58 +396,23 @@ namespace MPMFEVRP.Implementations.Algorithms
                 throw new Exception("ExtendedCSIsFeasibleForDesiredVehicleCategory ran into an undefined case of RouteOptimizationStatus!");
 
         }
-        CustomerSet UpdateCurrentState(CustomerSet currentCS, string customer2add, CustomerSet tempExtendedCS, bool isCSretrievedFromArchive, List<string> visitableCustomersForCS, List<VehicleSpecificRouteOptimizationOutcome> vsrooList_GDV, List<VehicleSpecificRouteOptimizationOutcome> vsrooList_EV)
-        {
-            visitableCustomersForCS.Remove(customer2add);
-            if (feas4EV)
-            {
-                currentCS = new CustomerSet(tempExtendedCS);
-            }
-            else if (feas4GDV)
-            {
-                // only GDV feasible, in this case run a mini algorithm that will give you some feasible routes for only gdv!!
-                // do not update current CS or anything related to EV
-            }
-            else
-                couldNotExtend = true;
-            if (!isCSretrievedFromArchive)
-            {
-                vsrooList_EV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV));
-                vsrooList_GDV.Add(tempExtendedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV));
-                exploredCustomerSetMasterList.Add(tempExtendedCS);
-            }
-            visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
-
-            return currentCS;
-        }
         CustomerSet UpdateCurrentState(CustomerSet currentCS, string customer2add, CustomerSet tempExtendedCS, bool isCSretrievedFromArchive, List<string> visitableCustomersForCS)
         {
-
-            visitableCustomersForCS.Remove(customer2add);
-            if (feas4EV)
-            {
-                currentCS = new CustomerSet(tempExtendedCS);
-            }
+            //visitableCustomersForCS = GetVisitableCustomersForCS(VisitableCustomers,currentCS);
             if (!isCSretrievedFromArchive)
             {
                 exploredCustomerSetMasterList.Add(tempExtendedCS);
-                if (previousNotEVFeasible == true && !feas4EV)
-                {
-                    extensionTime = extensionTime + totalTimeSpentExtendingCustSet + (extendFinishTime - extendStartTime).TotalSeconds;
-                    if (extensionTime > searchTimeLimit)
-                        visitableCustomersForCS = new List<string>();
-                }
             }
-            else
+            if (feas4EV)
             {
-                if (previousNotEVFeasible == true && !feas4EV)
-                {
-                    countInfeasible++;
-                    if (countInfeasible > infeasibleCountLimit)
-                        visitableCustomersForCS = new List<string>();
-                }
+                currentCS = new CustomerSet(tempExtendedCS);
+                visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
             }
-            visitableCustomersForCS = GetVisitableCustomersForCS(visitableCustomersForCS, currentCS);
+            if (currentCS.ImpossibleOtherCustomers.Count == theProblemModel.SRD.NumCustomers)
+                visitableCustomersForCS = new List<string>();
+            else
+                visitableCustomersForCS.Remove(customer2add);
+
             return currentCS;
         }
         CustomerSetBasedSolution SetCover()

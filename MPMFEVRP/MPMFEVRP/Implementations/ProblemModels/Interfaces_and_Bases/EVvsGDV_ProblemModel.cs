@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MPMFEVRP.Utils;
+using MPMFEVRP.Models.CustomerSetSolvers;
 
 namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 {
@@ -33,6 +34,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
         XCPlex_Model_AFV_SingleCustomerSet newTSPsolverEV;
         XCPlex_Model_GDV_SingleCustomerSet newTSPsolverGDV;
+
+        CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs theGDVExploiter;
+        PlainCustomerSetSolver_Homogeneous thePlainAFVSolver;
+
 
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
@@ -66,6 +71,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         {
             newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
             newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            theGDVExploiter = new CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(this);
+            thePlainAFVSolver = new PlainCustomerSetSolver_Homogeneous(this);
         }
         public string GetInstanceName(string inputFileName)
         {
@@ -160,7 +167,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             VehicleSpecificRoute fittedRoute = FitGDVOptimalRouteToEV(GDVOptimalRoute, vehicle);
             if (fittedRoute.Feasible)//if the fitted route is feasible:
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: fittedRoute);
-            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute) == AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved)
+            if (ProveAFVInfeasibilityOfCustomerSet(GDVOptimalRoute: GDVOptimalRoute) == AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved)
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
 
 
@@ -208,7 +215,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             if ((EVfittedRoute.Feasible == CheckAFVFeasibilityOfGDVOptimalRoute(GDVOptimalRoute)) && EVfittedRoute.Feasible)//if the fitted route is feasible:
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: EVfittedRoute);
-            if (ProveAFVInfeasibilityOfCustomerSet(CS, GDVOptimalRoute: GDVOptimalRoute) == AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved)
+            if (ProveAFVInfeasibilityOfCustomerSet(GDVOptimalRoute: GDVOptimalRoute) == AFVInfOfCustomerSet.AFVInfeasibilityOfCSProved)
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
             //If none of the previous conditions worked, we must solve an EV-TSP
             return NewRouteOptimize(CS, theEV);
@@ -272,7 +279,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             return new VehicleSpecificRoute(this, vehicle, GDVOptimalRoute.ListOfVisitedNonDepotSiteIDs);
         }
-        AFVInfOfCustomerSet ProveAFVInfeasibilityOfCustomerSet(CustomerSet CS, VehicleSpecificRoute GDVOptimalRoute = null)
+        public AFVInfOfCustomerSet ProveAFVInfeasibilityOfCustomerSet(VehicleSpecificRoute GDVOptimalRoute = null)
         {
             Vehicle theAFV = VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
             double batteryCap = theAFV.BatteryCapacity;
@@ -292,8 +299,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                         if (!SRD.GetSitesList(SiteTypes.Customer).Any(z => z.RechargingRate > 0.0)) //No internal station case
                         {
                             VehicleSpecificRoute EVfittedRoute = NewFitGDVOptimalRouteToEV(GDVOptimalRoute, theAFV);
-                            double endOfRouteNetEnergy = batteryCap - (EVfittedRoute.GetVehicleMilesTraveled() * energyConsumpRate);
-                            if (endOfRouteNetEnergy > 0.0)
+                            double endOfRouteNetEnergy = (EVfittedRoute.GetVehicleMilesTraveled() * energyConsumpRate)- batteryCap;
+                            if (endOfRouteNetEnergy < 0.0)
                                 throw new Exception("ProveAFVInfeasibilityOfCustomerSet method is called for a feasble EVfittedRoute.");
                             else
                             {
@@ -318,7 +325,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             }
         }
 
-        bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRoute GDVOptimalRoute)
+        public bool CheckAFVFeasibilityOfGDVOptimalRoute(VehicleSpecificRoute GDVOptimalRoute)
         {
             //Return true if and only if the GDV-Optimal Route is AFV-Feasible (in which case it's known to be AFV-Optimal as well
             if (GDVOptimalRoute == null)//The GDVOptimalRoute that was not provided cannot be feasible
@@ -781,6 +788,16 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
             EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
             EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+        }
+
+
+        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, bool preserveCustomerVisitSequence)
+        {
+            return theGDVExploiter.Solve(CS, preserveCustomerVisitSequence);
+        }
+        public RouteOptimizationOutcome RouteOptimizeByPlainAFVSolver(CustomerSet CS)
+        {
+            return thePlainAFVSolver.Solve(CS);
         }
     }
 }

@@ -52,6 +52,21 @@ namespace MPMFEVRP.Domains.SolutionDomain
             routeOptimizationOutcome = new RouteOptimizationOutcome();
             this.retrievedFromArchive = retrievedFromArchive;
         }
+
+        public CustomerSet(bool isEmpty, List<string> allCustomers)
+        {
+            if (isEmpty != true)
+                throw new ArgumentException();
+
+            customers = new List<string>();
+            possibleOtherCustomers = new List<string>();
+            foreach (string otherCustomer in allCustomers)
+                possibleOtherCustomers.Add(otherCustomer);
+            impossibleOtherCustomers = new List<string>();
+            routeOptimizationOutcome = new RouteOptimizationOutcome();
+            retrievedFromArchive = false ;
+        }
+
         public CustomerSet(CustomerSet twinCS, bool copyROO = false)
         {
             customers = new List<string>();
@@ -202,7 +217,22 @@ namespace MPMFEVRP.Domains.SolutionDomain
             routeOptimizationOutcome = theProblemModel.NewRouteOptimize(this);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
-        }        
+        }
+        
+        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence)
+        {
+            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence);
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
+        }
+
+        public void OptimizeByPlainAFVSolver(EVvsGDV_ProblemModel theProblemModel)
+        {
+            routeOptimizationOutcome = theProblemModel.RouteOptimizeByPlainAFVSolver(this);
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
+        }
+
         public void NewOptimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null, bool requireGDVSolutionBeforeEV = true)
         {
             //This method makes heavy use of the problem model
