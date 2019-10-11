@@ -25,8 +25,8 @@ namespace MPMFEVRP.Models.XCPlex
         {
             this.theProblemModel = theProblemModel;
             this.xCplexParam = xCplexParam;
-            XCPlexRelaxation relaxation;
-            relaxation = xCplexParam.Relaxation;
+            //XCPlexRelaxation relaxation;
+            //relaxation = xCplexParam.Relaxation;
             if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
                 //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
                 )
@@ -52,7 +52,7 @@ namespace MPMFEVRP.Models.XCPlex
                     customerSetArray[i] = theProblemModel.CustomerSetArchive[i];
                 }
             }
-            overrideNumberOfVehicles = new int[2];
+            overrideNumberOfVehicles = new int[2] { theProblemModel.NumVehicles[vIndex_EV], theProblemModel.NumVehicles[1- vIndex_EV] };
             if (noGDVUnlimitedEV)
             {
                 overrideNumberOfVehicles[vIndex_EV] = theProblemModel.SRD.NumCustomers;
@@ -169,7 +169,7 @@ namespace MPMFEVRP.Models.XCPlex
                 }//for i
                 //int nv = overrideNumberOfVehicles == null ? theProblemModel.NumVehicles[v] : overrideNumberOfVehicles[v];
                 string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + theProblemModel.NumVehicles[v].ToString() + "times";
-                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, theProblemModel.NumVehicles[v], constraint_name));
+                allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, overrideNumberOfVehicles[v], constraint_name));
             }
         }
         public override SolutionBase GetCompleteSolution(Type SolutionType)

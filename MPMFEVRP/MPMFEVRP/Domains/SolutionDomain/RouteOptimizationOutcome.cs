@@ -33,7 +33,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else
             {
                 if ((theList == null)
-                    || (((status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV) || (status == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV)) && (theList.Count != 1))
+                    //|| ((status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV) && (theList.Count != 1))
+                    || ((status == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV) && (theList.Count != 1))
                     || ((status == RouteOptimizationStatus.OptimizedForBothGDVandEV) && (theList.Count != 2)))
                     throw new Exception("RouteOptimizationOutcome constructor(status,theList) invoked with inconsistent arguments!");
                 theListofVSROOs = theList;

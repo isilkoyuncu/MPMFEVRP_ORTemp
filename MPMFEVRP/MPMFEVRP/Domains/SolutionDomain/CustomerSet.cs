@@ -67,7 +67,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             retrievedFromArchive = false ;
         }
 
-        public CustomerSet(CustomerSet twinCS, bool copyROO = false)
+        public CustomerSet(CustomerSet twinCS, EVvsGDV_ProblemModel theProblemModel=null, bool copyROO = false)
         {
             customers = new List<string>();
             foreach (string c in twinCS.Customers)
@@ -90,6 +90,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
             else
                 routeOptimizationOutcome = new RouteOptimizationOutcome();
+            if (theProblemModel != null)
+            {
+                UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+                IdentifyNewImpossibleOtherCustomers(theProblemModel);
+            }
         }
         public CustomerSet(List<string> customers, double computationTime=0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
@@ -342,7 +347,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 possibleOtherCustomers.Add(customer);
             }
         }
-        void IdentifyNewImpossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
+        public void IdentifyNewImpossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
         {
             //This method assumes that the customer set has already been optimized
             //This method focuses only on GDV feasibility
@@ -367,7 +372,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 }
             }
         }
-        void UpdateMinAdditionalsForAllPossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
+        public void UpdateMinAdditionalsForAllPossibleOtherCustomers(EVvsGDV_ProblemModel theProblemModel)
         {
             minAdditionalDistanceForPossibleOtherCustomer.Clear();
             minAdditionalTimeForPossibleOtherCustomer.Clear();

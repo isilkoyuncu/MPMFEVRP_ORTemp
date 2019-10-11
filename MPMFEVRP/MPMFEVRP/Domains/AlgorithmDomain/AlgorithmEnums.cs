@@ -5,7 +5,9 @@
 
     public enum Recovery_Options { AssignmentProbByCPLEX, AnalyticallySolve}
 
-    public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection };
+    public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection, UsingShadowPrices };
+
+    public enum TSPSolverType { GDVExploiter,PlainAFVSolver,OldiesADF};
 
     public enum XCPlexSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };
     //enum values:
