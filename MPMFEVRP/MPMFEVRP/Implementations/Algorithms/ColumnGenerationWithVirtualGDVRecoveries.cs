@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         double closestPercentSelect;
         double power;
         TSPSolverType tspSolverType;
-        //double runTimeLimitInSeconds = 0.0;
+        double runTimeLimitInSeconds = 0.0;
 
         XCPlexBase setPartitionSolver = null;
         XCPlex_SetCovering_wCustomerSets relaxedSetPartitionSolver;
@@ -64,8 +64,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             //Problem param
             this.theProblemModel = theProblemModel;
-            
+
             //Algorithm param
+            runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
             poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
             preserveCustomerVisitSequence = AlgorithmParameters.GetParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE).GetBoolValue();
             randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
@@ -270,7 +271,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         if(mostNegativeReducedCostCustomers.Count==0)
                             return (possibleCustomersForCS[random.Next(possibleCustomersForCS.Count)]);
                         else
-                        return (mostNegativeReducedCostCustomers[random.Next(mostNegativeReducedCostCustomers.Count)]);
+                        return (mostNegativeReducedCostCustomers.First());
                     }
                 default:
                     throw new Exception("The selection criterion sent to CustomerSet.Extend was not defined before!");

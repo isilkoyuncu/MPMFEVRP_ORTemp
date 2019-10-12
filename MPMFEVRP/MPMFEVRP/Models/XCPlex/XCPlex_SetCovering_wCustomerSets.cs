@@ -124,15 +124,14 @@ namespace MPMFEVRP.Models.XCPlex
                 ILinearNumExpr numTimesCustomerServed = LinearNumExpr();
                 for (int i = 0; i < nFeasibleCustomerSets; i++)
                 {
-                    if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.EV))
+                    if (customerSetArray[i].RouteOptimizationOutcome.Status==RouteOptimizationStatus.OptimizedForBothGDVandEV)
                         if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[1].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                         {
-
                             numTimesCustomerServed.AddTerm(1.0, z[i][0]);
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
                         }
                         else { }
-                    else if (customerSetArray[i].RouteOptimizationOutcome.IsFeasible(VehicleCategories.GDV))
+                    else if (customerSetArray[i].RouteOptimizationOutcome.Status==RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV || customerSetArray[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV)
                     {
                         if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[0].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);

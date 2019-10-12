@@ -69,10 +69,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void CreateNewTspSolvers()
         {
-            newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
-            newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            //newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            //newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
             theGDVExploiter = new CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(this);
-            thePlainAFVSolver = new PlainCustomerSetSolver_Homogeneous(this);
+            //thePlainAFVSolver = new PlainCustomerSetSolver_Homogeneous(this);
         }
         public string GetInstanceName(string inputFileName)
         {
