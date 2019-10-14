@@ -234,7 +234,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public void OptimizeByPlainAFVSolver(EVvsGDV_ProblemModel theProblemModel)
         {
             routeOptimizationOutcome = theProblemModel.RouteOptimizeByPlainAFVSolver(this);
-            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+            UpdateMinAdditionalsForAllPossibleOtherCustomerswPlainAFV(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
@@ -390,6 +390,26 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 minAdditionalTimeForPossibleOtherCustomer.Add(otherCustomer, minAddlDist / theProblemModel.CRD.TravelSpeed + theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration);
             }
         }
+
+        public void UpdateMinAdditionalsForAllPossibleOtherCustomerswPlainAFV(EVvsGDV_ProblemModel theProblemModel)
+        {
+            minAdditionalDistanceForPossibleOtherCustomer.Clear();
+            minAdditionalTimeForPossibleOtherCustomer.Clear();
+            if (routeOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+                return;
+            double maxDistance = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestArcLength();
+            foreach (string otherCustomer in possibleOtherCustomers)
+            {
+                List<double> arcLengthsToCustomerSet = new List<double>() { Math.Min(theProblemModel.SRD.GetDistance(theProblemModel.SRD.GetSingleDepotID(), otherCustomer), theProblemModel.SRD.GetDistance(otherCustomer, theProblemModel.SRD.GetSingleDepotID())) };
+                foreach (string customer in customers)
+                    arcLengthsToCustomerSet.Add(Math.Min(theProblemModel.SRD.GetDistance(otherCustomer, customer), theProblemModel.SRD.GetDistance(customer, otherCustomer)));
+                arcLengthsToCustomerSet.Sort();
+                double minAddlDist = Math.Max(0, arcLengthsToCustomerSet[0] + arcLengthsToCustomerSet[1] - maxDistance);
+                minAdditionalDistanceForPossibleOtherCustomer.Add(otherCustomer, minAddlDist);
+                minAdditionalTimeForPossibleOtherCustomer.Add(otherCustomer, minAddlDist / theProblemModel.CRD.TravelSpeed + theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration);
+            }
+        }
+
         public void MakeCustomerImpossible(string otherCustomer)
         {
             if (possibleOtherCustomers.Contains(otherCustomer))

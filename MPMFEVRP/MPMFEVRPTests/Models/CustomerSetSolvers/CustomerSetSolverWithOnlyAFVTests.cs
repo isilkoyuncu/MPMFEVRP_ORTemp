@@ -78,6 +78,39 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
         }
 
         [TestMethod()]
+        public void SolveForAnInfeasibleCustomerSetTest()
+        {
+            KoyuncuYavuzReader reader = new KoyuncuYavuzReader("20c3sU1_0(0,0+0+0)_4(4+0+0)_E60.txt");
+            reader.Read();
+            ProblemDataPackage pdp = new ProblemDataPackage(reader);
+            theProblem = new EMH_Problem(pdp);
+            //The problem has been created
+            theProblemModel = new EMH_ProblemModel(theProblem, null);
+            CustomerSetSolverWithOnlyGDV theGDVSolver = new CustomerSetSolverWithOnlyGDV(theProblemModel);
+            theSolver = new CustomerSetSolverWithOnlyAFV(theProblemModel);
+
+            CustomerSet cs = new CustomerSet("C6", theProblemModel.SRD.GetCustomerIDs());
+            cs.NewExtend("C13");
+            cs.NewExtend("C19");
+
+            VehicleSpecificRouteOptimizationOutcome vsrooGDV = theGDVSolver.Solve(cs, false);
+            VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs, false, vsrooGDV.VSOptimizedRoute);       
+
+            for (int i = 0; i < theSolver.DeltaValues.Length; i++)
+            {
+                if (theSolver.DeltaValues[i] > theSolver.preprocessedSites[i].DeltaMax)
+                    Assert.Fail();
+                else if (theSolver.DeltaValues[i] < theSolver.preprocessedSites[i].DeltaMin)
+                    Assert.Fail();
+                else if (theSolver.TValues[i] > theSolver.preprocessedSites[i].TLS)
+                    Assert.Fail();
+                else if (theSolver.TValues[i] < theSolver.preprocessedSites[i].TES)
+                    Assert.Fail();
+            }
+            Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Infeasible, vsroo.Status);
+        }
+
+        [TestMethod()]
         public void SolveForTenCustomersTest()
         {
             List<string> allCustomers = theProblemModel.SRD.GetCustomerIDs();

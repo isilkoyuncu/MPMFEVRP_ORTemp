@@ -146,8 +146,16 @@ namespace MPMFEVRP.Models.XCPlex
                         allConstraints_list.Add(AddLe(numTimesCustomerServed, 1.0, constraint_name));
                         break;
                     case CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce:
-                        constraint_name += "exactly_once";
-                        allConstraints_list.Add(AddEq(numTimesCustomerServed, 1.0, constraint_name));
+                        if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                        {
+                            constraint_name += "at_least_once";
+                            allConstraints_list.Add(AddGe(numTimesCustomerServed, 1.0, constraint_name));
+                        }
+                        else
+                        {
+                            constraint_name += "exactly_once";
+                            allConstraints_list.Add(AddEq(numTimesCustomerServed, 1.0, constraint_name));
+                        }
                         break;
                     case CustomerCoverageConstraint_EachCustomerMustBeCovered.AtLeastOnce:
                         constraint_name += "at_least_once";

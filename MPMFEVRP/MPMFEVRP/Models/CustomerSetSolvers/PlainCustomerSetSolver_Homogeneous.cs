@@ -27,17 +27,20 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
         public RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence = false)
         {
             VehicleSpecificRouteOptimizationOutcome vsroo_AFV;
+
             AFV_Solver.Solve(customerSet, PreserveCustomerVisitSequence);
             if (AFV_Solver.SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
                 VehicleSpecificRoute vsr_AFV = AFV_Solver.GetVehicleSpecificRoutes(theAFV.Category).First();
                 vsroo_AFV = new VehicleSpecificRouteOptimizationOutcome(theAFV.Category, AFV_Solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsr_AFV);
-                return new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_AFV });
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsr_AFV);
+                return new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_AFV });
             }
             else
             {
                 vsroo_AFV = new VehicleSpecificRouteOptimizationOutcome(theAFV.Category, AFV_Solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
-                return new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_AFV });
+                VehicleSpecificRouteOptimizationOutcome vsroo_GDV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                return new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_AFV });
             }
         }
     }

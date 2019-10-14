@@ -51,9 +51,26 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
         }
 
-        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence)
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence=false)
         {
-            throw new NotImplementedException();
+            //Implementation
+            //Pre-process
+            RefineDecisionVariables(customerSet, preserveCustomerVisitSequence);
+
+            //Solve & Post-process
+            Solve_and_PostProcess();
+
+            //Return the desired outcome
+            if (SolutionStatus == XCPlexSolutionStatus.Infeasible)
+            {
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            }
+            else if (SolutionStatus == XCPlexSolutionStatus.Optimal)
+            {
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First());
+            }
+            else
+                throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
         }
     }
 }
