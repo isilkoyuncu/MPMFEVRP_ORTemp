@@ -42,7 +42,7 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
                     ParameterID.ALG_RUNTIME_SECONDS,
                     "Runtime Seconds",
                     new List<Object>() { 10.0, 30.0, 60.0, 120.0, 300.0, 600.0, 900.0, 1200.0, 1800.0, 3600.0, 7200.0, 36000.0 },
-                    120.0,
+                    600.0,
                     UserInputObjectType.ComboBox));
 
             algorithmParameters.AddParameter(

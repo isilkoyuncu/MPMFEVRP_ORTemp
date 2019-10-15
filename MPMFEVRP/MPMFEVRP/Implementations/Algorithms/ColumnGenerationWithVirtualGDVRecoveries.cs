@@ -60,14 +60,14 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "300"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "600"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.UsingShadowPrices, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.WeightedNormalizedProbSelection, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 5, 10, 15, 20, 25, 30, 50 }, 20, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "Power", "2.0"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE, "TSP Type", new List<object>() { TSPSolverType.GDVExploiter, TSPSolverType.PlainAFVSolver, TSPSolverType.OldiesADF }, TSPSolverType.GDVExploiter, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.PROB_BKS, "BKS", ""));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.PROB_BKS, "BKS", "0"));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
@@ -84,7 +84,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTION_POWER).GetDoubleValue();
             tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
-            BKS = AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();
+            BKS = Double.Parse(GetBKS());//AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();
             XcplexParam = new XCPlexParameters();
 
             exploredCustomerSetMasterList = new CustomerSetList();
@@ -110,7 +110,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 else
                     singleCustomerCS.NewOptimize(theProblemModel);
                 exploredSingleCustomerSetList.Add(singleCustomerCS);
-            }            
+            }
+            exploredCustomerSetMasterList.AddRange(exploredSingleCustomerSetList);
             solution = SetCover();            
             int count = 0;
             double obj = double.MaxValue;
@@ -119,7 +120,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 localStartTime = DateTime.Now;
                 List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set
-                CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
+                CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[random.Next(exploredSingleCustomerSetList.Count)],theProblemModel,true);//new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
                 while (visitableCustomers.Count > 0 && !terminate)
                 {
                     List<string> possibleCustomersForCS = GetPossibleCustomersForCS(visitableCustomers, currentCS); //finish a route when there is no customer left in the visitableCustomersForCS
@@ -250,6 +251,31 @@ namespace MPMFEVRP.Implementations.Algorithms
             bestSolutionFound.UpperBound = setPartitionSolver.UpperBound_XCPlex;
             bestSolutionFound.LowerBound = setPartitionSolver.LowerBound_XCPlex;
             //_OptimizationComparisonStatistics.WriteToFile(StringOperations.AppendToFilename(theProblemModel.InputFileName, "_OptimizationComparisonStatistics"));
+        }
+        string GetBKS()
+        {
+            double bestKnownSoln;
+            if (theProblemModel.InputFileName.Contains("AB101"))
+                bestKnownSoln = 2566.62;
+            else if (theProblemModel.InputFileName.Contains("AB102"))
+                bestKnownSoln = 2876.26;
+            else if (theProblemModel.InputFileName.Contains("AB103"))
+                bestKnownSoln = 2804.07;
+            else if (theProblemModel.InputFileName.Contains("AB104"))
+                bestKnownSoln = 2634.17;
+            else if (theProblemModel.InputFileName.Contains("AB105"))
+                bestKnownSoln = 3939.96;
+            else if (theProblemModel.InputFileName.Contains("AB106"))
+                bestKnownSoln = 3915.15;
+            else if (theProblemModel.InputFileName.Contains("AB107"))
+                bestKnownSoln = 3732.97;
+            else if (theProblemModel.InputFileName.Contains("AB108"))
+                bestKnownSoln = 3672.4;
+            else if (theProblemModel.InputFileName.Contains("AB109"))
+                bestKnownSoln = 3722.17;
+            else
+                throw new Exception("AB101-109 must be solved first.");
+            return bestKnownSoln.ToString();
         }
         public override void SpecializedReset()
         {
