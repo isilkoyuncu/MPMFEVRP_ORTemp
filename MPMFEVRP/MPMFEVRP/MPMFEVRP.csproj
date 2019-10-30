@@ -125,6 +125,7 @@
       <DependentUpon>TS_Runs.cs</DependentUpon>
     </Compile>
     <Compile Include="Implementations\Algorithms\BranchAndPrice.cs" />
+    <Compile Include="Implementations\Algorithms\CGHwithShadowPrices.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationWithVirtualGDVRecoveries.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
