@@ -290,7 +290,7 @@ namespace MPMFEVRP.Models.XCPlex
 
                     ILinearNumExpr TimeFlow = LinearNumExpr();
                     TimeFlow.AddTerm(1.0, ArrivalTime[j]);
-                    TimeFlow.AddTerm((totalArcTime + preprocessedSites[j].TES), X[0][j][r]);
+                    TimeFlow.AddTerm(-1.0*(totalArcTime - preprocessedSites[j].TES), X[0][j][r]);
                     string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
                     allConstraints_list.Add(AddGe(TimeFlow, preprocessedSites[j].TES, constraint_name));
                 }
@@ -345,9 +345,9 @@ namespace MPMFEVRP.Models.XCPlex
                     {
                         ILinearNumExpr EnergyFlow = LinearNumExpr();
                         EnergyFlow.AddTerm(1.0, ArrivalSOE[j]);
-                        EnergyFlow.AddTerm((allNondominatedRPs[0, j][0].TotalEnergyConsumption + allNondominatedRPs[0, j][0].MaximumArrivalSOEAtDestination - BatteryCapacity(VehicleCategories.EV)), X[0][j][0]);
+                        EnergyFlow.AddTerm((allNondominatedRPs[0, j][0].TotalEnergyConsumption + preprocessedSites[j].DeltaMax - BatteryCapacity(VehicleCategories.EV)), X[0][j][0]);
                         string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
-                        allConstraints_list.Add(AddLe(EnergyFlow, allNondominatedRPs[0, j][0].MaximumArrivalSOEAtDestination, constraint_name));
+                        allConstraints_list.Add(AddLe(EnergyFlow, preprocessedSites[j].DeltaMax, constraint_name));
                     }
         }
 

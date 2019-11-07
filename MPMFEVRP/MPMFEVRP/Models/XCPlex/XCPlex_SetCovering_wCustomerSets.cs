@@ -131,7 +131,7 @@ namespace MPMFEVRP.Models.XCPlex
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);
                         }
                         else { }
-                    else if (customerSetArray[i].RouteOptimizationOutcome.Status==RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV || customerSetArray[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV)
+                    else if (customerSetArray[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV || customerSetArray[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV)
                     {
                         if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[0].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                             numTimesCustomerServed.AddTerm(1.0, z[i][1]);

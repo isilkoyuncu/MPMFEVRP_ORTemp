@@ -17,13 +17,9 @@ namespace MPMFEVRP.Implementations.Algorithms
     public class CGHwithShadowPrices : AlgorithmBase
     {
         //Algorithm parameters
-        int poolSize = 0;
         bool preserveCustomerVisitSequence = false;
         int randomSeed;
         Random random;
-        Selection_Criteria selectedCriterion;
-        double closestPercentSelect;
-        double power;
         TSPSolverType tspSolverType;
         double runTimeLimitInSeconds = 0.0;
 
@@ -60,12 +56,8 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "600"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.UsingShadowPrices, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 5, 10, 15, 20, 25, 30, 50 }, 20, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "Power", "2.0"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE, "TSP Type", new List<object>() { TSPSolverType.GDVExploiter, TSPSolverType.PlainAFVSolver, TSPSolverType.OldiesADF }, TSPSolverType.GDVExploiter, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.PROB_BKS, "BKS", ""));
         }
@@ -76,13 +68,9 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             //Algorithm param
             runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
-            poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
             preserveCustomerVisitSequence = AlgorithmParameters.GetParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE).GetBoolValue();
             randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
             random = new Random(randomSeed);
-            selectedCriterion = (Selection_Criteria)AlgorithmParameters.GetParameter(ParameterID.ALG_SELECTION_CRITERIA).Value;
-            closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
-            power = AlgorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTION_POWER).GetDoubleValue();
             tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
             BKS = Double.Parse(GetBKS()); //AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();
             XcplexParam = new XCPlexParameters();
@@ -308,83 +296,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             setPartitionSolver.Dispose();
             setPartitionSolver.End();
             GC.Collect();
-        }
-        string SelectACustomer(List<string> possibleCustomersForCS, CustomerSet currentCS)
-        {
-            switch (selectedCriterion)
-            {
-                case Selection_Criteria.CompleteUniform:
-                    return (possibleCustomersForCS[random.Next(possibleCustomersForCS.Count)]);
-
-                case Selection_Criteria.UniformAmongTheBestPercentage:
-                    List<string> theBestTopXPercent = new List<string>();
-                    theBestTopXPercent = PopulateTheBestTopXPercentCustomersList(currentCS, possibleCustomersForCS, closestPercentSelect);
-                    return (theBestTopXPercent[random.Next(theBestTopXPercent.Count)]);
-
-                case Selection_Criteria.WeightedNormalizedProbSelection:
-                    //We assume probabilities are proportional inverse distances
-                    double[] prob = new double[possibleCustomersForCS.Count];
-                    double probSum = 0.0;
-                    for (int c = 0; c < possibleCustomersForCS.Count; c++)
-                    {
-                        prob[c] = 1.0 / Math.Max(0.00001, ShortestDistanceOfCandidateToCurrentCustomerSet(currentCS, possibleCustomersForCS[c]));//Math.max used to eliminate the div by 0 error
-                        prob[c] = Math.Pow(prob[c], power);
-                        probSum += prob[c];
-                    }
-                    for (int c = 0; c < possibleCustomersForCS.Count; c++)
-                        prob[c] /= probSum;
-                    return possibleCustomersForCS[Utils.RandomArrayOperations.Select(random.NextDouble(), prob)];
-                default:
-                    throw new Exception("The selection criterion sent to CustomerSet.Extend was not defined before!");
-            }
-
-        }
-        List<string> PopulateTheBestTopXPercentCustomersList(CustomerSet CS, List<string> possibleCustomersForCS, double closestPercentSelect)
-        {
-            string[] customers = possibleCustomersForCS.ToArray();
-            int nCustomers = customers.Length;
-            double[] shortestDistancesToCS = new double[nCustomers];
-            for (int i = 0; i < nCustomers; i++)
-            {
-                shortestDistancesToCS[i] = ShortestDistanceOfCandidateToCurrentCustomerSet(CS, customers[i]);
-            }
-            Array.Sort(shortestDistancesToCS, customers);
-
-            List<string> outcome = new List<string>();
-            int numberToReturn = (int)Math.Ceiling(closestPercentSelect * nCustomers / 100.0);
-            for (int i = 0; i < numberToReturn; i++)
-            {
-                outcome.Add(customers[i]);
-            }
-
-            return outcome;
-        }
-
-        double ShortestDistanceOfCandidateToCurrentCustomerSet(CustomerSet CS, string candidate)
-        {
-            if (CS.NumberOfCustomers == 0)
-                return theProblemModel.SRD.GetDistance(candidate, theProblemModel.SRD.GetSingleDepotID());
-            else
-            {
-                double outcome = double.MaxValue;
-                foreach (string customer in CS.Customers)
-                {
-                    double distance = theProblemModel.SRD.GetDistance(candidate, customer);
-                    if (outcome > distance)
-                    {
-                        outcome = distance;
-                    }
-                }
-                return outcome;
-            }
-        }
-        List<string> GetPossibleCustomersForCS(List<string> VisitableCustomers, CustomerSet currentCS)
-        {
-            List<string> visitableCustomersForCS = VisitableCustomers;
-            visitableCustomersForCS = visitableCustomersForCS.Except(currentCS.ImpossibleOtherCustomers).ToList();
-            visitableCustomersForCS = visitableCustomersForCS.Except(currentCS.Customers).ToList();
-            return visitableCustomersForCS;
-        }
+        }        
         void UpdateFeasibilityStatus4EachVehicleCategory(CustomerSet tempExtendedCS)
         {
             if (tempExtendedCS.RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForBothGDVandEV)
@@ -427,12 +339,11 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         CustomerSetBasedSolution SetCover()
         {
-            if (selectedCriterion == Selection_Criteria.UsingShadowPrices)
-            {
-                relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
-                relaxedSetPartitionSolver.Solve_and_PostProcess();
-                shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
-            }
+
+            relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
+            relaxedSetPartitionSolver.Solve_and_PostProcess();
+            shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
+
             setPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam, exploredCustomerSetMasterList);
             setPartitionSolver.Solve_and_PostProcess();
             CustomerSetBasedSolution outcome = (CustomerSetBasedSolution)setPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));

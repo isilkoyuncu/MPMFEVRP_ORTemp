@@ -84,7 +84,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTION_POWER).GetDoubleValue();
             tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
-            BKS = AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();//Double.Parse(GetBKS());
+            //BKS = AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();//Double.Parse(GetBKS());
             XcplexParam = new XCPlexParameters();
 
             exploredCustomerSetMasterList = new CustomerSetList();
@@ -180,8 +180,6 @@ namespace MPMFEVRP.Implementations.Algorithms
                         allSolutions.Add(solution);
                         iterationNo.Add(count);
                         incumbentTime.Add((localFinishTime - globalStartTime).TotalSeconds);
-                        if (obj - BKS <= 0.1)
-                            terminate = true;
                     }
                 }
                 count++;
@@ -479,8 +477,10 @@ namespace MPMFEVRP.Implementations.Algorithms
                 relaxedSetPartitionSolver.Solve_and_PostProcess();
                 shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
             }
-            setPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam, exploredCustomerSetMasterList);
+            setPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam, exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
             setPartitionSolver.Solve_and_PostProcess();
+
+
             CustomerSetBasedSolution outcome = (CustomerSetBasedSolution)setPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             if (setPartitionSolver.SolutionStatus == XCPlexSolutionStatus.Feasible)
                 outcome.Status = AlgorithmSolutionStatus.Feasible;
@@ -491,7 +491,14 @@ namespace MPMFEVRP.Implementations.Algorithms
             else if (setPartitionSolver.SolutionStatus == XCPlexSolutionStatus.NotYetSolved)
                 outcome.Status = AlgorithmSolutionStatus.NotYetSolved;
             else if (setPartitionSolver.SolutionStatus == XCPlexSolutionStatus.Optimal)
+            {
                 outcome.Status = AlgorithmSolutionStatus.Optimal;
+                //shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
+                //if (relaxedSetPartitionSolver.UpperBound_XCPlex == setPartitionSolver.UpperBound_XCPlex)
+                //{
+                //     terminate = false;
+                //}
+            }
             outcome.UpperBound = setPartitionSolver.UpperBound_XCPlex;
             outcome.LowerBound = setPartitionSolver.LowerBound_XCPlex;
             return outcome;

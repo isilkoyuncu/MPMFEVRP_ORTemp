@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    public class XCPlex_Model_AFV_TSP : XCPlexVRPBase
+    public class XCPlex_AFV_TSP : XCPlexVRPBase
     {
         RefuelingPathGenerator rpg;
         List<string> GDV_optRouteIDs;
@@ -41,9 +41,9 @@ namespace MPMFEVRP.Models.XCPlex
 
         List<List<string>> EV_optRouteIDs = new List<List<string>>();
 
-        public XCPlex_Model_AFV_TSP() { }
+        public XCPlex_AFV_TSP() { }
 
-        public XCPlex_Model_AFV_TSP(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
+        public XCPlex_AFV_TSP(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
             : base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
             //Do not uncomment these. They are here to show which methods are being implemented in the base

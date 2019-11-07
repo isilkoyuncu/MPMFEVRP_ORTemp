@@ -189,7 +189,7 @@
     <Compile Include="Models\RefuelingPathGenerator.cs" />
     <Compile Include="Models\RefuelingPathList.cs" />
     <Compile Include="Models\XCPlex\XCPlex_Model_AFV_SingleCustomerSet.cs" />
-    <Compile Include="Models\XCPlex\XCPlex_Model_AFV_TSP.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_AFV_TSP.cs" />
     <Compile Include="Models\XCPlex\XCPlexADF_EVSingleCustomerSet.cs" />
     <Compile Include="Models\XCPlex\XCPlex_Model_GDV_SingleCustomerSet.cs" />
     <Compile Include="Models\XCPlex\XCPlexVRPBase.cs" />
