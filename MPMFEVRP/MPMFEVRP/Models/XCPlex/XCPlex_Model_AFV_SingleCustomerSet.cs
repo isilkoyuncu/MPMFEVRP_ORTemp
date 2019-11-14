@@ -22,6 +22,8 @@ namespace MPMFEVRP.Models.XCPlex
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
         int totalTravelTimeConstraintIndex = -1;
         int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
+        int objUpperBoundConstraintIndex = -1;
+        double objRHS = double.MaxValue;
 
         bool addTotalNumberOfActiveArcsCut = false;
 
@@ -191,6 +193,9 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_RegulateArrivalSOEAtOrigin();//9
             AddConstraint_RegulateArrivalSOEAtDestinationThroughRP();//11
             AddConstraint_RegulateArrivalSOEAtDestinationDirect();//12
+
+            AddConstraint_MinimizeVMTObjectiveUB();
+
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -451,6 +456,18 @@ namespace MPMFEVRP.Models.XCPlex
                     
         }
 
+        void AddConstraint_MinimizeVMTObjectiveUB()
+        {
+            objUpperBoundConstraintIndex = allConstraints_list.Count;
+            ILinearNumExpr ObjUB = LinearNumExpr();
+
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        ObjUB.AddTerm(allNondominatedRPs[i, j][r].TotalDistance, X[i][j][r]);
+            string constraint_name = "Minimize VMT Objective Upper Bound";
+            allConstraints_list.Add(AddLe(ObjUB, objRHS, constraint_name));
+        }
 
         void AddConstraint_ArrivalTimeLimitsOLD()
         {
@@ -753,6 +770,48 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
+
+        public void RefineDecisionVariables(CustomerSet cS, double AFV_vmt)
+        {
+            RHS_forNodeCoverage = new double[numNonESNodes];
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 1; j < numNonESNodes; j++)
+                {
+                    if (cS.Customers.Contains(preprocessedSites[j].ID))
+                    {
+                        RHS_forNodeCoverage[j] = 1.0;
+                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        {
+                            X[i][j][r].UB = 1.0;
+                        }
+                        for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
+                        {
+                            X[j][i][r].UB = 1.0;
+                        }
+                    }
+                    else
+                    {
+                        RHS_forNodeCoverage[j] = 0.0;
+                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        {
+                            X[i][j][r].UB = 0.0;
+                        }
+                        for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
+                        {
+                            X[j][i][r].UB = 0.0;
+                        }
+                    }
+                }
+            RefineRightHandSidesOfCustomerVisitationConstraints();
+            allConstraints_array[objUpperBoundConstraintIndex].UB = double.MaxValue;
+            allConstraints_array[objUpperBoundConstraintIndex].LB = 0.0;
+            if (objUpperBoundConstraintIndex > -1)
+            {
+                allConstraints_array[objUpperBoundConstraintIndex].UB = AFV_vmt;
+                allConstraints_array[objUpperBoundConstraintIndex].LB = AFV_vmt;
+            }
+        }
+
         //void RefineRHSofTotalTravelConstraints(CustomerSet cS)
         //{
         //    int c = 0;
