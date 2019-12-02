@@ -55,7 +55,7 @@ namespace MPMFEVRP.Forms
             listBox_algorithms.MouseDoubleClick += ListBox_algorithms_MouseDoubleClick;
             listBox_algorithms.MouseMove += ListBox_algorithms_MouseMove;
             comboBox_algorithms.Items.AddRange(AlgorithmUtil.GetAllAlgorithmNames().ToArray());
-            comboBox_algorithms.SelectedIndex = 2;
+            comboBox_algorithms.SelectedIndex = 3;
 
             comboBox_multi_TSPModel.Items.AddRange(XCPlexUtil.GetTSPModelNamesForSolver().ToArray());
             comboBox_multi_TSPModel.SelectedIndexChanged += ComboBox_multi_TSPModel_SelectedIndexChanged;

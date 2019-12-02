@@ -5,6 +5,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class SiteVisit
     {
+        double mipError = 0.01;
         //site visited
         Site site;
         public Site Site { get { return site; } }
@@ -22,8 +23,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public double CumulativeTravelDistance { get { return cumulativeTravelDistance; } }
 
         //feasibility
-        public bool GetTimeFeasible(double Tmax) { return arrivalTime <= Tmax; }
-        public bool GetSOCFeasible() { return arrivalSOC >= 0; }
+        public bool GetTimeFeasible(double Tmax) { return arrivalTime <= Tmax+mipError; }
+        public bool GetSOCFeasible() { return arrivalSOC >= -mipError; }
         public bool GetFeasible(double Tmax) { return (GetSOCFeasible() && GetTimeFeasible(Tmax)); }
 
         //Constructors

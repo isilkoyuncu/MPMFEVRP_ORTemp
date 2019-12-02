@@ -60,7 +60,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "600"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "1800"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.WeightedNormalizedProbSelection, UserInputObjectType.ComboBox));
@@ -84,7 +84,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTION_POWER).GetDoubleValue();
             tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
-            //BKS = AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();//Double.Parse(GetBKS());
+            BKS = Double.Parse(GetBKS()); // AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();
             XcplexParam = new XCPlexParameters();
 
             exploredCustomerSetMasterList = new CustomerSetList();
@@ -116,7 +116,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             int count = 0;
             double obj = double.MaxValue;
             terminate = false;
-            while (count < poolSize && !terminate)
+            while (!terminate)
             {
                 localStartTime = DateTime.Now;
                 List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set
@@ -173,13 +173,15 @@ namespace MPMFEVRP.Implementations.Algorithms
                 solution = SetCover();
                 localFinishTime = DateTime.Now;
                 if (solution.Status == AlgorithmSolutionStatus.Optimal)
-                {
+                {                    
                     if (obj > solution.UpperBound)
                     {
                         obj = solution.UpperBound;
                         allSolutions.Add(solution);
                         iterationNo.Add(count);
                         incumbentTime.Add((localFinishTime - globalStartTime).TotalSeconds);
+                        if (solution.UpperBound - BKS < 0.001)
+                            terminate = true;
                     }
                 }
                 count++;
