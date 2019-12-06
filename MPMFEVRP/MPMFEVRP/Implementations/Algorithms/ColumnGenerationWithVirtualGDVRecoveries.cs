@@ -53,6 +53,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         DateTime localFinishTime;
 
         bool terminate;
+        bool stopAddingColumns;
 
         public ColumnGenerationWithVirtualGDVRecoveries()
         {
@@ -60,10 +61,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "1800"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "900"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.WeightedNormalizedProbSelection, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.UsingShadowPrices, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 5, 10, 15, 20, 25, 30, 50 }, 20, UserInputObjectType.ComboBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "Power", "2.0"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE, "TSP Type", new List<object>() { TSPSolverType.GDVExploiter, TSPSolverType.PlainAFVSolver, TSPSolverType.OldiesADF }, TSPSolverType.GDVExploiter, UserInputObjectType.ComboBox));
@@ -119,13 +120,22 @@ namespace MPMFEVRP.Implementations.Algorithms
             while (!terminate)
             {
                 localStartTime = DateTime.Now;
-                List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set
-                CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[random.Next(exploredSingleCustomerSetList.Count)],theProblemModel,true);//new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
-                while (visitableCustomers.Count > 0 && !terminate)
+                stopAddingColumns = false;
+                List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set                                                                                      //CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[random.Next(exploredSingleCustomerSetList.Count)],theProblemModel,true);//new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
+                //int a = count % exploredSingleCustomerSetList.Count;
+                CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
+                while (visitableCustomers.Count > 0 && !stopAddingColumns)
                 {
+                    if (terminate == true)
+                        break;
                     List<string> possibleCustomersForCS = GetPossibleCustomersForCS(visitableCustomers, currentCS); //finish a route when there is no customer left in the visitableCustomersForCS
                     while (possibleCustomersForCS.Count > 0)
                     {
+                        if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                        {
+                            terminate = true;
+                            break;
+                        }
                         CustomerSet tempExtendedCS;
                         if (currentCS.Customers.Count == 0)
                             tempExtendedCS = new CustomerSet();
@@ -161,31 +171,43 @@ namespace MPMFEVRP.Implementations.Algorithms
                                 possibleCustomersForCS.Remove(customer2add);
                             }
                         }
-                        if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                        if ((DateTime.Now - localStartTime).TotalSeconds > 60.0)
                         {
-                            terminate = true;
+                            stopAddingColumns = true;
                             break;
                         }
                     }
                     visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
                     currentCS = new CustomerSet();//Start a new "customer set" <- route
                 }
-                solution = SetCover();
-                localFinishTime = DateTime.Now;
-                if (solution.Status == AlgorithmSolutionStatus.Optimal)
-                {                    
-                    if (obj > solution.UpperBound)
-                    {
-                        obj = solution.UpperBound;
-                        allSolutions.Add(solution);
-                        iterationNo.Add(count);
-                        incumbentTime.Add((localFinishTime - globalStartTime).TotalSeconds);
-                        if (solution.UpperBound - BKS < 0.001)
-                            terminate = true;
-                    }
+                if (selectedCriterion == Selection_Criteria.UsingShadowPrices)
+                {
+                    relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
+                    relaxedSetPartitionSolver.Solve_and_PostProcess();
+                    shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
                 }
+                //solution = SetCover();
+                //localFinishTime = DateTime.Now;
+                //if (solution.Status == AlgorithmSolutionStatus.Optimal)
+                //{                    
+                //    if (obj > solution.UpperBound)
+                //    {
+                //        obj = solution.UpperBound;
+                //        allSolutions.Add(solution);
+                //        iterationNo.Add(count);
+                //        incumbentTime.Add((localFinishTime - globalStartTime).TotalSeconds);
+                //        if (solution.UpperBound - BKS < 0.001)
+                //            terminate = true;
+                //    }
+                //}
                 count++;
+                if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                {
+                    terminate = true;
+                    break;
+                }
             }
+            solution = SetCover();
             globalFinishTime = DateTime.Now;
             totalRunTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
         }
@@ -331,6 +353,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 bestKnownSoln = 3790.71;
             else if (theProblemModel.InputFileName.Contains("AB220"))
                 bestKnownSoln = 3737.88;
+            else if (theProblemModel.InputFileName.Contains("20c3sU1"))
+                bestKnownSoln = 1797.49;
             else
                 throw new Exception("AB101-109 must be solved first.");
             return bestKnownSoln.ToString();

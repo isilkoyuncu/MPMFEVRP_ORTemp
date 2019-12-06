@@ -19,7 +19,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
         //Constructors
         public CustomerSetSolverWithOnlyAFV() : base() { }
-        public CustomerSetSolverWithOnlyAFV(EVvsGDV_ProblemModel theProblemModel) : base(theProblemModel, new XCPlexParameters(tSP: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
+        public CustomerSetSolverWithOnlyAFV(EVvsGDV_ProblemModel theProblemModel) : base(theProblemModel, new XCPlexParameters(tSP: true,limitComputationTime:true,runtimeLimit_Seconds:900.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
         {
 
         }
