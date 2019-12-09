@@ -7,6 +7,8 @@
 
     public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection, UsingShadowPrices };
 
+    public enum Stopping_Criteria {IterationNumber, TimeLimit};
+
     public enum TSPSolverType { GDVExploiter,PlainAFVSolver,OldiesADF};
 
     public enum XCPlexSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };

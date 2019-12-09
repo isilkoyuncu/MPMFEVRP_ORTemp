@@ -17,15 +17,17 @@ namespace MPMFEVRP.Implementations.Algorithms
     public class ColumnGenerationWithVirtualGDVRecoveries : AlgorithmBase
     {
         //Algorithm parameters
-        int poolSize = 0;
+        double runTimeLimitInSeconds = 0.0;
+        TSPSolverType tspSolverType;
+        bool optimizeColumns = false;
         bool preserveCustomerVisitSequence = false;
-        int randomSeed;
-        Random random;
+        Stopping_Criteria stoppingCriterion;
+        int poolSize = 0;
         Selection_Criteria selectedCriterion;
         double closestPercentSelect;
         double power;
-        TSPSolverType tspSolverType;
-        double runTimeLimitInSeconds = 0.0;
+        int randomSeed;
+        Random random;
 
         XCPlexBase setPartitionSolver = null;
         XCPlex_SetCovering_wCustomerSets relaxedSetPartitionSolver;
@@ -50,7 +52,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         DateTime globalStartTime;
         DateTime globalFinishTime;
         DateTime localStartTime;
-        DateTime localFinishTime;
+        //DateTime localFinishTime;
 
         bool terminate;
         bool stopAddingColumns;
@@ -61,14 +63,15 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Random Pool Size", "900"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Random Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.UsingShadowPrices, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "% Customers 2 Select", new List<object>() { 5, 10, 15, 20, 25, 30, 50 }, 20, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "Power", "2.0"));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE, "TSP Type", new List<object>() { TSPSolverType.GDVExploiter, TSPSolverType.PlainAFVSolver, TSPSolverType.OldiesADF }, TSPSolverType.GDVExploiter, UserInputObjectType.ComboBox));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.PROB_BKS, "BKS", "0"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_OBTAIN_COLUMNS_UNTIL_OPT, "Columns Optimized", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_STOPPING_CRITERIA, "Stopping Criterion", new List<object>() { Stopping_Criteria.IterationNumber, Stopping_Criteria.TimeLimit }, Stopping_Criteria.TimeLimit, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_POOL_SIZE, "Iteration Limit", "900"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_SELECTION_CRITERIA, "Site Selection Criterion", new List<object>() { Selection_Criteria.CompleteUniform, Selection_Criteria.UniformAmongTheBestPercentage, Selection_Criteria.WeightedNormalizedProbSelection, Selection_Criteria.UsingShadowPrices }, Selection_Criteria.UsingShadowPrices, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT, "IF RANDOM -- % Customers 2 Select", new List<object>() { 5, 10, 15, 20, 25, 30, 50 }, 20, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PROB_SELECTION_POWER, "IF RANDOM -- Power", "2.0"));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
@@ -77,15 +80,18 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             //Algorithm param
             runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
-            poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
+            tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
+            optimizeColumns = AlgorithmParameters.GetParameter(ParameterID.ALG_OBTAIN_COLUMNS_UNTIL_OPT).GetBoolValue();
             preserveCustomerVisitSequence = AlgorithmParameters.GetParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE).GetBoolValue();
-            randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
-            random = new Random(randomSeed);
+            stoppingCriterion = (Stopping_Criteria)AlgorithmParameters.GetParameter(ParameterID.ALG_STOPPING_CRITERIA).Value;
+            poolSize = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_POOL_SIZE).GetIntValue();
             selectedCriterion = (Selection_Criteria)AlgorithmParameters.GetParameter(ParameterID.ALG_SELECTION_CRITERIA).Value;
             closestPercentSelect = AlgorithmParameters.GetParameter(ParameterID.ALG_PERCENTAGE_OF_CUSTOMERS_2SELECT).GetIntValue();
             power = AlgorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTION_POWER).GetDoubleValue();
-            tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
-            BKS = Double.Parse(GetBKS()); // AlgorithmParameters.GetParameter(ParameterID.PROB_BKS).GetDoubleValue();
+            randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
+
+            random = new Random(randomSeed);
+            BKS = Double.Parse(GetBKS());
             XcplexParam = new XCPlexParameters();
 
             exploredCustomerSetMasterList = new CustomerSetList();
@@ -113,10 +119,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                 exploredSingleCustomerSetList.Add(singleCustomerCS);
             }
             exploredCustomerSetMasterList.AddRange(exploredSingleCustomerSetList);
-            solution = SetCover();            
+            if (selectedCriterion == Selection_Criteria.UsingShadowPrices)
+            {
+                shadowPrices = GetShadowPricesFromRelaxedSetCover();
+            }
+            //solution = SetCover();            
             int count = 0;
-            double obj = double.MaxValue;
-            terminate = false;
+            //double obj = double.MaxValue;
             while (!terminate)
             {
                 localStartTime = DateTime.Now;
@@ -495,17 +504,17 @@ namespace MPMFEVRP.Implementations.Algorithms
                     output.Add(remainingCustomers_array[i]);
             return remainingCustomers_array.ToList();
         }
+
+        Dictionary<string, double> GetShadowPricesFromRelaxedSetCover()
+        {
+            relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
+            relaxedSetPartitionSolver.Solve_and_PostProcess();
+            return relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
+        }
         CustomerSetBasedSolution SetCover()
         {
-            if (selectedCriterion == Selection_Criteria.UsingShadowPrices)
-            {
-                relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
-                relaxedSetPartitionSolver.Solve_and_PostProcess();
-                shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
-            }
             setPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam, exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
             setPartitionSolver.Solve_and_PostProcess();
-
 
             CustomerSetBasedSolution outcome = (CustomerSetBasedSolution)setPartitionSolver.GetCompleteSolution(typeof(CustomerSetBasedSolution));
             if (setPartitionSolver.SolutionStatus == XCPlexSolutionStatus.Feasible)
