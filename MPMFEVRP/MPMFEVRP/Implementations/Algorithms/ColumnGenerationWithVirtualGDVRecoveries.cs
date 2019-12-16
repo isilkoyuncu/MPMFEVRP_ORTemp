@@ -52,6 +52,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         DateTime globalStartTime;
         DateTime globalFinishTime;
         DateTime localStartTime;
+        DateTime localFinishTime;
         //DateTime localFinishTime;
 
         bool terminate;
@@ -123,28 +124,24 @@ namespace MPMFEVRP.Implementations.Algorithms
             {
                 shadowPrices = GetShadowPricesFromRelaxedSetCover();
             }
-            //solution = SetCover();            
+            solution = SetCover();
+            localFinishTime = DateTime.Now;
+            double time = (localFinishTime - globalStartTime).TotalSeconds;
             int count = 0;
-            //double obj = double.MaxValue;
+            double obj = double.MaxValue;
+            obj = SolveAndUpdateAllSolutionsIfOptimal(obj, count, time);
             while (!terminate)
             {
                 localStartTime = DateTime.Now;
                 stopAddingColumns = false;
-                List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set                                                                                      //CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[random.Next(exploredSingleCustomerSetList.Count)],theProblemModel,true);//new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
-                //int a = count % exploredSingleCustomerSetList.Count;
-                CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
-                while (visitableCustomers.Count > 0 && !stopAddingColumns)
+                List<string> visitableCustomers = theProblemModel.GetAllCustomerIDs(); //finish a solution when there is no customer in visitableCustomers set                                                                                      
+                CustomerSet currentCS = new CustomerSet(exploredSingleCustomerSetList[count % exploredSingleCustomerSetList.Count], theProblemModel, true);//Start a new "customer set" <- route
+                while (visitableCustomers.Count > 0 && !stopAddingColumns && !terminate)
                 {
-                    if (terminate == true)
-                        break;
                     List<string> possibleCustomersForCS = GetPossibleCustomersForCS(visitableCustomers, currentCS); //finish a route when there is no customer left in the visitableCustomersForCS
-                    while (possibleCustomersForCS.Count > 0)
-                    {
-                        if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
-                        {
-                            terminate = true;
-                            break;
-                        }
+                    //while (possibleCustomersForCS.Count > 0 && !terminate)
+                    //{
+                        DateTime startAddingColumns = DateTime.Now;
                         CustomerSet tempExtendedCS;
                         if (currentCS.Customers.Count == 0)
                             tempExtendedCS = new CustomerSet();
@@ -185,7 +182,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                             stopAddingColumns = true;
                             break;
                         }
-                    }
+                        if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                        {
+                            terminate = true;
+                            break;
+                        }
+                    //}
                     visitableCustomers = visitableCustomers.Except(currentCS.Customers).ToList();
                     currentCS = new CustomerSet();//Start a new "customer set" <- route
                 }
@@ -194,29 +196,19 @@ namespace MPMFEVRP.Implementations.Algorithms
                     relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
                     relaxedSetPartitionSolver.Solve_and_PostProcess();
                     shadowPrices = relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
-                }
-                //solution = SetCover();
-                //localFinishTime = DateTime.Now;
-                //if (solution.Status == AlgorithmSolutionStatus.Optimal)
-                //{                    
-                //    if (obj > solution.UpperBound)
-                //    {
-                //        obj = solution.UpperBound;
-                //        allSolutions.Add(solution);
-                //        iterationNo.Add(count);
-                //        incumbentTime.Add((localFinishTime - globalStartTime).TotalSeconds);
-                //        if (solution.UpperBound - BKS < 0.001)
-                //            terminate = true;
-                //    }
-                //}
+                }               
                 count++;
                 if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
                 {
                     terminate = true;
                     break;
                 }
+                localFinishTime = DateTime.Now;
+
             }
             solution = SetCover();
+            time = (localFinishTime - globalStartTime).TotalSeconds;
+            obj = SolveAndUpdateAllSolutionsIfOptimal(obj, count, time);
             globalFinishTime = DateTime.Now;
             totalRunTimeSec = (globalFinishTime - globalStartTime).TotalSeconds;
         }
@@ -435,7 +427,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             return outcome;
         }
-
+        
         double ShortestDistanceOfCandidateToCurrentCustomerSet(CustomerSet CS, string candidate)
         {
             if (CS.NumberOfCustomers == 0)
@@ -504,13 +496,38 @@ namespace MPMFEVRP.Implementations.Algorithms
                     output.Add(remainingCustomers_array[i]);
             return remainingCustomers_array.ToList();
         }
-
-        Dictionary<string, double> GetShadowPricesFromRelaxedSetCover()
+        /// <summary>
+        /// This method runs a relaxed set cover and retrieves shadow prices
+        /// </summary>
+        /// <param name="sorted">true if customers are sorted in their shadow prices</param>
+        /// <returns>a dictionary of customer ids and their current shadow prices</returns>
+        Dictionary<string, double> GetShadowPricesFromRelaxedSetCover(bool sorted = true)
         {
             relaxedSetPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming), exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
             relaxedSetPartitionSolver.Solve_and_PostProcess();
-            return relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
+            if (sorted == false)
+                return relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices();
+            else
+            {
+                var items = from pair in relaxedSetPartitionSolver.GetCustomerCoverageConstraintShadowPrices()
+                            orderby pair.Value descending
+                            select pair;
+                return (Dictionary<string, double>)items;
+            }
         }
+
+        /// <summary>
+        /// This method calculates the reduced cost of extending given column with a given customer.
+        /// The longest arc is removed and the two shortest arcs are added. Finally, the shadow price is subtracted from it.
+        /// </summary>
+        /// <param name="CS">Column to be extended. This CS must be optimized so that it will have a route.</param>
+        /// <param name="customer">The customer that we are estimating its reduced affect on the column</param>
+        /// <returns></returns>
+        double GetReducedCostOfExtendingGivenColumnWithGivenCustomer(CustomerSet CS, Site customer)
+        {
+            throw new NotImplementedException();
+        }
+        
         CustomerSetBasedSolution SetCover()
         {
             setPartitionSolver = new XCPlex_SetCovering_wCustomerSets(theProblemModel, XcplexParam, exploredCustomerSetMasterList, noGDVUnlimitedEV: true);
@@ -538,6 +555,27 @@ namespace MPMFEVRP.Implementations.Algorithms
             outcome.LowerBound = setPartitionSolver.LowerBound_XCPlex;
             return outcome;
         }
+
+        double SolveAndUpdateAllSolutionsIfOptimal(double obj, int count, double time)
+        {
+            if (solution.Status == AlgorithmSolutionStatus.Optimal)
+            {
+                if (obj > solution.UpperBound)
+                {
+                    allSolutions.Add(solution);
+                    iterationNo.Add(count);
+                    incumbentTime.Add(time);
+                    if (solution.UpperBound - BKS < 0.001)
+                        terminate = true;
+                    return solution.UpperBound;
+                }
+                else
+                    return obj;
+            }
+            else
+                return obj;
+        }
+
         public override string GetName()
         {
             return "Randomized Column Generation with Refueling Path Insert";
