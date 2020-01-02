@@ -31,7 +31,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
 
-        public ObjectiveFunctionInputDataPackage OFIDP { get { return routeOptimizationOutcome.OFIDP; } } 
+        public ObjectiveFunctionInputDataPackage OFIDP { get { return routeOptimizationOutcome.OFIDP; } }
 
         public CustomerSet()
         {
@@ -64,10 +64,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 possibleOtherCustomers.Add(otherCustomer);
             impossibleOtherCustomers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
-            retrievedFromArchive = false ;
+            retrievedFromArchive = false;
         }
 
-        public CustomerSet(CustomerSet twinCS, EVvsGDV_ProblemModel theProblemModel=null, bool copyROO = false)
+        public CustomerSet(CustomerSet twinCS, EVvsGDV_ProblemModel theProblemModel = null, bool copyROO = false)
         {
             customers = new List<string>();
             foreach (string c in twinCS.Customers)
@@ -84,7 +84,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 impossibleOtherCustomers.Add(c);
             }
-            
+
             retrievedFromArchive = false;
             if (copyROO)
                 routeOptimizationOutcome = new RouteOptimizationOutcome(twinCS.RouteOptimizationOutcome);
@@ -96,7 +96,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 IdentifyNewImpossibleOtherCustomers(theProblemModel);
             }
         }
-        public CustomerSet(List<string> customers, double computationTime=0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
+        public CustomerSet(List<string> customers, double computationTime = 0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
             this.customers = customers;
             this.customers.Sort();//just in case
@@ -209,7 +209,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
-        
+
         public void NewExtend(string customer)
         {
             possibleOtherCustomers.Remove(customer);
@@ -223,7 +223,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
-        
+
         public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence)
         {
             routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence);
@@ -269,7 +269,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
-        
+
         public void Remove(string customer)
         {
             if (customers.Contains(customer))
@@ -326,7 +326,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             CS2.ExtendAndOptimize(customer1, theProblemModel);
             CS1.ExtendAndOptimize(customer2, theProblemModel);
         }
-        
+
         public bool Contains(string customerID)
         {
             for (int i = 0; i < Customers.Count; i++)
@@ -338,7 +338,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         void PopulatePossibleOtherCustomers(List<string> allCustomers)
         {
             possibleOtherCustomers.Clear();
-            foreach(string customer in allCustomers)
+            foreach (string customer in allCustomers)
             {
                 if (customers.Contains(customer))
                     continue;
@@ -357,10 +357,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 return;
             double totalTime = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetTotalTime();
             double totalDistance = routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.GDV);
-            for (int i = possibleOtherCustomers.Count - 1;i >= 0;i--)
+            for (int i = possibleOtherCustomers.Count - 1; i >= 0; i--)
             {
                 string otherCustomer = possibleOtherCustomers[i];
-                if (theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration>theProblemModel.CRD.TMax-totalTime)
+                if (theProblemModel.SRD.GetSiteByID(otherCustomer).ServiceDuration > theProblemModel.CRD.TMax - totalTime)
                 {
                     MakeCustomerImpossible(otherCustomer);
                     continue;
@@ -421,5 +421,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             else throw new Exception("CustomerSet. called to make impossible a customer that wasn't possible!");
         }
+
+        public double ReturnRow0EstimateMinusLongestArc()
+        {
+            return this.RouteOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
+        }
     }
+
 }
