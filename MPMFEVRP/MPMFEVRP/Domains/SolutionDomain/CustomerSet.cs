@@ -424,7 +424,18 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public double ReturnRow0EstimateMinusLongestArc()
         {
-            return this.RouteOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
+            double VMT = routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
+            double longestArc = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestArcLength();
+            return VMT - longestArc;
+        }
+
+        public double GetShortestTwoArcsToCSfromCustomerID (string customerID, EVvsGDV_ProblemModel theProblemModel)
+        {
+            List<double> arcLengthsToCustomerSet = new List<double>() { Math.Min(theProblemModel.SRD.GetDistance(theProblemModel.SRD.GetSingleDepotID(), customerID), theProblemModel.SRD.GetDistance(customerID, theProblemModel.SRD.GetSingleDepotID())) };
+            foreach (string customer in customers)
+                arcLengthsToCustomerSet.Add(Math.Min(theProblemModel.SRD.GetDistance(customerID, customer), theProblemModel.SRD.GetDistance(customer, customerID)));
+            arcLengthsToCustomerSet.Sort();
+            return Math.Max(0, arcLengthsToCustomerSet[0] + arcLengthsToCustomerSet[1]);
         }
     }
 
