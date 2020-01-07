@@ -12,6 +12,7 @@
         ALG_OBTAIN_COLUMNS_UNTIL_OPT,
         ALG_PRESERVE_CUST_SEQUENCE,
         ALG_RANDOM_SEED,
+        ALG_NUM_COLUMNS_ADDED_PER_ITER,
         ALG_SOLUTION_TYPES,
         ALG_ERROR_TOLERANCE,
         ALG_MIP_EMPHASIS,//This is an optional Cplex parameter
