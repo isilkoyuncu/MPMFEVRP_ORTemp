@@ -422,11 +422,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else throw new Exception("CustomerSet. called to make impossible a customer that wasn't possible!");
         }
 
-        public double ReturnRow0EstimateMinusLongestArc()
+        public double GetReducedCost()
         {
-            double VMT = routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
-            double longestArc = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestArcLength();
-            return VMT - longestArc;
+            return routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
+        }
+        public double GetLongestArc()
+        {
+            return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestArcLength();
         }
 
         public double GetShortestTwoArcsToCSfromCustomerID (string customerID, EVvsGDV_ProblemModel theProblemModel)
