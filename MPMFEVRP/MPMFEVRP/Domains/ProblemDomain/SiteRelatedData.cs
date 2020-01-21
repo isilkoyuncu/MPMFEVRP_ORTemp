@@ -224,18 +224,25 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public double GetDistance(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
-            double distance = 0.0;
+            int count = 0;
 
             for (int i = 0; i < siteArray.Length; i++)
             {
                 if (siteArray[i].ID == currentNodeID)
+                {
                     currentIndex = i;
+                    count++;
+                }
                 if (siteArray[i].ID == nextNodeID)
+                {
                     nextIndex = i;
+                    count++;
+                }
+                if (count == 2)
+                    break;
             }
 
-            distance = Distance[currentIndex, nextIndex];
-
+            double distance = Distance[currentIndex, nextIndex];
             return distance;
         }
         public double[,] GetES2ESDistanceMatrix()
@@ -284,35 +291,50 @@ namespace MPMFEVRP.Domains.ProblemDomain
         public double GetTravelTime(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
-            double travelTime = 0.0;
+            int count = 0;
 
             for (int i = 0; i < siteArray.Length; i++)
             {
                 if (siteArray[i].ID == currentNodeID)
+                {
                     currentIndex = i;
+                    count++;
+                }
                 if (siteArray[i].ID == nextNodeID)
+                {
                     nextIndex = i;
+                    count++;
+                }
+                if (count == 2)
+                    break;
             }
 
-            travelTime = TimeConsumption[currentIndex, nextIndex];
+            double travelTime = TimeConsumption[currentIndex, nextIndex];
 
             return travelTime;
         }
         public double GetEVEnergyConsumption(string currentNodeID, string nextNodeID)
         {
             int currentIndex = 0, nextIndex = 0;
-            double eVenergyConsumption = 0.0;
+            int count = 0;
 
             for (int i = 0; i < siteArray.Length; i++)
             {
                 if (siteArray[i].ID == currentNodeID)
+                {
                     currentIndex = i;
+                    count++;
+                }
                 if (siteArray[i].ID == nextNodeID)
+                {
                     nextIndex = i;
+                    count++;
+                }
+                if (count == 2)
+                    break;
             }
 
-            eVenergyConsumption = EnergyConsumption[currentIndex, nextIndex,0];
-
+            double eVenergyConsumption = EnergyConsumption[currentIndex, nextIndex, 0];
             return eVenergyConsumption;
         }
 
