@@ -19,6 +19,7 @@ namespace MPMFEVRP.Models.XCPlex
         RefuelingPathGenerator rpg;
         RefuelingPathList[,] allNondominatedRPs;
 
+        double evPerMileCost = 0.5;
         int firstCustomerVisitationConstraintIndex = -1;//This is followed by one constraint for each customer
         int totalTravelTimeConstraintIndex = -1;
         int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
@@ -156,6 +157,21 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMaxTypeObjectiveFunction()
         {
             throw new NotImplementedException("This model works with only vmt minimization objective for now.");
+            //ILinearNumExpr objFunction = LinearNumExpr();           
+            ////First term: prize collection
+            //    for (int i = 0; i < numNonESNodes; i++)
+            //        for (int j = 0; j < numNonESNodes; j++)
+            //            for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+            //                objFunction.AddTerm(allNondominatedRPs[i, j][r].Destination.Prize[vIndex_EV], X[i][j][r]);
+
+            ////Second term: distance-based costs from customer to customer through an ES
+            //for (int i = 0; i < numNonESNodes; i++)
+            //    for (int j = 0; j < numNonESNodes; j++)
+            //        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+            //            objFunction.AddTerm(-1.0 *allNondominatedRPs[i, j][r].TotalDistance* GetVarCostPerMile(vehicleCategories[vIndex_EV]), X[i][j][r]);
+            
+            ////Now adding the objective function to the model
+            //objective = AddMaximize(objFunction);
         }
         void AddMinTypeObjectiveFunction()
         {
@@ -172,8 +188,8 @@ namespace MPMFEVRP.Models.XCPlex
                 throw new NotImplementedException();
                 //The old code was repetitive of the distance-based cost calculation given above and it was only capable of multiplying the VMt by the vehicle's $/mile coeff. We can and shoulddo much better than that, for example combining distance- and time-based costs together. Will solve when it's needed :)
             }
-            //Now adding the objective function to the model
-            objective = AddMinimize(objFunction);
+                //Now adding the objective function to the model
+                objective = AddMinimize(objFunction);
         }
         protected override void AddAllConstraints()
         {

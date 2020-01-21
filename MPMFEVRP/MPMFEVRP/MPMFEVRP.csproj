@@ -127,6 +127,7 @@
     <Compile Include="Implementations\Algorithms\BranchAndPrice.cs" />
     <Compile Include="Implementations\Algorithms\CGA_ExploitingGDVs.cs" />
     <Compile Include="Implementations\Algorithms\CGHwithShadowPrices.cs" />
+    <Compile Include="Implementations\Algorithms\CGA_RandomizedSetExplorerForProfitMaximization.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationWithVirtualGDVRecoveries.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />

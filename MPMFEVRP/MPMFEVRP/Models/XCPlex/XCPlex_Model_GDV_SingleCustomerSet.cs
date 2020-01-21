@@ -111,7 +111,7 @@ namespace MPMFEVRP.Models.XCPlex
                 if (s.SiteType == SiteTypes.Customer)
                     for (int i = 0; i < numNonESNodes; i++)
                     {
-                        objFunction.AddTerm(Prize(s, vehicleCategories[vIndex_EV]), X[i][j]);
+                        objFunction.AddTerm(Prize(s, vehicleCategories[vIndex_GDV]), X[i][j]);
                     }
             }
             //Second term Part I: distance-based costs from customer to customer directly
@@ -121,7 +121,7 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     Site sTo = preprocessedSites[j];
-                    objFunction.AddTerm(-1.0 * GetVarCostPerMile(vehicleCategories[vIndex_EV]) * Distance(sFrom, sTo), X[i][j]);
+                    objFunction.AddTerm(-1.0 * GetVarCostPerMile(vehicleCategories[vIndex_GDV]) * Distance(sFrom, sTo), X[i][j]);
                 }
             }
             //Third term: vehicle fixed costs
@@ -157,7 +157,7 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         Site sTo = preprocessedSites[j];
-                        objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[vIndex_EV]) * Distance(sFrom, sTo), X[i][j]);
+                        objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[vIndex_GDV]) * Distance(sFrom, sTo), X[i][j]);
                     }
                 }
                 //Third term: vehicle fixed costs
