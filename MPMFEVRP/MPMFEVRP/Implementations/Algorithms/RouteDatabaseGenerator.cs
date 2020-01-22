@@ -42,7 +42,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            //AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_ROUTES_EACH_ITER, "# routes at each iter", "1000"));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
@@ -54,7 +53,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             preserveCustomerVisitSequence = AlgorithmParameters.GetParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE).GetBoolValue();
             randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
             random = new Random(randomSeed);
-            numberOfRoutesGeneratedAndRecorded = AlgorithmParameters.GetParameter(ParameterID.ALG_NUM_ROUTES_EACH_ITER).GetIntValue();
             XcplexParam = new XCPlexParameters();
 
             exploredCustomerSetMasterListsAtEachLevel = new CustomerSetList[maxTreeLevel];
@@ -71,7 +69,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
                     break;
                 ExploreNextLevelBreadthFirst(i);
-            }         
+            }
         }
         
         public override void SpecializedConclude()
@@ -102,7 +100,9 @@ namespace MPMFEVRP.Implementations.Algorithms
             exploredCustomerSetMasterListsAtEachLevel[i + 1] = new CustomerSetList();
             for (int j=0; j<exploredCustomerSetMasterListsAtEachLevel[i].Count; j++)
             {
-                List<string> customersToBeAdded = SelectCustomersToExtend(exploredCustomerSetMasterListsAtEachLevel[i][j]);
+                List<string> customersToBeAdded = new List<string>();
+                if(exploredCustomerSetMasterListsAtEachLevel[i][j].GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV)==VehicleSpecificRouteOptimizationStatus.Optimized)
+                    customersToBeAdded = SelectCustomersToExtend(exploredCustomerSetMasterListsAtEachLevel[i][j]);
                 for(int k=0; k<customersToBeAdded.Count; k++)
                 {
                     CustomerSet tempCS = new CustomerSet(exploredCustomerSetMasterListsAtEachLevel[i][j]);
@@ -115,6 +115,36 @@ namespace MPMFEVRP.Implementations.Algorithms
                     if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
                         break;
                 }
+                if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                    break;
+            }
+        }
+        void ExploreNextLevelsDepthFirst(int i, int j)
+        {
+            CustomerSet currentCS = new CustomerSet(exploredCustomerSetMasterListsAtEachLevel[i][j]);
+
+            while (i < maxTreeLevel)
+            {
+                List<string> customersToBeAdded = SelectCustomersToExtend(currentCS);
+
+                if (exploredCustomerSetMasterListsAtEachLevel[i + 1] == null)
+                    exploredCustomerSetMasterListsAtEachLevel[i + 1] = new CustomerSetList();
+                if (customersToBeAdded != null && customersToBeAdded.Count != 0)
+                {
+                    CustomerSet tempCS = new CustomerSet(currentCS);
+                    tempCS.NewExtend(customersToBeAdded.First());
+                    if (!exploredCustomerSetMasterListsAtEachLevel[i + 1].ContainsAnIdenticalCustomerSet(tempCS))
+                    {
+                        tempCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
+                        exploredCustomerSetMasterListsAtEachLevel[i + 1].Add(tempCS);
+                    }
+                    currentCS = new CustomerSet(tempCS);
+                    if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                        break;
+                }
+                else
+                    break;
+                i++;
                 if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
                     break;
             }
