@@ -21,20 +21,18 @@ namespace MPMFEVRP.Implementations.Algorithms
         int randomSeed; Random random;
         double runTimeLimitInSeconds = 0.0;
         int numberOfRoutesGeneratedAndRecorded = 0;
-        int beamWidth = 5;
+        int beamWidth = 10;
         int maxTreeLevel = 10;
 
         XCPlexParameters XcplexParam;
         CustomerSetList[] exploredCustomerSetMasterListsAtEachLevel;
         CustomerSetList columnsToSetCover; //Feasible for at least one vehicle
         CustomerSetList exploredSingleCustomerSetList;
-
+        Dictionary<int, double> promisingNodes;
         string[] writtenStatistics;
 
         //Local statistics
         DateTime globalStartTime;
-
-        bool terminate;
 
         public RouteDatabaseGenerator()
         {
@@ -42,9 +40,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_ROUTES_EACH_ITER, "# routes at each iter", "1000"));
+            //AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_NUM_ROUTES_EACH_ITER, "# routes at each iter", "1000"));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
@@ -65,22 +63,15 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void SpecializedRun()
         {
-            terminate = false;
             globalStartTime = DateTime.Now;
             InitializeTreeLevel_0();
             exploredCustomerSetMasterListsAtEachLevel[0] = new CustomerSetList(exploredSingleCustomerSetList, false);
-            while (!terminate)
+            for (int i = 0; i < maxTreeLevel - 1; i++)
             {
-                for (int i = 0; i < maxTreeLevel-1; i++)
-                {
-                    if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
-                    {
-                        terminate = true;
-                        break;
-                    }
-                    ExploreNextLevelBreadthFirst(i);
-                }  
-            }
+                if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
+                    break;
+                ExploreNextLevelBreadthFirst(i);
+            }         
         }
         
         public override void SpecializedConclude()
@@ -93,7 +84,6 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void SpecializedReset()
         {
-           
             GC.Collect();
         }
         
@@ -119,7 +109,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     tempCS.NewExtend(customersToBeAdded[k]);
                     if (!exploredCustomerSetMasterListsAtEachLevel[i + 1].ContainsAnIdenticalCustomerSet(tempCS))
                     {
-                        tempCS.OptimizeByExploitingGDVs(theProblemModel, true);
+                        tempCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
                         exploredCustomerSetMasterListsAtEachLevel[i + 1].Add(tempCS);
                     }
                     if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
@@ -136,7 +126,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             List<string> toReturn = new List<string>();
             for (int k = 0; k < Math.Min(beamWidth, theBestTopXPercent.Count); k++)
                 toReturn.Add(theBestTopXPercent[k]);
-            return theBestTopXPercent;
+            return toReturn;
         }
         List<string> PopulateTheBestTopXPercentCustomersList(CustomerSet CS, List<string> visitableCustomers, double closestPercentSelect)
         {
@@ -241,11 +231,12 @@ namespace MPMFEVRP.Implementations.Algorithms
         string[] WriteSolutionStatistics()
         {
             List<string> output = new List<string>();
-            output.Add("GDVRoute\tGDVVMT\tEVRoute\tEVVMT\tNumCustomers\tNumESVisits\tStatus\tGDVSolnTime\tEVSolnTime");
+            output.Add("CustomerSet\tGDVRoute\tGDVVMT\tEVRoute\tEVVMT\tNumCustomers\tNumESVisits\tStatus\tGDVSolnTime\tEVSolnTime");
             for (int i = 0; i < maxTreeLevel; i++)
                 if (exploredCustomerSetMasterListsAtEachLevel[i] != null)
                     foreach (CustomerSet cs in exploredCustomerSetMasterListsAtEachLevel[i])
                     {
+                        string CS = "";
                         string GDVRoute = "";
                         double GDVVMT = 0.0;
                         string EVRoute = "";
@@ -256,6 +247,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                         double GDVSolnTime = 0.0;
                         double EVSolnTime = 0.0;
 
+                        
+                        CS = String.Join("-", cs.Customers);
                         if (SolnStatus != RouteOptimizationStatus.InfeasibleForBothGDVandEV && SolnStatus != RouteOptimizationStatus.NotYetOptimized)
                         {
                             if (SolnStatus == RouteOptimizationStatus.OptimizedForBothGDVandEV || SolnStatus == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV || SolnStatus == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV)
@@ -279,7 +272,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                                 }
                             }
                         }
-                        output.Add(GDVRoute.ToString() + "\t" + GDVVMT.ToString() + "\t" + EVRoute.ToString() + "\t" + EVVMT.ToString() + "\t"+ numCustomers.ToString() + "\t" + numESVisits.ToString() + "\t" + SolnStatus.ToString() + "\t" + GDVSolnTime.ToString() + "\t" + EVSolnTime.ToString());
+                        output.Add(CS + "\t" + GDVRoute.ToString() + "\t" + GDVVMT.ToString() + "\t" + EVRoute.ToString() + "\t" + EVVMT.ToString() + "\t"+ numCustomers.ToString() + "\t" + numESVisits.ToString() + "\t" + SolnStatus.ToString() + "\t" + GDVSolnTime.ToString() + "\t" + EVSolnTime.ToString());
                     }
             return output.ToArray();
         }
