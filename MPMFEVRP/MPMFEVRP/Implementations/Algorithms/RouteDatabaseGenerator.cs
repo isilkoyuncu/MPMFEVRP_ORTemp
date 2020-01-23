@@ -42,9 +42,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RESUME, "Resume", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RESUME, "Resume", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
