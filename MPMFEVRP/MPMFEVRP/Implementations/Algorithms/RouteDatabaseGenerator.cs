@@ -20,15 +20,13 @@ namespace MPMFEVRP.Implementations.Algorithms
         bool preserveCustomerVisitSequence = false;
         int randomSeed; Random random;
         double runTimeLimitInSeconds = 0.0;
-        int numberOfRoutesGeneratedAndRecorded = 0;
-        int beamWidth = 10;
-        int maxTreeLevel = 10;
+        int beamWidth = 7;
+        int maxTreeLevel = 20;
 
         XCPlexParameters XcplexParam;
         CustomerSetList[] exploredCustomerSetMasterListsAtEachLevel;
         CustomerSetList columnsToSetCover; //Feasible for at least one vehicle
         CustomerSetList exploredSingleCustomerSetList;
-        Dictionary<int, double> promisingNodes;
         string[] writtenStatistics;
 
         //Local statistics
@@ -100,6 +98,8 @@ namespace MPMFEVRP.Implementations.Algorithms
             exploredCustomerSetMasterListsAtEachLevel[i + 1] = new CustomerSetList();
             for (int j=0; j<exploredCustomerSetMasterListsAtEachLevel[i].Count; j++)
             {
+                if (exploredCustomerSetMasterListsAtEachLevel[i][j].RouteOptimizationOutcome == null)
+                    continue;
                 List<string> customersToBeAdded = new List<string>();
                 if(exploredCustomerSetMasterListsAtEachLevel[i][j].GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV)==VehicleSpecificRouteOptimizationStatus.Optimized)
                     customersToBeAdded = SelectCustomersToExtend(exploredCustomerSetMasterListsAtEachLevel[i][j]);
@@ -156,6 +156,13 @@ namespace MPMFEVRP.Implementations.Algorithms
             List<string> toReturn = new List<string>();
             for (int k = 0; k < Math.Min(beamWidth, theBestTopXPercent.Count); k++)
                 toReturn.Add(theBestTopXPercent[k]);
+            if (possibleCustIDs.Count != 0)
+                for (int r = 0; r < 3; r++)
+                {
+                    string candidate = possibleCustIDs[random.Next(possibleCustIDs.Count)];
+                    if (!toReturn.Contains(candidate))
+                        toReturn.Add(candidate);
+                }
             return toReturn;
         }
         List<string> PopulateTheBestTopXPercentCustomersList(CustomerSet CS, List<string> visitableCustomers, double closestPercentSelect)
