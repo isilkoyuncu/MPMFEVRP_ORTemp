@@ -22,8 +22,11 @@ namespace MPMFEVRP.Implementations.Algorithms
         double runTimeLimitInSeconds = 0.0;
         int beamWidth = 7;
         int maxTreeLevel = 20;
+        int randExtension = 3;
+        bool resume = false;
 
         XCPlexParameters XcplexParam;
+        CustomerSetList exploredCustomerSetMasterListsAtStart;
         CustomerSetList[] exploredCustomerSetMasterListsAtEachLevel;
         CustomerSetList columnsToSetCover; //Feasible for at least one vehicle
         CustomerSetList exploredSingleCustomerSetList;
@@ -31,24 +34,28 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         //Local statistics
         DateTime globalStartTime;
-
+        List<string> allCustomerIDs;
+ 
         public RouteDatabaseGenerator()
         {
             AddSpecializedParameters();
         }
         public override void AddSpecializedParameters()
         {
-            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RESUME, "Resume", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
             //Problem param
             this.theProblemModel = theProblemModel;
+            allCustomerIDs = theProblemModel.GetAllCustomerIDs();
 
             //Algorithm param
             runTimeLimitInSeconds = AlgorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
             preserveCustomerVisitSequence = AlgorithmParameters.GetParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE).GetBoolValue();
+            resume = AlgorithmParameters.GetParameter(ParameterID.ALG_RESUME).GetBoolValue();
             randomSeed = AlgorithmParameters.GetParameter(ParameterID.ALG_RANDOM_SEED).GetIntValue();
             random = new Random(randomSeed);
             XcplexParam = new XCPlexParameters();
@@ -56,12 +63,24 @@ namespace MPMFEVRP.Implementations.Algorithms
             exploredCustomerSetMasterListsAtEachLevel = new CustomerSetList[maxTreeLevel];
             exploredSingleCustomerSetList = new CustomerSetList();
             columnsToSetCover = new CustomerSetList();
+            if (resume)
+            {
+                exploredCustomerSetMasterListsAtStart = new CustomerSetList();
+                ReadCSsFromData();
+            }
         }
         public override void SpecializedRun()
         {
             globalStartTime = DateTime.Now;
-            InitializeTreeLevel_0();
-            exploredCustomerSetMasterListsAtEachLevel[0] = new CustomerSetList(exploredSingleCustomerSetList, false);
+            if (!resume)
+            {
+                InitializeTreeLevel_0();
+                exploredCustomerSetMasterListsAtEachLevel[0] = new CustomerSetList(exploredSingleCustomerSetList, false);
+            }
+            else
+            {
+                exploredCustomerSetMasterListsAtEachLevel[0] = new CustomerSetList(exploredCustomerSetMasterListsAtStart, false);
+            }
             for (int i = 0; i < maxTreeLevel - 1; i++)
             {
                 if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
@@ -82,7 +101,23 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             GC.Collect();
         }
-        
+        public void ReadCSsFromData()
+        {
+            randExtension = 1;
+            beamWidth = 2;
+            System.IO.StreamReader sr = new System.IO.StreamReader("C:/Users/ikoyuncu/Desktop/TestReader/EMH_Test_0_resume.txt");
+            string wholeFile = sr.ReadToEnd();
+            sr.Close();
+            string[] allRows = wholeFile.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
+            for(int i=0; i<allRows.Count(); i++)
+            {
+                string[] customerSet = allRows[i].Split('\t')[0].Split('-');
+                CustomerSet cs = new CustomerSet(customerSet[0], allCustomerIDs);
+                for (int c = 1; c < customerSet.Count(); c++)
+                    cs.NewExtend(customerSet[c]);
+                exploredCustomerSetMasterListsAtStart.Add(cs);
+            }
+        }
 
         void InitializeTreeLevel_0()
         {
@@ -98,11 +133,18 @@ namespace MPMFEVRP.Implementations.Algorithms
             exploredCustomerSetMasterListsAtEachLevel[i + 1] = new CustomerSetList();
             for (int j=0; j<exploredCustomerSetMasterListsAtEachLevel[i].Count; j++)
             {
-                if (exploredCustomerSetMasterListsAtEachLevel[i][j].RouteOptimizationOutcome == null)
-                    continue;
                 List<string> customersToBeAdded = new List<string>();
-                if(exploredCustomerSetMasterListsAtEachLevel[i][j].GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV)==VehicleSpecificRouteOptimizationStatus.Optimized)
+                if (resume == false)
+                {
+                    if (exploredCustomerSetMasterListsAtEachLevel[i][j].RouteOptimizationOutcome.Status == RouteOptimizationStatus.InfeasibleForBothGDVandEV)
+                        continue;
+                    if (exploredCustomerSetMasterListsAtEachLevel[i][j].GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV) == VehicleSpecificRouteOptimizationStatus.Optimized)
+                        customersToBeAdded = SelectCustomersToExtend(exploredCustomerSetMasterListsAtEachLevel[i][j]);
+                }
+                else
+                {
                     customersToBeAdded = SelectCustomersToExtend(exploredCustomerSetMasterListsAtEachLevel[i][j]);
+                }
                 for(int k=0; k<customersToBeAdded.Count; k++)
                 {
                     CustomerSet tempCS = new CustomerSet(exploredCustomerSetMasterListsAtEachLevel[i][j]);
@@ -157,7 +199,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int k = 0; k < Math.Min(beamWidth, theBestTopXPercent.Count); k++)
                 toReturn.Add(theBestTopXPercent[k]);
             if (possibleCustIDs.Count != 0)
-                for (int r = 0; r < 3; r++)
+                for (int r = 0; r < randExtension; r++)
                 {
                     string candidate = possibleCustIDs[random.Next(possibleCustIDs.Count)];
                     if (!toReturn.Contains(candidate))
