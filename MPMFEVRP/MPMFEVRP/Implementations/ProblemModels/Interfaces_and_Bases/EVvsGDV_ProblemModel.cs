@@ -55,13 +55,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             coverConstraintType = problem.CoverConstraintType;
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
-            lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
+            //lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
             CalculateBoundsForAllOriginalSWAVs();
 
             if (problemCharacteristics.GetParameter(ParameterID.PRB_CREATETSPSOLVERS).GetBoolValue())
-                CreateTSPSolvers(typeof(XCPlex_ArcDuplicatingFormulation_woU)); //TODO: 10/1/19 this code make sure we create tsp solvers with adfwu, so no matter what we choose on the form it doesn't affect anything.
-
-            CreateNewTspSolvers();
+                CreateTSPSolvers(typeof(XCPlex_Model_GDV_SingleCustomerSet)); //TODO: 10/1/19 this code make sure we create tsp solvers with adfwu, so no matter what we choose on the form it doesn't affect anything.
+            if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATEEXPLOITINGTSPSOLVER).GetBoolValue() || problemCharacteristics.GetParameter(ParameterID.PRB_CREATEPLAINTSPSOLVER).GetBoolValue())
+                CreateNewTspSolvers();
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
@@ -71,8 +71,10 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         {
             //newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
             //newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
-            theGDVExploiter = new CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(this);
-            //thePlainAFVSolver = new PlainCustomerSetSolver_Homogeneous(this);
+            if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATEEXPLOITINGTSPSOLVER).GetBoolValue())
+                theGDVExploiter = new CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(this);
+            if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATEPLAINTSPSOLVER).GetBoolValue())
+                thePlainAFVSolver = new PlainCustomerSetSolver_Homogeneous(this);
         }
         public string GetInstanceName(string inputFileName)
         {
@@ -80,39 +82,44 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void CreateTSPSolvers(Type TSPModelType)
         {
-            if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
+            if (TSPModelType == typeof(XCPlex_Model_GDV_SingleCustomerSet))
+            {
+                EV_TSPSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+                GDV_TSPSolver = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+            }
+            else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
                 GDV_TSPSolver = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             }
-            else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation_woU))
-            {
-                EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-            }
+            //else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation_woU))
+            //{
+            //    EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
+            //    GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
+            //}
             else
             {
                 throw new NotImplementedException("I do not trust any other model other than ADF and NDF without U.(IK)");
-                if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
-                {
-                    EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-                }
-                else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
-                {
-                    EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-                }
-                else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation))
-                {
-                    EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                    GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-                }
-                else
-                {
-                    System.Windows.Forms.MessageBox.Show("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
-                    throw new Exception("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
-                }
+                //if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
+                //{
+                //    EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
+                //    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
+                //}
+                //else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
+                //{
+                //    EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
+                //    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
+                //}
+                //else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation))
+                //{
+                //    EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
+                //    GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
+                //}
+                //else
+                //{
+                //    System.Windows.Forms.MessageBox.Show("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
+                //    throw new Exception("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
+                //}
             }
         }
         double GetWorstCaseOFV()
@@ -734,7 +741,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         void InitializeForTripleSolve()
         {
             GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-            EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+            //EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+            EV_TSPSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
         }
         public string[] TripleOrienteeringSolve(Dictionary<string, double> customerCoverageConstraintShadowPrices, bool useRuntimeLimit = false, double runTimeLimit = double.MaxValue, bool compareToGDV = false, bool compareToEV_NDF = false)
@@ -786,7 +794,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         void InitializeForTripleOrienteeringSolve(bool limitComputationTime, double runtimeLimit_Seconds)
         {
             GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            //EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+            EV_NDF_OrienteeringSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
             EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
         }
 

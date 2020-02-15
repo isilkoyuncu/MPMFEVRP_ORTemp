@@ -20,9 +20,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         bool preserveCustomerVisitSequence = false;
         int randomSeed; Random random;
         double runTimeLimitInSeconds = 0.0;
-        int beamWidth = 7;
+        int beamWidth = 10;
         int maxTreeLevel = 20;
-        int randExtension = 3;
+        int randExtension = 10;
         bool resume = false;
 
         XCPlexParameters XcplexParam;
@@ -44,7 +44,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_PRESERVE_CUST_SEQUENCE, "Preserve Customer Visit Sequence", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RANDOM_SEED, "Random Seed", "50"));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RESUME, "Resume", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RESUME, "Resume", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
         }
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
@@ -105,7 +105,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             randExtension = 1;
             beamWidth = 2;
-            System.IO.StreamReader sr = new System.IO.StreamReader("C:/Users/ikoyuncu/Desktop/TestReader/EMH_Test_0_resume.txt");
+            System.IO.StreamReader sr = new System.IO.StreamReader("C:/Users/ikoyuncu/Desktop/TestReader/EMH2_Test_0_resume2.txt");
             string wholeFile = sr.ReadToEnd();
             sr.Close();
             string[] allRows = wholeFile.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);

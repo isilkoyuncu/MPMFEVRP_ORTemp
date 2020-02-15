@@ -53,6 +53,8 @@
         PRB_RECHARGING_ASSUMPTION,
         PRB_LAMBDA,
         PRB_CREATETSPSOLVERS,
+        PRB_CREATEEXPLOITINGTSPSOLVER,
+        PRB_CREATEPLAINTSPSOLVER,
         PROB_BKS
         //TODO put solution statistics, things you need select from the form in order to show them to user.
     }

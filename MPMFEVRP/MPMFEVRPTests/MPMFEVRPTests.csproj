@@ -54,6 +54,8 @@
     <Compile Include="Models\RefuelingPathGeneratorTests.cs" />
     <Compile Include="Models\XCPlex\AllFormulationsFindSameOptimals.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woUvariablesTests.cs" />
+    <Compile Include="MPMFEVRP\Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />
+    <Compile Include="MPMFEVRP\Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woU.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetCoverFileUtilities\CustomerSetArchiveTests.cs" />
     <Compile Include="TestUtility-DefaultGetters\ProblemRelated.cs" />

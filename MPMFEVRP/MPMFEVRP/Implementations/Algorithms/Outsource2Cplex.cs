@@ -65,20 +65,17 @@ namespace MPMFEVRP.Implementations.Algorithms
             XCPlexBase model;
             switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value)
             {
-                case XCPlex_Formulation.NodeDuplicating:
-                    model = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
-                    break;
-                case XCPlex_Formulation.ArcDuplicating:
-                    model = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
-                    break;
-                case XCPlex_Formulation.NodeDuplicatingwoU:
-                    model = new XCPlex_NodeDuplicatingFormulation_woU(theProblemModel, XcplexParam);
-                    break;
+                //case XCPlex_Formulation.NodeDuplicating:
+                //    model = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
+                //    break;
+                //case XCPlex_Formulation.ArcDuplicating:
+                //    model = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
+                //    break;
+                //case XCPlex_Formulation.NodeDuplicatingwoU:
+                //    model = new XCPlex_NodeDuplicatingFormulation_woU(theProblemModel, XcplexParam);
+                //    break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
                     model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
-                    break;
-                case XCPlex_Formulation.EVRPwRefuelingPaths:
-                    model = new XCPlex_EVRPwRefuelingPaths(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 default:
                     throw new Exception("XCplex model type does not exist, thus cannot be built.");
