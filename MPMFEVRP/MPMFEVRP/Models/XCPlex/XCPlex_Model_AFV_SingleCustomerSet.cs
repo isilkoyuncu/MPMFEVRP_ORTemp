@@ -24,7 +24,9 @@ namespace MPMFEVRP.Models.XCPlex
         int totalTravelTimeConstraintIndex = -1;
         int totalNumberOfActiveArcsConstraintIndex = -1;//This is followed by one more-specific constraint for EV and one for GDV
         int objUpperBoundConstraintIndex = -1;
+        int objLowerBoundConstraintIndex = -1;
         double objRHS = double.MaxValue;
+        double objRHS_LB = 0.0;
 
         bool addTotalNumberOfActiveArcsCut = false;
 
@@ -211,7 +213,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_RegulateArrivalSOEAtDestinationDirect();//12
 
             AddConstraint_MinimizeVMTObjectiveUB();
-
+            AddConstraint_MinimizeVMTObjectiveLB();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();
@@ -485,6 +487,19 @@ namespace MPMFEVRP.Models.XCPlex
             allConstraints_list.Add(AddLe(ObjUB, objRHS, constraint_name));
         }
 
+        void AddConstraint_MinimizeVMTObjectiveLB()
+        {
+            objLowerBoundConstraintIndex = allConstraints_list.Count;
+            ILinearNumExpr ObjLB = LinearNumExpr();
+
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        ObjLB.AddTerm(allNondominatedRPs[i, j][r].TotalDistance, X[i][j][r]);
+            string constraint_name = "Minimize VMT Objective Lower Bound";
+            allConstraints_list.Add(AddGe(ObjLB, objRHS_LB, constraint_name));
+        }
+
         void AddConstraint_ArrivalTimeLimitsOLD()
         {
             ILinearNumExpr TimeDifference;
@@ -673,6 +688,12 @@ namespace MPMFEVRP.Models.XCPlex
                                     X[i][j][r].UB = 0.0;
                             }
                         }
+            }
+            if(vsr_GDV!=null)
+            {
+                objRHS_LB = vsr_GDV.GetVehicleMilesTraveled();
+                int c = objLowerBoundConstraintIndex;
+                allConstraints_array[c].LB = objRHS_LB;
             }
         }
         public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence)
