@@ -212,8 +212,8 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_RegulateArrivalSOEAtDestinationThroughRP();//11
             AddConstraint_RegulateArrivalSOEAtDestinationDirect();//12
 
-            AddConstraint_MinimizeVMTObjectiveUB();
-            AddConstraint_MinimizeVMTObjectiveLB();
+            //AddConstraint_MinimizeVMTObjectiveUB();
+            //AddConstraint_MinimizeVMTObjectiveLB();
 
             //All constraints added
             allConstraints_array = allConstraints_list.ToArray();

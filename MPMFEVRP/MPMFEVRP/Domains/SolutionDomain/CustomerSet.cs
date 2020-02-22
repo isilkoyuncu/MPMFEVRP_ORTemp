@@ -307,7 +307,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 exploredCustomerSetMasterList.Add(CS1);
             }
         }
+        public void SwapAndESInsert(EVvsGDV_ProblemModel theProblemModel)
+        {
+            VehicleSpecificRouteOptimizationOutcome vsroo_AFV_swapAndES = theProblemModel.NewRouteOptimize(this);
 
+        }
         public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2, EVvsGDV_ProblemModel theProblemModel)
         {
             string c1, c2;
