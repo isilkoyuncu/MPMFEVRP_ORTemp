@@ -34,10 +34,12 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
         XCPlex_Model_AFV_SingleCustomerSet newTSPsolverEV;
         XCPlex_Model_GDV_SingleCustomerSet newTSPsolverGDV;
+        public RefuelingPathList NonDominatedRefuelingPaths = new RefuelingPathList();
 
         CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs theGDVExploiter;
         PlainCustomerSetSolver_Homogeneous thePlainAFVSolver;
 
+        public RefuelingPathGenerator rpg;
 
         public bool GDVOptimalRouteFeasibleForEV = false;
         public List<string> RouteConstructionMethodForEV = new List<string>(); // Here for statistical purposes
@@ -65,7 +67,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
-
+            rpg = new RefuelingPathGenerator(this);
+            PopulateNonDominatedRefuelingPaths();
         }
         void CreateNewTspSolvers()
         {
@@ -230,10 +233,14 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         public VehicleSpecificRouteOptimizationOutcome NewRouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
             VehicleSpecificRouteOptimizationOutcome vsroo;
-            XCPlexVRPBase solver = newTSPsolverGDV;
+            XCPlexVRPBase solver;
             if (vehicle.Category == VehicleCategories.EV)
             {
                 solver = newTSPsolverEV;
+            }
+            else
+            {
+                solver = newTSPsolverGDV;
             }
             solver.RefineDecisionVariables(CS);
             //solver.ExportModel("model.lp");
@@ -799,10 +806,19 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
         }
 
-
-        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, bool preserveCustomerVisitSequence)
+        void PopulateNonDominatedRefuelingPaths()
         {
-            return theGDVExploiter.Solve(CS, preserveCustomerVisitSequence);
+            foreach (SiteWithAuxiliaryVariables swav1 in SRD.GetAllNonESSWAVsList())
+                foreach (SiteWithAuxiliaryVariables swav2 in SRD.GetAllNonESSWAVsList())
+                    if (swav1.ID != swav2.ID)
+                    {
+                        NonDominatedRefuelingPaths.AddRange(rpg.GenerateNonDominatedBetweenODPairIK(swav1, swav2, SRD));
+                    }
+        }
+
+        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough)
+        {
+            return theGDVExploiter.Solve(CS, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough);
         }
         public RouteOptimizationOutcome RouteOptimizeByPlainAFVSolver(CustomerSet CS)
         {

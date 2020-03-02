@@ -233,6 +233,10 @@ namespace MPMFEVRP.Forms
             }
         }
 
+
+
+
+
         private void ExtractLogInfo(object sender, EventArgs e)
         {
             IKTestsToDelete testLPfiles = new IKTestsToDelete();
@@ -279,6 +283,40 @@ namespace MPMFEVRP.Forms
             }
             else
                 MessageBox.Show("You should create a problem first!", "No problem!");
+        }
+
+        private void ExploitingGDVvsPlainSummary_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = true,
+                Multiselect = true
+            };
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+
+                try
+                {
+                    for (int j = 0; j < dialog.FileNames.Length; j++)
+                    {
+                        string[] cplexOutputSummary = SolutionUtil.ReadCplexLogByFileName(dialog.FileNames[j]);
+                        StreamWriter sw = new StreamWriter("cplexLogSummary" + (j + 1).ToString() + ".txt");
+                        for (int i = 0; i < cplexOutputSummary.Length; i++)
+                        {
+                            sw.WriteLine(cplexOutputSummary[i]);
+                        }
+                        sw.Flush();
+                        sw.Close();
+                        Log("Solution summary is written!");
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("There is something wrong while parsing the file!", "File parse error!");
+                }
+            }
+
         }
     }
 }

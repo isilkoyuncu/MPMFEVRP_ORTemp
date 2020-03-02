@@ -33,6 +33,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         public ObjectiveFunctionInputDataPackage OFIDP { get { return routeOptimizationOutcome.OFIDP; } }
 
+        double swapInsertCPUtime;
+
         public CustomerSet()
         {
             customers = new List<string>();
@@ -96,6 +98,32 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 IdentifyNewImpossibleOtherCustomers(theProblemModel);
             }
         }
+
+        public CustomerSet(CustomerSet twinCS, EVvsGDV_ProblemModel theProblemModel, RouteOptimizationOutcome newROO)
+        {
+            customers = new List<string>();
+            foreach (string c in twinCS.Customers)
+            {
+                customers.Add(c);
+            }
+            possibleOtherCustomers = new List<string>();
+            foreach (string c in twinCS.PossibleOtherCustomers)
+            {
+                possibleOtherCustomers.Add(c);
+            }
+            impossibleOtherCustomers = new List<string>();
+            foreach (string c in twinCS.ImpossibleOtherCustomers)
+            {
+                impossibleOtherCustomers.Add(c);
+            }
+                routeOptimizationOutcome = new RouteOptimizationOutcome(newROO);
+            
+                UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+                IdentifyNewImpossibleOtherCustomers(theProblemModel);
+            
+        }
+
+
         public CustomerSet(List<string> customers, double computationTime = 0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
             this.customers = customers;
@@ -224,9 +252,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
-        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence)
+        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false)
         {
-            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence);
+            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
@@ -307,11 +335,51 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 exploredCustomerSetMasterList.Add(CS1);
             }
         }
-        public void SwapAndESInsert(EVvsGDV_ProblemModel theProblemModel)
-        {
-            VehicleSpecificRouteOptimizationOutcome vsroo_AFV_swapAndES = theProblemModel.NewRouteOptimize(this);
 
+        public List<CustomerSet> SwapAndESInsert(int position, EVvsGDV_ProblemModel theProblemModel)
+        {
+            List<CustomerSet> output = new List<CustomerSet>();
+            VehicleSpecificRouteOptimizationOutcome vsroo_GDV = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV);
+            VehicleSpecificRouteOptimizationOutcome vsroo_AFV_swapAndES = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible); ;
+            List<VehicleSpecificRoute> vsr_AFV_list = GetVehicleSpecificRouteBySwapAdjacentAndInsertES(position, theProblemModel);
+            foreach (VehicleSpecificRoute vsr_AFV in vsr_AFV_list)
+                if (vsr_AFV.Feasible == true)
+                {
+                    vsroo_AFV_swapAndES = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, swapInsertCPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: vsr_AFV);
+                    output.Add(new CustomerSet(this, theProblemModel, new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_AFV_swapAndES })));
+                }
+            return output;
         }
+
+        List<VehicleSpecificRoute> GetVehicleSpecificRouteBySwapAdjacentAndInsertES(int position, EVvsGDV_ProblemModel theProblemModel)
+        {
+            List<VehicleSpecificRoute> vsr_AFV = new List<VehicleSpecificRoute>();
+            List<string> nonDepotSites = new List<string>();
+            RefuelingPathList refuelingPaths = new RefuelingPathList();
+            DateTime startTime = DateTime.Now;
+            nonDepotSites = routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.ListOfVisitedCustomerSiteIDs;
+            string cs = nonDepotSites[position];
+            nonDepotSites.RemoveAt(position);
+            nonDepotSites.Insert(position + 1, cs);
+            string origin = cs;
+            string destination;
+            if (nonDepotSites.Count <= position + 2)
+                destination = theProblemModel.SRD.GetSingleDepotID();
+            else
+                destination = nonDepotSites[position + 2];
+            foreach(RefuelingPath rp in theProblemModel.NonDominatedRefuelingPaths)
+            {
+                if (rp.Origin.ID == origin && rp.Destination.ID == destination && rp.GetRefuelingStopIDs().Count>0)
+                {
+                    nonDepotSites.InsertRange(position + 2, rp.GetRefuelingStopIDs());
+                    vsr_AFV.Add(new VehicleSpecificRoute(theProblemModel, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV), nonDepotSites));
+                }
+            }            
+            DateTime endTime = DateTime.Now;
+            swapInsertCPUtime = (endTime - startTime).TotalSeconds;
+            return vsr_AFV;
+        }
+
         public static void Swap(CustomerSet CS1, int position1, CustomerSet CS2, int position2, EVvsGDV_ProblemModel theProblemModel)
         {
             string c1, c2;

@@ -24,7 +24,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             AFV_Solver = new CustomerSetSolverWithOnlyAFV(theProblemModel);
             theAFV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
         }
-        public RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence = false)
+        public RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence = false, bool feasibleEnough = false)
         {
             VehicleSpecificRouteOptimizationOutcome vsroo_AFV;
 

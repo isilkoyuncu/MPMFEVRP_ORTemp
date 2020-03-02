@@ -44,6 +44,15 @@ namespace MPMFEVRP.Utils
             cplexLog = cplexLogFileReader.CplexLogSummary;
             return cplexLog;
         }
+
+        public static string[] ReadExploitingGDVvsPlainOutputByFileName(String fullFileName)
+        {
+            string[] output = new string[3];
+            //CplexLogReader cplexLogFileReader = new CplexLogReader(fullFileName);
+            //cplexLogFileReader.Read();
+            //output = cplexLogFileReader.CplexLogSummary;
+            return output;
+        }
         public static ISolution CreateSolutionByName(String solutionName, EVvsGDV_ProblemModel problemData)
         {
             var allSolutions = AppDomain.CurrentDomain.GetAssemblies()

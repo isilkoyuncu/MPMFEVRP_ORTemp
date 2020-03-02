@@ -17,6 +17,6 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Interfaces_and_Bases
         /// <param name="customerSet">The customer set for which a new solution is desired.</param>
         /// <param name="PreserveCustomerVisitSequence">Whether this solver is constrained to use the customer visit sequence obtained for the GDV when optimizing for the AFV.</param>
         /// <returns></returns>
-        RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence);
+        RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false);
     }
 }

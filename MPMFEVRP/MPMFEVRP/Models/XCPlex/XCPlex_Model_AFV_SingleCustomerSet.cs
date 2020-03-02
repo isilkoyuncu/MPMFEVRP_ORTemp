@@ -689,12 +689,12 @@ namespace MPMFEVRP.Models.XCPlex
                             }
                         }
             }
-            if(vsr_GDV!=null)
-            {
-                objRHS_LB = vsr_GDV.GetVehicleMilesTraveled();
-                int c = objLowerBoundConstraintIndex;
-                allConstraints_array[c].LB = objRHS_LB;
-            }
+            //if(vsr_GDV!=null)
+            //{
+            //    objRHS_LB = vsr_GDV.GetVehicleMilesTraveled();
+            //    int c = objLowerBoundConstraintIndex;
+            //    allConstraints_array[c].LB = objRHS_LB;
+            //}
         }
         public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence)
         {

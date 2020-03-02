@@ -58,6 +58,7 @@
             this.button_extractLogInfo = new System.Windows.Forms.Button();
             this.button_showCharts = new System.Windows.Forms.Button();
             this.textBox_log = new System.Windows.Forms.TextBox();
+            this.exploitingGDVvsPlainSummary = new System.Windows.Forms.Button();
             this.groupBox_problem.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox_algorithms.SuspendLayout();
@@ -336,6 +337,7 @@
             // 
             // groupBox_status
             // 
+            this.groupBox_status.Controls.Add(this.exploitingGDVvsPlainSummary);
             this.groupBox_status.Controls.Add(this.button_extractLogInfo);
             this.groupBox_status.Controls.Add(this.button_showCharts);
             this.groupBox_status.Controls.Add(this.textBox_log);
@@ -377,6 +379,16 @@
             this.textBox_log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_log.Size = new System.Drawing.Size(320, 484);
             this.textBox_log.TabIndex = 14;
+            // 
+            // exploitingGDVvsPlainSummary
+            // 
+            this.exploitingGDVvsPlainSummary.Location = new System.Drawing.Point(15, 511);
+            this.exploitingGDVvsPlainSummary.Name = "exploitingGDVvsPlainSummary";
+            this.exploitingGDVvsPlainSummary.Size = new System.Drawing.Size(146, 26);
+            this.exploitingGDVvsPlainSummary.TabIndex = 17;
+            this.exploitingGDVvsPlainSummary.Text = "Summary";
+            this.exploitingGDVvsPlainSummary.UseVisualStyleBackColor = true;
+            this.exploitingGDVvsPlainSummary.Click += new System.EventHandler(this.ExploitingGDVvsPlainSummary_Click);
             // 
             // SingleProblemSingleAlgorithm
             // 
@@ -435,5 +447,6 @@
         private System.Windows.Forms.Button button_showCharts;
         private System.Windows.Forms.Button button_extractLogInfo;
         private System.Windows.Forms.Button button_problemViewerOnMap;
+        private System.Windows.Forms.Button exploitingGDVvsPlainSummary;
     }
 }
