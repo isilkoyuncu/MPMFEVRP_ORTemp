@@ -182,7 +182,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             _OptimizationComparisonStatistics = new GDVvsAFV_OptimizationComparisonStatistics();
             foreach (CustomerSet cs in unexploredCustomerSets.ToCustomerSetList())
-                _OptimizationComparisonStatistics.RecordObservation(cs.Customers.Count, cs.RouteOptimizationOutcome);
+                _OptimizationComparisonStatistics.RecordObservation(cs.Customers.Count, cs.RouteOptimizationOutcome, cs.Customers);
 
             InfeasibleCustomerSets = new PartitionedCustomerSetList();
             OnlyGDVFeasibleCustomerSets = new PartitionedCustomerSetList();
@@ -319,7 +319,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                         if (candidate.RouteOptimizationOutcome.Status == RouteOptimizationStatus.NotYetOptimized)
                             continue;
 
-                        _OptimizationComparisonStatistics.RecordObservation(candidate.Customers.Count, candidate.RouteOptimizationOutcome);
+                        _OptimizationComparisonStatistics.RecordObservation(candidate.Customers.Count, candidate.RouteOptimizationOutcome, candidate.Customers);
                         ////Triple solve
                         //csTripleSolveOutcome = theProblemModel.TripleSolve(candidate);
                         ////Place in the proper list

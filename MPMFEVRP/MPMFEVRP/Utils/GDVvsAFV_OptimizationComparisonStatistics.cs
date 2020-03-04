@@ -25,7 +25,7 @@ namespace MPMFEVRP.Utils
             optDifferences = new List<GDV_AFV_OptimizationDifferences>();
         }
 
-        public void RecordObservation(int nCustomers, RouteOptimizationOutcome roo)
+        public void RecordObservation(int nCustomers, RouteOptimizationOutcome roo, List<string> customers)
         {
             switch(roo.Status)
             {
@@ -39,7 +39,7 @@ namespace MPMFEVRP.Utils
                 case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
                 case RouteOptimizationStatus.OptimizedForBothGDVandEV:
                     rosCounts[roo.Status] = new Tuple<int, double, double>(rosCounts[roo.Status].Item1 + 1, rosCounts[roo.Status].Item2 + roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ComputationTime, rosCounts[roo.Status].Item3 + roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ComputationTime);
-                    optDifferences.Add(new GDV_AFV_OptimizationDifferences(nCustomers, roo));
+                    optDifferences.Add(new GDV_AFV_OptimizationDifferences(nCustomers, roo, customers));
                     break;
                 default:
                     throw new Exception("GDVvsAFV_OptimizationComparisonStatistics.RecordObservation doesn't account for all values of RouteOptimizationStatus!");
