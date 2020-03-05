@@ -252,9 +252,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
-        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false)
+        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false, bool performSwap=false)
         {
-            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough);
+            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough, performSwap);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }

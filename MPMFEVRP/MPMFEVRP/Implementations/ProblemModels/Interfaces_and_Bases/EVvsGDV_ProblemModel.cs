@@ -39,6 +39,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs theGDVExploiter;
         PlainCustomerSetSolver_Homogeneous thePlainAFVSolver;
 
+
+
         public RefuelingPathGenerator rpg;
 
         public bool GDVOptimalRouteFeasibleForEV = false;
@@ -816,13 +818,23 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                     }
         }
 
-        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough)
+        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough, bool performSwap)
         {
-            return theGDVExploiter.Solve(CS, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough);
+            return theGDVExploiter.Solve(CS, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough, performSwap);
+        }
+
+        public OptimizationStatistics RetrieveExploitingGDVoptStat ()
+        {
+            return theGDVExploiter.optimizationStatstics;
         }
         public RouteOptimizationOutcome RouteOptimizeByPlainAFVSolver(CustomerSet CS)
         {
             return thePlainAFVSolver.Solve(CS);
+        }
+
+        public OptimizationStatistics RetrievePlainOptStat()
+        {
+            return thePlainAFVSolver.optimizationStatstics;
         }
     }
 }

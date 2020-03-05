@@ -239,7 +239,7 @@
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />
     <Compile Include="Utils\AllPairsShortestPaths.cs" />
-    <Compile Include="Utils\ExploitingGDVoptStat.cs" />
+    <Compile Include="Utils\OptimizationStatistics.cs" />
     <Compile Include="Utils\ExploitingGDVvsPlainOutputReader.cs" />
     <Compile Include="Utils\CplexLogReader.cs" />
     <Compile Include="Utils\DeepCopier.cs" />

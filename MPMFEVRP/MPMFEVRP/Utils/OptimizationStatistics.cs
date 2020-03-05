@@ -4,19 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.SolutionDomain;
-using System.IO;
 
 namespace MPMFEVRP.Utils
 {
     /// <summary>
     /// Designed for the case of both optimal.
     /// </summary>
-    public class ExploitingGDVoptStat
+    public class OptimizationStatistics
     {
         int nCustomers;
         RouteOptimizationStatus ros;
-
         string customers;
+        double t0GDVSoln;
+        double t1CheckAFVfeas;
+        double t2CheckAFVinfeas;
+        double t3RefuelingPathInsert;
+        double t4SwapAndInsert;
+        double t5AFVSoln;
+        int stopAfter;
 
         double GDV_comp_time;        public double GDV_Comp_Time => GDV_comp_time;
         double GDV_vmt;        public double GDV_Vmt => GDV_vmt;
@@ -26,14 +31,8 @@ namespace MPMFEVRP.Utils
         string AFV_route;        public string AFV_Route => AFV_route;
         double VMTdifference;        public double VMTDifference => VMTdifference;
         int nESVisits;        public int NESVisits => nESVisits;
-        int nDifferentPositions;        public int NDifferentPositions => nDifferentPositions;
-        int firstDifferentPosition;        public int FirstDifferentPosition => firstDifferentPosition;
-        int lastDifferentPosition;        public int LastDifferentPosition => lastDifferentPosition;
-
-        public int RangeOfDifferentPositions => lastDifferentPosition - firstDifferentPosition + 1;
-        int nSameNonIntermediatePositions;        public int NSameNonIntermediatePositions => nSameNonIntermediatePositions;
-        
-        public ExploitingGDVoptStat(int nCustomers, RouteOptimizationOutcome roo, List<string> customers)
+                
+        public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int stopAfter)
         {
             if (roo == null)
                 throw new ArgumentNullException();
@@ -43,30 +42,39 @@ namespace MPMFEVRP.Utils
             this.nCustomers = nCustomers;
             ros = roo.GetRouteOptimizationStatus();
 
+            this.t0GDVSoln = t0GDVSoln;
+            this.t1CheckAFVfeas = t1CheckAFVfeas;
+            this.t2CheckAFVinfeas = t2CheckAFVinfeas;
+            this.t3RefuelingPathInsert = t3RefuelingPathInsert;
+            this.t4SwapAndInsert = t4SwapAndInsert;
+            this.t5AFVSoln = t5AFVSoln;
+
+            this.stopAfter = stopAfter;
+
             switch (roo.GetRouteOptimizationStatus())
             {
                 case RouteOptimizationStatus.NotYetOptimized:
                 case RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV:
                     throw new ArgumentOutOfRangeException("GDV_AFV_OptimizationDifferences can't be run for a customer that has not yet been optimized!");
                 case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
-                    GDV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ComputationTime;
-                    AFV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ComputationTime;
+                    GDV_comp_time = t0GDVSoln;
+                    AFV_comp_time = t0GDVSoln+t1CheckAFVfeas+ t2CheckAFVinfeas+ t3RefuelingPathInsert+ t4SwapAndInsert+ t5AFVSoln;
                     break;
                 case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
-                    GDV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ComputationTime;
+                    GDV_comp_time = t0GDVSoln;
                     VehicleSpecificRoute Route_GDV1 = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute;
                     for (int c = 0; c < Route_GDV1.ListOfVisitedNonDepotSiteIDs.Count - 1; c++)
                         GDV_route = GDV_route + Route_GDV1.ListOfVisitedNonDepotSiteIDs[c] + "-";
                     GDV_route = GDV_route + Route_GDV1.ListOfVisitedNonDepotSiteIDs.Last();
                     GDV_vmt = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.GetVehicleMilesTraveled();
-                    AFV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ComputationTime;
+                    AFV_comp_time = t0GDVSoln + t1CheckAFVfeas + t2CheckAFVinfeas + t3RefuelingPathInsert + t4SwapAndInsert + t5AFVSoln;
                     break;
                 case RouteOptimizationStatus.OptimizedForBothGDVandEV:
                     VehicleSpecificRouteOptimizationOutcome ROO_GDV = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV);
                     VehicleSpecificRouteOptimizationOutcome ROO_AFV = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV);
-                    GDV_comp_time = ROO_GDV.ComputationTime;
+                    GDV_comp_time = t0GDVSoln;
                     GDV_vmt = ROO_GDV.VSOptimizedRoute.GetVehicleMilesTraveled();
-                    AFV_comp_time = ROO_AFV.ComputationTime;
+                    AFV_comp_time = t0GDVSoln + t1CheckAFVfeas + t2CheckAFVinfeas + t3RefuelingPathInsert + t4SwapAndInsert + t5AFVSoln;
                     AFV_vmt = ROO_AFV.VSOptimizedRoute.GetVehicleMilesTraveled();
                     VMTdifference = ROO_AFV.VSOptimizedRoute.GetVehicleMilesTraveled() - ROO_GDV.VSOptimizedRoute.GetVehicleMilesTraveled();
 
@@ -79,28 +87,7 @@ namespace MPMFEVRP.Utils
                     VehicleSpecificRoute Route_GDV = ROO_GDV.VSOptimizedRoute;
                     for (int c = 0; c < Route_GDV.ListOfVisitedNonDepotSiteIDs.Count - 1; c++)
                         GDV_route = GDV_route + Route_GDV.ListOfVisitedNonDepotSiteIDs[c] + "-";
-                    GDV_route = GDV_route + Route_GDV.ListOfVisitedNonDepotSiteIDs.Last();
-
-                    List<string> SymElim_ListOfCustomers_AFV = Route_AFV.ListOfVisitedCustomerSiteIDs;
-                    if (SymElim_ListOfCustomers_AFV.First().CompareTo(SymElim_ListOfCustomers_AFV.Last()) > -1)
-                        SymElim_ListOfCustomers_AFV.Reverse();
-                    List<string> SymElim_ListOfCustomers_GDV = Route_GDV.ListOfVisitedCustomerSiteIDs;
-                    if (SymElim_ListOfCustomers_GDV.First().CompareTo(SymElim_ListOfCustomers_GDV.Last()) > -1)
-                        SymElim_ListOfCustomers_GDV.Reverse();
-                    if (SymElim_ListOfCustomers_AFV.Count != SymElim_ListOfCustomers_GDV.Count)
-                        throw new DifferentRoutesVisitDifferentSetsOfCustomersException(); //Exception("GDV and AFV optimal routes visit different sets of customers!");
-                    nDifferentPositions = 0;
-                    for (int p = 0; p < SymElim_ListOfCustomers_AFV.Count; p++)
-                    {
-                        if (SymElim_ListOfCustomers_AFV[p] != SymElim_ListOfCustomers_GDV[p])
-                        {
-                            if (nDifferentPositions == 0)
-                                firstDifferentPosition = p;
-                            lastDifferentPosition = p;
-                            nDifferentPositions++;
-                        }
-                    }
-                    nSameNonIntermediatePositions = SymElim_ListOfCustomers_AFV.Count - RangeOfDifferentPositions;
+                    GDV_route = GDV_route + Route_GDV.ListOfVisitedNonDepotSiteIDs.Last();                   
                     break;
                 default:
                     throw new Exception("GDV_AFV_OptimizationDifferences doesn't account for all cases of RouteOptimizationStatus!");
@@ -110,7 +97,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\t# Different Customer Positions\tRange of Different Positions\t# Same Non-Intermediate Positions";
+            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo";
         }
 
         public string GetDataRow()
@@ -123,25 +110,20 @@ namespace MPMFEVRP.Utils
                 GDV_Route + "\t" +
                 AFV_comp_time.ToString() + "\t" +
                 GDV_comp_time.ToString() + "\t" +
+                t0GDVSoln.ToString() + "\t" +
+                t1CheckAFVfeas.ToString() + "\t" +
+                t2CheckAFVinfeas.ToString() + "\t" +
+                t3RefuelingPathInsert.ToString() + "\t" +
+                t4SwapAndInsert.ToString() + "\t" +
+                t5AFVSoln.ToString() + "\t" +
                 AFV_Vmt.ToString() + "\t" +
                 GDV_Vmt.ToString() + "\t" +
                 VMTDifference.ToString() + "\t" +
                 nESVisits.ToString() + "\t" +
-                nDifferentPositions.ToString() + "\t" +
-                RangeOfDifferentPositions.ToString() + "\t" +
-                nSameNonIntermediatePositions.ToString();
+                stopAfter.ToString();
         }
 
-        public void WriteToFile(string filename, List<ExploitingGDVoptStat> exploitingGDVoptStats)
-        {
-            StreamWriter sw = new StreamWriter(filename);
-            sw.AutoFlush = true;
-            sw.WriteLine(ExploitingGDVoptStat.GetHeaderRow());
-            foreach (ExploitingGDVoptStat stat in exploitingGDVoptStats)
-                sw.WriteLine(stat.GetDataRow());
-
-            sw.Close();
-        }
+        
 
     }
 }
