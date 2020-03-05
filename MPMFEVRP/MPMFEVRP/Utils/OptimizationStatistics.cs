@@ -23,6 +23,10 @@ namespace MPMFEVRP.Utils
         double t5AFVSoln;
         int stopAfter;
 
+        double vmt3RefuelingPathInsert;
+        double vmt4SwapAndInsert;
+        double vmt5AFVSoln;
+
         double GDV_comp_time;        public double GDV_Comp_Time => GDV_comp_time;
         double GDV_vmt;        public double GDV_Vmt => GDV_vmt;
         string GDV_route;        public string GDV_Route => GDV_route;
@@ -32,7 +36,10 @@ namespace MPMFEVRP.Utils
         double VMTdifference;        public double VMTDifference => VMTdifference;
         int nESVisits;        public int NESVisits => nESVisits;
                 
-        public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int stopAfter)
+        public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int stopAfter, 
+            double vmt3RefuelingPathInsert,
+            double vmt4SwapAndInsert,
+            double vmt5AFVSoln)
         {
             if (roo == null)
                 throw new ArgumentNullException();
@@ -50,6 +57,10 @@ namespace MPMFEVRP.Utils
             this.t5AFVSoln = t5AFVSoln;
 
             this.stopAfter = stopAfter;
+
+            this.vmt3RefuelingPathInsert = vmt3RefuelingPathInsert;
+            this.vmt4SwapAndInsert = vmt4SwapAndInsert;
+            this.vmt5AFVSoln = vmt5AFVSoln;
 
             switch (roo.GetRouteOptimizationStatus())
             {
@@ -97,7 +108,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo";
+            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln";
         }
 
         public string GetDataRow()
@@ -120,7 +131,10 @@ namespace MPMFEVRP.Utils
                 GDV_Vmt.ToString() + "\t" +
                 VMTDifference.ToString() + "\t" +
                 nESVisits.ToString() + "\t" +
-                stopAfter.ToString();
+                stopAfter.ToString() + "\t" +
+                vmt3RefuelingPathInsert.ToString() + "\t" +
+                vmt4SwapAndInsert.ToString() + "\t" +
+                vmt5AFVSoln.ToString();
         }
 
         
