@@ -35,6 +35,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             int nCustomers = customerSet.Customers.Count;
             List<string> customers = customerSet.Customers;
             t5AFVSoln = 0.0;
+            List<string> bestRoute = new List<string>();
 
             VehicleSpecificRouteOptimizationOutcome vsroo_AFV;
             stopwatch.Start();
@@ -43,10 +44,11 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             if (AFV_Solver.SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
                 VehicleSpecificRoute vsr_AFV = AFV_Solver.GetVehicleSpecificRoutes(theAFV.Category).First();
+                bestRoute = vsr_AFV.ListOfVisitedNonDepotSiteIDs;
                 vsroo_AFV = new VehicleSpecificRouteOptimizationOutcome(theAFV.Category, AFV_Solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsr_AFV);
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, 0.0, VehicleSpecificRouteOptimizationStatus.Optimized, vsr_AFV);
                 outcome = new RouteOptimizationOutcome(RouteOptimizationStatus.OptimizedForBothGDVandEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_AFV });
-                optimizationStatstics = new OptimizationStatistics(nCustomers, outcome, customers, 0.0, 0.0, 0.0, 0.0, 0.0, t5AFVSoln,0, 0.0, 0.0, 0.0);
+                optimizationStatstics = new OptimizationStatistics(nCustomers, outcome, customers, 0.0, 0.0, 0.0, 0.0, 0.0, t5AFVSoln,0, 0.0, 0.0, 0.0, bestRoute);
                 return outcome;
             }
             else
@@ -54,7 +56,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
                 vsroo_AFV = new VehicleSpecificRouteOptimizationOutcome(theAFV.Category, AFV_Solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
                 VehicleSpecificRouteOptimizationOutcome vsroo_GDV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
                 outcome = new RouteOptimizationOutcome(RouteOptimizationStatus.InfeasibleForBothGDVandEV, new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo_GDV, vsroo_AFV });
-                optimizationStatstics = new OptimizationStatistics(nCustomers, outcome, customers, 0.0, 0.0, 0.0, 0.0, 0.0, t5AFVSoln,0, 0.0, 0.0, 0.0);
+                optimizationStatstics = new OptimizationStatistics(nCustomers, outcome, customers, 0.0, 0.0, 0.0, 0.0, 0.0, t5AFVSoln,0, 0.0, 0.0, 0.0, bestRoute);
                 return outcome;
             }
         }
