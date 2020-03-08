@@ -21,20 +21,23 @@ namespace MPMFEVRP.Utils
         double t3RefuelingPathInsert;
         double t4SwapAndInsert;
         double t5AFVSoln;
-        int stopAfter;
+        int idealStopAfter;
 
         double vmt3RefuelingPathInsert;
         double vmt4SwapAndInsert;
         double vmt5AFVSoln;
 
         double GDV_comp_time;        public double GDV_Comp_Time => GDV_comp_time;
-        double GDV_vmt;        public double GDV_Vmt => GDV_vmt;
+        double GDV_vmt = double.MaxValue;        public double GDV_Vmt => GDV_vmt;
         string GDV_route;        public string GDV_Route => GDV_route;
         double AFV_comp_time;        public double AFV_Comp_Time => AFV_comp_time;
-        double AFV_vmt;        public double AFV_Vmt => AFV_vmt;
+        double AFV_vmt = double.MaxValue;        public double AFV_Vmt => AFV_vmt;
         string AFV_route;        public string AFV_Route => AFV_route;
-        double VMTdifference;        public double VMTDifference => VMTdifference;
+        double VMTdifference = double.MaxValue;        public double VMTDifference => VMTdifference;
         int nESVisits;        public int NESVisits => nESVisits;
+
+        string outcomeStatus;
+        double epsilon = 0.0001;
 
         string bestRoute;
 
@@ -42,7 +45,7 @@ namespace MPMFEVRP.Utils
         double vmtImprovementPercent45;
         double vmtImprovementPercent35;
 
-        public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int stopAfter, 
+        public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int idealStopAfter,
             double vmt3RefuelingPathInsert,
             double vmt4SwapAndInsert,
             double vmt5AFVSoln,
@@ -63,7 +66,8 @@ namespace MPMFEVRP.Utils
             this.t4SwapAndInsert = t4SwapAndInsert;
             this.t5AFVSoln = t5AFVSoln;
 
-            this.stopAfter = stopAfter;
+            this.idealStopAfter = idealStopAfter;
+            outcomeStatus = "";
 
             this.vmt3RefuelingPathInsert = vmt3RefuelingPathInsert;
             this.vmt4SwapAndInsert = vmt4SwapAndInsert;
@@ -77,14 +81,19 @@ namespace MPMFEVRP.Utils
                 case RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV:
                     throw new ArgumentOutOfRangeException("GDV_AFV_OptimizationDifferences can't be run for a customer that has not yet been optimized!");
                 case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
-                    GDV_comp_time = t0GDVSoln;
-                    AFV_comp_time = t0GDVSoln+t1CheckAFVfeas+ t2CheckAFVinfeas+ t3RefuelingPathInsert+ t4SwapAndInsert+ t5AFVSoln;
+                    outcomeStatus = "InfDetectedAfterGDVSoln";//0
+                    GDV_comp_time = this.t0GDVSoln;
+                    AFV_comp_time = this.t0GDVSoln;
                     break;
                 case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
-                    GDV_comp_time = t0GDVSoln;                    
+                    if (idealStopAfter == 2)
+                        outcomeStatus = "InfDetectedByCSInfProven";//2
+                    else if (idealStopAfter == 5)
+                        outcomeStatus = "InfDetectedAfterAFVSoln";//5
+                    GDV_comp_time = this.t0GDVSoln;
                     GDV_route = String.Join("-", roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs);
                     GDV_vmt = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.GetVehicleMilesTraveled();
-                    AFV_comp_time = t0GDVSoln + t1CheckAFVfeas + t2CheckAFVinfeas + t3RefuelingPathInsert + t4SwapAndInsert + t5AFVSoln;
+                    AFV_comp_time = this.t0GDVSoln + this.t1CheckAFVfeas + this.t2CheckAFVinfeas + this.t3RefuelingPathInsert + this.t4SwapAndInsert + this.t5AFVSoln;
                     break;
                 case RouteOptimizationStatus.OptimizedForBothGDVandEV:
                     VehicleSpecificRouteOptimizationOutcome ROO_GDV = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV);
@@ -98,27 +107,38 @@ namespace MPMFEVRP.Utils
                     AFV_route = String.Join("-", Route_AFV.ListOfVisitedNonDepotSiteIDs);
                     GDV_route = String.Join("-", ROO_GDV.VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs);
                     nESVisits = Route_AFV.ListOfVisitedNonDepotSiteIDs.Count - Route_AFV.NumberOfCustomersVisited;
-                    if (vmt4SwapAndInsert != 0)
-                    {
-                        if (vmt3RefuelingPathInsert != 0)
-                            vmtImprovementPercent34 = (vmt3RefuelingPathInsert - vmt4SwapAndInsert) / vmt4SwapAndInsert;
+                    if (idealStopAfter == 1)
+                        outcomeStatus = "OptimalityProvenAfterGDVSoln";//1
+                    else if (idealStopAfter == 3)
+                        outcomeStatus = "FeasibilityProvenAfterPathInsert";//3
+                    else if (idealStopAfter == 4)
+                        if (vmt3RefuelingPathInsert != 0.0)
+                            outcomeStatus = "FeasibilityProvenAfterPathInsert";//3
                         else
-                            vmtImprovementPercent34 = 1.0;
-                    }
-                    if(vmt5AFVSoln != 0)
-                    {
-                        if (vmt4SwapAndInsert != 0)
-                            vmtImprovementPercent45 = (vmt4SwapAndInsert - vmt5AFVSoln) / vmt5AFVSoln;
+                            outcomeStatus = "FeasibilityProvenAfterSwapAndPathInsert";//4
+                    else if (idealStopAfter == 5)
+                        if (vmt3RefuelingPathInsert != 0.0)
+                            outcomeStatus = "FeasibilityProvenAfterPathInsert";//3
+                        else if (vmt4SwapAndInsert != 0.0)
+                            outcomeStatus = "FeasibilityProvenAfterSwapAndPathInsert";//4
                         else
-                            vmtImprovementPercent45 = 1.0;
-                    }
-                    if (vmt5AFVSoln != 0)
-                    {
-                        if (vmt3RefuelingPathInsert != 0)
-                            vmtImprovementPercent35 = (vmt3RefuelingPathInsert - vmt5AFVSoln) / vmt5AFVSoln;
-                        else
-                            vmtImprovementPercent35 = 1.0;
-                    }
+                            outcomeStatus = "OptimalityProvenAfterAFVSoln";//5
+
+                    if (vmt3RefuelingPathInsert != 0.0 && vmt4SwapAndInsert != 0.0)
+                        vmtImprovementPercent34 = (vmt3RefuelingPathInsert - vmt4SwapAndInsert) / vmt4SwapAndInsert;
+                    else if (vmt4SwapAndInsert != 0.0)
+                        vmtImprovementPercent34 = 1.0;
+
+                    if (vmt3RefuelingPathInsert != 0.0 && vmt5AFVSoln != 0.0)
+                        vmtImprovementPercent35 = (vmt3RefuelingPathInsert - vmt5AFVSoln) / vmt5AFVSoln;
+                    else if (vmt5AFVSoln != 0.0)
+                        vmtImprovementPercent35 = 1.0;
+
+                    if (vmt4SwapAndInsert != 0.0 && vmt5AFVSoln != 0.0)
+                        vmtImprovementPercent45 = (vmt4SwapAndInsert - vmt5AFVSoln) / vmt5AFVSoln;
+                    else if (vmt5AFVSoln != 0.0)
+                        vmtImprovementPercent45 = 1.0;
+
                     break;
                 default:
                     throw new Exception("GDV_AFV_OptimizationDifferences doesn't account for all cases of RouteOptimizationStatus!");
@@ -128,7 +148,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln\tGap3-4\tGap3-5\tGap4-5\tBestRoute";
+            return "Customers\t# Customers\tRoute Optimization Status\tOutcome Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln\tGap3-4\tGap3-5\tGap4-5\tBestRoute";
         }
 
         public string GetDataRow()
@@ -137,21 +157,22 @@ namespace MPMFEVRP.Utils
                 customers + "\t" +
                 nCustomers.ToString() + "\t" +
                 ros.ToString() + "\t" +
+                outcomeStatus + "\t" +
                 AFV_Route + "\t" +
                 GDV_Route + "\t" +
                 AFV_comp_time.ToString() + "\t" +
                 GDV_comp_time.ToString() + "\t" +
-                t0GDVSoln.ToString() + "\t" +
-                t1CheckAFVfeas.ToString() + "\t" +
-                t2CheckAFVinfeas.ToString() + "\t" +
-                t3RefuelingPathInsert.ToString() + "\t" +
-                t4SwapAndInsert.ToString() + "\t" +
-                t5AFVSoln.ToString() + "\t" +
+                t0GDVSoln + "\t" +
+                t1CheckAFVfeas + "\t" +
+                t2CheckAFVinfeas + "\t" +
+                t3RefuelingPathInsert + "\t" +
+                t4SwapAndInsert + "\t" +
+                t5AFVSoln + "\t" +
                 AFV_Vmt.ToString() + "\t" +
                 GDV_Vmt.ToString() + "\t" +
                 VMTDifference.ToString() + "\t" +
                 nESVisits.ToString() + "\t" +
-                stopAfter.ToString() + "\t" +
+                idealStopAfter.ToString() + "\t" +
                 vmt3RefuelingPathInsert.ToString() + "\t" +
                 vmt4SwapAndInsert.ToString() + "\t" +
                 vmt5AFVSoln.ToString() + "\t" +

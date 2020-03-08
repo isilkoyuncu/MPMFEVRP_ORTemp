@@ -219,6 +219,22 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             return outcome;
         }
+        public double GetLongestTwoArcsLength()
+        {
+            double outcome = 0.0;
+            if (siteVisits.Count > 1)
+            {
+                List<double> tempDouble = new List<double>(); ;
+                for (int svIndex = 1; svIndex < siteVisits.Count; svIndex++)
+                {
+                    tempDouble.Add(siteVisits[svIndex].CumulativeTravelDistance - siteVisits[svIndex - 1].CumulativeTravelDistance);
+                }
+                tempDouble.Sort();
+                tempDouble.Reverse();
+                outcome = tempDouble[0] + tempDouble[1];
+            }
+            return outcome;
+        }
         public double GetTotalTime()
         {
             return siteVisits.Last().ArrivalTime;

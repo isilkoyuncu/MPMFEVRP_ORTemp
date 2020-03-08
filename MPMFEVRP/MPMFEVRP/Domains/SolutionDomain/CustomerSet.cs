@@ -502,7 +502,10 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestArcLength();
         }
-
+        public double GetTwoLongestArcs()
+        {
+            return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestTwoArcsLength();
+        }
         public double GetShortestTwoArcsToCSfromCustomerID (string customerID, EVvsGDV_ProblemModel theProblemModel)
         {
             List<double> arcLengthsToCustomerSet = new List<double>() { Math.Min(theProblemModel.SRD.GetDistance(theProblemModel.SRD.GetSingleDepotID(), customerID), theProblemModel.SRD.GetDistance(customerID, theProblemModel.SRD.GetSingleDepotID())) };
@@ -510,6 +513,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 arcLengthsToCustomerSet.Add(Math.Min(theProblemModel.SRD.GetDistance(customerID, customer), theProblemModel.SRD.GetDistance(customer, customerID)));
             arcLengthsToCustomerSet.Sort();
             return Math.Max(0, arcLengthsToCustomerSet[0] + arcLengthsToCustomerSet[1]);
+        }
+        public double[] GetShortestThreeArcsToCSfromCustomerID(string customerID, EVvsGDV_ProblemModel theProblemModel)
+        {
+            double[] outcome = new double[3] { double.MaxValue, double.MaxValue, double.MaxValue };
+            List<double> arcLengthsToCustomerSet = new List<double>() { Math.Min(theProblemModel.SRD.GetDistance(theProblemModel.SRD.GetSingleDepotID(), customerID), theProblemModel.SRD.GetDistance(customerID, theProblemModel.SRD.GetSingleDepotID())) };
+            foreach (string customer in customers)
+                arcLengthsToCustomerSet.Add(Math.Min(theProblemModel.SRD.GetDistance(customerID, customer), theProblemModel.SRD.GetDistance(customer, customerID)));
+            arcLengthsToCustomerSet.Sort();
+            for (int i = 0; i < Math.Min(3, arcLengthsToCustomerSet.Count); i++)
+                outcome[i] = Math.Max(0, arcLengthsToCustomerSet[i]);
+            return outcome;
         }
     }
 
