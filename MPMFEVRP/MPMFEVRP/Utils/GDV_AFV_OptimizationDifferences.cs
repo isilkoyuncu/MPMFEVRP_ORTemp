@@ -14,6 +14,7 @@ namespace MPMFEVRP.Utils
     {
         int nCustomers;
         RouteOptimizationStatus ros;
+        string afv_nonES_route = "";
 
         string customers; 
     
@@ -64,7 +65,7 @@ namespace MPMFEVRP.Utils
                 throw new ArgumentNullException();
 
             this.customers = String.Join("-", customers);
-
+            afv_nonES_route = "";
             this.nCustomers = nCustomers;
             ros = roo.GetRouteOptimizationStatus();
 
@@ -101,6 +102,8 @@ namespace MPMFEVRP.Utils
                         AFV_route = AFV_route + Route_AFV.ListOfVisitedNonDepotSiteIDs[c] + "-";
                     AFV_route = AFV_route + Route_AFV.ListOfVisitedNonDepotSiteIDs.Last();
 
+                    afv_nonES_route = String.Join("-", Route_AFV.ListOfVisitedCustomerSiteIDs);
+
                     VehicleSpecificRoute Route_GDV = ROO_GDV.VSOptimizedRoute;
                     for (int c = 0; c < Route_GDV.ListOfVisitedNonDepotSiteIDs.Count - 1; c++)
                         GDV_route = GDV_route + Route_GDV.ListOfVisitedNonDepotSiteIDs[c] + "-";
@@ -135,7 +138,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\t# Different Customer Positions\tRange of Different Positions\t# Same Non-Intermediate Positions";
+            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tAFV_NonES_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\t# Different Customer Positions\tRange of Different Positions\t# Same Non-Intermediate Positions";
         }
 
         public string GetDataRow()
@@ -145,6 +148,7 @@ namespace MPMFEVRP.Utils
                 nCustomers.ToString() + "\t" +
                 ros.ToString() + "\t" +
                 AFV_Route + "\t" +
+                afv_nonES_route + "\t" +
                 GDV_Route + "\t" +
                 AFV_comp_time.ToString() + "\t" +
                 GDV_comp_time.ToString() + "\t" +

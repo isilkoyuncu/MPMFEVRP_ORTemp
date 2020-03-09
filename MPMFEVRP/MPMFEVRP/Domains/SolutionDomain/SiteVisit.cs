@@ -5,7 +5,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class SiteVisit
     {
-        double mipError = 0.01;
+        double mipError = 0.00001;
         //site visited
         Site site;
         public Site Site { get { return site; } }

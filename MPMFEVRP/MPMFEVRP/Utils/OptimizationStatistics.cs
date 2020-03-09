@@ -45,6 +45,8 @@ namespace MPMFEVRP.Utils
         double vmtImprovementPercent45;
         double vmtImprovementPercent35;
 
+        string afv_nonES_route = "";
+
         public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int idealStopAfter,
             double vmt3RefuelingPathInsert,
             double vmt4SwapAndInsert,
@@ -105,6 +107,7 @@ namespace MPMFEVRP.Utils
                     VMTdifference = ROO_AFV.VSOptimizedRoute.GetVehicleMilesTraveled() - ROO_GDV.VSOptimizedRoute.GetVehicleMilesTraveled();
                     VehicleSpecificRoute Route_AFV = ROO_AFV.VSOptimizedRoute;
                     AFV_route = String.Join("-", Route_AFV.ListOfVisitedNonDepotSiteIDs);
+                    afv_nonES_route = String.Join("-", Route_AFV.ListOfVisitedCustomerSiteIDs);
                     GDV_route = String.Join("-", ROO_GDV.VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs);
                     nESVisits = Route_AFV.ListOfVisitedNonDepotSiteIDs.Count - Route_AFV.NumberOfCustomersVisited;
                     if (idealStopAfter == 1)
@@ -148,7 +151,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tOutcome Status\tAFV_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln\tGap3-4\tGap3-5\tGap4-5\tBestRoute";
+            return "Customers\t# Customers\tRoute Optimization Status\tOutcome Status\tAFV_Route\tAFV_nonES_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln\tGap3-4\tGap3-5\tGap4-5\tBestRoute";
         }
 
         public string GetDataRow()
@@ -159,6 +162,7 @@ namespace MPMFEVRP.Utils
                 ros.ToString() + "\t" +
                 outcomeStatus + "\t" +
                 AFV_Route + "\t" +
+                afv_nonES_route + "\t" +
                 GDV_Route + "\t" +
                 AFV_comp_time.ToString() + "\t" +
                 GDV_comp_time.ToString() + "\t" +
