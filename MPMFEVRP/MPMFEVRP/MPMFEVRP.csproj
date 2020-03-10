@@ -100,6 +100,12 @@
     <Compile Include="Domains\SolutionDomain\SiteVisit.cs" />
     <Compile Include="Domains\SolutionDomain\VehicleSpecificRoute.cs" />
     <Compile Include="Domains\SolutionDomain\VehicleSpecificRouteOptimizationOutcome.cs" />
+    <Compile Include="Forms\ClusterBasedSetCoverCharts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ClusterBasedSetCoverCharts.Designer.cs">
+      <DependentUpon>ClusterBasedSetCoverCharts.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\HybridTreeSearchAndSetPartitionCharts.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -130,6 +136,7 @@
     <Compile Include="Implementations\Algorithms\CGA_RandomizedSetExplorerForProfitMaximization.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationHeuristic.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationWithVirtualGDVRecoveries.cs" />
+    <Compile Include="Implementations\Algorithms\HybridClusterBasedAndSetCoverProcedure.cs" />
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\Algorithms\PathBasedApproach.cs" />
@@ -263,6 +270,9 @@
     <Compile Include="Utils\StringOperations.cs" />
     <Compile Include="Utils\IKTestsToDelete.cs" />
     <Compile Include="Utils\XCPlexUtil.cs" />
+    <EmbeddedResource Include="Forms\ClusterBasedSetCoverCharts.resx">
+      <DependentUpon>ClusterBasedSetCoverCharts.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Dashboard.resx">
       <DependentUpon>Dashboard.cs</DependentUpon>
     </EmbeddedResource>

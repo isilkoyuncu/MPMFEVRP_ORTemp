@@ -31,7 +31,7 @@ namespace MPMFEVRP.Forms
         IAlgorithm theAlgorithm;
         //ISolution theSolution;
         Type TSPModelType;
-        HybridTreeSearchAndSetPartitionCharts charts;
+        Form charts;
 
         public SingleProblemSingleAlgorithm()
         {
@@ -227,9 +227,21 @@ namespace MPMFEVRP.Forms
             }
             else
             {
-                charts = new HybridTreeSearchAndSetPartitionCharts();//CONSULT (with Huseyin): Is this a good implementation with not much coupling? 
-                if (theAlgorithm.setListener(charts))
-                    charts.Show();
+                if (theAlgorithm.GetName() == "Hybrid tree search & set partition")
+                {
+                    charts = new HybridTreeSearchAndSetPartitionCharts();
+                    if (theAlgorithm.setListener((HybridTreeSearchAndSetPartitionCharts)charts))
+                        charts.Show();
+                }
+                else if (theAlgorithm.GetName() == "Hybrid cluster based & set cover")
+                {
+                    charts = new ClusterBasedSetCoverCharts();
+                    if (theAlgorithm.setListener((ClusterBasedSetCoverCharts)charts))
+                        charts.Show();
+                }
+                else
+                    throw new Exception("The algorithm you selected does not support any chart.");
+                
             }
         }
 

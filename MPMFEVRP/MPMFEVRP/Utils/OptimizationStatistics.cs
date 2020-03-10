@@ -240,8 +240,5 @@ namespace MPMFEVRP.Utils
                 nDifferentPositions.ToString() + "\t" +
                 routeDifference;
         }
-
-        
-
     }
 }

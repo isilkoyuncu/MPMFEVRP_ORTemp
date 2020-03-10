@@ -18,15 +18,15 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
     {
         protected string problemName;
         protected XCPlexVRPBase EV_TSPSolver;
-        public Dictionary<string, int> EV_TSP_NumberOfCustomerSetsByStatus { get { return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
-        public Dictionary<string, double> EV_TSP_TimeSpentAccount { get { return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
+        public Dictionary<string, int> EV_TSP_NumberOfCustomerSetsByStatus { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.NumberOfTimesSolveFoundStatus; else return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
+        public Dictionary<string, double> EV_TSP_TimeSpentAccount { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.TotalTimeInSolveOnStatus; else return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
         //TheOther is created only for two EV_TSP vs. 1 GDV_TSP model comparison 
         protected XCPlexVRPBase TheOtherEV_TSPSolver;
-        public Dictionary<string, int> TheOtherEV_TSP_NumberOfCustomerSetsByStatus { get { return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
-        public Dictionary<string, double> TheOtherEV_TSP_TimeSpentAccount { get { return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
+        public Dictionary<string, int> TheOtherEV_TSP_NumberOfCustomerSetsByStatus { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.NumberOfTimesSolveFoundStatus; else return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
+        public Dictionary<string, double> TheOtherEV_TSP_TimeSpentAccount { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.TotalTimeInSolveOnStatus; else return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
         protected XCPlexVRPBase GDV_TSPSolver;
-        public Dictionary<string, int> GDV_TSP_NumberOfCustomerSetsByStatus { get { return GDV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
-        public Dictionary<string, double> GDV_TSP_TimeSpentAccount { get { return GDV_TSPSolver.TotalTimeInSolveOnStatus; } }
+        public Dictionary<string, int> GDV_TSP_NumberOfCustomerSetsByStatus { get { if (GDV_TSPSolver == null) return theGDVExploiter.GDV_Solver.NumberOfTimesSolveFoundStatus; else return GDV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
+        public Dictionary<string, double> GDV_TSP_TimeSpentAccount { get { if (GDV_TSPSolver == null) return theGDVExploiter.GDV_Solver.TotalTimeInSolveOnStatus; else return GDV_TSPSolver.TotalTimeInSolveOnStatus; } }
 
         protected XCPlexVRPBase GDV_OrienteeringSolver;
         protected XCPlexVRPBase EV_NDF_OrienteeringSolver;
