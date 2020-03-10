@@ -24,7 +24,7 @@ namespace MPMFEVRP.Utils
         double GDV_vmt;
         public double GDV_Vmt => GDV_vmt;
 
-        string GDV_route;
+        string GDV_route = "";
         public string GDV_Route => GDV_route;
 
         double AFV_comp_time;
@@ -33,7 +33,7 @@ namespace MPMFEVRP.Utils
         double AFV_vmt;
         public double AFV_Vmt => AFV_vmt;
 
-        string AFV_route;
+        string AFV_route = "";
         public string AFV_Route => AFV_route;
 
         double VMTdifference;
@@ -45,19 +45,10 @@ namespace MPMFEVRP.Utils
         int nESVisits;
         public int NESVisits => nESVisits;
 
-        int nDifferentPositions;
+        int nDifferentPositions; //0, 1, 2
         public int NDifferentPositions => nDifferentPositions;
 
-        int firstDifferentPosition;
-        public int FirstDifferentPosition => firstDifferentPosition;
-
-        int lastDifferentPosition;
-        public int LastDifferentPosition => lastDifferentPosition;
-
-        public int RangeOfDifferentPositions => lastDifferentPosition - firstDifferentPosition + 1;
-
-        int nSameNonIntermediatePositions;
-        public int NSameNonIntermediatePositions => nSameNonIntermediatePositions;
+        string routeDifference = "";
 
         public GDV_AFV_OptimizationDifferences(int nCustomers, RouteOptimizationOutcome roo, List<string> customers)
         {
@@ -77,6 +68,7 @@ namespace MPMFEVRP.Utils
                 case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
                     GDV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ComputationTime;
                     AFV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ComputationTime;
+                    routeDifference = "infeasible";
                     break;
                 case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
                     GDV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).ComputationTime;
@@ -86,6 +78,7 @@ namespace MPMFEVRP.Utils
                     GDV_route = GDV_route + Route_GDV1.ListOfVisitedNonDepotSiteIDs.Last();
                     GDV_vmt = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV).VSOptimizedRoute.GetVehicleMilesTraveled();
                     AFV_comp_time = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.EV).ComputationTime;
+                    routeDifference = "infeasible";
                     break;
                 case RouteOptimizationStatus.OptimizedForBothGDVandEV:
                     VehicleSpecificRouteOptimizationOutcome ROO_GDV = roo.GetVehicleSpecificRouteOptimizationOutcome(Domains.ProblemDomain.VehicleCategories.GDV);
@@ -98,16 +91,11 @@ namespace MPMFEVRP.Utils
 
                     VehicleSpecificRoute Route_AFV = ROO_AFV.VSOptimizedRoute;
                     nESVisits = Route_AFV.ListOfVisitedNonDepotSiteIDs.Count - Route_AFV.NumberOfCustomersVisited;
-                    for (int c = 0; c < Route_AFV.ListOfVisitedNonDepotSiteIDs.Count - 1; c++)
-                        AFV_route = AFV_route + Route_AFV.ListOfVisitedNonDepotSiteIDs[c] + "-";
-                    AFV_route = AFV_route + Route_AFV.ListOfVisitedNonDepotSiteIDs.Last();
-
+                    AFV_route = String.Join("-", Route_AFV.ListOfVisitedNonDepotSiteIDs);
                     afv_nonES_route = String.Join("-", Route_AFV.ListOfVisitedCustomerSiteIDs);
 
                     VehicleSpecificRoute Route_GDV = ROO_GDV.VSOptimizedRoute;
-                    for (int c = 0; c < Route_GDV.ListOfVisitedNonDepotSiteIDs.Count - 1; c++)
-                        GDV_route = GDV_route + Route_GDV.ListOfVisitedNonDepotSiteIDs[c] + "-";
-                    GDV_route = GDV_route + Route_GDV.ListOfVisitedNonDepotSiteIDs.Last();
+                    GDV_route = String.Join("-", Route_GDV.ListOfVisitedNonDepotSiteIDs);
 
                     List<string> SymElim_ListOfCustomers_AFV = Route_AFV.ListOfVisitedCustomerSiteIDs;
                     if (SymElim_ListOfCustomers_AFV.First().CompareTo(SymElim_ListOfCustomers_AFV.Last()) > -1)
@@ -118,17 +106,46 @@ namespace MPMFEVRP.Utils
                     if (SymElim_ListOfCustomers_AFV.Count != SymElim_ListOfCustomers_GDV.Count)
                         throw new DifferentRoutesVisitDifferentSetsOfCustomersException(); //Exception("GDV and AFV optimal routes visit different sets of customers!");
                     nDifferentPositions = 0;
-                    for (int p = 0; p < SymElim_ListOfCustomers_AFV.Count; p++)
+
+                    if (SymElim_ListOfCustomers_GDV.Count == 1)
                     {
-                        if (SymElim_ListOfCustomers_AFV[p] != SymElim_ListOfCustomers_GDV[p])
-                        {
-                            if (nDifferentPositions == 0)
-                                firstDifferentPosition = p;
-                            lastDifferentPosition = p;
-                            nDifferentPositions++;
-                        }
+                        if (nESVisits == 0)
+                            routeDifference = "identical";
+                        else
+                            routeDifference = "sameSequence";
                     }
-                    nSameNonIntermediatePositions = SymElim_ListOfCustomers_AFV.Count - RangeOfDifferentPositions;
+                    else
+                    {
+
+                        for (int p = 0; p < SymElim_ListOfCustomers_GDV.Count - 1; p++)
+                            if (SymElim_ListOfCustomers_GDV[p] == SymElim_ListOfCustomers_AFV[p + 1] && SymElim_ListOfCustomers_GDV[p + 1] == SymElim_ListOfCustomers_AFV[p])
+                            {
+                                nDifferentPositions++;
+                                if (nDifferentPositions == 1)
+                                    routeDifference = "adjacentSwapped";
+                                else
+                                {
+                                    routeDifference = "differentRoutes";
+                                    break;
+                                }
+                            }
+                            else if (SymElim_ListOfCustomers_GDV[p] == SymElim_ListOfCustomers_AFV[p] && nDifferentPositions == 0)
+                            {
+                                if (nESVisits == 0)
+                                    routeDifference = "identical";
+                                else
+                                    routeDifference = "sameSequence";
+                            }
+                            else
+                            {
+                                if (nDifferentPositions == 0)
+                                    nDifferentPositions = nDifferentPositions + 2;
+                                else
+                                    nDifferentPositions++;
+                                routeDifference = "differentRoutes";
+                                break;
+                            }
+                    }
                     break;
                 default:
                     throw new Exception("GDV_AFV_OptimizationDifferences doesn't account for all cases of RouteOptimizationStatus!");
@@ -138,7 +155,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tAFV_NonES_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\t# Different Customer Positions\tRange of Different Positions\t# Same Non-Intermediate Positions";
+            return "Customers\t# Customers\tRoute Optimization Status\tAFV_Route\tAFV_NonES_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\t# Different Customer Positions\tRoute Difference";
         }
 
         public string GetDataRow()
@@ -157,8 +174,7 @@ namespace MPMFEVRP.Utils
                 VMTDifference.ToString() + "\t" +
                 nESVisits.ToString() + "\t" +
                 nDifferentPositions.ToString() + "\t" +
-                RangeOfDifferentPositions.ToString() + "\t" +
-                nSameNonIntermediatePositions.ToString();
+                routeDifference;
         }
 
     }

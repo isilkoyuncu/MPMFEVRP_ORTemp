@@ -46,6 +46,10 @@ namespace MPMFEVRP.Utils
         double vmtImprovementPercent35;
 
         string afv_nonES_route = "";
+        string routeDifference = "";
+
+        int nDifferentPositions; //0, 1, 2
+        public int NDifferentPositions => nDifferentPositions;
 
         public OptimizationStatistics(int nCustomers, RouteOptimizationOutcome roo, List<string> customers, double t0GDVSoln, double t1CheckAFVfeas, double t2CheckAFVinfeas, double t3RefuelingPathInsert, double t4SwapAndInsert, double t5AFVSoln, int idealStopAfter,
             double vmt3RefuelingPathInsert,
@@ -142,6 +146,55 @@ namespace MPMFEVRP.Utils
                     else if (vmt5AFVSoln != 0.0)
                         vmtImprovementPercent45 = 1.0;
 
+                    List<string> SymElim_ListOfCustomers_AFV = Route_AFV.ListOfVisitedCustomerSiteIDs;
+                    if (SymElim_ListOfCustomers_AFV.First().CompareTo(SymElim_ListOfCustomers_AFV.Last()) > -1)
+                        SymElim_ListOfCustomers_AFV.Reverse();
+                    List<string> SymElim_ListOfCustomers_GDV = ROO_GDV.VSOptimizedRoute.ListOfVisitedCustomerSiteIDs;
+                    if (SymElim_ListOfCustomers_GDV.First().CompareTo(SymElim_ListOfCustomers_GDV.Last()) > -1)
+                        SymElim_ListOfCustomers_GDV.Reverse();
+                    if (SymElim_ListOfCustomers_AFV.Count != SymElim_ListOfCustomers_GDV.Count)
+                        throw new DifferentRoutesVisitDifferentSetsOfCustomersException(); //Exception("GDV and AFV optimal routes visit different sets of customers!");
+                    nDifferentPositions = 0;
+                    if (SymElim_ListOfCustomers_GDV.Count == 1)
+                    {
+                        if (nESVisits == 0)
+                            routeDifference = "identical";
+                        else
+                            routeDifference = "sameSequence";
+                    }
+                    else
+                    {
+                        for (int p = 0; p < SymElim_ListOfCustomers_GDV.Count - 1; p++)
+                            if (SymElim_ListOfCustomers_GDV[p] == SymElim_ListOfCustomers_AFV[p + 1] && SymElim_ListOfCustomers_GDV[p + 1] == SymElim_ListOfCustomers_AFV[p])
+                            {
+                                nDifferentPositions++;
+                                if (nDifferentPositions == 1)
+                                    routeDifference = "adjacentSwapped";
+                                else
+                                {
+                                    routeDifference = "differentRoutes";
+                                    break;
+                                }
+                            }
+                            else if (SymElim_ListOfCustomers_GDV[p] == SymElim_ListOfCustomers_AFV[p] && nDifferentPositions == 0)
+                            {
+                                if (nESVisits == 0)
+                                    routeDifference = "identical";
+                                else
+                                    routeDifference = "sameSequence";
+                            }
+                            else
+                            {
+                                if (nDifferentPositions == 0)
+                                    nDifferentPositions = nDifferentPositions + 2;
+                                else
+                                    nDifferentPositions++;
+                                routeDifference = "differentRoutes";
+                                break;
+                            }
+                    }
+
+
                     break;
                 default:
                     throw new Exception("GDV_AFV_OptimizationDifferences doesn't account for all cases of RouteOptimizationStatus!");
@@ -151,7 +204,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "Customers\t# Customers\tRoute Optimization Status\tOutcome Status\tAFV_Route\tAFV_nonES_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln\tGap3-4\tGap3-5\tGap4-5\tBestRoute";
+            return "Customers\t# Customers\tRoute Optimization Status\tOutcome Status\tAFV_Route\tAFV_nonES_Route\tGDV_Route\tAFV_Comp_Time\tGDV_Comp_Time\tT0GDVSoln\tT1CheckAFVfeas\tT2CheckAFVinfeas\tT3RefuelingPathInsert\tT4SwapAndInsert\tT5AFVSoln\tAFV_VMT\tGDV_VMT\tVMT Difference\t# ES Visits\tStopAfterStepNo\tVMT3RefuelingPathInsert\tVMT4SwapAndInsert\tVMT5AFVSoln\tGap3-4\tGap3-5\tGap4-5\tBestRoute\tNum Diff Positions\tRoute Difference";
         }
 
         public string GetDataRow()
@@ -183,7 +236,9 @@ namespace MPMFEVRP.Utils
                 vmtImprovementPercent34.ToString() + "\t" +
                 vmtImprovementPercent35.ToString() + "\t" +
                 vmtImprovementPercent45.ToString() + "\t" +
-                bestRoute;
+                bestRoute + "\t" +
+                nDifferentPositions.ToString() + "\t" +
+                routeDifference;
         }
 
         
