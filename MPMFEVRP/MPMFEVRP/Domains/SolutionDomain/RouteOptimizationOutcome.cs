@@ -26,7 +26,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public RouteOptimizationOutcome(RouteOptimizationStatus status, List<VehicleSpecificRouteOptimizationOutcome> theList = null)
         {
-            if ((status == RouteOptimizationStatus.NotYetOptimized) || (status == RouteOptimizationStatus.InfeasibleForBothGDVandEV))
+            if ((status == RouteOptimizationStatus.NotYetOptimized))// || (status == RouteOptimizationStatus.InfeasibleForBothGDVandEV))
             {
                 theListofVSROOs = new List<VehicleSpecificRouteOptimizationOutcome>();
             }

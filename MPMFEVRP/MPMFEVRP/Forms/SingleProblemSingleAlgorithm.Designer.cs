@@ -55,10 +55,11 @@
             this.BackgroundWorker_algorithmRunner = new System.ComponentModel.BackgroundWorker();
             this.button_viewSolution = new System.Windows.Forms.Button();
             this.groupBox_status = new System.Windows.Forms.GroupBox();
+            this.exploitingGDVvsPlainSummary = new System.Windows.Forms.Button();
             this.button_extractLogInfo = new System.Windows.Forms.Button();
             this.button_showCharts = new System.Windows.Forms.Button();
             this.textBox_log = new System.Windows.Forms.TextBox();
-            this.exploitingGDVvsPlainSummary = new System.Windows.Forms.Button();
+            this.infAnalysisCplex = new System.Windows.Forms.Button();
             this.groupBox_problem.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox_algorithms.SuspendLayout();
@@ -175,6 +176,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.infAnalysisCplex);
             this.groupBox1.Controls.Add(this.label_selectedFile);
             this.groupBox1.Controls.Add(this.button_browseForFile);
             this.groupBox1.Controls.Add(this.button_openDataManager);
@@ -275,7 +277,7 @@
             this.groupBox_algorithms.Controls.Add(this.comboBox_algorithms);
             this.groupBox_algorithms.Location = new System.Drawing.Point(476, 13);
             this.groupBox_algorithms.Name = "groupBox_algorithms";
-            this.groupBox_algorithms.Size = new System.Drawing.Size(350, 648);
+            this.groupBox_algorithms.Size = new System.Drawing.Size(350, 671);
             this.groupBox_algorithms.TabIndex = 1;
             this.groupBox_algorithms.TabStop = false;
             this.groupBox_algorithms.Text = "Algorithm";
@@ -349,6 +351,16 @@
             this.groupBox_status.TabStop = false;
             this.groupBox_status.Text = "Status";
             // 
+            // exploitingGDVvsPlainSummary
+            // 
+            this.exploitingGDVvsPlainSummary.Location = new System.Drawing.Point(15, 511);
+            this.exploitingGDVvsPlainSummary.Name = "exploitingGDVvsPlainSummary";
+            this.exploitingGDVvsPlainSummary.Size = new System.Drawing.Size(146, 26);
+            this.exploitingGDVvsPlainSummary.TabIndex = 17;
+            this.exploitingGDVvsPlainSummary.Text = "Summary";
+            this.exploitingGDVvsPlainSummary.UseVisualStyleBackColor = true;
+            this.exploitingGDVvsPlainSummary.Click += new System.EventHandler(this.ExploitingGDVvsPlainSummary_Click);
+            // 
             // button_extractLogInfo
             // 
             this.button_extractLogInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -380,15 +392,15 @@
             this.textBox_log.Size = new System.Drawing.Size(320, 484);
             this.textBox_log.TabIndex = 14;
             // 
-            // exploitingGDVvsPlainSummary
+            // infAnalysisCplex
             // 
-            this.exploitingGDVvsPlainSummary.Location = new System.Drawing.Point(15, 511);
-            this.exploitingGDVvsPlainSummary.Name = "exploitingGDVvsPlainSummary";
-            this.exploitingGDVvsPlainSummary.Size = new System.Drawing.Size(146, 26);
-            this.exploitingGDVvsPlainSummary.TabIndex = 17;
-            this.exploitingGDVvsPlainSummary.Text = "Summary";
-            this.exploitingGDVvsPlainSummary.UseVisualStyleBackColor = true;
-            this.exploitingGDVvsPlainSummary.Click += new System.EventHandler(this.ExploitingGDVvsPlainSummary_Click);
+            this.infAnalysisCplex.Location = new System.Drawing.Point(12, 89);
+            this.infAnalysisCplex.Name = "infAnalysisCplex";
+            this.infAnalysisCplex.Size = new System.Drawing.Size(198, 23);
+            this.infAnalysisCplex.TabIndex = 13;
+            this.infAnalysisCplex.Text = "Infeas Analysis CPLEX";
+            this.infAnalysisCplex.UseVisualStyleBackColor = true;
+            this.infAnalysisCplex.Click += new System.EventHandler(this.infAnalysisCplex_Click);
             // 
             // SingleProblemSingleAlgorithm
             // 
@@ -448,5 +460,6 @@
         private System.Windows.Forms.Button button_extractLogInfo;
         private System.Windows.Forms.Button button_problemViewerOnMap;
         private System.Windows.Forms.Button exploitingGDVvsPlainSummary;
+        private System.Windows.Forms.Button infAnalysisCplex;
     }
 }

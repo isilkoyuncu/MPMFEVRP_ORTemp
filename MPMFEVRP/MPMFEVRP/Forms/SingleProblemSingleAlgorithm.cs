@@ -330,5 +330,31 @@ namespace MPMFEVRP.Forms
             }
 
         }
+
+        private void infAnalysisCplex_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = true,
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+
+                try
+                {
+                    new InfeasibilityAnalysisForCPLEX(dialog.FileName);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("There is something wrong while parsing the file!", "File parse error!");
+                }
+            }
+
+
+                        
+        }
     }
 }

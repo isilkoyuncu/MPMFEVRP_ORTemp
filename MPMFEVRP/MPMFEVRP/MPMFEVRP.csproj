@@ -141,6 +141,7 @@
     <Compile Include="Implementations\Algorithms\Outsource2Gurobi.cs" />
     <Compile Include="Implementations\Algorithms\PathBasedApproach.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedCustomerSetExplorer.cs" />
+    <Compile Include="Implementations\Algorithms\RndomizedCSExplorerWithExploitingGDVs.cs" />
     <Compile Include="Implementations\Algorithms\RouteDatabaseGenerator.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
@@ -246,6 +247,7 @@
     <Compile Include="Utils\AlgorithmUtil.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemEnums.cs" />
     <Compile Include="Utils\AllPairsShortestPaths.cs" />
+    <Compile Include="Utils\InfeasibilityAnalysisForCPLEX.cs" />
     <Compile Include="Utils\OptimizationStatistics.cs" />
     <Compile Include="Utils\ExploitingGDVvsPlainOutputReader.cs" />
     <Compile Include="Utils\CplexLogReader.cs" />
