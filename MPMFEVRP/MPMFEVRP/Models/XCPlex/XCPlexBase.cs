@@ -384,6 +384,9 @@ namespace MPMFEVRP.Models.XCPlex
                 SetParam(Cplex.DoubleParam.CutsFactor, double.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_CUTS_FACTOR].Value.ToString()));
             if (xCplexParam.OptionalCPlexParameters.ContainsKey(ParameterID.ALG_THREADS))
                 SetParam(Cplex.Param.Threads, int.Parse(xCplexParam.OptionalCPlexParameters[ParameterID.ALG_THREADS].Value.ToString()));
+
+            SetParam(Cplex.Param.MIP.Tolerances.Integrality, 0.00001);
+            SetParam(Cplex.Param.Simplex.Tolerances.Feasibility, 0.00001);
             SetParam(Cplex.Param.MIP.Display, 4);
             //SetParam(Cplex.Param.Threads, 8);
         }
