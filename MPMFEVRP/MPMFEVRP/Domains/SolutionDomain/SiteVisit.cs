@@ -5,8 +5,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
 {
     public class SiteVisit
     {
-        double mipErrorTime = 0.01;
-        double mipErrorSOE = 0.0005;
+        double mipErrorTime = 0.0001;
+        double mipErrorSOE = 0.0001;
         
         //site visited
         Site site;
