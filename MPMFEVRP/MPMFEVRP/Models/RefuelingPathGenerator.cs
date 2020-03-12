@@ -13,6 +13,7 @@ namespace MPMFEVRP.Models
     public class RefuelingPathGenerator
     {
         int maxPossibleNumberOfRefuelingStops = 4;
+        double epsilon = 0.01;
 
         Dictionary<int, List<List<SiteWithAuxiliaryVariables>>> allEnumeratedRefuelingStops;
         AllPairsShortestPaths apss;
@@ -143,7 +144,7 @@ namespace MPMFEVRP.Models
             if (origin.ID != destination.ID) //no refueling path from itself to itself
             {
                 //Add direct arc
-                if (origin.DeltaPrimeMax - SRD.GetEVEnergyConsumption(origin.ID, destination.ID) >= destination.DeltaMin)
+                if (origin.DeltaPrimeMax - SRD.GetEVEnergyConsumption(origin.ID, destination.ID) + epsilon >= destination.DeltaMin)
                 {
                     refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables>() { }, SRD);
                     int addResult = outcome.AddIfNondominated(refuelingPath);
