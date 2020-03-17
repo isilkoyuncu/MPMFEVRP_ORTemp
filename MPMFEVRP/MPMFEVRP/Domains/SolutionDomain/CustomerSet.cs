@@ -3,6 +3,7 @@ using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using System;
 using System.Collections.Generic;
 using MPMFEVRP.Models;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 
 namespace MPMFEVRP.Domains.SolutionDomain
@@ -252,16 +253,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
-        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false, bool performSwap=false)
+        public void OptimizeByExploitingGDVs(EVvsGDV_ProblemModel theProblemModel, Exploiting_GDVs_Flowchart flowchart, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false, bool performSwap=false)
         {
-            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough, performSwap);
+            routeOptimizationOutcome = theProblemModel.RouteOptimizeByExploitingGDVs(this, flowchart, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough, performSwap);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
-        public void OptimizeByPlainAFVSolver(EVvsGDV_ProblemModel theProblemModel)
+        public void OptimizeByPlainAFVSolver(EVvsGDV_ProblemModel theProblemModel, Exploiting_GDVs_Flowchart flowchart)
         {
-            routeOptimizationOutcome = theProblemModel.RouteOptimizeByPlainAFVSolver(this);
+            routeOptimizationOutcome = theProblemModel.RouteOptimizeByPlainAFVSolver(this, flowchart);
             UpdateMinAdditionalsForAllPossibleOtherCustomerswPlainAFV(theProblemModel);
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }

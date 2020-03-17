@@ -19,6 +19,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         List<OptimizationStatistics> optStatistics;
         Vehicle theGDV;
         XCPlexParameters xCplexParam;
+        Exploiting_GDVs_Flowchart flowchart;
 
         //These are the important characteristics that will have to be tied to the form
         int beamWidth;
@@ -50,6 +51,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void AddSpecializedParameters()
         {
             AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE, "TSP Type", new List<object>() { TSPSolverType.GDVExploiter, TSPSolverType.PlainAFVSolver, TSPSolverType.OldiesADF }, TSPSolverType.GDVExploiter, UserInputObjectType.ComboBox));
+            AlgorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_FLOWCHART, "Flow Chart", new List<object>() { Exploiting_GDVs_Flowchart.a_NoExploiting, Exploiting_GDVs_Flowchart.b_OnlyIdenticalRoutes, Exploiting_GDVs_Flowchart.c_PathInsertedRoutes, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes }, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes, UserInputObjectType.ComboBox));
         }
 
         public override string GetName()
@@ -140,6 +142,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             xCplexParam = new XCPlexParameters();
             tspSolverType = (TSPSolverType)AlgorithmParameters.GetParameter(ParameterID.ALG_TSP_OPTIMIZATION_MODEL_TYPE).Value;
             optStatistics = new List<OptimizationStatistics>();
+            flowchart = (Exploiting_GDVs_Flowchart)AlgorithmParameters.GetParameter(ParameterID.ALG_FLOWCHART).Value;
 
             //These are the important characteristics that will have to be tied to the form
             beamWidth = 10;
@@ -382,12 +385,12 @@ namespace MPMFEVRP.Implementations.Algorithms
 
             if (tspSolverType == TSPSolverType.GDVExploiter)
             {
-                candidate.OptimizeByExploitingGDVs(theProblemModel, true, false, true);
+                candidate.OptimizeByExploitingGDVs(theProblemModel, flowchart, true, false, true);
                 //optStatistics.Add(theProblemModel.RetrieveExploitingGDVoptStat());
             }
             else if (tspSolverType == TSPSolverType.PlainAFVSolver)
             {
-                candidate.OptimizeByPlainAFVSolver(theProblemModel);
+                candidate.OptimizeByPlainAFVSolver(theProblemModel, flowchart);
                 //optStatistics.Add(theProblemModel.RetrievePlainOptStat());
             }
             else

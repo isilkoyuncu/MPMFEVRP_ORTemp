@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Domains.ProblemDomain;
 using MPMFEVRP.Domains.SolutionDomain;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 namespace MPMFEVRP.Models.CustomerSetSolvers.Interfaces_and_Bases
 {
@@ -17,6 +18,6 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Interfaces_and_Bases
         /// <param name="customerSet">The customer set for which a new solution is desired.</param>
         /// <param name="PreserveCustomerVisitSequence">Whether this solver is constrained to use the customer visit sequence obtained for the GDV when optimizing for the AFV.</param>
         /// <returns></returns>
-        RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false, bool performSwap=false);
+        RouteOptimizationOutcome Solve(CustomerSet customerSet, Exploiting_GDVs_Flowchart exploiting_GDVs_Flowchart, bool PreserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough=false, bool performSwap=false);
     }
 }

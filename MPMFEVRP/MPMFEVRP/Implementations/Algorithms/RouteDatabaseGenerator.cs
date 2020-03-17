@@ -124,7 +124,7 @@ namespace MPMFEVRP.Implementations.Algorithms
             for (int i = 0; i < theProblemModel.SRD.NumCustomers; i++)
             {
                 CustomerSet singleCustomerCS = new CustomerSet(theProblemModel.GetAllCustomerIDs()[i], theProblemModel.GetAllCustomerIDs());
-                singleCustomerCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
+                singleCustomerCS.OptimizeByExploitingGDVs(theProblemModel, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes, preserveCustomerVisitSequence);
                 exploredSingleCustomerSetList.Add(singleCustomerCS);
             }
         }
@@ -151,7 +151,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     tempCS.NewExtend(customersToBeAdded[k]);
                     if (!exploredCustomerSetMasterListsAtEachLevel[i + 1].ContainsAnIdenticalCustomerSet(tempCS))
                     {
-                        tempCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
+                        tempCS.OptimizeByExploitingGDVs(theProblemModel, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes, preserveCustomerVisitSequence);
                         exploredCustomerSetMasterListsAtEachLevel[i + 1].Add(tempCS);
                     }
                     if ((DateTime.Now - globalStartTime).TotalSeconds > runTimeLimitInSeconds)
@@ -177,7 +177,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                     tempCS.NewExtend(customersToBeAdded.First());
                     if (!exploredCustomerSetMasterListsAtEachLevel[i + 1].ContainsAnIdenticalCustomerSet(tempCS))
                     {
-                        tempCS.OptimizeByExploitingGDVs(theProblemModel, preserveCustomerVisitSequence);
+                        tempCS.OptimizeByExploitingGDVs(theProblemModel, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes, preserveCustomerVisitSequence);
                         exploredCustomerSetMasterListsAtEachLevel[i + 1].Add(tempCS);
                     }
                     currentCS = new CustomerSet(tempCS);

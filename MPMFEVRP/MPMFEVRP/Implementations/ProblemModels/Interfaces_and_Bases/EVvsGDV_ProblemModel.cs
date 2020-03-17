@@ -818,18 +818,18 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                     }
         }
 
-        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough, bool performSwap)
+        public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, Exploiting_GDVs_Flowchart flowchart, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough, bool performSwap)
         {
-            return theGDVExploiter.Solve(CS, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough, performSwap);
+            return theGDVExploiter.Solve(CS, flowchart, preserveCustomerVisitSequence, feasibleAFVSolnIsEnough, performSwap);
         }
 
         public OptimizationStatistics RetrieveExploitingGDVoptStat ()
         {
             return theGDVExploiter.optimizationStatstics;
         }
-        public RouteOptimizationOutcome RouteOptimizeByPlainAFVSolver(CustomerSet CS)
+        public RouteOptimizationOutcome RouteOptimizeByPlainAFVSolver(CustomerSet CS, Exploiting_GDVs_Flowchart flowchart)
         {
-            return thePlainAFVSolver.Solve(CS);
+            return thePlainAFVSolver.Solve(CS, flowchart);
         }
 
         public OptimizationStatistics RetrievePlainOptStat()

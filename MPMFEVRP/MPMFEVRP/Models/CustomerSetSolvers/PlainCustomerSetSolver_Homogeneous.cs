@@ -29,7 +29,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             AFV_Solver = new CustomerSetSolverWithOnlyAFV(theProblemModel);
             theAFV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
         }
-        public RouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence = false, bool feasibleEnough = false, bool performSwap =false)
+        public RouteOptimizationOutcome Solve(CustomerSet customerSet, Exploiting_GDVs_Flowchart flowchart, bool PreserveCustomerVisitSequence = false, bool feasibleEnough = false, bool performSwap =false)
         {
             RouteOptimizationOutcome outcome;
             int nCustomers = customerSet.Customers.Count;
