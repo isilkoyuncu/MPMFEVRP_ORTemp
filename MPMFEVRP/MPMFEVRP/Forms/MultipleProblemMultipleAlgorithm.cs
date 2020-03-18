@@ -16,6 +16,7 @@ using MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Problems.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
+using MPMFEVRP.Domains.AlgorithmDomain;
 
 
 namespace MPMFEVRP.Forms
@@ -55,7 +56,7 @@ namespace MPMFEVRP.Forms
             listBox_algorithms.MouseDoubleClick += ListBox_algorithms_MouseDoubleClick;
             listBox_algorithms.MouseMove += ListBox_algorithms_MouseMove;
             comboBox_algorithms.Items.AddRange(AlgorithmUtil.GetAllAlgorithmNames().ToArray());
-            comboBox_algorithms.SelectedIndex = 6;
+            comboBox_algorithms.SelectedIndex = 0;
 
             comboBox_multi_TSPModel.Items.AddRange(XCPlexUtil.GetTSPModelNamesForSolver().ToArray());
             comboBox_multi_TSPModel.SelectedIndexChanged += ComboBox_multi_TSPModel_SelectedIndexChanged;
@@ -203,7 +204,9 @@ namespace MPMFEVRP.Forms
                         else
                         {
                             Log("Solution " + theSolution.ToString() + " started writing.");
-                            writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution());
+                             
+                            Exploiting_GDVs_Flowchart specialAlg = (Exploiting_GDVs_Flowchart)algorithm.AlgorithmParameters.GetParameter(Models.ParameterID.ALG_FLOWCHART).Value;
+                            writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution(), specialAlg.ToString());
                             writer.Write();
                         }
                         Log("**************RESET************");
