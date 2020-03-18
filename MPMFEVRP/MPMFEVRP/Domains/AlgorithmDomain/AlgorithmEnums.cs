@@ -1,7 +1,7 @@
 ﻿namespace MPMFEVRP.Domains.AlgorithmDomain
 {
 
-    public enum Exploiting_GDVs_Flowchart { a_NoExploiting, b_OnlyIdenticalRoutes, c_PathInsertedRoutes, d_PathInsertedAndSwappedRoutes };
+    public enum Exploiting_GDVs_Flowchart { a_NoExploiting, b_OnlyIdenticalRoutes, c_PathInsertedRoutes, d_PathInsertedAndSwappedRoutes, e_DataCollection };
 
     public enum Recovery_Options { AssignmentProbByCPLEX, AnalyticallySolve}
 
