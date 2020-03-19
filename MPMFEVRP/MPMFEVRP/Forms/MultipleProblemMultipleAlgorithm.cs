@@ -204,9 +204,13 @@ namespace MPMFEVRP.Forms
                         else
                         {
                             Log("Solution " + theSolution.ToString() + " started writing.");
-                             
-                            Exploiting_GDVs_Flowchart specialAlg = (Exploiting_GDVs_Flowchart)algorithm.AlgorithmParameters.GetParameter(Models.ParameterID.ALG_FLOWCHART).Value;
-                            writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution(), specialAlg.ToString());
+                            string algParam = "";
+                            if (algorithm.GetName() == "CGA with Exploiting GDVs")
+                            {
+                                Exploiting_GDVs_Flowchart specialAlg = (Exploiting_GDVs_Flowchart)algorithm.AlgorithmParameters.GetParameter(Models.ParameterID.ALG_FLOWCHART).Value;
+                                algParam = specialAlg.ToString();
+                            }
+                            writer = new IndividualSolutionWriter(problemModel.InputFileName, algorithm.GetOutputSummary(), theSolution.GetOutputSummary(), theSolution.GetWritableSolution(), algParam);
                             writer.Write();
                         }
                         Log("**************RESET************");
