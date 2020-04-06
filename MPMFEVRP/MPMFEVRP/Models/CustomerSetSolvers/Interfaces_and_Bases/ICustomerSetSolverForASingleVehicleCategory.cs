@@ -21,6 +21,6 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Interfaces_and_Bases
         /// <param name="customerSet">The customer set for which a new solution is desired.</param>
         /// <param name="PreserveCustomerVisitSequence">Whether this solver is constrained to use the customer visit sequence obtained when previously optimized for the GDV.</param>
         /// <returns></returns>
-        VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence);
+        VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool PreserveCustomerVisitSequence, bool usetimeLimit, double tilim);
     }
 }

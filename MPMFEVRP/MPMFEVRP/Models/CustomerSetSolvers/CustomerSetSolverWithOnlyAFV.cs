@@ -24,7 +24,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
         }
         //Other Methods
-        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence, VehicleSpecificRoute vsr_GDV)
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence, VehicleSpecificRoute vsr_GDV, bool useTilim = false, double tilim = Double.MaxValue)
         {
             //Verification
             if (preserveCustomerVisitSequence) //If we want to preserce cs visit sequence, we must provide a CS that has been optimized with a GDV solver
@@ -51,7 +51,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
         }
 
-        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence=false)
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence = false, bool useTilim = false, double tilim = Double.MaxValue)
         {
             //Implementation
             //Pre-process
@@ -68,6 +68,13 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             else if (SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First());
+            }
+            else if (useTilim)
+            {
+                if (cpuTime >= tilim + 1.0)
+                    return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                else
+                    throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
             }
             else
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());

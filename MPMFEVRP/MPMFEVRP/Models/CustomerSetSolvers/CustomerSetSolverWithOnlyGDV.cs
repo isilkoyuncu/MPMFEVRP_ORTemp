@@ -25,7 +25,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
         }
 
         //Other methods
-        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence = false)
+        public VehicleSpecificRouteOptimizationOutcome Solve(CustomerSet customerSet, bool preserveCustomerVisitSequence = false, bool useTilim = false, double tilim = double.MaxValue)
         {
             //Verificiation
             if (preserveCustomerVisitSequence)
