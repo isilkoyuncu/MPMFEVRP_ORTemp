@@ -64,7 +64,7 @@ namespace MPMFEVRP.Utils
 
         public static string GetHeaderRow()
         {
-            return "iterationNo\tnumberOfColumnsExplored\tnumberOfNegRedCostColumnsAdded\tnumberOfPromisingCustomers\ttotalNumOfColumnsToSetCoverSoFar\ttotalNumOfColumnsExploredSoFar\trelaxedSetPartitionTime\tcustomerSetGeneratorTotalTime\trouteOptimizationTotalTime\titerationTotalTimeCalculated\titerationTotalTimeActual\trelaxedSetPartitionObjValue\tavgNumberOfCustomersExplored";
+            return "iterationNo\tnumberOfColumnsExplored\tnumberOfNegRedCostColumnsAdded\tnumberOfPromisingCustomers\ttotalNumOfColumnsToSetCoverSoFar\ttotalNumOfColumnsExploredSoFar\trelaxedSetPartitionTime\tcustomerSetGeneratorTotalTime\trouteOptimizationTotalTime\titerationTotalTimeCalculated\titerationTotalTimeActual\tavgNumberOfCustomersExplored\trelaxedSetPartitionObjValue";
         }
 
         public string GetDataRow()
@@ -81,8 +81,8 @@ namespace MPMFEVRP.Utils
              routeOptimizationTotalTime.ToString() + "\t" +
              iterationTotalTimeCalculated.ToString() + "\t" +
              iterationTotalTimeActual.ToString() + "\t" +
-             relaxedSetPartitionObjValue.ToString() + "\t" +
-             avgNumberOfCustomersExplored.ToString();
+             avgNumberOfCustomersExplored.ToString() + "\t" +
+             relaxedSetPartitionObjValue.ToString();
         }
     }
 }
