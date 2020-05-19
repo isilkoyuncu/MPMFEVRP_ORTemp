@@ -267,6 +267,7 @@
     <Compile Include="Utils\ProblemUtil.cs" />
     <Compile Include="Utils\RandomArrayOperations.cs" />
     <Compile Include="Utils\RawDataParser.cs" />
+    <Compile Include="Utils\CGIterationStats.cs" />
     <Compile Include="Utils\SerializationUtil.cs" />
     <Compile Include="Utils\SolutionUtil.cs" />
     <Compile Include="Utils\StringOperations.cs" />
