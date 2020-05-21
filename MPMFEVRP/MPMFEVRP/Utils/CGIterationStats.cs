@@ -28,6 +28,7 @@ namespace MPMFEVRP.Utils
         double routeOptimizationTotalTime; //total duration of the route optimization
         double iterationTotalTimeCalculated; //total duration of the iteration = relaxed set partitioning duration + total duration of the route optimization
         double iterationTotalTimeActual;
+        double cumulativeTotalTime;
 
         double relaxedSetPartitionObjValue; //objective function value of the relaxed set partitioning model
         double avgNumberOfCustomersExplored;
@@ -44,6 +45,7 @@ namespace MPMFEVRP.Utils
             double routeOptimizationTotalTime,
             double iterationTotalTimeCalculated,
             double iterationTotalTimeActual,
+            double cumulativeTotalTime,
             double relaxedSetPartitionObjValue,
             double avgNumberOfCustomersExplored)
         {
@@ -58,13 +60,14 @@ namespace MPMFEVRP.Utils
             this.routeOptimizationTotalTime = routeOptimizationTotalTime;
             this.iterationTotalTimeCalculated = iterationTotalTimeCalculated;
             this.iterationTotalTimeActual = iterationTotalTimeActual;
+            this.cumulativeTotalTime = cumulativeTotalTime;
             this.relaxedSetPartitionObjValue = relaxedSetPartitionObjValue;
             this.avgNumberOfCustomersExplored = avgNumberOfCustomersExplored;
         }
 
         public static string GetHeaderRow()
         {
-            return "iterationNo\tnumberOfColumnsExplored\tnumberOfNegRedCostColumnsAdded\tnumberOfPromisingCustomers\ttotalNumOfColumnsToSetCoverSoFar\ttotalNumOfColumnsExploredSoFar\trelaxedSetPartitionTime\tcustomerSetGeneratorTotalTime\trouteOptimizationTotalTime\titerationTotalTimeCalculated\titerationTotalTimeActual\tavgNumberOfCustomersExplored\trelaxedSetPartitionObjValue";
+            return "iterationNo\tnumberOfColumnsExplored\tnumberOfNegRedCostColumnsAdded\tnumberOfPromisingCustomers\ttotalNumOfColumnsToSetCoverSoFar\ttotalNumOfColumnsExploredSoFar\trelaxedSetPartitionTime\tcustomerSetGeneratorTotalTime\trouteOptimizationTotalTime\titerationTotalTimeCalculated\titerationTotalTimeActual\tcumulativeTotalTime\tavgNumberOfCustomersExplored\trelaxedSetPartitionObjValue";
         }
 
         public string GetDataRow()
@@ -81,6 +84,7 @@ namespace MPMFEVRP.Utils
              routeOptimizationTotalTime.ToString() + "\t" +
              iterationTotalTimeCalculated.ToString() + "\t" +
              iterationTotalTimeActual.ToString() + "\t" +
+             cumulativeTotalTime.ToString() + "\t" +
              avgNumberOfCustomersExplored.ToString() + "\t" +
              relaxedSetPartitionObjValue.ToString();
         }

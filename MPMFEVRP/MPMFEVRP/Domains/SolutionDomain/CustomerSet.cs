@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using MPMFEVRP.Models;
 using MPMFEVRP.Domains.AlgorithmDomain;
+using System.Linq;
 
 
 namespace MPMFEVRP.Domains.SolutionDomain
@@ -14,6 +15,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
     /// </summary>
     public class CustomerSet
     {
+        public string CustomerSetID { get { return customerSetID; } }
+        string customerSetID;
         List<string> customers = new List<string>();
         public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
@@ -39,6 +42,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public CustomerSet()
         {
             customers = new List<string>();
+            customerSetID = "";
             possibleOtherCustomers = new List<string>();
             impossibleOtherCustomers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
@@ -47,6 +51,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public CustomerSet(string customerID, List<string> allCustomers, bool retrievedFromArchive = false)
         {
             customers = new List<string> { customerID };
+            customerSetID = String.Join(",", customers.OrderBy(x => x));
             possibleOtherCustomers = new List<string>();
             foreach (string otherCustomer in allCustomers)
                 if (otherCustomer != customerID)
@@ -62,6 +67,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 throw new ArgumentException();
 
             customers = new List<string>();
+            customerSetID = "";
             possibleOtherCustomers = new List<string>();
             foreach (string otherCustomer in allCustomers)
                 possibleOtherCustomers.Add(otherCustomer);
@@ -77,6 +83,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(c);
             }
+            customerSetID = String.Join(",", customers.OrderBy(x => x));
+
             possibleOtherCustomers = new List<string>();
             foreach (string c in twinCS.PossibleOtherCustomers)
             {
@@ -107,6 +115,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 customers.Add(c);
             }
+            customerSetID = String.Join(",", customers.OrderBy(x => x));
+
             possibleOtherCustomers = new List<string>();
             foreach (string c in twinCS.PossibleOtherCustomers)
             {
@@ -129,6 +139,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             this.customers = customers;
             this.customers.Sort();//just in case
+            customerSetID = String.Join(",", customers.OrderBy(x => x));
+
             possibleOtherCustomers = new List<string>();
             impossibleOtherCustomers = new List<string>();
             VehicleCategories vehicleCategory = (vehicleSpecificRoute == null ? VehicleCategories.GDV : vehicleSpecificRoute.VehicleCategory);
@@ -161,6 +173,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     possibleOtherCustomers.Remove(customer);
                     customers.Add(customer);
                     customers.Sort();
+                    customerSetID = String.Join(",", customers.OrderBy(x => x));
+
                     VehicleSpecificRouteOptimizationOutcome vsroo_GDV = theProblemModel.RouteOptimize(this, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV));
                     VehicleSpecificRouteOptimizationOutcome vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(); //TODO test if this will work
                     if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
@@ -192,6 +206,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     possibleOtherCustomers.Remove(customer);
                     customers.Add(customer);
                     customers.Sort();
+                    customerSetID = String.Join(",", customers.OrderBy(x => x));
+
                     routeOptimizationOutcome = new RouteOptimizationOutcome();
                 }
                 else
@@ -244,6 +260,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             possibleOtherCustomers.Remove(customer);
             customers.Add(customer);
             customers.Sort();
+            customerSetID = String.Join(",", customers.OrderBy(x => x));
+
             routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
         public void NewOptimize(EVvsGDV_ProblemModel theProblemModel)
@@ -302,14 +320,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
         public void Remove(string customer)
         {
             if (customers.Contains(customer))
+            {
                 customers.Remove(customer);
+                customerSetID = String.Join(",", customers.OrderBy(x => x));
+
+            }
+
             else
                 throw new Exception("Customer is not in the set, cannot remove!");
         }
         public void RemoveAt(int position)
         {
             if (customers.Count > position)
+            {
                 customers.RemoveAt(position);
+                customerSetID = String.Join(",", customers.OrderBy(x => x));
+
+            }
+
             else
                 throw new Exception("Cannot remove customer at a position that doesn't exist!");
         }
@@ -495,7 +523,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else throw new Exception("CustomerSet. called to make impossible a customer that wasn't possible!");
         }
 
-        public double GetReducedCost()
+        public double GetVMT()
         {
             return routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
         }

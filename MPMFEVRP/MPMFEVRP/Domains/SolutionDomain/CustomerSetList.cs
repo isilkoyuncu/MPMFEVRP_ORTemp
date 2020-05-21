@@ -44,6 +44,14 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return false;
         }
 
+        CustomerSet GetCustomerSet (string customerSetID)
+        {
+            for(int i=0; i<this.Count; i++)
+                if (this[i].CustomerSetID == customerSetID)
+                    return this[i];
+            return null;
+        }
+
         public RouteOptimizationOutcome Retrieve(CustomerSet candidate)
         {
             for (int i = 0; i < this.Count; i++)
@@ -249,15 +257,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return outcome;
         }
 
-        //TODO: Either re-fit to the new architecture or eliminate
-        //public List<double> GetDeltaProfit()
-        //{
-        //    List<double> outcome = new List<double>();
-        //    foreach (CustomerSet cs in this)
-        //        outcome.Add(cs.RouteOptimizerOutcome.OFV[0] - Math.Max(cs.RouteOptimizerOutcome.OFV[1], 0));
-        //    return outcome;
-        //}
-
         public bool ContainsAnIdenticalCustomerSet(CustomerSet candidate)
         {
             foreach (CustomerSet cs in this)
@@ -265,5 +264,6 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     return true;
             return false;
         }
+
     }
 }
