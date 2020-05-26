@@ -44,6 +44,13 @@ namespace MPMFEVRP.Domains.SolutionDomain
             return false;
         }
 
+        public bool ContainsCS(string CSID)
+        {
+            for (int i = 0; i < this.Count; i++)
+                if (this[i].CustomerSetID == CSID)
+                    return true;
+            return false;
+        }
         CustomerSet GetCustomerSet (string customerSetID)
         {
             for(int i=0; i<this.Count; i++)
