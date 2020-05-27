@@ -47,12 +47,12 @@
             // 
             this.panel_params.Location = new System.Drawing.Point(13, 39);
             this.panel_params.Name = "panel_params";
-            this.panel_params.Size = new System.Drawing.Size(257, 323);
+            this.panel_params.Size = new System.Drawing.Size(257, 451);
             this.panel_params.TabIndex = 1;
             // 
             // button_Close
             // 
-            this.button_Close.Location = new System.Drawing.Point(13, 368);
+            this.button_Close.Location = new System.Drawing.Point(13, 496);
             this.button_Close.Name = "button_Close";
             this.button_Close.Size = new System.Drawing.Size(257, 23);
             this.button_Close.TabIndex = 2;
@@ -64,7 +64,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(282, 403);
+            this.ClientSize = new System.Drawing.Size(282, 527);
             this.Controls.Add(this.button_Close);
             this.Controls.Add(this.panel_params);
             this.Controls.Add(this.label_name);

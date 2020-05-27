@@ -273,6 +273,9 @@
     <Compile Include="Utils\StringOperations.cs" />
     <Compile Include="Utils\IKTestsToDelete.cs" />
     <Compile Include="Utils\XCPlexUtil.cs" />
+    <EmbeddedResource Include="Forms\AlgorithmViewer.resx">
+      <DependentUpon>AlgorithmViewer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\ClusterBasedSetCoverCharts.resx">
       <DependentUpon>ClusterBasedSetCoverCharts.cs</DependentUpon>
     </EmbeddedResource>
