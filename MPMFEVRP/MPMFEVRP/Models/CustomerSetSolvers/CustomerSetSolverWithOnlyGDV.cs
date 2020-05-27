@@ -19,7 +19,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
         //Constructors
         public CustomerSetSolverWithOnlyGDV() : base() { }
-        public CustomerSetSolverWithOnlyGDV(EVvsGDV_ProblemModel theProblemModel) :base(theProblemModel, new XCPlexParameters(tSP:true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
+        public CustomerSetSolverWithOnlyGDV(EVvsGDV_ProblemModel theProblemModel) :base(theProblemModel, new XCPlexParameters(tSP:true, limitComputationTime: true, runtimeLimit_Seconds: 120.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
         {
 
         }
@@ -47,6 +47,10 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             {
                 return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First());
             }
+            else if (SolutionStatus == XCPlexSolutionStatus.Feasible)
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First());
+            else if (SolutionStatus == XCPlexSolutionStatus.NoFeasibleSolutionFound)
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
         }
