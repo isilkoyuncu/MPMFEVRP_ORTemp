@@ -86,10 +86,13 @@ namespace MPMFEVRP.Models.XCPlex
                 z[i] = new INumVar[2];
                 for (int v = 0; v < 2; v++)
                 {
-                        z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
-                        z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
-                        obj.AddTerm(theProblemModel.CalculateObjectiveFunctionValue(customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]).GetObjectiveFunctionInputDataPackage()), z[i][v]);
-                        allVariables_list.Add(z[i][v]);
+                    z_name[i][v] = "z_(" + i.ToString() + "," + v.ToString() + ")";
+                    z[i][v] = NumVar(0, 1, variable_type, z_name[i][v]);
+                    VehicleSpecificRouteOptimizationOutcome vsroo = customerSetArray[i].RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc[v]);
+                    ObjectiveFunctionInputDataPackage ofidp = vsroo.GetObjectiveFunctionInputDataPackage();
+                    double objective = theProblemModel.CalculateObjectiveFunctionValue(ofidp);
+                    obj.AddTerm(objective, z[i][v]);
+                    allVariables_list.Add(z[i][v]);
                 }
             }
             //All variables defined
@@ -128,16 +131,16 @@ namespace MPMFEVRP.Models.XCPlex
                         if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[1].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                         {
                             if (theProblemModel.GetNumVehicles(VehicleCategories.EV) > 0)
-                                numTimesCustomerServed.AddTerm(1.0, z[i][0]);
+                                numTimesCustomerServed.AddTerm(1.0, z[i][vIndex_EV]);
                             if (theProblemModel.GetNumVehicles(VehicleCategories.GDV) > 0)
-                                numTimesCustomerServed.AddTerm(1.0, z[i][1]);
+                                numTimesCustomerServed.AddTerm(1.0, z[i][1-vIndex_EV]);
                         }
                         else { }
                     else if (customerSetArray[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV || customerSetArray[i].RouteOptimizationOutcome.Status == RouteOptimizationStatus.OptimizedForGDVButNotYetOptimizedForEV)
                     {
                         if (customerSetArray[i].RouteOptimizationOutcome.TheListofVSROOs[0].VSOptimizedRoute.ListOfVisitedNonDepotSiteIDs.Contains(customerID))
                             if (theProblemModel.GetNumVehicles(VehicleCategories.GDV) > 0)
-                                numTimesCustomerServed.AddTerm(1.0, z[i][1]);
+                                numTimesCustomerServed.AddTerm(1.0, z[i][1-vIndex_EV]);
                     }
 
                 }//for i
@@ -178,7 +181,7 @@ namespace MPMFEVRP.Models.XCPlex
                     numTimesVehicleTypeIsUsed.AddTerm(1.0, z[i][v]);
                 }//for i
                 //int nv = overrideNumberOfVehicles == null ? theProblemModel.NumVehicles[v] : overrideNumberOfVehicles[v];
-                string constraint_name = "Vehicle type "+v.ToString()+" can be used at most" + theProblemModel.NumVehicles[v].ToString() + "times";
+                string constraint_name = "Vehicle type_"+v.ToString()+"_can be used at most" + theProblemModel.NumVehicles[v].ToString() + "times";
                 allConstraints_list.Add(AddLe(numTimesVehicleTypeIsUsed, overrideNumberOfVehicles[v], constraint_name));
             }
         }
@@ -241,6 +244,25 @@ namespace MPMFEVRP.Models.XCPlex
                 if (constraintName.Contains("Customer") && constraintName.Contains("must_be_covered"))
                 {
                     outcome.Add(constraintName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries)[1], AllShadowPrices[c]);
+                }
+            }
+            return outcome;
+        }
+
+        public Dictionary<string, double> GetNumberOfVehiclesLimitShadowPrices()
+        {
+            Dictionary<string, double> outcome = new Dictionary<string, double>();
+            for (int c = 0; c < allConstraints_array.Length; c++)
+            {
+                string constraintName = allConstraints_array[c].Name;
+                if (constraintName.Contains("Vehicle type_") && constraintName.Contains("_can be used at most"))
+                {
+                    if (constraintName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries)[1] == "0")
+                        outcome.Add("EV", AllShadowPrices[c]);
+                    else if (constraintName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries)[1] == "1")
+                        outcome.Add("GDV", AllShadowPrices[c]);
+                    else
+                        throw new System.Exception("Invoked vehicle category does not exists in this context.");
                 }
             }
             return outcome;

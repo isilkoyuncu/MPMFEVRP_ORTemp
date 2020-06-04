@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="Implementations\Algorithms\BranchAndPrice.cs" />
     <Compile Include="Implementations\Algorithms\CGA_ExploitingGDVs.cs" />
+    <Compile Include="Implementations\Algorithms\CGA_ExploitingGDV_ProfitMax.cs" />
     <Compile Include="Implementations\Algorithms\CGHwithShadowPrices.cs" />
     <Compile Include="Implementations\Algorithms\CGA_RandomizedSetExplorerForProfitMaximization.cs" />
     <Compile Include="Implementations\Algorithms\ColumnGenerationHeuristic.cs" />

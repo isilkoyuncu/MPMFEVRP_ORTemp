@@ -623,9 +623,16 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 case ObjectiveFunctions.MaximizeProfit:
                     foreach (VehicleCategories vc in vcList)
                     {
-                        outcome += objectiveFunctionCoefficientsPackage.GetEVTotalPrizeCoefficient(vc) * OFIDP.GetPrizeCollected(vc);
-                        outcome -= objectiveFunctionCoefficientsPackage.GetFixedCostPerVehicle(vc) * OFIDP.GetNumberOfVehiclesUsed(vc);
-                        outcome -= objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
+                        outcome += OFIDP.GetPrizeCollected(vc);
+                        outcome -= VRD.GetTheVehicleOfCategory(vc).FixedCost * OFIDP.GetNumberOfVehiclesUsed(vc);
+                        outcome -= VRD.GetTheVehicleOfCategory(vc).VariableCostPerMile * OFIDP.GetVMT(vc);
+
+
+                        //TODO objectiveFunctionCoefficientsPackage is not set properly, I do not want to multiply these by 0.0 and loose all the data
+
+                        //outcome += objectiveFunctionCoefficientsPackage.GetEVTotalPrizeCoefficient(vc) * OFIDP.GetPrizeCollected(vc);
+                        //outcome -= objectiveFunctionCoefficientsPackage.GetFixedCostPerVehicle(vc) * OFIDP.GetNumberOfVehiclesUsed(vc);
+                        //outcome -= objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
                     }
                     break;
                 case ObjectiveFunctions.MinimizeVMT:

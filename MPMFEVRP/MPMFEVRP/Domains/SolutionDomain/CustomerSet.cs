@@ -527,11 +527,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
         {
             return routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
         }
-        public double GetLongestArc()
+        public double GetLongestArc(VehicleCategories vc = VehicleCategories.EV)
         {
-            return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestArcLength();
+            return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc).VSOptimizedRoute.GetLongestArcLength();
         }
-        public double GetTwoLongestArcs()
+        public double GetTwoLongestArcs(VehicleCategories vc = VehicleCategories.EV)
         {
             return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestTwoArcsLength();
         }

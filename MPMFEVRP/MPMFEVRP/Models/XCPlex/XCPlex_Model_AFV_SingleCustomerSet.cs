@@ -158,22 +158,26 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void AddMaxTypeObjectiveFunction()
         {
-            throw new NotImplementedException("This model works with only vmt minimization objective for now.");
-            //ILinearNumExpr objFunction = LinearNumExpr();           
-            ////First term: prize collection
-            //    for (int i = 0; i < numNonESNodes; i++)
-            //        for (int j = 0; j < numNonESNodes; j++)
-            //            for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-            //                objFunction.AddTerm(allNondominatedRPs[i, j][r].Destination.Prize[vIndex_EV], X[i][j][r]);
+            ILinearNumExpr objFunction = LinearNumExpr();
+            //First term: prize collection
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        objFunction.AddTerm(allNondominatedRPs[i, j][r].Destination.Prize[vIndex_EV], X[i][j][r]);
 
-            ////Second term: distance-based costs from customer to customer through an ES
-            //for (int i = 0; i < numNonESNodes; i++)
-            //    for (int j = 0; j < numNonESNodes; j++)
-            //        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-            //            objFunction.AddTerm(-1.0 *allNondominatedRPs[i, j][r].TotalDistance* GetVarCostPerMile(vehicleCategories[vIndex_EV]), X[i][j][r]);
-            
-            ////Now adding the objective function to the model
-            //objective = AddMaximize(objFunction);
+            //Second term: distance-based costs from customer to customer through an ES
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        objFunction.AddTerm(-1.0 * allNondominatedRPs[i, j][r].TotalDistance * GetVarCostPerMile(vehicleCategories[vIndex_EV]), X[i][j][r]);
+
+            //Third term: fixed cost
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r = 0; r < allNondominatedRPs[0, j].Count; r++)
+                        objFunction.AddTerm(-1.0 * GetVehicleFixedCost(VehicleCategories.EV), X[0][j][r]);
+
+            //Now adding the objective function to the model
+            objective = AddMaximize(objFunction);
         }
         void AddMinTypeObjectiveFunction()
         {
