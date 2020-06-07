@@ -26,19 +26,32 @@ namespace RunFromConsole
         {
             string TSPModelName = "AFV Optimize Single Customer Set";
             string problemName = "EV vs GDV Maximum Profit VRP";
-            string workingFolder = @"G:\My Drive\0-Research\5-2-profit max heterogenous gvrp\EMH - profits\testInput-lessadoption\";
-            int minNumberOfEVs = 1;
-            int maxNumberOfEVs = 4;
-            double timeLimit = 60.0;
 
+            Console.WriteLine("Please enter the input file folder:");
+            string folderName = Console.ReadLine();
+            Console.WriteLine("Please enter the min EVs desired:");
+            int minNumberOfEVs = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Please enter the max EVs desired:");
+            int maxNumberOfEVs = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Please enter the time limit per instance");
+            double timeLimit = Convert.ToDouble(Console.ReadLine());
 
-            IAlgorithm theAlgorithm = new CGA_ExploitingGDVs_ProfitMax(timeLimit);
+            string workingFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName, @"Input\");
+            IAlgorithm theAlgorithm = new CGA_ExploitingGDVs_ProfitMax(timeLimit, folderName);
             string[] fileNames = Directory.GetFiles(workingFolder).OrderBy(x => x).ToArray();
-            for (int i = 0; i < fileNames.Length; i++)
+            Dictionary<int, string> fileDict = new Dictionary<int, string>();
+            foreach(string s in fileNames)
+            {
+                int index = s.Replace(workingFolder,"").IndexOf('_');
+                string temp = s.Replace(workingFolder, "").Substring(0, index);
+                fileDict.Add(Convert.ToInt32(temp), s);
+            }
+            fileDict = fileDict.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            foreach(KeyValuePair<int ,string> kvp in fileDict)
             {
                 for(int j = minNumberOfEVs; j <= maxNumberOfEVs; j++)
                 {
-                    IProblem theProblem = ProblemUtil.CreateProblemByFileName(problemName, Path.Combine(workingFolder, fileNames[i]), j);
+                    IProblem theProblem = ProblemUtil.CreateProblemByFileName(problemName, Path.Combine(workingFolder, kvp.Value), j);
                     Console.WriteLine("Problem loaded from file " + theProblem.PDP.InputFileName);
                     Type TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(TSPModelName);
                     EVvsGDV_ProblemModel theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(typeof(EVvsGDV_MaxProfit_VRP_Model), theProblem, TSPModelType);
