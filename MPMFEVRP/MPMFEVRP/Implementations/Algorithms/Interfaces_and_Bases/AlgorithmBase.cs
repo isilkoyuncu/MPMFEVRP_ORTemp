@@ -34,7 +34,6 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
             algorithmParameters = new InputOrOutputParameterSet();
             AddParameters();
         }
-        
         public void AddParameters()
         {
             algorithmParameters.AddParameter(
@@ -42,7 +41,7 @@ namespace MPMFEVRP.Implementations.Algorithms.Interfaces_and_Bases
                     ParameterID.ALG_RUNTIME_SECONDS,
                     "Runtime Seconds",
                     new List<Object>() {3.0, 10.0, 30.0, 60.0, 120.0, 300.0, 600.0, 900.0, 1200.0, 1800.0, 3600.0, 7200.0, 10800.0, 21600.0, 25200.0, 28800.0, 36000.0 },
-                    600.0,
+                    120.0,
                     UserInputObjectType.ComboBox));
 
             algorithmParameters.AddParameter(

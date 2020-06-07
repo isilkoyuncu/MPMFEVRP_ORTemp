@@ -18,7 +18,7 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
         {
             //Empty constructor
         }
-        public IndividualSolutionWriter(string inputFileName, string[] algorithmOutputSummary, string[] solutionOutputSummary, string[] writableSolution, string algParam = null)
+        public IndividualSolutionWriter(string inputFileName, string[] algorithmOutputSummary, string[] solutionOutputSummary, string[] writableSolution, string algParam = null, string probParam = null)
         {
             this.inputFileName = inputFileName;
             this.algorithmOutputSummary = algorithmOutputSummary;
@@ -37,7 +37,15 @@ namespace MPMFEVRP.Implementations.Solutions.Writers
             algorithmName = algorithmOutputSummary[0].Remove(0, algorithmOutputSummary[0].IndexOf(":") + 1);
 
             if (solutionOutputSummary != null)
-                outputFileName = fileName + algorithmName + "Param-"+ specialParam + " Runtime Limit-" + runtimeLimit + "_.txt";
+                if(probParam != null)
+                {
+                    outputFileName = fileName + algorithmName + "Param-" + specialParam + " tilim-" + runtimeLimit + "-" + probParam + "EVs_.txt";
+                }
+                else
+                {
+                    outputFileName = fileName + algorithmName + "Param-" + specialParam + " tilim-" + runtimeLimit + "_.txt";
+                }
+
             else
                 outputFileName = "SingleVehicle_" + fileName + ".txt";
             //TODO Make sure everything is passed into this constructor and used appropriately

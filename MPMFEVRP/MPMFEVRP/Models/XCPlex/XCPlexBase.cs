@@ -387,7 +387,7 @@ namespace MPMFEVRP.Models.XCPlex
 
             //SetParam(Cplex.Param.MIP.Tolerances.Integrality, 0.001);
             //SetParam(Cplex.Param.Simplex.Tolerances.Feasibility, 0.00001);
-            SetParam(Cplex.Param.MIP.Display, 4);
+            SetParam(Cplex.Param.MIP.Display, 0);
             //SetParam(Cplex.Param.Threads, 8);
         }
         protected void InitializeOutputVariables()
@@ -423,11 +423,14 @@ namespace MPMFEVRP.Models.XCPlex
             DateTime endTime = new DateTime();
             beginTime = DateTime.Now;
             Output();
-
             if (xCplexParam.CplexLogOutputFile)
             {
                 TWoutput = System.IO.File.CreateText("CplexLog_" + theProblemModel.InputFileName);
                 SetOut(TWoutput);
+            }
+            else
+            {
+                SetOut(System.IO.TextWriter.Null);
             }
             Solve();
             if (xCplexParam.CplexLogOutputFile)

@@ -29,6 +29,15 @@ namespace MPMFEVRP.Implementations.Problems
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
 
+        public EVvsGDV_MinCost_VRP(ProblemDataPackage PDP, int numberOfEVs) : base(PDP)
+        {
+            objectiveFunctionType = Models.ObjectiveFunctionTypes.Minimize;
+            objectiveFunction = Models.ObjectiveFunctions.MinimizeTotalCost;
+            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 0, 0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
+            coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
+            problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);
+        }
+
         public override string GetName()
         {
             return "EV vs GDV Minimum Cost VRP";

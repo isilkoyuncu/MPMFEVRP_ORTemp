@@ -29,6 +29,15 @@ namespace MPMFEVRP.Implementations.Problems
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
 
+        public EMH_Problem(ProblemDataPackage PDP, int numberOfEVs) : base(PDP)
+        {
+            objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
+            objectiveFunction = ObjectiveFunctions.MinimizeVMT;
+            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, 0.0);
+            coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
+            problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);
+        }
+
         public override string GetName()
         {
             return "Erdogan & Miller-Hooks Problem";

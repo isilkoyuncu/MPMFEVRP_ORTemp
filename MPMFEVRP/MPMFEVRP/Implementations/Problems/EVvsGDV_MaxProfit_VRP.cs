@@ -30,6 +30,15 @@ namespace MPMFEVRP.Implementations.Problems
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
 
+        public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP, int numberOfEVs) : base(PDP)
+        {
+            objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
+            objectiveFunction = ObjectiveFunctions.MaximizeProfit;
+            objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 1, 1, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
+            coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
+            problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);
+        }
+
         public override string GetName()
         {
             return "EV vs GDV Maximum Profit VRP";

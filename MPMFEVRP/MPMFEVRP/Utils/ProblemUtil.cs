@@ -110,6 +110,35 @@ namespace MPMFEVRP.Utils
             return null;
         }
 
+        public static IProblem CreateProblemByFileName(String problemName, String fullFileName, int numberOfEVs) //TODO problem characteristics needs to be defined before this in order to create a proper model
+        {
+            KoyuncuYavuzReader KYreader = new KoyuncuYavuzReader(fullFileName);
+            KYreader.Read();
+
+            ProblemDataPackage dataPackage = new ProblemDataPackage(KYreader);
+
+            var allProblems = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => typeof(IProblem).IsAssignableFrom(p))
+                .Where(type => typeof(IProblem).IsAssignableFrom(type))
+                .Where(t => !t.IsAbstract)
+                .ToList();
+
+            IProblem createdProblem;
+
+            foreach (var problem in allProblems)
+            {
+                createdProblem = (IProblem)Activator.CreateInstance(problem, dataPackage, numberOfEVs);
+                if (createdProblem.GetName() == problemName)
+                {
+                    return createdProblem;
+                }
+            }
+
+            //If we're here, the problem doesn't exist!
+            return null;
+        }
+
         // TODO this random problem needs to be changed
         public static IProblem CreateRandomProblem(int numberOfJobs, int dueDateLowerLimit, int dueDateUpperLimit, int processingTimeLowerLimit, int processingTimeUpperLimit)
         {
