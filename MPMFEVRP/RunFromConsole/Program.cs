@@ -25,19 +25,65 @@ namespace RunFromConsole
         public static void Main(string[] args)
         {
             string TSPModelName = "AFV Optimize Single Customer Set";
-            string problemName = "EV vs GDV Maximum Profit VRP";
+            string maxProfitProblemName = "EV vs GDV Maximum Profit VRP";
+            string minVMTProblemName = "Erdogan & Miller-Hooks Problem";
+            string problemName = maxProfitProblemName;
+            int minNumberOfEVs = 7;
+            int maxNumberOfEVs = 7;
+            IAlgorithm theAlgorithm;
+            string algorithmName = "cga";
+            string algorithmParam = "GE2";
+            EVvsGDV_ProblemModel theProblemModel;
 
             Console.WriteLine("Please enter the input file folder:");
             string folderName = Console.ReadLine();
-            Console.WriteLine("Please enter the min EVs desired:");
-            int minNumberOfEVs = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Please enter the max EVs desired:");
-            int maxNumberOfEVs = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Please enter the time limit per instance");
+            Console.WriteLine("Please enter the time limit (seconds) per instance");
             double timeLimit = Convert.ToDouble(Console.ReadLine());
+            Console.WriteLine("Min VMT problem? (y/n):");
+            string isMinimization = Console.ReadLine();
+            if (isMinimization == "Y" || isMinimization == "y")
+            {
+                problemName = minVMTProblemName;
+                Console.WriteLine("Number of EVs available?");
+                minNumberOfEVs = Convert.ToInt32(Console.ReadLine());
+                maxNumberOfEVs = minNumberOfEVs;
+                Console.WriteLine("Algorithm: (cplex/cga)");
+                algorithmName = Console.ReadLine();
+                if (algorithmName == "cplex" || algorithmName == "CPLEX") {
+                    Console.WriteLine("Algoritgm parameters: (adf/ndf)");
+                    algorithmParam = Console.ReadLine();  
+                    if(algorithmParam == "adf" || algorithmParam =="ndf")
+                        theAlgorithm = new Outsource2Cplex(timeLimit, algorithmParam, folderName); 
+                    else
+                        throw new Exception("An unknown algorithm parameter cannot be used...");
+                }
+                else if(algorithmName == "cga" || algorithmName == "CGA")
+                {
+                    Console.WriteLine("Algoritgm parameters: (ge0-ge3)");
+                    algorithmParam = Console.ReadLine();
+                    if (algorithmParam == "ge0" || algorithmParam == "ge1" || algorithmParam == "ge2" || algorithmParam == "ge3")
+                        theAlgorithm = new CGA_ExploitingGDVs(timeLimit, algorithmParam, folderName);
+                    else
+                        throw new Exception("An unknown algorithm parameter cannot be used...");
+                }
+                else
+                    throw new Exception("An unknown algorithm type cannot be revoked...");
+            }
+            else if (isMinimization == "N" || isMinimization == "n")
+            {
+                problemName = maxProfitProblemName;
+                Console.WriteLine("Please enter the min EVs desired:");
+                minNumberOfEVs = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Please enter the max EVs desired:");
+                maxNumberOfEVs = Convert.ToInt32(Console.ReadLine());
+                theAlgorithm = new CGA_ExploitingGDVs_ProfitMax(timeLimit, folderName);
+            }
+            else
+            {
+                throw new Exception("An unknown problem type cannot be solved...");
+            }
 
-            string workingFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName, @"Input\");
-            IAlgorithm theAlgorithm = new CGA_ExploitingGDVs_ProfitMax(timeLimit, folderName);
+            string workingFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName, @"Input\");            
             string[] fileNames = Directory.GetFiles(workingFolder).OrderBy(x => x).ToArray();
             Dictionary<int, string> fileDict = new Dictionary<int, string>();
             foreach(string s in fileNames)
@@ -54,7 +100,10 @@ namespace RunFromConsole
                     IProblem theProblem = ProblemUtil.CreateProblemByFileName(problemName, Path.Combine(workingFolder, kvp.Value), j);
                     Console.WriteLine("Problem loaded from file " + theProblem.PDP.InputFileName);
                     Type TSPModelType = XCPlexUtil.GetXCPlexModelTypeByName(TSPModelName);
-                    EVvsGDV_ProblemModel theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(typeof(EVvsGDV_MaxProfit_VRP_Model), theProblem, TSPModelType);
+                    if(isMinimization=="y" || isMinimization == "Y")
+                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(typeof(EMH_ProblemModel), theProblem, TSPModelType);
+                    else
+                        theProblemModel = ProblemModelUtil.CreateProblemModelByProblem(typeof(EVvsGDV_MaxProfit_VRP_Model), theProblem, TSPModelType);
                     Console.WriteLine("Problem model is created from problem " + theProblem.PDP.InputFileName);
                     theAlgorithm.Initialize(theProblemModel);
                     Console.WriteLine("Algorithm " + theAlgorithm.ToString() + " is initialized.");

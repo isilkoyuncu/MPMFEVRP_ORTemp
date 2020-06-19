@@ -432,6 +432,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 SetOut(System.IO.TextWriter.Null);
             }
+            //ExportModel("model.lp");
             Solve();
             if (xCplexParam.CplexLogOutputFile)
             {

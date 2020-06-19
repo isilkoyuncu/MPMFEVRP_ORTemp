@@ -36,6 +36,7 @@ namespace MPMFEVRP.Implementations.Problems
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, 0.0);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
             problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);
+            problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_GDV, 0);
         }
 
         public override string GetName()

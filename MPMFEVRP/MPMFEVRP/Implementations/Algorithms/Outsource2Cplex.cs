@@ -14,10 +14,30 @@ namespace MPMFEVRP.Implementations.Algorithms
     {
         XCPlexParameters XcplexParam;
         XCPlexBase CPlexExtender = null;
+        string folder { get; set; }
 
         public Outsource2Cplex() : base() 
         {
             AddSpecializedParameters();
+        }
+
+        public Outsource2Cplex(double tilim, string clplexFormulation, string f = null) : base()
+        {
+            AddSpecializedParameters();
+            algorithmParameters.UpdateParameter(ParameterID.ALG_RUNTIME_SECONDS, tilim);
+            switch (clplexFormulation)
+            {
+                case "adf":
+                    algorithmParameters.UpdateParameter(ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.ArcDuplicatingwoU);
+                    break;
+                case "ndf":
+                    algorithmParameters.UpdateParameter(ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.NodeDuplicatingwoU);
+                    break;
+                
+                default:
+                    throw new Exception("Unknown cplex formulation.");
+            }
+            folder = f;
         }
         public override void AddSpecializedParameters()
         {
