@@ -34,6 +34,7 @@ namespace RunFromConsole
             string algorithmName = "cga";
             string algorithmParam = "GE2";
             EVvsGDV_ProblemModel theProblemModel;
+            int randomSeed = 50;
 
             Console.WriteLine("Please enter the input file folder:");
             string folderName = Console.ReadLine();
@@ -41,6 +42,8 @@ namespace RunFromConsole
             double timeLimit = Convert.ToDouble(Console.ReadLine());
             Console.WriteLine("Min VMT problem? (y/n):");
             string isMinimization = Console.ReadLine();
+            Console.WriteLine("Random Seed:");
+            randomSeed = Convert.ToInt32(Console.ReadLine());
             if (isMinimization == "Y" || isMinimization == "y")
             {
                 problemName = minVMTProblemName;
@@ -62,7 +65,7 @@ namespace RunFromConsole
                     Console.WriteLine("Algoritgm parameters: (ge0-ge3)");
                     algorithmParam = Console.ReadLine();
                     if (algorithmParam == "ge0" || algorithmParam == "ge1" || algorithmParam == "ge2" || algorithmParam == "ge3")
-                        theAlgorithm = new CGA_ExploitingGDVs(timeLimit, algorithmParam, folderName);
+                        theAlgorithm = new CGA_ExploitingGDVs(timeLimit, algorithmParam, randomSeed, folderName);
                     else
                         throw new Exception("An unknown algorithm parameter cannot be used...");
                 }
@@ -76,7 +79,7 @@ namespace RunFromConsole
                 minNumberOfEVs = Convert.ToInt32(Console.ReadLine());
                 Console.WriteLine("Please enter the max EVs desired:");
                 maxNumberOfEVs = Convert.ToInt32(Console.ReadLine());
-                theAlgorithm = new CGA_ExploitingGDVs_ProfitMax(timeLimit, folderName);
+                theAlgorithm = new CGA_ExploitingGDVs_ProfitMax(timeLimit, randomSeed, folderName);
             }
             else
             {
