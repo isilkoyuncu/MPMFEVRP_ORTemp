@@ -105,5 +105,11 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             else
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
         }
+
+
+        public override string GetModelName()
+        {
+            return "CustomerSetSolverWithOnlyAFV";
+        }
     }
 }
