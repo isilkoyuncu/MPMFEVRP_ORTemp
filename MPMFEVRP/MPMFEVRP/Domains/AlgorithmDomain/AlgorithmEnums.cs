@@ -5,7 +5,7 @@
 
     public enum Recovery_Options { AssignmentProbByCPLEX, AnalyticallySolve}
 
-    public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WeightedNormalizedProbSelection, UsingShadowPrices };
+    public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WightedProbSelecAmongTheBestPercentage, WeightedNormalizedProbSelection, UsingShadowPrices };
 
     public enum Stopping_Criteria {IterationNumber, TimeLimit};
 
