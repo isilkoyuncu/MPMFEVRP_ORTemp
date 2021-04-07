@@ -191,8 +191,16 @@ namespace MPMFEVRP.Models.XCPlex
             }
             else
             {
-                throw new NotImplementedException();
-                //The old code was repetitive of the distance-based cost calculation given above and it was only capable of multiplying the VMt by the vehicle's $/mile coeff. We can and shoulddo much better than that, for example combining distance- and time-based costs together. Will solve when it's needed :)
+                //Second term: distance-based costs from customer to customer through an ES
+                for (int i = 0; i < numNonESNodes; i++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                            objFunction.AddTerm(1.0 * allNondominatedRPs[i, j][r].TotalDistance * GetVarCostPerMile(vehicleCategories[vIndex_EV]), X[i][j][r]);
+
+                //Third term: fixed cost
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int r = 0; r < allNondominatedRPs[0, j].Count; r++)
+                        objFunction.AddTerm(1.0 * GetVehicleFixedCost(VehicleCategories.EV), X[0][j][r]);
             }
                 //Now adding the objective function to the model
                 objective = AddMinimize(objFunction);

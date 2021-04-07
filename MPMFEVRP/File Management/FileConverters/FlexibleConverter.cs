@@ -153,7 +153,9 @@ namespace Instance_Generation.FileConverters
             PopulateDistancesMatrix();
 
             //Removal of infeasible customers
-            RemoveInfeasibleCustomers(new List<CustomerRemovalCriteria>() { CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit, CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength });
+            if(reader!=null)
+                if(reader.getInputFileType()== "EMH_12")
+                    RemoveInfeasibleCustomers(new List<CustomerRemovalCriteria>() { CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit, CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength });
         }
 
         void PopulateIDColumn()

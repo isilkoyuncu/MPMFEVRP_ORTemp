@@ -462,6 +462,7 @@
             this.textBox_FilenamePrefix.Name = "textBox_FilenamePrefix";
             this.textBox_FilenamePrefix.Size = new System.Drawing.Size(382, 20);
             this.textBox_FilenamePrefix.TabIndex = 46;
+            this.textBox_FilenamePrefix.Text = "KY";
             // 
             // label_FilenamePrefix
             // 

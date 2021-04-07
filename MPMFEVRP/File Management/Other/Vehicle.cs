@@ -143,14 +143,5 @@ namespace Instance_Generation.Other
             this.variableCostPerMile = variableCostPerMile;
             this.maxChargingRate = maxChargingRate;
         }
-        //public Vehicle(string id, VehicleCategories category, int loadCapacity, double batteryCapacity, double consumptionRate, double variableCostPerMile)
-        //{
-        //    this.id = id;
-        //    this.category = category;
-        //    this.loadCapacity = loadCapacity;
-        //    this.batteryCapacity = batteryCapacity;
-        //    this.consumptionRate = consumptionRate;
-        //    this.variableCostPerMile = variableCostPerMile;
-        //}
     }
 }

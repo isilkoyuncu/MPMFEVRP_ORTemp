@@ -103,7 +103,8 @@ namespace Instance_Generation.FileReaders
         public double[] getReadyTimeColumn() { return readyTime; }
         public double[] getDueDateColumn() { return dueDate; }
         public double[] getServiceDurationColumn() { return serviceTime; }
-        public double[] getRechargingRate() { return gamma; }
+        public double[] getRechargingRates() { return gamma; }
+        public double getESRechargingRate() { return 4.0; }
         public double[,] getPrizeMatrix() { return null; }
         public double[,] getDistanceMatrix() { return distance; }
         public Vehicle[] getVehicleRows() { return V; }

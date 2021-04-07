@@ -189,6 +189,7 @@ namespace Instance_Generation.Forms
                 FixOnFormInputFromFile(); 
                 textBox_nCustomers.Text = reader.getNumCustomers().ToString();
                 textBox_nESS.Text = reader.getNumESS().ToString();
+                textBox_L3kwhPerMin.Text = reader.getESRechargingRate().ToString();
             }
             else
             {
@@ -450,6 +451,10 @@ namespace Instance_Generation.Forms
                 tripChargePol, tripChargeDollar,
                 EVPrizeCoef);
             Vehicle_RelatedData VehData = new FormSections.Vehicle_RelatedData(selectedEV, selectedGDV);
+            if (reader != null)
+                if (reader.getInputFileType() == "Schneider_14")
+                    VehData = new FormSections.Vehicle_RelatedData(reader.getVehicleRows()[0], reader.getVehicleRows()[1]);
+                
 
             //The Flexible Converter is created to be our general contractor for all the remaining operations
             fc = new FlexibleConverter(ExpData, CCData, TGPData, VehData, reader);

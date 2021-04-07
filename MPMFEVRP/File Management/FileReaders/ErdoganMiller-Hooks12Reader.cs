@@ -73,8 +73,6 @@ namespace Instance_Generation.FileReaders
             }
 
             V = new Vehicle[2];
-            //V[0] = new Vehicle("EMH12AFV", VehicleCategories.EV, 0, 60, 0.2, 0.35, );//TODO Check out the EMH12 paper to see if they have any cost information
-            //V[1] = new Vehicle("EMH12GDV", VehicleCategories.GDV, 0, 0, 0, 1);
         }
         public string getRecommendedOutputFileFullName()
         {
@@ -105,7 +103,8 @@ namespace Instance_Generation.FileReaders
             }
             return toReturnServiceDuration;
         }
-        public double[] getRechargingRate() { return Enumerable.Repeat(4.0, ID.Length).ToArray(); }//TODO change this to be based on gamma, where the rate given here applies to external stations only
+        public double[] getRechargingRates() { return Enumerable.Repeat(4.0, ID.Length).ToArray(); }//TODO change this to be based on gamma, where the rate given here applies to external stations only
+        public double getESRechargingRate() { return 4.0; }
         public double[,] getPrizeMatrix() { return null; }
         public double[,] getDistanceMatrix() { return null; }
         public Vehicle[] getVehicleRows() { return V; }

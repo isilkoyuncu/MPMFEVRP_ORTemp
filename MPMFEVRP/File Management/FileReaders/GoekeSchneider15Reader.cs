@@ -19,23 +19,21 @@ namespace Instance_Generation.FileReaders
         string[] Type;
         double[] X;
         double[] Y;
-        double[] demand;
-        double[] readyTime;
-        double[] dueDate;
-        double[] serviceTime;
-        double[] gamma;
-        double[,] distance;
         Vehicle[] V;
-        double velocity;
         int numCustomers = 0;
-
+        int numESS = 0;
+        // It's the same as EMH up until here
+        double[] demand; //Demands are given in the file
+        double[] readyTime; //given in the file
+        double[] dueDate; //given in the file
+        double[] serviceTime; //given in the file
+        double[,] distance; //Distance matrix is given in the file
+        int numEVs;
+        int numGDVs;
 
         System.IO.StreamReader sr;
 
-        public GoekeSchneider15Reader()
-        {
-
-        }
+        public GoekeSchneider15Reader() { }
         public GoekeSchneider15Reader(string sourceDirectory, string file_name, string file_extension)
         {
             this.sourceDirectory = sourceDirectory;
@@ -61,7 +59,7 @@ namespace Instance_Generation.FileReaders
             int count = 0;
             while (!allRows[count].Contains("numVeh"))
                 count++;
-
+            int vehInfoRow = count;
             int nTabularRows = count - 2;
             ID = new string[nTabularRows];
             Type = new string[nTabularRows];
@@ -71,13 +69,17 @@ namespace Instance_Generation.FileReaders
             readyTime = new double[nTabularRows];
             dueDate = new double[nTabularRows];
             serviceTime = new double[nTabularRows];
-            char[] cellSeparator = new char[] { '\t', '\r', ' ' };
+            char[] cellSeparator = new char[] { '\t', '\r', ' ', '/' };
             string[] cellsInCurrentRow;
             for (int r = 1; r <= nTabularRows; r++)
             {
                 cellsInCurrentRow = allRows[r].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
                 ID[r - 1] = cellsInCurrentRow[0];
                 Type[r - 1] = cellsInCurrentRow[1];
+                if (Type[r - 1] == "c")
+                    numCustomers++;
+                if (Type[r - 1] == "f")
+                    numESS++;
                 X[r - 1] = double.Parse(cellsInCurrentRow[2]);
                 Y[r - 1] = double.Parse(cellsInCurrentRow[3]);
                 demand[r - 1] = double.Parse(cellsInCurrentRow[4]);
@@ -85,6 +87,21 @@ namespace Instance_Generation.FileReaders
                 dueDate[r - 1] = double.Parse(cellsInCurrentRow[6]);
                 serviceTime[r - 1] = double.Parse(cellsInCurrentRow[7]);
             }
+            distance = new double[nTabularRows, nTabularRows];
+            while (!allRows[count].Contains("DistanceMatrix"))
+                count++;
+
+            for (int i = 0; i < nTabularRows; i++)
+            {
+                cellsInCurrentRow = allRows[count + 1 + i].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+                for (int j = 0; j < nTabularRows; j++)
+                {
+                    distance[i, j] = double.Parse(cellsInCurrentRow[j]);
+                }
+            }
+            V = new Vehicle[2];
+            numGDVs = (int)double.Parse(allRows[vehInfoRow + 1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries)[2]);
+            numEVs = (int)double.Parse(allRows[vehInfoRow + 2].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries)[2]);
         }
         public string getRecommendedOutputFileFullName()
         {
@@ -97,20 +114,23 @@ namespace Instance_Generation.FileReaders
         public string[] getIDColumn() { return ID; }
         public string[] getTypeColumn() { return Type; }
         public bool usesGeographicPositions() { return false; }
-        public bool needToShuffleCustomers() { return true; }
+        public bool needToShuffleCustomers() { return false; }
         public double[] getXorLongitudeColumn() { return X; }
         public double[] getYorLatitudeColumn() { return Y; }
         public double[] getDemandColumn() { return demand; }
         public double[] getReadyTimeColumn() { return readyTime; }
         public double[] getDueDateColumn() { return dueDate; }
         public double[] getServiceDurationColumn() { return serviceTime; }
-        public double[] getRechargingRate() { return gamma; }
+        public double[] getRechargingRates() { return Enumerable.Repeat(4.0, ID.Length).ToArray(); }
+        public double getESRechargingRate() { return 4.0; }
         public double[,] getPrizeMatrix() { return null; }
         public double[,] getDistanceMatrix() { return distance; }
         public Vehicle[] getVehicleRows() { return V; }
-        public double getTravelSpeed() { return velocity; }
+        public double getTravelSpeed() { return 90/60; }
         public int getNumCustomers() { return numCustomers; }
-        public int getNumESS() { return -1; }
+        public int getNumESS() { return numESS; }
+        public int getNumEVs() { return numEVs; }
+        public int getNumGDVs() { return numGDVs; }
         public string getInputFileType() { return "Goeke_15"; /*"KoyuncuYavuz", "EMH_12", "Felipe_14", "Goeke_15", "Schneider_14", "YavuzCapar_17"*/}
 
     }

@@ -184,7 +184,8 @@ namespace Instance_Generation.FileReaders
             }
             return toReturnServiceDuration;
         }
-        public double[] getRechargingRate() { return Enumerable.Repeat((24.0/30.0), X.Length).ToArray(); }//TODO change this to be based on gamma, where the rate given here applies to external stations only
+        public double[] getRechargingRates() { return Enumerable.Repeat((24.0/30.0), X.Length).ToArray(); }//TODO change this to be based on gamma, where the rate given here applies to external stations only
+        public double getESRechargingRate() { return (24.0 / 30.0); }
         public double[,] getPrizeMatrix() { return null; }
         public double[,] getDistanceMatrix(){ return distance; }
         public Vehicle[] getVehicleRows(){ return V; }

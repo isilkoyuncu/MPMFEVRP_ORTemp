@@ -24,7 +24,8 @@ namespace Instance_Generation.Interfaces
         double[] getReadyTimeColumn();
         double[] getDueDateColumn();
         double[] getServiceDurationColumn();
-        double[] getRechargingRate();
+        double[] getRechargingRates();
+        double getESRechargingRate();
         double[,] getPrizeMatrix();
 
         double[,] getDistanceMatrix();
