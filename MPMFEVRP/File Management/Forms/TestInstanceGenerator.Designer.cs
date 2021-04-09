@@ -121,6 +121,8 @@
             this.label_Seed = new System.Windows.Forms.Label();
             this.label_Source = new System.Windows.Forms.Label();
             this.groupBox_ExperimentRelated = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.button_createMultipleSchneider14 = new System.Windows.Forms.Button();
             this.groupBox_VehicleRelated.SuspendLayout();
             this.groupBox_InputFileSelection.SuspendLayout();
             this.groupBox_AsIsDataFromFile.SuspendLayout();
@@ -1030,11 +1032,32 @@
             this.groupBox_ExperimentRelated.TabStop = false;
             this.groupBox_ExperimentRelated.Text = "Experiment-Related Inputs";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(568, 257);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(232, 13);
+            this.label1.TabIndex = 81;
+            this.label1.Text = "Read and write multiple Schneider 14 Instances";
+            // 
+            // button_createMultipleSchneider14
+            // 
+            this.button_createMultipleSchneider14.Location = new System.Drawing.Point(948, 246);
+            this.button_createMultipleSchneider14.Name = "button_createMultipleSchneider14";
+            this.button_createMultipleSchneider14.Size = new System.Drawing.Size(72, 24);
+            this.button_createMultipleSchneider14.TabIndex = 82;
+            this.button_createMultipleSchneider14.Text = "Go";
+            this.button_createMultipleSchneider14.UseVisualStyleBackColor = true;
+            this.button_createMultipleSchneider14.Click += new System.EventHandler(this.button_createMultipleSchneider14_Click);
+            // 
             // TestInstanceGenerator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1116, 572);
+            this.Controls.Add(this.button_createMultipleSchneider14);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox_AsIsDataFromFile);
             this.Controls.Add(this.groupBox_InputFileSelection);
@@ -1158,5 +1181,7 @@
         private System.Windows.Forms.Label label_level3;
         private System.Windows.Forms.Label label_level2;
         private System.Windows.Forms.Label label_level1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button_createMultipleSchneider14;
     }
 }

@@ -117,7 +117,7 @@ namespace Instance_Generation.FileReaders
         public string[] getIDColumn() { return ID; }
         public string[] getTypeColumn() { return Type; }
         public bool usesGeographicPositions() { return false; }
-        public bool needToShuffleCustomers() { return false; }
+        public bool needToShuffleCustomers() { return true; }
         public double[] getXorLongitudeColumn() { return X; }
         public double[] getYorLatitudeColumn() { return Y; }
         public double[] getDemandColumn() { return demand; }

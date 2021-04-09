@@ -20,6 +20,7 @@ namespace Instance_Generation.Forms
     public partial class TestInstanceGenerator : Form
     {
         string[] tiFilenames;
+        int instanceNumber = 0; 
         IRawReader reader;
         FlexibleConverter fc;
         IWriter writer;
@@ -145,31 +146,31 @@ namespace Instance_Generation.Forms
                     break;
                 case "EMH_12":
                     if (fileNameSelected)
-                        reader = new ErdoganMiller_Hooks12Reader(tiFilenames[0]);
+                        reader = new ErdoganMiller_Hooks12Reader(tiFilenames[instanceNumber]);
                     else
                         throw new Exception("Filename expected before reader can be constructed");
                     break;
                 case "Felipe_14":
                     if (fileNameSelected)
-                        reader = new Felipe14Reader(tiFilenames[0]);
+                        reader = new Felipe14Reader(tiFilenames[instanceNumber]);
                     else
                         throw new Exception("Filename expected before reader can be constructed");
                     break;
                 case "Goeke_15":
                     if (fileNameSelected)
-                        reader = new GoekeSchneider15Reader(tiFilenames[0]);
+                        reader = new GoekeSchneider15Reader(tiFilenames[instanceNumber]);
                     else
                         throw new Exception("Filename expected before reader can be constructed");
                     break;
                 case "Schneider_14":
                     if (fileNameSelected)
-                        reader = new Schneider14Reader(tiFilenames[0]);
+                        reader = new Schneider14Reader(tiFilenames[instanceNumber]);
                     else
                         throw new Exception("Filename expected before reader can be constructed");
                     break;
                 case "YavuzCapar_17":
                     if (fileNameSelected)
-                        reader = new YavuzCapar17Reader(tiFilenames[0]);
+                        reader = new YavuzCapar17Reader(tiFilenames[instanceNumber]);
                     else
                         throw new Exception("Filename expected before reader can be constructed");
                     break;
@@ -184,16 +185,17 @@ namespace Instance_Generation.Forms
                 //comboBox_FileType.Enabled = false;
                 checkBox_NeedToShuffleCustomers.Checked = reader.needToShuffleCustomers();
                 checkBoxDistanceMatrixReadFromFile.Checked = (reader.getDistanceMatrix() != null);
-                label_Source.Text = StringOperations.SeparateFullFileName(tiFilenames[0])[1];//TODO When we allow selecting multiple files, this textbox will look awful, will have to do something
+                label_Source.Text = StringOperations.SeparateFullFileName(tiFilenames[instanceNumber])[1];//TODO When we allow selecting multiple files, this textbox will look awful, will have to do something
                 //textBox_Seed.Enabled = false; //TODO if this stays here other than their positions all instances are going to have the same 
                 FixOnFormInputFromFile(); 
                 textBox_nCustomers.Text = reader.getNumCustomers().ToString();
                 textBox_nESS.Text = reader.getNumESS().ToString();
                 textBox_L3kwhPerMin.Text = reader.getESRechargingRate().ToString();
+                textBox_nESS_L3.Text = reader.getNumESS().ToString();
             }
             else
             {
-                //textBox_nInstances.Enabled = true; // TODO Turn this on after making sure we can create multiple files at once
+                textBox_nInstances.Enabled = true; // TODO Turn this on after making sure we can create multiple files at once
             }
         }
         void FixOnFormInputFromFile()
@@ -240,6 +242,24 @@ namespace Instance_Generation.Forms
         private void TextBox_L1kwhPerMin_TextChanged(object sender, EventArgs e)
         {
             l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
+        }
+
+        private void button_createMultipleSchneider14_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text Files (.txt)|*.txt|All Files (*.*)|*.*";
+            openFileDialog1.InitialDirectory = System.Environment.CurrentDirectory;
+            openFileDialog1.Multiselect = true;
+            openFileDialog1.ShowDialog();
+            tiFilenames = openFileDialog1.FileNames;
+            for (int i=0; i<tiFilenames.Length; i++)
+            {
+                instanceNumber = i;
+                comboBox_FileType.Text = "Schneider_14";
+                button_UpdateFilename.PerformClick();
+                button_Create_n_Save.PerformClick();
+                comboBox_FileType.Text = "";
+            }
         }
 
         private void TextBox_nESS_L2_TextChanged(object sender, EventArgs e)
@@ -420,7 +440,7 @@ namespace Instance_Generation.Forms
                     }
                     else
                     {
-                        string[] filenameSeparated = StringOperations.SeparateFullFileName(tiFilenames[0]);
+                        string[] filenameSeparated = StringOperations.SeparateFullFileName(tiFilenames[instanceNumber]);
                         filename = filenamePrefix + filenameSeparated[1] + "_"
                             + nISS.ToString() + "(" + textBox_nEVPremiumPayingCustomers.Text + "," + nISS_L3.ToString() + "+" + nISS_L2.ToString() + "+" + nISS_L1.ToString() + ")_"
                             + textBox_nESS.Text + "(" + nESS_L3.ToString() + "+" + nESS_L2.ToString() + "+" + nESS_L1.ToString() + ")_"
