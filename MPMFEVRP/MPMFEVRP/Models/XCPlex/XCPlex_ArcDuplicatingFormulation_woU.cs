@@ -1211,7 +1211,6 @@ namespace MPMFEVRP.Models.XCPlex
         }
         List<List<string>> GetListsOfNonDepotSiteIDs(VehicleCategories vehicleCategory)
         {
-            //TODO: Delete the following after debugging. Update on 11/10/17: Is this still relevant?
             GetDecisionVariableValues();
 
             int vc_int = (vehicleCategory == VehicleCategories.EV) ? 0 : 1;

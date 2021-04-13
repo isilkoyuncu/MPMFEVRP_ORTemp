@@ -33,7 +33,7 @@ namespace MPMFEVRPTests1.Models.XCPlex
         [TestMethod]
         public void RefuelingPathsFormulationTest()
         {
-            toCplex.AlgorithmParameters.UpdateParameter(MPMFEVRP.Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.EVRPwRefuelingPaths);
+            toCplex.AlgorithmParameters.UpdateParameter(MPMFEVRP.Models.ParameterID.ALG_XCPLEX_FORMULATION, XCPlex_Formulation.MixedEVRPwRefuelingPaths);
             toCplex.Run();
             toCplex.Conclude();
             ISolution solution = toCplex.Solution;

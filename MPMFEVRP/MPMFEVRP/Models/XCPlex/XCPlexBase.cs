@@ -229,7 +229,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             DecisionVariables.Add(dv_name, dv);
         }
-
+        
         protected void AddThreeDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, int length2, int length3, out INumVar[][][] dv)
         {
             String dv_name = name;
@@ -307,6 +307,38 @@ namespace MPMFEVRP.Models.XCPlex
                         dv[i][j][v] = NumVar(lowerBound[i][j][v], upperBound[i][j][v], newType, dv_name);
                         allVariables_list.Add(dv[i][j][v]);
                     }
+                }
+            }
+            DecisionVariables.Add(dv_name, dv);
+        }
+
+        protected void AddFourDimensionalDecisionVariableAndFourthIsVehTypeEVorGDV(String name, double[][][] lowerBound, double[][][] upperBound, NumVarType type, int length1, int length2, int[,] length3, out INumVar[][][][] dv)
+        {
+            String dv_name = name;
+            dv = new INumVar[length1][][][];
+            NumVarType newType = type;
+            if (xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
+                newType = NumVarType.Float;
+            for (int i = 0; i < length1; i++)
+            {
+                dv[i] = new INumVar[length2][][];
+                for (int j = 0; j < length2; j++)
+                {
+                    dv[i][j] = new INumVar[2][];
+                    
+                    //Add EV variables
+                    dv[i][j][0] = new INumVar[length3[i, j]];
+                    for (int r = 0; r < length3[i, j]; r++)
+                    {
+                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + r.ToString() + "," + 0.ToString() + ")";
+                        dv[i][j][0][r] = NumVar(lowerBound[i][j][r], upperBound[i][j][r], newType, dv_name);
+                        allVariables_list.Add(dv[i][j][0][r]);
+                    }
+                    //Add GDV variable
+                    dv[i][j][1] = new INumVar[1];
+                    dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + 0.ToString() + "," + 1.ToString() + ")";
+                    dv[i][j][1][0] = NumVar(0.0, 1.0, newType, dv_name);
+                    allVariables_list.Add(dv[i][j][1][0]);
                 }
             }
             DecisionVariables.Add(dv_name, dv);

@@ -26,7 +26,7 @@
     //Feasible (1): At least one feasible solution was found, however whether an optimal solution has been found is unknown because the search didn't exhaust the solution space
     //Optimal (2): An exhaustive search proved that the optimal solution has been obtained
 
-    public enum XCPlex_Formulation { NodeDuplicating, ArcDuplicating, NodeDuplicatingwoU, ArcDuplicatingwoU, EVRPwRefuelingPaths };
+    public enum XCPlex_Formulation { MixedEVRPwRefuelingPaths, ArcDuplicatingwoU, ETSP, NodeDuplicatingwoU, ArcDuplicating };
 
     public enum XCPlexRelaxation { None, LinearProgramming };
     //enum values:
