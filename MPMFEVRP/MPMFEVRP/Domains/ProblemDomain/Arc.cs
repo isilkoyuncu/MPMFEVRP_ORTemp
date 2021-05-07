@@ -122,8 +122,8 @@ namespace MPMFEVRP.Domains.ProblemDomain
                 } while (to_inSequence.Count > 0);
             }          
             minimumDepartureSOEAtOrigin = firstLegEnergyConsumption;
-            maximumDepartureTimeAtOrigin = destination.TLS - arcTravelDuration - minRefuelingDuration;
-            timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TES + origin.ServiceDuration));
+            maximumDepartureTimeAtOrigin = destination.TauMax - arcTravelDuration - minRefuelingDuration;
+            timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TauMin + origin.ServiceDuration));
         }
 
     }

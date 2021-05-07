@@ -21,6 +21,7 @@ namespace MPMFEVRP.Models.XCPlex
         int[] overrideNumberOfVehicles;
         //public XCPlex_SetCovering_wCustomerSets(ProblemModelBase problemModel, XCPlexParameters xCplexParam): base(problemModel, xCplexParam){}
         public XCPlex_SetCovering_wCustomerSets() { }
+
         public XCPlex_SetCovering_wCustomerSets(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerSetList cs_List = null, bool noGDVUnlimitedEV = false)
         {
             this.theProblemModel = theProblemModel;
@@ -268,5 +269,9 @@ namespace MPMFEVRP.Models.XCPlex
             return outcome;
         }
 
+        protected override void SpecializedInitialize()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

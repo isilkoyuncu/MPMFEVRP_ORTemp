@@ -26,7 +26,7 @@ namespace MPMFEVRP.Models
                     incumbentsDominatedByChallenger.Add(incumbent);
                 }
             }
-            //If we're here, the incumbent is not dominated
+            //If we're here, the incumbent is dominated
             int outcome = 1 - incumbentsDominatedByChallenger.Count;
             if (incumbentsDominatedByChallenger.Count > 0)
             {

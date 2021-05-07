@@ -383,7 +383,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                         epsilonMax = 0.0;
                         break;
                 }
-                swav.UpdateEpsilonBounds(epsilonMax);
+                swav.UpdateRefueledEnergyOnArrivalNodeBounds(epsilonMax);
             }
         }
         void CalculateDeltaBounds()
@@ -398,9 +398,9 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 if (swav.SiteType == SiteTypes.Depot)
-                    swav.UpdateDeltaMin(0.0);
+                    swav.UpdateMinArrivalSOE(0.0);
                 else
-                    swav.UpdateDeltaMin(Math.Max(0, SRD.GetEVEnergyConsumption(swav.ID, SRD.GetSingleDepotID()) - swav.EpsilonMax));
+                    swav.UpdateMinArrivalSOE(Math.Max(0, SRD.GetEVEnergyConsumption(swav.ID, SRD.GetSingleDepotID()) - swav.EpsilonMax));
             
             while (tempSWAVs.Count != 0)
             {
@@ -413,7 +413,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 tempSWAVs.Remove(swavToPerm);
                 permSWAVs.Add(swavToPerm);
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
-                    swav.UpdateDeltaMin(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
+                    swav.UpdateMinArrivalSOE(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
             }
             if ((SRD.AllOriginalSWAVs.Length) != (permSWAVs.Count))
                 throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
@@ -426,13 +426,13 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 if (swav.SiteType == SiteTypes.Depot)
                 {
-                    swav.UpdateDeltaMax(0.0);
-                    swav.UpdateDeltaPrimeMax(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
+                    swav.UpdateMaxArrivalSOE(0.0);
+                    swav.UpdateMaxDepartureSOE(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
                 }
                 else
                 {
-                    swav.UpdateDeltaMax(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - SRD.GetEVEnergyConsumption(SRD.GetSingleDepotID(), swav.ID));
-                    swav.UpdateDeltaPrimeMax(Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, (swav.DeltaMax + swav.EpsilonMax)));
+                    swav.UpdateMaxArrivalSOE(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - SRD.GetEVEnergyConsumption(SRD.GetSingleDepotID(), swav.ID));
+                    swav.UpdateMaxDepartureSOE(Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, (swav.DeltaMax + swav.EpsilonMax)));
                 }
             while (tempSWAVs.Count != 0)
             {
@@ -446,8 +446,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                 permSWAVs.Add(swavToPerm);
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 {
-                    swav.UpdateDeltaMax(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
-                    swav.UpdateDeltaPrimeMax(Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, (swav.DeltaMax + swav.EpsilonMax)));
+                    swav.UpdateMaxArrivalSOE(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
+                    swav.UpdateMaxDepartureSOE(Math.Min(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, (swav.DeltaMax + swav.EpsilonMax)));
                 }
             }
             if (SRD.AllOriginalSWAVs.Length != permSWAVs.Count)
@@ -457,7 +457,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             foreach (SiteWithAuxiliaryVariables swav in SRD.AllOriginalSWAVs)
                 if ((swav.X == SRD.GetSingleDepotSite().X) && (swav.Y == SRD.GetSingleDepotSite().Y))
                     if (swav.SiteType != SiteTypes.Customer)
-                        swav.UpdateDeltaMax(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - GetMinEnergyConsumptionFromNonDepotToDepot());
+                        swav.UpdateMaxArrivalSOE(VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity - GetMinEnergyConsumptionFromNonDepotToDepot());
         }
         void CalculateTBounds()
         {
@@ -496,7 +496,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                     default:
                         break;
                 }
-                swav.UpdateTBounds(tLS, tES);
+                swav.UpdateArrivalTimeBounds(tLS, tES);
             }
         }
         double GetMinTravelTimeFromDepotDuplicateToDepotThroughANode(SiteWithAuxiliaryVariables depotDuplicate)

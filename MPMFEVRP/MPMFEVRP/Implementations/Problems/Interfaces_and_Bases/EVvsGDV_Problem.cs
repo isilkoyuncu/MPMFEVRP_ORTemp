@@ -22,9 +22,9 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
 
         void AddProblemCharacteristics()
         {
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_EV, "Available # of EVS", "1"));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_EV, "Available # of EVS", "7"));
             //problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_EV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
-            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_GDV, "Available # of GDVs", "10"));
+            problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_NUM_GDV, "Available # of GDVs", "0"));
             //problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_USE_EXACTLY_NUM_GDV_AVAILABLE, "Use exactly available", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
             problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_RECHARGING_ASSUMPTION, "Recharging Assumption", new List<object>() { RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Full, RechargingDurationAndAllowableDepartureStatusFromES.Variable_Partial }, RechargingDurationAndAllowableDepartureStatusFromES.Fixed_Full, UserInputObjectType.ComboBox));
             //problemCharacteristics.AddParameter(new InputOrOutputParameter(ParameterID.PRB_LAMBDA, "Max # of ES Visit", "1"));

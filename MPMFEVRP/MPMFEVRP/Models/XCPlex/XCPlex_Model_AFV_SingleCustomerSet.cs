@@ -126,8 +126,8 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 minValue_Delta[i] = preprocessedSites[i].DeltaMin;
                 maxValue_Delta[i] = preprocessedSites[i].DeltaMax;
-                minValue_T[i] = preprocessedSites[i].TES;
-                maxValue_T[i] = preprocessedSites[i].TLS;
+                minValue_T[i] = preprocessedSites[i].TauMin;
+                maxValue_T[i] = preprocessedSites[i].TauMax;
 
                 X_LB[i] = new double[numNonESNodes][];
                 X_UB[i] = new double[numNonESNodes][];
@@ -334,7 +334,7 @@ namespace MPMFEVRP.Models.XCPlex
                     double refuelingDuration = allNondominatedRPs[i, j][r].RefuelingStops.Count * singleRefDuration;
                     double serviceDuration = preprocessedSites[j].ServiceDuration;
                     double totalTime = refuelingDuration + serviceDuration + allNondominatedRPs[i, j][r].TotalTravelTime;
-                    TimeDifference.AddTerm(-1.0 * (preprocessedSites[i].TES + totalTime), X[i][j][r]);
+                    TimeDifference.AddTerm(-1.0 * (preprocessedSites[i].TauMin + totalTime), X[i][j][r]);
                 }
             return TimeDifference;
         }
@@ -346,7 +346,7 @@ namespace MPMFEVRP.Models.XCPlex
                     {
                         ILinearNumExpr TimeDifference = CreateCoreOf_Constraint_TimeRegulationFollowingACustomerVisit(i, j, r);
                         string constraint_name = "Time_Regulation_from_Customer_node_" + i.ToString() + "_to_node_" + j.ToString();
-                        allConstraints_list.Add(AddGe(TimeDifference, (preprocessedSites[j].TES - preprocessedSites[i].TLS), constraint_name));
+                        allConstraints_list.Add(AddGe(TimeDifference, (preprocessedSites[j].TauMin - preprocessedSites[i].TauMax), constraint_name));
                     }
         }
         public ILinearNumExpr CreateCoreOf_Constraint_TimeRegulationFollowingACustomerVisit(int i, int j, int r)
@@ -359,7 +359,7 @@ namespace MPMFEVRP.Models.XCPlex
             ILinearNumExpr TimeDifference = LinearNumExpr();
             TimeDifference.AddTerm(1.0, ArrivalTime[j]);
             TimeDifference.AddTerm(-1.0, ArrivalTime[i]);
-            TimeDifference.AddTerm(-1.0 * (totalArcTime - (preprocessedSites[j].TES - preprocessedSites[i].TLS)), X[i][j][r]);
+            TimeDifference.AddTerm(-1.0 * (totalArcTime - (preprocessedSites[j].TauMin - preprocessedSites[i].TauMax)), X[i][j][r]);
             return TimeDifference;
         }
         void AddConstraint_ArrivalTimeRegulationFollowingTheDepot()//7
@@ -373,9 +373,9 @@ namespace MPMFEVRP.Models.XCPlex
 
                     ILinearNumExpr TimeFlow = LinearNumExpr();
                     TimeFlow.AddTerm(1.0, ArrivalTime[j]);
-                    TimeFlow.AddTerm(-1.0 * (totalArcTime - preprocessedSites[j].TES), X[0][j][r]);
+                    TimeFlow.AddTerm(-1.0 * (totalArcTime - preprocessedSites[j].TauMin), X[0][j][r]);
                     string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
-                    allConstraints_list.Add(AddGe(TimeFlow, preprocessedSites[j].TES, constraint_name));
+                    allConstraints_list.Add(AddGe(TimeFlow, preprocessedSites[j].TauMin, constraint_name));
                 }
         }
         void AddConstraint_TotalTravelTime()//8
@@ -523,7 +523,7 @@ namespace MPMFEVRP.Models.XCPlex
             {
                 TimeDifference = CreateCoreOf_Constraint_ArrivalTimeLimitsOLD(j);
                 string constraint_name = "Arrival_Time_Limit_at_node_" + j.ToString();
-                allConstraints_list.Add(AddGe(TimeDifference, preprocessedSites[j].TLS, constraint_name));
+                allConstraints_list.Add(AddGe(TimeDifference, preprocessedSites[j].TauMax, constraint_name));
             }
         }
         public ILinearNumExpr CreateCoreOf_Constraint_ArrivalTimeLimitsOLD(int j)
@@ -532,7 +532,7 @@ namespace MPMFEVRP.Models.XCPlex
             TimeDifference.AddTerm(1.0, ArrivalTime[j]);
             for (int i = 0; i < numNonESNodes; i++)
                 for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-                    TimeDifference.AddTerm((preprocessedSites[j].TLS - preprocessedSites[j].TES), X[i][j][r]);
+                    TimeDifference.AddTerm((preprocessedSites[j].TauMax - preprocessedSites[j].TauMin), X[i][j][r]);
 
             return TimeDifference;
         }
@@ -888,6 +888,11 @@ namespace MPMFEVRP.Models.XCPlex
         //    }
         //}
         public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void SpecializedInitialize()
         {
             throw new NotImplementedException();
         }

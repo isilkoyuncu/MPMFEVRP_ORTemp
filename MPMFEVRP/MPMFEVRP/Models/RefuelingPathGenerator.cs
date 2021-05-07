@@ -137,7 +137,7 @@ namespace MPMFEVRP.Models
         /// <param name="externalStations"></param>
         /// <param name="SRD"></param>
         /// <returns></returns>
-        public RefuelingPathList GenerateNonDominatedBetweenODPairIK(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations = null)
+        public RefuelingPathList GenerateNonDominatedBetweenODPairIK(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD)
         {
             RefuelingPathList outcome = new RefuelingPathList();
             RefuelingPath refuelingPath;
@@ -168,7 +168,7 @@ namespace MPMFEVRP.Models
             }
             return outcome;
         }
-        //public RefuelingPathList GenerateNonDominated
+
         public RefuelingPathList GenerateSingleESNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
         {
             RefuelingPathList outcome = new RefuelingPathList();

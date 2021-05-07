@@ -26,14 +26,17 @@ namespace MPMFEVRP.Models
         double totalDistance;
         public double TotalDistance { get => totalDistance; }
 
-        double totalTime;
-        public double TotalTime { get => totalTime; }
-
         double totalTravelTime;
         public double TotalTravelTime { get => totalTravelTime; }
 
         double totalRefuelingTime;
         public double TotalRefuelingTime { get => totalRefuelingTime; }
+
+        double minimumTotalRefuelingTime;
+        public double MinimumTotalRefuelingTime { get => minimumTotalRefuelingTime; }
+
+        double minimumTotalTime;
+        public double MinimumTotalTime { get => minimumTotalTime; }
 
         double totalEnergyConsumption;
         public double TotalEnergyConsumption { get => totalEnergyConsumption; }
@@ -77,13 +80,21 @@ namespace MPMFEVRP.Models
 
         double minimumArrivalTimeAtOrigin;
         public double MinimumArrivalTimeAtOrigin { get => minimumArrivalTimeAtOrigin; }
+
+
+        double maximumEnergyRefueledOnRoad;
+        public double MaximumEnergyRefueledOnRoad { get => maximumEnergyRefueledOnRoad; }
+        double minimumEnergyRefueledOnRoad;
+        public double MinimumEnergyRefueledOnRoad { get => minimumEnergyRefueledOnRoad; }
+
+
         /// <summary>
         /// Creates a RefuelingPath between two non-ES nodes and through a (ordered) set of ES nodes. 
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="destination"></param>
         /// <param name="refuelingStops">An ordered set of ES nodes. Cannot be null! Can contain 0 elements.</param>
-        public RefuelingPath(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> refuelingStops, SiteRelatedData SRD)
+        public RefuelingPath(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> refuelingStops, SiteRelatedData SRD, VehicleRelatedData VRD=null)
         {
             //verification:
             if (origin.SiteType == SiteTypes.ExternalStation)
@@ -102,7 +113,8 @@ namespace MPMFEVRP.Models
             this.refuelingStops = refuelingStops;
 
             totalDistance = 0.0;
-            totalTime = 0.0;
+            minimumTotalTime = 0.0;
+            minimumTotalRefuelingTime = 0.0;
             totalTravelTime = 0.0;
             totalRefuelingTime = 0.0;
             totalEnergyConsumption = 0.0;
@@ -119,6 +131,7 @@ namespace MPMFEVRP.Models
                 string to_id = to.ID;
                 totalDistance += SRD.GetDistance(from_id, to_id);
                 totalTravelTime += SRD.GetTravelTime(from_id, to_id);
+                //TODO this is not true
                 if (to.SiteType == SiteTypes.ExternalStation)
                     totalRefuelingTime += (to.EpsilonMax / to.RechargingRate);
                 double energyConsumption = SRD.GetEVEnergyConsumption(from_id, to_id);
@@ -132,7 +145,11 @@ namespace MPMFEVRP.Models
                 from = to;
                 to_inSequence.RemoveAt(0);
             }
-            totalTime = totalTravelTime + totalRefuelingTime;
+
+            maximumEnergyRefueledOnRoad = VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity + totalEnergyConsumption - firstArcEnergyConsumption - lastArcEnergyConsumption;
+            minimumEnergyRefueledOnRoad = Math.Max(0.0, destination.DeltaMin - origin.DeltaMax + TotalEnergyConsumption);
+
+            minimumTotalTime = totalTravelTime + minimumTotalRefuelingTime;
             minimumDepartureSOEAtOrigin = firstArcEnergyConsumption;
             if (refuelingStops.Count == 0)
             {
@@ -141,27 +158,27 @@ namespace MPMFEVRP.Models
             }
             else
             {
-                minimumArrivalSOEAtDestination = refuelingStops.Last().DeltaPrimeMax - lastArcEnergyConsumption;
+                minimumArrivalSOEAtDestination = destination.DeltaMin;
                 maximumArrivalSOEAtDestination = refuelingStops.Last().DeltaPrimeMax - lastArcEnergyConsumption;
             }
             maximumArrivalSOEAtOrigin = origin.DeltaMax;
 
-            minimumArrivalTimeAtOrigin = origin.TES;
-            maximumArrivalTimeAtOrigin = origin.TLS;
+            minimumArrivalTimeAtOrigin = origin.TauMin;
+            maximumArrivalTimeAtOrigin = origin.TauMax;
 
-            minimumDepartureTimeAtDestination = origin.TES + totalTime + destination.ServiceDuration;
-            minimumArrivalTimeAtDestination = destination.TES;
-            maximumArrivalTimeAtDestination = destination.TLS;
+            minimumDepartureTimeAtDestination = origin.TauMin + minimumTotalTime + destination.ServiceDuration;
+            minimumArrivalTimeAtDestination = destination.TauMin;
+            maximumArrivalTimeAtDestination = destination.TauMax;
             
-            maximumDepartureTimeAtOrigin = destination.TLS - totalTime;
-            timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TES + origin.ServiceDuration));
-            if (Feasible)
-            {
-                string feasibleArc = origin.ID + "_";
-                foreach (string es in GetRefuelingStopIDs())
-                    feasibleArc = feasibleArc + es + "_";
-                feasibleArc = feasibleArc + destination.ID;
-            }
+            maximumDepartureTimeAtOrigin = destination.TauMax - minimumTotalTime;
+            timeFeasible = (maximumDepartureTimeAtOrigin >= (origin.TauMin + origin.ServiceDuration));
+            //if (Feasible)
+            //{
+            //    string feasibleArc = origin.ID + "_";
+            //    foreach (string es in GetRefuelingStopIDs())
+            //        feasibleArc = feasibleArc + es + "_";
+            //    feasibleArc = feasibleArc + destination.ID;
+            //}
         }
         public List<string> GetRefuelingStopIDs()
         {
@@ -177,7 +194,7 @@ namespace MPMFEVRP.Models
             signs.Add(Math.Sign(firstArcEnergyConsumption - theOtherRP.firstArcEnergyConsumption));
             signs.Add(Math.Sign(lastArcEnergyConsumption - theOtherRP.lastArcEnergyConsumption));
             signs.Add(Math.Sign(totalDistance - theOtherRP.totalDistance));
-            signs.Add(Math.Sign(totalTime - theOtherRP.totalTime));
+            signs.Add(Math.Sign(minimumTotalTime - theOtherRP.minimumTotalTime));
 
             int nFavorIncumbent = signs.Where(x => x.Equals(-1)).Count();
             int nFavorChallenger = signs.Where(x => x.Equals(1)).Count();

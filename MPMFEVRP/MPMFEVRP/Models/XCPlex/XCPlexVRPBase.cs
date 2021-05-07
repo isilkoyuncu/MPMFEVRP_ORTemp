@@ -12,13 +12,13 @@ namespace MPMFEVRP.Models.XCPlex
     public abstract class XCPlexVRPBase : XCPlexBase
     {
         //The originals
-        List<SiteWithAuxiliaryVariables> allOriginalSWAVs = new List<SiteWithAuxiliaryVariables>();
-        List<SiteWithAuxiliaryVariables> depots; protected List<SiteWithAuxiliaryVariables> Depots { get { return depots; } }
-        List<SiteWithAuxiliaryVariables> customers; protected List<SiteWithAuxiliaryVariables> Customers { get { return customers; } }
-        List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } }
+        protected List<SiteWithAuxiliaryVariables> allOriginalSWAVs = new List<SiteWithAuxiliaryVariables>();
+        protected List<SiteWithAuxiliaryVariables> depots; protected List<SiteWithAuxiliaryVariables> Depots { get { return depots; } }
+        protected List<SiteWithAuxiliaryVariables> customers; protected List<SiteWithAuxiliaryVariables> Customers { get { return customers; } }
+        protected List<SiteWithAuxiliaryVariables> externalStations; protected List<SiteWithAuxiliaryVariables> ExternalStations { get { return externalStations; } }
 
         //How do we want to process the auxiliary variable bounds
-        bool useTighterBounds = true;
+        protected bool useTighterBounds = true;
 
         //The preprocessed (duplicated) ones
         public SiteWithAuxiliaryVariables[] preprocessedSites;//Ready-to-use
@@ -28,6 +28,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected int vIndex_EV = -1, vIndex_GDV = -1;
         protected int[] numVehicles;
+        protected int numCustomers;
 
         protected double[] minValue_T, maxValue_T;
         protected double[] minValue_Delta, maxValue_Delta;
@@ -38,14 +39,12 @@ namespace MPMFEVRP.Models.XCPlex
         protected RechargingDurationAndAllowableDepartureStatusFromES rechargingDuration_status;
 
         protected int minNumVeh=0;
-
         public XCPlexVRPBase() { }
 
-        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam) 
+        public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
             : base(theProblemModel, xCplexParam, theProblemModel.CoverConstraintType)
         {
         }
-
         public XCPlexVRPBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint) 
             : base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
@@ -55,6 +54,7 @@ namespace MPMFEVRP.Models.XCPlex
         {
             rechargingDuration_status = theProblemModel.RechargingDuration_status;
             useTighterBounds = xCplexParam.TighterAuxBounds;
+            numCustomers = theProblemModel.SRD.NumCustomers;
             for (int v = 0; v < numVehCategories; v++)
             {
                 if (vehicleCategories[v] == VehicleCategories.EV)
@@ -84,12 +84,10 @@ namespace MPMFEVRP.Models.XCPlex
                 numVehicles = new int[] { theProblemModel.GetNumVehicles(VehicleCategories.EV), theProblemModel.GetNumVehicles(VehicleCategories.GDV) };
             }
         }
-
+        
         protected void PreprocessSites(int numCopiesOfEachES = 0)
         {
-            foreach (Site s in theProblemModel.SRD.GetAllSitesList())
-                allOriginalSWAVs.Add(new SiteWithAuxiliaryVariables(s));
-
+            SetAllOriginalSWAVs();
             PopulateSubLists();
             CalculateBoundsForAllOriginalSWAVs();
             PopulatePreprocessedSWAVs(numCopiesOfEachES);
@@ -99,7 +97,12 @@ namespace MPMFEVRP.Models.XCPlex
 
             CalculateMinNumVehicles();
         }
-        void PopulateSubLists()
+        protected void SetAllOriginalSWAVs()
+        {
+            foreach (Site s in theProblemModel.SRD.GetAllSitesList())
+                allOriginalSWAVs.Add(new SiteWithAuxiliaryVariables(s));
+        }
+        protected void PopulateSubLists()
         {
             depots = new List<SiteWithAuxiliaryVariables>();
             customers = new List<SiteWithAuxiliaryVariables>();
@@ -142,7 +145,7 @@ namespace MPMFEVRP.Models.XCPlex
                         epsilonMax = 0.0;
                         break;
                 }
-                swav.UpdateEpsilonBounds(epsilonMax);
+                swav.UpdateRefueledEnergyOnArrivalNodeBounds(epsilonMax);
             }
         }
         void CalculateDeltaBounds()
@@ -150,7 +153,7 @@ namespace MPMFEVRP.Models.XCPlex
             if (!useTighterBounds)
             {
                 foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
-                    swav.UpdateDeltaBounds(theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, 0.0, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
+                    swav.UpdateArrivalSOEBounds(theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity, 0.0, theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity);
             }
             else
             {
@@ -165,9 +168,9 @@ namespace MPMFEVRP.Models.XCPlex
 
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 if (swav.SiteType == SiteTypes.Depot)
-                    swav.UpdateDeltaMin(0.0);
+                    swav.UpdateMinArrivalSOE(0.0);
                 else
-                    swav.UpdateDeltaMin(Math.Max(0, EnergyConsumption(swav, TheDepot, VehicleCategories.EV) - swav.EpsilonMax));
+                    swav.UpdateMinArrivalSOE(Math.Max(0, EnergyConsumption(swav, TheDepot, VehicleCategories.EV) - swav.EpsilonMax));
                 //{
                 //    if ((swav.X == TheDepot.X) && (swav.Y == TheDepot.Y))
                 //    {
@@ -188,7 +191,7 @@ namespace MPMFEVRP.Models.XCPlex
                 tempSWAVs.Remove(swavToPerm);
                 permSWAVs.Add(swavToPerm);
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
-                    swav.UpdateDeltaMin(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
+                    swav.UpdateMinArrivalSOE(Math.Min(swav.DeltaMin, Math.Max(0, swavToPerm.DeltaMin + theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID) - swav.EpsilonMax)));
             }
             if (allOriginalSWAVs.Count != permSWAVs.Count)
                 throw new System.Exception("XCPlexVRPBase.SetDeltaMinViaLabelSetting could not produce proper delta bounds hence allOriginalSWAVs.Count!=permSWAVs.Count");
@@ -201,13 +204,13 @@ namespace MPMFEVRP.Models.XCPlex
             foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 if (swav.SiteType == SiteTypes.Depot)
                 {
-                    swav.UpdateDeltaMax(0.0);
-                    swav.UpdateDeltaPrimeMax(BatteryCapacity(VehicleCategories.EV));
+                    swav.UpdateMaxArrivalSOE(0.0);
+                    swav.UpdateMaxDepartureSOE(BatteryCapacity(VehicleCategories.EV));
                 }
                 else
                 {
-                    swav.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(TheDepot, swav, VehicleCategories.EV));
-                    swav.UpdateDeltaPrimeMax(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
+                    swav.UpdateMaxArrivalSOE(BatteryCapacity(VehicleCategories.EV) - EnergyConsumption(TheDepot, swav, VehicleCategories.EV));
+                    swav.UpdateMaxDepartureSOE(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
                 }
             while (tempSWAVs.Count != 0)
             {
@@ -221,8 +224,8 @@ namespace MPMFEVRP.Models.XCPlex
                 permSWAVs.Add(swavToPerm);
                 foreach (SiteWithAuxiliaryVariables swav in tempSWAVs)
                 {
-                    swav.UpdateDeltaMax(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
-                    swav.UpdateDeltaPrimeMax(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
+                    swav.UpdateMaxArrivalSOE(Math.Max(swav.DeltaMax, swavToPerm.DeltaPrimeMax - theProblemModel.SRD.GetEVEnergyConsumption(swav.ID, swavToPerm.ID)));
+                    swav.UpdateMaxDepartureSOE(Math.Min(BatteryCapacity(VehicleCategories.EV), (swav.DeltaMax + swav.EpsilonMax)));
                 }
             }
             if (allOriginalSWAVs.Count != permSWAVs.Count)
@@ -232,7 +235,7 @@ namespace MPMFEVRP.Models.XCPlex
             foreach (SiteWithAuxiliaryVariables swav in allOriginalSWAVs)
                 if ((swav.X == TheDepot.X) && (swav.Y == TheDepot.Y))
                     if (swav.SiteType != SiteTypes.Customer)
-                        swav.UpdateDeltaMax(BatteryCapacity(VehicleCategories.EV) - GetMinEnergyConsumptionFromNonDepotToDepot());
+                        swav.UpdateMaxArrivalSOE(BatteryCapacity(VehicleCategories.EV) - GetMinEnergyConsumptionFromNonDepotToDepot());
         }
         void CalculateTBounds()
         {
@@ -271,7 +274,7 @@ namespace MPMFEVRP.Models.XCPlex
                     default:
                         break;
                 }
-                swav.UpdateTBounds(tLS, tES);
+                swav.UpdateArrivalTimeBounds(tLS, tES);
             }
         }
         double GetMinTravelTimeFromDepotDuplicateToDepotThroughANode(SiteWithAuxiliaryVariables depotDuplicate)
@@ -368,8 +371,8 @@ namespace MPMFEVRP.Models.XCPlex
                 maxValue_Epsilon[i] = preprocessedSites[i].EpsilonMax;
                 minValue_Delta[i] = preprocessedSites[i].DeltaMin;
                 maxValue_Delta[i] = preprocessedSites[i].DeltaMax;
-                minValue_T[i] = preprocessedSites[i].TES;
-                maxValue_T[i] = preprocessedSites[i].TLS;
+                minValue_T[i] = preprocessedSites[i].TauMin;
+                maxValue_T[i] = preprocessedSites[i].TauMax;
             }
         }
 

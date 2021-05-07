@@ -97,7 +97,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 //    model = new XCPlex_NodeDuplicatingFormulation_woU(theProblemModel, XcplexParam);
                 //    break;
                 case XCPlex_Formulation.MixedEVRPwRefuelingPaths:
-                    model = new XCPlex_EVRPwRefuelingPaths(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
+                    model = new XCPlex_HeterogenousEVRPwRefuelingPaths(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
                     model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);

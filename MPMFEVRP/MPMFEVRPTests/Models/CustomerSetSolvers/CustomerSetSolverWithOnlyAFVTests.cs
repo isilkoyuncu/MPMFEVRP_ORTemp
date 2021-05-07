@@ -67,9 +67,9 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
                     Assert.Fail();
                 else if (theSolver.DeltaValues[i] < theSolver.preprocessedSites[i].DeltaMin)
                     Assert.Fail();
-                else if (theSolver.TValues[i] > theSolver.preprocessedSites[i].TLS)
+                else if (theSolver.TValues[i] > theSolver.preprocessedSites[i].TauMax)
                     Assert.Fail();
-                else if (theSolver.TValues[i] < theSolver.preprocessedSites[i].TES)
+                else if (theSolver.TValues[i] < theSolver.preprocessedSites[i].TauMin)
                     Assert.Fail();
             }
             Assert.AreEqual(4, vsroo.VSOptimizedRoute.NumberOfCustomersVisited);
@@ -102,9 +102,9 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
                     Assert.Fail();
                 else if (theSolver.DeltaValues[i] < theSolver.preprocessedSites[i].DeltaMin)
                     Assert.Fail();
-                else if (theSolver.TValues[i] > theSolver.preprocessedSites[i].TLS)
+                else if (theSolver.TValues[i] > theSolver.preprocessedSites[i].TauMax)
                     Assert.Fail();
-                else if (theSolver.TValues[i] < theSolver.preprocessedSites[i].TES)
+                else if (theSolver.TValues[i] < theSolver.preprocessedSites[i].TauMin)
                     Assert.Fail();
             }
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Infeasible, vsroo.Status);

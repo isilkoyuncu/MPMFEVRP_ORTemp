@@ -58,7 +58,6 @@ namespace MPMFEVRP.Models.XCPlex
         protected CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint;
 
         public System.IO.TextWriter TWoutput;
-
         public XCPlexBase()
         {
             numberOfTimesSolveFoundStatus = new Dictionary<string, int>();
@@ -82,9 +81,10 @@ namespace MPMFEVRP.Models.XCPlex
                 )
                 variable_type = NumVarType.Float;
 
-            //Model Specific Initialization
+            //VRP or TSP initialization
             Initialize();
-
+            //Model Specific Initialization
+            SpecializedInitialize();
             //now we are ready to put the model together and then solve it
             //Define the variables
             DefineDecisionVariables();
@@ -97,6 +97,7 @@ namespace MPMFEVRP.Models.XCPlex
             //output variables
             InitializeOutputVariables();
         }
+
         public XCPlexBase(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
         {
             this.customerCoverageConstraint = customerCoverageConstraint;
@@ -110,16 +111,15 @@ namespace MPMFEVRP.Models.XCPlex
             if (numVehCategories < vehicleCategories.Length) { throw new System.Exception("XCPlexBase number of VehicleCategories are different than problemModel.VRD.NumVehicleCategories"); }
 
             this.xCplexParam = xCplexParam;
-            XCPlexRelaxation relaxation;
-            relaxation = xCplexParam.Relaxation;
-            if ((xCplexParam.Relaxation == XCPlexRelaxation.LinearProgramming)
-                //||(xCplexParam.Relaxation == XCPlexRelaxation.AssignmentProblem)
+            XCPlexRelaxation relaxation = xCplexParam.Relaxation;
+            if ((relaxation == XCPlexRelaxation.LinearProgramming)
+                //||(relaxation == XCPlexRelaxation.AssignmentProblem)
                 )
                 variable_type = NumVarType.Float;
-
-            //Model Specific Initialization
+            //VRP or TSP initialization
             Initialize();
-
+            //Model Specific Initialization
+            SpecializedInitialize();
             //now we are ready to put the model together and then solve it
             //Define the variables
             DefineDecisionVariables();
@@ -134,13 +134,12 @@ namespace MPMFEVRP.Models.XCPlex
         }
 
         protected abstract void Initialize();
-
+        protected abstract void SpecializedInitialize();
         protected abstract void DefineDecisionVariables();
         protected abstract void AddTheObjectiveFunction();
         protected abstract void AddAllConstraints();
         public abstract string GetDescription_AllVariables_Array();
         public abstract SolutionBase GetCompleteSolution(Type SolutionType);//ISSUE (#5) Figure out how to make this work with a run-time-selected Solution type
-
         protected void AddOneDimensionalDecisionVariable(String name, double lowerBound, double upperBound, NumVarType type, int length1, out INumVar[] dv)
         {
             String dv_name = name;
@@ -253,6 +252,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             DecisionVariables.Add(dv_name, dv);
         }
+        //To add X_ijv variables use this
         protected void AddThreeDimensionalDecisionVariable(String name, double[][][] lowerBound, double[][][] upperBound, NumVarType type, int length1, int length2, int length3, out INumVar[][][] dv)
         {
             String dv_name = name;
@@ -288,6 +288,7 @@ namespace MPMFEVRP.Models.XCPlex
         /// <param name="length2"></param>
         /// <param name="length3"></param>
         /// <param name="dv"></param>
+        //To add Y_ijr variables use this
         protected void AddThreeDimensionalDecisionVariable(String name, double[][][] lowerBound, double[][][] upperBound, NumVarType type, int length1, int length2, int[,] length3, out INumVar[][][] dv)
         {
             String dv_name = name;
@@ -301,11 +302,11 @@ namespace MPMFEVRP.Models.XCPlex
                 for (int j = 0; j < length2; j++)
                 {
                     dv[i][j] = new INumVar[length3[i,j]];
-                    for (int v = 0; v < length3[i,j]; v++)
+                    for (int r = 0; r < length3[i,j]; r++)
                     {
-                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + v.ToString() + ")";
-                        dv[i][j][v] = NumVar(lowerBound[i][j][v], upperBound[i][j][v], newType, dv_name);
-                        allVariables_list.Add(dv[i][j][v]);
+                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + r.ToString() + ")";
+                        dv[i][j][r] = NumVar(lowerBound[i][j][r], upperBound[i][j][r], newType, dv_name);
+                        allVariables_list.Add(dv[i][j][r]);
                     }
                 }
             }
@@ -334,11 +335,16 @@ namespace MPMFEVRP.Models.XCPlex
                         dv[i][j][0][r] = NumVar(lowerBound[i][j][r], upperBound[i][j][r], newType, dv_name);
                         allVariables_list.Add(dv[i][j][0][r]);
                     }
-                    //Add GDV variable
-                    dv[i][j][1] = new INumVar[1];
-                    dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + 0.ToString() + "," + 1.ToString() + ")";
-                    dv[i][j][1][0] = NumVar(0.0, 1.0, newType, dv_name);
-                    allVariables_list.Add(dv[i][j][1][0]);
+                    //Add GDV variable                   
+                    if (i != j)
+                    {
+                        dv[i][j][1] = new INumVar[1];
+                        dv_name = name + "_(" + i.ToString() + "," + j.ToString() + "," + 0.ToString() + "," + 1.ToString() + ")";
+                        dv[i][j][1][0] = NumVar(0.0, 1.0, newType, dv_name);
+                        allVariables_list.Add(dv[i][j][1][0]);
+                    }
+                    else
+                        dv[i][j][1] = new INumVar[0];
                 }
             }
             DecisionVariables.Add(dv_name, dv);

@@ -225,5 +225,10 @@ namespace MPMFEVRP.Models.XCPlex
                 output[i] = CSwVMTs[i].CustomerSet;
             return output;
         }
+
+        protected override void SpecializedInitialize()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

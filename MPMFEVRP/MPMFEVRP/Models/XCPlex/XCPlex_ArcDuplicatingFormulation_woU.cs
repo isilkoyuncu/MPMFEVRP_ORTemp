@@ -32,8 +32,8 @@ namespace MPMFEVRP.Models.XCPlex
 
         IndividualRouteESVisits singleRouteESvisits;
         List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
-
         public XCPlex_ArcDuplicatingFormulation_woU() { }
+
         //public XCPlex_ArcDuplicatingFormulation_woU(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam)
         //    : base(theProblemModel, xCplexParam)
         //{
@@ -1493,6 +1493,10 @@ namespace MPMFEVRP.Models.XCPlex
             }
         }
 
+        protected override void SpecializedInitialize()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

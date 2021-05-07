@@ -387,13 +387,13 @@
 //                                if (X[i][r2][vIndex_EV].UB + X[r2][j][vIndex_EV].UB <= 1.0)
 //                                    continue;
 //                                ILinearNumExpr EliminateDominatedESVisits = LinearNumExpr();
-//                                string constraint_name="";
+//                                string constraint_name = "";
 //                                int dom = Dominates(i, j, r1, r2);
 //                                if (dom == 1)
 //                                {
 //                                    EliminateDominatedESVisits.AddTerm(1.0, X[i][r2][vIndex_EV]);
 //                                    EliminateDominatedESVisits.AddTerm(1.0, X[r2][j][vIndex_EV]);
-//                                    constraint_name = "The_ES_node_" + r2.ToString() + "_is_dominated_by_ES_node_" + r1.ToString() + "_from_node_"+ i.ToString() + "_to_node_" + j.ToString();
+//                                    constraint_name = "The_ES_node_" + r2.ToString() + "_is_dominated_by_ES_node_" + r1.ToString() + "_from_node_" + i.ToString() + "_to_node_" + j.ToString();
 //                                    allConstraints_list.Add(AddLe(EliminateDominatedESVisits, 1.0, constraint_name));
 //                                }
 //                                if (dom == 2)
@@ -403,11 +403,11 @@
 //                                    constraint_name = "The_ES_node_" + r1.ToString() + "_is_dominated_by_ES_node_" + r2.ToString() + "_from_node_" + i.ToString() + "_to_node_" + j.ToString();
 //                                    allConstraints_list.Add(AddLe(EliminateDominatedESVisits, 1.0, constraint_name));
 //                                }
-                                
+
 //                                EliminateDominatedESVisits.Clear();
 //                            }
 //                        }
-            
+
 //        }
 //        void AddConstraint_NumberOfVisitsPerCustomerNode()//1
 //        {
@@ -533,7 +533,7 @@
 //                DepartureSOCFromCustomer.AddTerm(1.0, Delta[j]);
 //                DepartureSOCFromCustomer.AddTerm(1.0, Epsilon[j]);
 //                for (int i = 0; i < NumPreprocessedSites; i++)
-//                    DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV)-minValue_Delta[j]), X[i][j][vIndex_EV]);
+//                    DepartureSOCFromCustomer.AddTerm(-1.0 * (BatteryCapacity(VehicleCategories.EV) - minValue_Delta[j]), X[i][j][vIndex_EV]);
 //                string constraint_name = "Departure_SOC_From_Customer_" + j.ToString();
 //                allConstraints_list.Add(AddLe(DepartureSOCFromCustomer, minValue_Delta[j], constraint_name));
 //                DepartureSOCFromCustomer.Clear();
@@ -593,7 +593,7 @@
 //                Site sTo = preprocessedSites[j];
 //                ILinearNumExpr SOCDifference = LinearNumExpr();
 //                SOCDifference.AddTerm(1.0, Delta[j]);
-//                SOCDifference.AddTerm(EnergyConsumption(TheDepot, sTo,VehicleCategories.EV), X[0][j][vIndex_EV]);
+//                SOCDifference.AddTerm(EnergyConsumption(TheDepot, sTo, VehicleCategories.EV), X[0][j][vIndex_EV]);
 //                string constraint_name = "SOC_Regulation_from_depot_to_node_" + j.ToString();
 //                allConstraints_list.Add(AddLe(SOCDifference, BatteryCapacity(VehicleCategories.EV), constraint_name));
 //                SOCDifference.Clear();
@@ -618,18 +618,18 @@
 //        }
 //        void AddConstraint_TimeRegulationFollowingDepot()//000
 //        {
-//                for (int j = 0; j < NumPreprocessedSites; j++)
-//                {
-//                    Site sFrom = preprocessedSites[0];
-//                    Site sTo = preprocessedSites[j];
-//                    ILinearNumExpr TimeDifference = LinearNumExpr();
-//                    TimeDifference.AddTerm(1.0, T[j]);
-//                    for (int v = 0; v < numVehCategories; v++)
-//                        TimeDifference.AddTerm(-1.0 * (TravelTime(sFrom, sTo) + BigT[0][j]), X[0][j][v]);
-//                    string constraint_name = "Time_Regulation_from_depot_to_node_" + j.ToString();
-//                    allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
-//                    TimeDifference.Clear();
-//                }
+//            for (int j = 0; j < NumPreprocessedSites; j++)
+//            {
+//                Site sFrom = preprocessedSites[0];
+//                Site sTo = preprocessedSites[j];
+//                ILinearNumExpr TimeDifference = LinearNumExpr();
+//                TimeDifference.AddTerm(1.0, T[j]);
+//                for (int v = 0; v < numVehCategories; v++)
+//                    TimeDifference.AddTerm(-1.0 * (TravelTime(sFrom, sTo) + BigT[0][j]), X[0][j][v]);
+//                string constraint_name = "Time_Regulation_from_depot_to_node_" + j.ToString();
+//                allConstraints_list.Add(AddGe(TimeDifference, -1.0 * BigT[0][j], constraint_name));
+//                TimeDifference.Clear();
+//            }
 //        }
 //        void AddConstraint_TimeRegulationFollowingAnESVisit_FixedRechargingDuration()//12 
 //        {
@@ -700,7 +700,7 @@
 //                }
 //            }
 //            string constraint_name = "Total_Travel_Time";
-//            double rhs = (numVehicles[vIndex_EV]+numVehicles[vIndex_GDV]) * theProblemModel.CRD.TMax;
+//            double rhs = (numVehicles[vIndex_EV] + numVehicles[vIndex_GDV]) * theProblemModel.CRD.TMax;
 //            if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
 //                rhs -= theProblemModel.SRD.GetTotalCustomerServiceTime();
 //            allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
@@ -739,7 +739,7 @@
 //                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[i][k][v]);
 //                                        TimeFeasibilityOfTwoConsecutiveArcs.AddTerm(1.0, X[k][j][v]);
 //                                    }
-                                    
+
 //                                    string constraint_name = "No_arc_from_node_" + i.ToString() + "_through_node_" + k.ToString() + "to_node_" + j.ToString();
 //                                    allConstraints_list.Add(AddLe(TimeFeasibilityOfTwoConsecutiveArcs, 1.0, constraint_name));
 //                                    TimeFeasibilityOfTwoConsecutiveArcs.Clear();
@@ -822,13 +822,13 @@
 //        {
 //            totalNumberOfActiveArcsConstraintIndex = allConstraints_list.Count;
 
-//            int nActiveArcs = numVehicles[0]* theProblemModel.Lambda + numVehicles[1] + numCustomers;
+//            int nActiveArcs = numVehicles[0] * theProblemModel.Lambda + numVehicles[1] + numCustomers;
 //            int nActiveArcs_EV = numVehicles[vIndex_EV] * theProblemModel.Lambda + numCustomers;
 //            int nActiveArcs_GDV = numVehicles[vIndex_GDV] + numCustomers;
 //            ILinearNumExpr totalArcFlow = LinearNumExpr();
 //            ILinearNumExpr totalArcFlow_EV = LinearNumExpr();
 //            ILinearNumExpr totalArcFlow_GDV = LinearNumExpr();
-//            for (int i = 0; i <NumPreprocessedSites; i++)
+//            for (int i = 0; i < NumPreprocessedSites; i++)
 //                for (int j = 0; j < NumPreprocessedSites; j++)
 //                {
 //                    for (int v = 0; v < 2; v++)
@@ -900,7 +900,7 @@
 //                    {
 //                        allX.Add(preprocessedSites[i].ID + "," + preprocessedSites[j].ID + "," + v.ToString() + "->" + GetValue(X[i][j][v]).ToString());
 //                        if (GetValue(X[i][j][v]) >= 1.0 - ProblemConstants.ERROR_TOLERANCE)
-//                            activeX.Add(preprocessedSites[i].ID + "," + preprocessedSites[j].ID + "," + v.ToString()+"->"+ GetValue(X[i][j][v]).ToString());
+//                            activeX.Add(preprocessedSites[i].ID + "," + preprocessedSites[j].ID + "," + v.ToString() + "->" + GetValue(X[i][j][v]).ToString());
 //                    }
 //            for (int j = 1; j < NumPreprocessedSites; j++)
 //            {

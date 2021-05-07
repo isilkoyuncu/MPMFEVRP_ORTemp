@@ -206,6 +206,7 @@
     <Compile Include="Models\RefuelingPath.cs" />
     <Compile Include="Models\RefuelingPathGenerator.cs" />
     <Compile Include="Models\RefuelingPathList.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_HeterogenousEVRPwRefuelingPathsVP.cs" />
     <Compile Include="Models\XCPlex\XCPlex_Model_AFV_SingleCustomerSet.cs" />
     <Compile Include="Models\XCPlex\XCPlex_AFV_TSP.cs" />
     <Compile Include="Models\XCPlex\XCPlexADF_EVSingleCustomerSet.cs" />
@@ -214,7 +215,7 @@
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special.cs" />
-    <Compile Include="Models\XCPlex\XCPlex_EVRPwRefuelingPaths.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_HeterogenousEVRPwRefuelingPaths.cs" />
     <Compile Include="Models\XCPlex\XCPlex_NodeDuplicatingFormulation_woU.cs" />
     <Compile Include="Models\XCPlex\XCplex_RefuelingPathReplacement.cs" />
     <Compile Include="Models\XCPlex\XCPlex_SetCovering_wSetOfCustomerSetswVMTs.cs" />
