@@ -37,6 +37,12 @@ namespace Instance_Generation.Forms
         int xMax, yMax;
         int nISS, nISS_L1, nISS_L2, nISS_L3;
         int nESS, nESS_L1, nESS_L2, nESS_L3;
+        int numInNetworkESs;
+        double refuelingCostAtDepotPerKWH;
+        double inNetworkCostPerKWH;
+        double outNetworkCostPerKWH;
+        double gasolineDollarPerGallon;
+
         List<Vehicle> list_EV;
         List<Vehicle> list_GDV;
         Vehicle selectedEV;
@@ -74,6 +80,8 @@ namespace Instance_Generation.Forms
             nESS_L2 = int.Parse(textBox_nESS_L2.Text);
             nESS_L3 = int.Parse(textBox_nESS_L3.Text);
             Update_nESS();
+
+            numInNetworkESs = int.Parse(textBox_NumInNetworkESs.Text);
 
             l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
             l2kWhPerMinute = double.Parse(textBox_L2kwhPerMin.Text); //L2 charging speed
@@ -192,6 +200,10 @@ namespace Instance_Generation.Forms
                 textBox_nESS.Text = reader.getNumESS().ToString();
                 textBox_L3kwhPerMin.Text = reader.getESRechargingRate().ToString();
                 textBox_nESS_L3.Text = reader.getNumESS().ToString();
+                textBox_NumInNetworkESs.Text = Math.Max(0, (reader.getNumESS()-1)).ToString();
+                textBox_refuelCostAtDepot.Text = textBox_superOffPeakCost.Text;
+                textBox_inNetworkCost.Text = textBox_offPeakCost.Text;
+                textBox_outNetworkCost.Text = textBox_oNPeakCost.Text;
             }
             else
             {
@@ -225,12 +237,23 @@ namespace Instance_Generation.Forms
             nISS_L3 = int.Parse(textBox_nISS_L3.Text);
             Update_nISS();
         }
+        
         private void TextBox_nESS_L1_TextChanged(object sender, EventArgs e)
         {
             nESS_L1 = int.Parse(textBox_nESS_L1.Text);
             Update_nESS();
         }
-
+        private void TextBox_nESS_L2_TextChanged(object sender, EventArgs e)
+        {
+            nESS_L2 = int.Parse(textBox_nESS_L2.Text);
+            Update_nESS();
+        }
+        private void TextBox_nESS_L3_TextChanged(object sender, EventArgs e)
+        {
+            nESS_L3 = int.Parse(textBox_nESS_L3.Text);
+            Update_nESS();
+        }
+        
         private void TextBox_L3kwhPerMin_TextChanged(object sender, EventArgs e)
         {
             l3kWhPerMinute = double.Parse(textBox_L3kwhPerMin.Text); //L3 charging speed
@@ -244,34 +267,11 @@ namespace Instance_Generation.Forms
             l1kWhPerMinute = double.Parse(textBox_L1kwhPerMin.Text); //L1 charging speed
         }
 
-        private void button_createMultipleSchneider14_Click(object sender, EventArgs e)
+        private void textBox_NumInNetworkESs_TextChanged(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Text Files (.txt)|*.txt|All Files (*.*)|*.*";
-            openFileDialog1.InitialDirectory = System.Environment.CurrentDirectory;
-            openFileDialog1.Multiselect = true;
-            openFileDialog1.ShowDialog();
-            tiFilenames = openFileDialog1.FileNames;
-            for (int i=0; i<tiFilenames.Length; i++)
-            {
-                instanceNumber = i;
-                comboBox_FileType.Text = "Schneider_14";
-                button_UpdateFilename.PerformClick();
-                button_Create_n_Save.PerformClick();
-                comboBox_FileType.Text = "";
-            }
+            numInNetworkESs = int.Parse(textBox_NumInNetworkESs.Text);
         }
 
-        private void TextBox_nESS_L2_TextChanged(object sender, EventArgs e)
-        {
-            nESS_L2 = int.Parse(textBox_nESS_L2.Text);
-            Update_nESS();
-        }
-        private void TextBox_nESS_L3_TextChanged(object sender, EventArgs e)
-        {
-            nESS_L3 = int.Parse(textBox_nESS_L3.Text);
-            Update_nESS();
-        }
         private void ComboBox_BasePricingPolicy_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox_BasePricingPolicy.Items[comboBox_BasePricingPolicy.SelectedIndex].ToString() == BasePricingPolicy.Identical.ToString())
@@ -319,6 +319,7 @@ namespace Instance_Generation.Forms
             textBox_EV_FixedCost.Text = selectedEV.FixedCost.ToString();
             textBox_EV_LoadCapacity.Text = selectedEV.LoadCapacity.ToString();
             textBox_EV_VariableCost.Text = selectedEV.VariableCostPerMile.ToString();
+            textBox_EV_fixedRefDur.Text = selectedEV.FixedRefuelingTimeMins.ToString();
         }
         private void ComboBox_GDV_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -328,7 +329,9 @@ namespace Instance_Generation.Forms
             textBox_GDV_FixedCost.Text = selectedGDV.FixedCost.ToString();
             textBox_GDV_LoadCapacity.Text = selectedGDV.LoadCapacity.ToString();
             textBox_GDV_VariableCost.Text = selectedGDV.VariableCostPerMile.ToString();
+            textBox_GDV_fixedRefDur.Text = selectedGDV.FixedRefuelingTimeMins.ToString();
         }
+
         void Update_nISS()
         {
             nISS = nISS_L1 + nISS_L2 + nISS_L3;
@@ -339,6 +342,8 @@ namespace Instance_Generation.Forms
             nESS = nESS_L1 + nESS_L2 + nESS_L3;
             textBox_nESS.Text = nESS.ToString();
         }
+        
+        
         private void Button_UpdateFilename_Click(object sender, EventArgs e)
         {
             if (reader == null)
@@ -350,7 +355,7 @@ namespace Instance_Generation.Forms
                 //Read Experiment Related Data from the form
                 minSeed = int.Parse(textBox_Seed.Text);
                 maxSeed = minSeed + int.Parse(textBox_nInstances.Text) - 1;
-
+                
                 //Take as is type data
                 if (comboBox_FileType.Text == "CompletelyNew")
                 {
@@ -392,6 +397,10 @@ namespace Instance_Generation.Forms
                 }
                 //Type, Gamma and Prize related data
                 nEVPremPayCustomers = int.Parse(textBox_nEVPremiumPayingCustomers.Text); // # EV prem pay cust
+                refuelingCostAtDepotPerKWH = double.Parse(textBox_superOffPeakCost.Text);
+                inNetworkCostPerKWH = double.Parse(textBox_offPeakCost.Text);
+                outNetworkCostPerKWH = double.Parse(textBox_oNPeakCost.Text);
+                gasolineDollarPerGallon = double.Parse(textBox_gasolineDollarPerGallon.Text);
                 string dcl_str = comboBox_ChargingLevelAtDepot.Text; // charging level at depot
                 foreach (ChargingLevels dcl in Enum.GetValues(typeof(ChargingLevels)))
                 {
@@ -451,6 +460,27 @@ namespace Instance_Generation.Forms
                 }
             }
         }
+        private void button_createMultipleSchneider14_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text Files (.txt)|*.txt|All Files (*.*)|*.*";
+            openFileDialog1.InitialDirectory = System.Environment.CurrentDirectory;
+            openFileDialog1.Multiselect = true;
+            openFileDialog1.ShowDialog();
+            tiFilenames = openFileDialog1.FileNames;
+            for (int i = 0; i < tiFilenames.Length; i++)
+            {
+                instanceNumber = i;
+                comboBox_FileType.Text = "Schneider_14";
+                button_UpdateFilename.PerformClick();
+                button_Create_n_Save.PerformClick();
+                comboBox_FileType.Text = "";
+            }
+        }
+        private void comboBox_ChargingLevelAtDepot_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
         private void Button_Create_n_Save_Click(object sender, EventArgs e)
         {
             //Reading different sections of the form and creating their respective objects for flexible future use
@@ -469,7 +499,10 @@ namespace Instance_Generation.Forms
                 selectedDepotChargingLvl,
                 basePricingPol, basePricingDollar,
                 tripChargePol, tripChargeDollar,
-                EVPrizeCoef);
+                EVPrizeCoef,
+                numInNetworkESs,refuelingCostAtDepotPerKWH,inNetworkCostPerKWH,outNetworkCostPerKWH, 
+                gasolineDollarPerGallon
+                );
             Vehicle_RelatedData VehData = new FormSections.Vehicle_RelatedData(selectedEV, selectedGDV);
             if (reader != null)
                 if (reader.getInputFileType() == "Schneider_14")
@@ -480,7 +513,7 @@ namespace Instance_Generation.Forms
             fc = new FlexibleConverter(ExpData, CCData, TGPData, VehData, reader);
             fc.Convert();
             writer = new KoyuncuYavuzFileWriter(filename, fc.NumberOfNodes, VehData, CCData,
-                fc.NodeID, fc.NodeType, fc.X, fc.Y, fc.Demand, fc.TimeWindowStart, fc.TimeWindowEnd, fc.CustomerServiceDuration, fc.Gamma, fc.Prize, fc.TravelSpeed, fc.UseGeogPosition ,fc.Distance);
+                fc.NodeID, fc.NodeType, fc.X, fc.Y, fc.Demand, fc.TimeWindowStart, fc.TimeWindowEnd, fc.CustomerServiceDuration, fc.Gamma, fc.RefuelingCostPerKWH, fc.Prize, fc.TravelSpeed, fc.RefuelCostOfGas, fc.RefuelCostAtDepot, fc.RefuelCostInNetwork, fc.RefuelCostOutNetwork, fc.UseGeogPosition ,fc.Distance);
             writer.Write();
             //System.Windows.Forms.MessageBox.Show("Files were written successfully!");
         }
@@ -520,6 +553,12 @@ namespace Instance_Generation.Forms
             else
             {
                 MessageBox.Show("Please select a vehicle");
+                return false;
+            }
+            //Check number of in-network ESs not greater than total number of ESs
+            if (numInNetworkESs >= nESS)
+            {
+                MessageBox.Show("Number of in-network ESs cannot be greater than or equal to the total number of ESs!");
                 return false;
             }
             //If none of the errors above are caught:

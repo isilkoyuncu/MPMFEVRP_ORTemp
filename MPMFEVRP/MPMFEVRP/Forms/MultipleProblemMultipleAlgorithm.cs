@@ -51,16 +51,16 @@ namespace MPMFEVRP.Forms
 
             comboBox_multi_problems.Items.AddRange(ProblemUtil.GetAllProblemNames().ToArray());
             comboBox_multi_problems.SelectedIndexChanged += ComboBox_multi_problems_SelectedIndexChanged;
-            comboBox_multi_problems.SelectedIndex = 0;
+            comboBox_multi_problems.SelectedIndex = 2;
 
             listBox_algorithms.MouseDoubleClick += ListBox_algorithms_MouseDoubleClick;
             listBox_algorithms.MouseMove += ListBox_algorithms_MouseMove;
             comboBox_algorithms.Items.AddRange(AlgorithmUtil.GetAllAlgorithmNames().ToArray());
-            comboBox_algorithms.SelectedIndex = 8;
+            comboBox_algorithms.SelectedIndex = 5;
 
-            comboBox_multi_TSPModel.Items.AddRange(XCPlexUtil.GetTSPModelNamesForSolver().ToArray());
+            comboBox_multi_TSPModel.Items.AddRange(new List<string> { "ETSP VP with RPs", "AFV Optimize Single Customer Set"}.ToArray());//(XCPlexUtil.GetTSPModelNamesForSolver().ToArray());
             comboBox_multi_TSPModel.SelectedIndexChanged += ComboBox_multi_TSPModel_SelectedIndexChanged;
-            comboBox_multi_TSPModel.SelectedIndex = 3;
+            comboBox_multi_TSPModel.SelectedIndex = 0;
         }
 
         private void ComboBox_multi_problems_SelectedIndexChanged(object sender, EventArgs e)

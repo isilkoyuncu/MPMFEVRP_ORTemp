@@ -25,6 +25,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         double[] dueDate;
         double[] serviceDuration;
         double[] rechargingRate;
+        double[] refuelingCostPerKWH;
         double[][] prize;
 
         //Vehicle related input
@@ -36,9 +37,15 @@ namespace MPMFEVRP.Implementations.Problems.Readers
         double[] vehFixedCost;
         double[] vehVariableCost;
         double[] vehMaxChargingRate;
+        double[] vehFixedRefuelingTime;
 
-        //Speed and distance
+        //Speed,  and distance
         double travelSpeed;
+        double refuelCostofGas;
+        double refuelCostAtDepot;
+        double refuelCostInNetwork;
+        double refuelCostOutNetwork;
+
         double[,] distance = null;
 
         //Intermediate steps related
@@ -98,6 +105,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             dueDate = new double[nTabularRows];
             serviceDuration = new double[nTabularRows];
             rechargingRate = new double[nTabularRows];
+            refuelingCostPerKWH = new double[nTabularRows];
             prize = new double[nTabularRows][];
 
             char[] cellSeparator = new char[] { '\t' };
@@ -119,6 +127,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 dueDate[r - 1] = double.Parse(cellsInCurrentRow[6]);
                 serviceDuration[r - 1] = double.Parse(cellsInCurrentRow[7]);
                 rechargingRate[r - 1] = double.Parse(cellsInCurrentRow[8]);
+                refuelingCostPerKWH[r - 1] = double.Parse(cellsInCurrentRow[9]);
                 prize[r - 1] = new double[cellsInCurrentRow.Length - 9];
                 for (int i = 0; i < prize[r - 1].Length; i++)
                     prize[r - 1][i] = double.Parse(cellsInCurrentRow[9 + i]);
@@ -137,6 +146,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             vehFixedCost = new double[nTabularRows2 - nTabularRows - 2];
             vehVariableCost = new double[nTabularRows2 - nTabularRows - 2];
             vehMaxChargingRate = new double[nTabularRows2 - nTabularRows - 2];
+            vehFixedRefuelingTime = new double[nTabularRows2 - nTabularRows - 2];
 
             for (int r = nTabularRows+3; r <= nTabularRows2; r++)
             {
@@ -150,12 +160,22 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                 vehFixedCost[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[5]);
                 vehVariableCost[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[6]);
                 vehMaxChargingRate[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[7]);
+                vehFixedRefuelingTime[r - nTabularRows - 3] = double.Parse(cellsInCurrentRow[8]);
             }
             PopulateVehicleArray();
 
             cellsInCurrentRow = allRows[blankRowPosition2+1].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             travelSpeed= double.Parse(cellsInCurrentRow[1]);
+            cellsInCurrentRow = allRows[blankRowPosition2 + 2].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            refuelCostofGas = double.Parse(cellsInCurrentRow[1]);
             cellsInCurrentRow = allRows[blankRowPosition2 + 3].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            refuelCostAtDepot = double.Parse(cellsInCurrentRow[1]);
+            cellsInCurrentRow = allRows[blankRowPosition2 + 4].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            refuelCostInNetwork = double.Parse(cellsInCurrentRow[1]);
+            cellsInCurrentRow = allRows[blankRowPosition2 + 5].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
+            refuelCostOutNetwork = double.Parse(cellsInCurrentRow[1]);
+
+            cellsInCurrentRow = allRows[blankRowPosition2 + 7].Split(cellSeparator, StringSplitOptions.RemoveEmptyEntries);
             if (cellsInCurrentRow.Contains("Long-Lat")) //Distance matrix exists
             {
                 distType = "Long-Lat";
@@ -232,7 +252,7 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             siteArray = new Site[id.Length];
             for (int i = 0; i < id.Length; i++)
             {
-                site = new Site(id[i], type[i], x[i], y[i], demand[i], readyTime[i], dueDate[i], serviceDuration[i], rechargingRate[i], prize[i]);
+                site = new Site(id[i], type[i], x[i], y[i], demand[i], readyTime[i], dueDate[i], serviceDuration[i], rechargingRate[i], refuelingCostPerKWH[i], prize[i]);
                 siteArray[i] = site;
             }
         }
@@ -265,10 +285,29 @@ namespace MPMFEVRP.Implementations.Problems.Readers
                         VehCat = VehicleCategories.EV;
                         break;
                 }
-                vehicle = new Vehicle(vehID[i], VehCat, vehLoadCap[i], vehBatteryCap[i], vehConsumpRate[i], vehFixedCost[i], vehVariableCost[i], vehMaxChargingRate[i]);
+                
+                vehicle = new Vehicle(vehID[i], VehCat, vehLoadCap[i], vehBatteryCap[i], vehConsumpRate[i], vehFixedCost[i], vehVariableCost[i], vehMaxChargingRate[i], vehFixedRefuelingTime[i]);
                 vehicleArray[i] = vehicle;
             }
         }
+        //public Vehicle(string[] allInput)//ISSUE (#7): This constructor should not exist as it should never be the responsibility of the vehicle class to know how to decipher a 7-part string array, it should be the responsibility of the reader that reads the data
+        //{
+        //    if (allInput.Length != 7)
+        //        throw new Exception("Expecting exactly 7 inputs into the 'Vehicle' class, because that's how many fields it has!");
+        //    //TODO Parse all input to what they need to be and then set the field values appropriately; An example is below, test that it actually works.
+        //    id = allInput[0];
+        //    //category = allInput[1];
+        //    loadCapacity = int.Parse(allInput[2]);
+        //    batteryCapacity = double.Parse(allInput[3]);
+        //    consumptionRate = double.Parse(allInput[4]);
+        //    fixedCost = double.Parse(allInput[5]);
+        //    variableCostPerMile = double.Parse(allInput[6]);
+        //    maxChargingRate = double.Parse(allInput[7]);
+
+        //    if (!int.TryParse(allInput[1], out loadCapacity))
+        //        throw new Exception("load capacity was not successfully parsed from the input!");
+        //    //TODO When this Vehicle constructor does all parsing correctly, you still need to verify that all fields were actually filled so we can use them later
+        //}
         public Vehicle[] GetVehicleArray()
         {
             if (vehicleArray == null)
@@ -277,6 +316,12 @@ namespace MPMFEVRP.Implementations.Problems.Readers
             return vehicleArray;
         }
         public double GetTravelSpeed() { return travelSpeed; }
+        public double GetRefuelCostofGas() { return refuelCostofGas; }
+        public double GetRefuelCostAtDepot() { return refuelCostAtDepot; }
+        public double GetRefuelCostInNetwork() { return refuelCostInNetwork; }
+        public double GetRefuelCostOutNetwork() { return refuelCostOutNetwork; }
+
+
         public double[,] GetDistanceMatrix() { return distance; }
         public bool IsLongLat()
         {

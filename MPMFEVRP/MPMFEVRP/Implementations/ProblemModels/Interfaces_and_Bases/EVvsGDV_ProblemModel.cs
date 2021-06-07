@@ -21,25 +21,24 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         public Dictionary<string, int> EV_TSP_NumberOfCustomerSetsByStatus { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.NumberOfTimesSolveFoundStatus; else return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
         public Dictionary<string, double> EV_TSP_TimeSpentAccount { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.TotalTimeInSolveOnStatus; else return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
         //TheOther is created only for two EV_TSP vs. 1 GDV_TSP model comparison 
-        protected XCPlexVRPBase TheOtherEV_TSPSolver;
+        //protected XCPlexVRPBase TheOtherEV_TSPSolver;
         public Dictionary<string, int> TheOtherEV_TSP_NumberOfCustomerSetsByStatus { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.NumberOfTimesSolveFoundStatus; else return EV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
         public Dictionary<string, double> TheOtherEV_TSP_TimeSpentAccount { get { if (EV_TSPSolver == null) return theGDVExploiter.AFV_Solver.TotalTimeInSolveOnStatus; else return EV_TSPSolver.TotalTimeInSolveOnStatus; } }
         protected XCPlexVRPBase GDV_TSPSolver;
         public Dictionary<string, int> GDV_TSP_NumberOfCustomerSetsByStatus { get { if (GDV_TSPSolver == null) return theGDVExploiter.GDV_Solver.NumberOfTimesSolveFoundStatus; else return GDV_TSPSolver.NumberOfTimesSolveFoundStatus; } }
         public Dictionary<string, double> GDV_TSP_TimeSpentAccount { get { if (GDV_TSPSolver == null) return theGDVExploiter.GDV_Solver.TotalTimeInSolveOnStatus; else return GDV_TSPSolver.TotalTimeInSolveOnStatus; } }
 
-        protected XCPlexVRPBase GDV_OrienteeringSolver;
-        protected XCPlexVRPBase EV_NDF_OrienteeringSolver;
-        protected XCPlexVRPBase EV_ADF_OrienteeringSolver;
+        //protected XCPlexVRPBase GDV_OrienteeringSolver;
+        //protected XCPlexVRPBase EV_NDF_OrienteeringSolver;
+        //protected XCPlexVRPBase EV_ADF_OrienteeringSolver;
 
         XCPlex_Model_AFV_SingleCustomerSet newTSPsolverEV;
         XCPlex_Model_GDV_SingleCustomerSet newTSPsolverGDV;
+
         public RefuelingPathList NonDominatedRefuelingPaths = new RefuelingPathList();
 
         CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs theGDVExploiter;
         PlainCustomerSetSolver_Homogeneous thePlainAFVSolver;
-
-
 
         public RefuelingPathGenerator rpg;
 
@@ -59,23 +58,20 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             coverConstraintType = problem.CoverConstraintType;
             SetNumVehicles();
             rechargingDuration_status = (RechargingDurationAndAllowableDepartureStatusFromES)problemCharacteristics.GetParameter(ParameterID.PRB_RECHARGING_ASSUMPTION).Value;
-            //lambda = problemCharacteristics.GetParameter(ParameterID.PRB_LAMBDA).GetIntValue();
             CalculateBoundsForAllOriginalSWAVs();
 
             if (problemCharacteristics.GetParameter(ParameterID.PRB_CREATETSPSOLVERS).GetBoolValue())
-                CreateTSPSolvers(typeof(XCPlex_Model_GDV_SingleCustomerSet)); //TODO: 10/1/19 this code make sure we create tsp solvers with adfwu, so no matter what we choose on the form it doesn't affect anything.
+                CreateTSPSolvers(TSPModelType); 
             if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATEEXPLOITINGTSPSOLVER).GetBoolValue() || problemCharacteristics.GetParameter(ParameterID.PRB_CREATEPLAINTSPSOLVER).GetBoolValue())
                 CreateNewTspSolvers();
 
             PopulateCompatibleSolutionTypes();
             CreateCustomerSetArchive();
-            rpg = new RefuelingPathGenerator(this);
-            PopulateNonDominatedRefuelingPaths();
         }
         void CreateNewTspSolvers()
         {
-            //newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
-            //newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            newTSPsolverEV = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), coverConstraintType);
+            newTSPsolverGDV = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), coverConstraintType);
             if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATEEXPLOITINGTSPSOLVER).GetBoolValue())
                 theGDVExploiter = new CustomerSetSolver_Homogeneous_ExploitingVirtualGDVs(this);
             if(problemCharacteristics.GetParameter(ParameterID.PRB_CREATEPLAINTSPSOLVER).GetBoolValue())
@@ -87,44 +83,20 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         }
         void CreateTSPSolvers(Type TSPModelType)
         {
-            if (TSPModelType == typeof(XCPlex_Model_GDV_SingleCustomerSet))
+            if (TSPModelType == typeof(XCPlex_ETSP_VP))
+            {
+                EV_TSPSolver = new XCPlex_ETSP_VP(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+                GDV_TSPSolver = new XCPlex_TSP(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+            }
+            else if(TSPModelType == typeof(XCPlex_Model_AFV_SingleCustomerSet))
             {
                 EV_TSPSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-                GDV_TSPSolver = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+                GDV_TSPSolver = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
             }
-            else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU))
+            else
             {
                 EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
                 GDV_TSPSolver = new XCPlex_Model_GDV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-            }
-            //else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation_woU))
-            //{
-            //    EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-            //    GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-            //}
-            else
-            {
-                throw new NotImplementedException("I do not trust any other model other than ADF and NDF without U.(IK)");
-                //if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation))
-                //{
-                //    EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                //    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-                //}
-                //else if (TSPModelType == typeof(XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special))
-                //{
-                //    EV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_EV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                //    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU_GDV_TSP_special(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-                //}
-                //else if (TSPModelType == typeof(XCPlex_NodeDuplicatingFormulation))
-                //{
-                //    EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, tighterAuxBounds: true));
-                //    GDV_TSPSolver = new XCPlex_NodeDuplicatingFormulation(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, tighterAuxBounds: true));
-                //}
-                //else
-                //{
-                //    System.Windows.Forms.MessageBox.Show("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
-                //    throw new Exception("The formulation you asked for doesn't exist as far as EVvsGDV_ProblemModel.CreateTSPSolvers method is concerned.");
-                //}
             }
         }
         double GetWorstCaseOFV()
@@ -263,14 +235,19 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         VehicleSpecificRouteOptimizationOutcome RouteOptimize(CustomerSet CS, Vehicle vehicle)
         {
             XCPlexVRPBase solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
+            // TO DO massive issue here you cannot leave it like this!!!!
+            /**************************************************************/
+            //solver.SetParam(ILOG.CPLEX.Cplex.Param.TimeLimit, 1200.0);
+            /**************************************************************/
             solver.RefineDecisionVariables(CS);
             solver.Solve_and_PostProcess();
             VehicleSpecificRouteOptimizationOutcome vsroo;
-            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)
+            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)// || solver.SolutionStatus==XCPlexSolutionStatus.NoFeasibleSolutionFound)
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
-            else//optimal
+            else //if (solver.SolutionStatus == XCPlexSolutionStatus.Optimal)//optimal
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
-                                                                                                                                                                                                                      //            solver.ClearModel();
+            //else
+            //    throw new Exception("Solution found is not optimal but just feasible. Stopped due to the time limit.");
             return vsroo;
         }
         VehicleSpecificRoute FitGDVOptimalRouteToEV(VehicleSpecificRoute GDVOptimalRoute, Vehicle vehicle)
@@ -720,110 +697,100 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         /// </summary>
         /// <param name="customerSet"></param>
         /// <returns></returns>
-        public string[] TripleSolve(CustomerSet customerSet)
-        {
-            if (TheOtherEV_TSPSolver == null)
-                InitializeForTripleSolve();
+        //public string[] TripleSolve(CustomerSet customerSet)
+        //{
+        //    if (TheOtherEV_TSPSolver == null)
+        //        InitializeForTripleSolve();
 
-            GDV_TSPSolver.RefineDecisionVariables(customerSet);
-            GDV_TSPSolver.Solve_and_PostProcess();
+        //    GDV_TSPSolver.RefineDecisionVariables(customerSet);
+        //    GDV_TSPSolver.Solve_and_PostProcess();
 
-            EV_TSPSolver.RefineDecisionVariables(customerSet);
-            EV_TSPSolver.Solve_and_PostProcess();
+        //    EV_TSPSolver.RefineDecisionVariables(customerSet);
+        //    EV_TSPSolver.Solve_and_PostProcess();
 
-            TheOtherEV_TSPSolver.RefineDecisionVariables(customerSet);
-            TheOtherEV_TSPSolver.Solve_and_PostProcess();
+        //    TheOtherEV_TSPSolver.RefineDecisionVariables(customerSet);
+        //    TheOtherEV_TSPSolver.Solve_and_PostProcess();
 
-            string csStatus = GDV_TSPSolver.GetStatus().ToString();
-            string EVNDFStatus = EV_TSPSolver.GetStatus().ToString();
-            string EVADFStatus = TheOtherEV_TSPSolver.GetStatus().ToString();
-            if (EVNDFStatus != EVADFStatus)
-                throw new Exception("NDF and ADF found different statuses for the same customer set!");
-            else
-                if (EVNDFStatus != csStatus)
-            {
-                if ((csStatus == "Optimal") && (EVNDFStatus == "Infeasible"))
-                    csStatus = "GDVOnly";
-                else
-                    throw new Exception("Some unrecognized status combination obtained!");
-            }
-            return new string[]
-            {
-                csStatus,
-                GDV_TSPSolver.CPUtime.ToString(), EV_TSPSolver.CPUtime.ToString(), TheOtherEV_TSPSolver.CPUtime.ToString(),
-                (csStatus=="Infeasible")?"-1.0":GDV_TSPSolver.ObjValue.ToString(), (EVNDFStatus=="Infeasible")?"-1.0":EV_TSPSolver.ObjValue.ToString()
-            };
-        }
-        void InitializeForTripleSolve()
-        {
-            GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-            //EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-            EV_TSPSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-            TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
-        }
-        public string[] TripleOrienteeringSolve(Dictionary<string, double> customerCoverageConstraintShadowPrices, bool useRuntimeLimit = false, double runTimeLimit = double.MaxValue, bool compareToGDV = false, bool compareToEV_NDF = false)
-        {
-            if (GDV_OrienteeringSolver == null)
-                InitializeForTripleOrienteeringSolve(useRuntimeLimit, runTimeLimit);
+        //    string csStatus = GDV_TSPSolver.GetStatus().ToString();
+        //    string EVNDFStatus = EV_TSPSolver.GetStatus().ToString();
+        //    string EVADFStatus = TheOtherEV_TSPSolver.GetStatus().ToString();
+        //    if (EVNDFStatus != EVADFStatus)
+        //        throw new Exception("NDF and ADF found different statuses for the same customer set!");
+        //    else
+        //        if (EVNDFStatus != csStatus)
+        //    {
+        //        if ((csStatus == "Optimal") && (EVNDFStatus == "Infeasible"))
+        //            csStatus = "GDVOnly";
+        //        else
+        //            throw new Exception("Some unrecognized status combination obtained!");
+        //    }
+        //    return new string[]
+        //    {
+        //        csStatus,
+        //        GDV_TSPSolver.CPUtime.ToString(), EV_TSPSolver.CPUtime.ToString(), TheOtherEV_TSPSolver.CPUtime.ToString(),
+        //        (csStatus=="Infeasible")?"-1.0":GDV_TSPSolver.ObjValue.ToString(), (EVNDFStatus=="Infeasible")?"-1.0":EV_TSPSolver.ObjValue.ToString()
+        //    };
+        //}
+        //void InitializeForTripleSolve()
+        //{
+        //    GDV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+        //    //EV_TSPSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+        //    EV_TSPSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+        //    TheOtherEV_TSPSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true), customerCoverageConstraint: CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce);
+        //}
+        //public string[] TripleOrienteeringSolve(Dictionary<string, double> customerCoverageConstraintShadowPrices, bool useRuntimeLimit = false, double runTimeLimit = double.MaxValue, bool compareToGDV = false, bool compareToEV_NDF = false)
+        //{
+        //    if (GDV_OrienteeringSolver == null)
+        //        InitializeForTripleOrienteeringSolve(useRuntimeLimit, runTimeLimit);
 
-            if (compareToGDV)
-            {
-                GDV_OrienteeringSolver.RefineObjectiveFunctionCoefficients(customerCoverageConstraintShadowPrices);
-                GDV_OrienteeringSolver.Solve_and_PostProcess();
-            }
+        //    if (compareToGDV)
+        //    {
+        //        GDV_OrienteeringSolver.RefineObjectiveFunctionCoefficients(customerCoverageConstraintShadowPrices);
+        //        GDV_OrienteeringSolver.Solve_and_PostProcess();
+        //    }
 
-            if (compareToEV_NDF)
-            {
-                EV_NDF_OrienteeringSolver.RefineObjectiveFunctionCoefficients(customerCoverageConstraintShadowPrices);
-                EV_NDF_OrienteeringSolver.Solve_and_PostProcess();
-            }
+        //    if (compareToEV_NDF)
+        //    {
+        //        EV_NDF_OrienteeringSolver.RefineObjectiveFunctionCoefficients(customerCoverageConstraintShadowPrices);
+        //        EV_NDF_OrienteeringSolver.Solve_and_PostProcess();
+        //    }
 
-            EV_ADF_OrienteeringSolver.RefineObjectiveFunctionCoefficients(customerCoverageConstraintShadowPrices);
-            EV_ADF_OrienteeringSolver.Solve_and_PostProcess();
+        //    EV_ADF_OrienteeringSolver.RefineObjectiveFunctionCoefficients(customerCoverageConstraintShadowPrices);
+        //    EV_ADF_OrienteeringSolver.Solve_and_PostProcess();
 
-            //Time for output now
-            if ((compareToEV_NDF) && (!useRuntimeLimit))
-            {
-                if (Math.Abs(EV_NDF_OrienteeringSolver.ObjValue - EV_ADF_OrienteeringSolver.ObjValue) > 0.00001)
-                    throw new Exception("EV_NDF and EV_ADF Orienteering Solvers found different solutions!");
-            }
+        //    //Time for output now
+        //    if ((compareToEV_NDF) && (!useRuntimeLimit))
+        //    {
+        //        if (Math.Abs(EV_NDF_OrienteeringSolver.ObjValue - EV_ADF_OrienteeringSolver.ObjValue) > 0.00001)
+        //            throw new Exception("EV_NDF and EV_ADF Orienteering Solvers found different solutions!");
+        //    }
 
-            List<string> outcome = new List<string>();
-            if (compareToGDV)
-            {
-                outcome.Add(GDV_OrienteeringSolver.GetStatus().ToString());
-                outcome.Add(GDV_OrienteeringSolver.CPUtime.ToString("0.000"));
-                outcome.Add(GDV_OrienteeringSolver.ObjValue.ToString("0.000"));
-            }
-            if (compareToEV_NDF)
-            {
-                outcome.Add(EV_NDF_OrienteeringSolver.GetStatus().ToString());
-                outcome.Add(EV_NDF_OrienteeringSolver.CPUtime.ToString("0.000"));
-                outcome.Add(EV_NDF_OrienteeringSolver.ObjValue.ToString("0.000"));
-            }
-            outcome.Add(EV_ADF_OrienteeringSolver.GetStatus().ToString());
-            outcome.Add(EV_ADF_OrienteeringSolver.CPUtime.ToString("0.000"));
-            outcome.Add(EV_ADF_OrienteeringSolver.ObjValue.ToString("0.000"));
+        //    List<string> outcome = new List<string>();
+        //    if (compareToGDV)
+        //    {
+        //        outcome.Add(GDV_OrienteeringSolver.GetStatus().ToString());
+        //        outcome.Add(GDV_OrienteeringSolver.CPUtime.ToString("0.000"));
+        //        outcome.Add(GDV_OrienteeringSolver.ObjValue.ToString("0.000"));
+        //    }
+        //    if (compareToEV_NDF)
+        //    {
+        //        outcome.Add(EV_NDF_OrienteeringSolver.GetStatus().ToString());
+        //        outcome.Add(EV_NDF_OrienteeringSolver.CPUtime.ToString("0.000"));
+        //        outcome.Add(EV_NDF_OrienteeringSolver.ObjValue.ToString("0.000"));
+        //    }
+        //    outcome.Add(EV_ADF_OrienteeringSolver.GetStatus().ToString());
+        //    outcome.Add(EV_ADF_OrienteeringSolver.CPUtime.ToString("0.000"));
+        //    outcome.Add(EV_ADF_OrienteeringSolver.ObjValue.ToString("0.000"));
 
-            return outcome.ToArray();
-        }
-        void InitializeForTripleOrienteeringSolve(bool limitComputationTime, double runtimeLimit_Seconds)
-        {
-            GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            //EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_NDF_OrienteeringSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-            EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
-        }
-
-        void PopulateNonDominatedRefuelingPaths()
-        {
-            foreach (SiteWithAuxiliaryVariables swav1 in SRD.GetAllNonESSWAVsList())
-                foreach (SiteWithAuxiliaryVariables swav2 in SRD.GetAllNonESSWAVsList())
-                    if (swav1.ID != swav2.ID)
-                    {
-                        NonDominatedRefuelingPaths.AddRange(rpg.GenerateNonDominatedBetweenODPairIK(swav1, swav2, SRD));
-                    }
-        }
+        //    return outcome.ToArray();
+        //}
+        //void InitializeForTripleOrienteeringSolve(bool limitComputationTime, double runtimeLimit_Seconds)
+        //{
+        //    GDV_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.GDV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+        //    //EV_NDF_OrienteeringSolver = new XCPlex_NodeDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+        //    EV_NDF_OrienteeringSolver = new XCPlex_Model_AFV_SingleCustomerSet(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+        //    EV_ADF_OrienteeringSolver = new XCPlex_ArcDuplicatingFormulation_woU(this, new XCPlexParameters(vehCategory: VehicleCategories.EV, tSP: true, limitComputationTime: limitComputationTime, runtimeLimit_Seconds: runtimeLimit_Seconds, tighterAuxBounds: true), CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce);
+        //}
 
         public RouteOptimizationOutcome RouteOptimizeByExploitingGDVs(CustomerSet CS, Exploiting_GDVs_Flowchart flowchart, bool preserveCustomerVisitSequence, bool feasibleAFVSolnIsEnough, bool performSwap)
         {

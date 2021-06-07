@@ -4,26 +4,20 @@ using MPMFEVRP.Domains.SolutionDomain;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
 using MPMFEVRP.Implementations.Solutions;
 using MPMFEVRP.Implementations.Solutions.Interfaces_and_Bases;
-using MPMFEVRP.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace MPMFEVRP.Models.XCPlex
 {
-    public class XCPlex_HeterogenousEVRPwRefuelingPathsVP : XCPlexVRPBase
+    public class XCPlex_MixedFleetEVRPwRefuelingPathsVP : XCPlexVRPBase
     {
         //Problem specific parameters
         int numNonESNodes;
         double batteryCapacity; //kWh
         double refuelingRate;
         double planningHorizonLength; //mins
-
-        double nighttimeRefuelingCostperkWh = 0.01437; //dollars per kWh
-        double daytimeRefuelingCostperkWh = 0.123667; //dollars per kWh
-        double GDVcostPerMile = 2.731 / 25.0;
-
-
+        
         RefuelingPathGenerator rpg;
         RefuelingPathList[,] allNondominatedRPs;
         RefuelingPathList[,] nondominatedRPsExceptDirectArcs;
@@ -31,6 +25,7 @@ namespace MPMFEVRP.Models.XCPlex
         int[,] numNondominatedRPs;
 
         double[] RHS_forNodeCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
+        List<IndividualRouteESVisits> allRoutesESVisits = new List<IndividualRouteESVisits>();
 
         //Decision Variables
         INumVar[][][] X; double[][][] X_LB, X_UB;    //X_ijv
@@ -39,7 +34,6 @@ namespace MPMFEVRP.Models.XCPlex
         INumVar[] ArrivalSOE; double[] ArrivalSOE_LB, ArrivalSOE_UB; //Delta_j
         INumVar[] ArrivalTime; double[] ArrivalTime_LB, ArrivalTime_UB; //Tau_j
         INumVar[][] RefueledEnergyOnPath; double[][] RefueledEnergyOnPath_LB, RefueledEnergyOnPath_UB; //Epsilon_ij
-        //INumVar[][] RefueledEnergyOnArcOfPath; double[][] RRefueledEnergyOnArcOfPath_LB, RefueledEnergyOnArcOfPath_UB; This is Ksi_rp
 
         //Extracted decision variables. They are public for only testing purposes. Never ever use these or manipulate these outside of this class.
         //The output of this solver should never be the values of these decision variables but rather the vehicle specific routes.
@@ -49,7 +43,8 @@ namespace MPMFEVRP.Models.XCPlex
         public double[,][] x_ijv_Values;
         public double[,][] y_ijp_Values;
 
-        public XCPlex_HeterogenousEVRPwRefuelingPathsVP(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
+        public XCPlex_MixedFleetEVRPwRefuelingPathsVP() { }
+        public XCPlex_MixedFleetEVRPwRefuelingPathsVP(EVvsGDV_ProblemModel theProblemModel, XCPlexParameters xCplexParam, CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint)
             : base(theProblemModel, xCplexParam, customerCoverageConstraint)
         {
             //Do not uncomment these. They are here to show which methods are being implemented in the base
@@ -71,7 +66,7 @@ namespace MPMFEVRP.Models.XCPlex
             numNonESNodes = numCustomers + 1; //because there's only a single depot
             batteryCapacity = BatteryCapacity(VehicleCategories.EV);
             planningHorizonLength = theProblemModel.CRD.TMax;
-            refuelingRate = theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetESIDs().First()).RechargingRate;
+            refuelingRate = theProblemModel.SRD.GetSiteByID(theProblemModel.SRD.GetESIDs().First()).RechargingRate;          
             SetAllOriginalSWAVs(); //from base
             PopulateSubLists(); //from base
             CalculateMinimumAndMaximumArrivalTimeBounds();
@@ -79,6 +74,7 @@ namespace MPMFEVRP.Models.XCPlex
             PopulatePreprocessedSWAVs(); //from base. No ES should be copied to the preprocessedSites
             rpg = new RefuelingPathGenerator(theProblemModel);
             PopulateNondominatedRPsBetweenODPairs();
+            CalculateMinNumVehicles();
         }
 
         // Minimum and Maximum Arrival SOE Limits
@@ -136,12 +132,14 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD);
+                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD, theProblemModel.VRD);
                 }
 
             nondominatedRPsExceptDirectArcs = new RefuelingPathList[numNonESNodes, numNonESNodes];
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
+                {
+                    nondominatedRPsExceptDirectArcs[i, j] = new RefuelingPathList();
                     for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
                     {
                         if (allNondominatedRPs[i, j][r].RefuelingStops.Count != 0)
@@ -149,6 +147,7 @@ namespace MPMFEVRP.Models.XCPlex
                             nondominatedRPsExceptDirectArcs[i, j].Add(allNondominatedRPs[i, j][r]);
                         }
                     }
+                }
         }
 
         //Populate the general domain of the decision variables
@@ -198,7 +197,7 @@ namespace MPMFEVRP.Models.XCPlex
                         X_UB[i][j][v] = 1.0;
                     }
 
-                    int numRPS = allNondominatedRPs[i, j].Count;
+                    int numRPS = nondominatedRPsExceptDirectArcs[i, j].Count;
                     Y_LB[i][j] = new double[numRPS];
                     Y_UB[i][j] = new double[numRPS];
                     double epsilonUB = 0.0;
@@ -215,6 +214,8 @@ namespace MPMFEVRP.Models.XCPlex
                         if (epsilonLB > nondominatedRPsExceptDirectArcs[i, j][r].MinimumEnergyRefueledOnRoad)
                             epsilonLB = nondominatedRPsExceptDirectArcs[i, j][r].MinimumEnergyRefueledOnRoad;
                     }
+                    if (epsilonLB > epsilonUB)
+                        epsilonLB = epsilonUB;
                     RefueledEnergyOnPath_LB[i][j] = epsilonLB;
                     RefueledEnergyOnPath_UB[i][j] = epsilonUB;
                 }
@@ -237,7 +238,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddThreeDimensionalDecisionVariable("X", X_LB, X_UB, NumVarType.Int, numNonESNodes, numNonESNodes, numVehCategories, out X);
 
             //dvs: Y_ijr
-            AddThreeDimensionalDecisionVariable("Y", Y_LB, Y_UB, NumVarType.Int, numNonESNodes, numNonESNodes, numNondominatedRPs, out X);
+            AddThreeDimensionalDecisionVariable("Y", Y_LB, Y_UB, NumVarType.Int, numNonESNodes, numNonESNodes, numNondominatedRPs, out Y);
             //auxiliaries (T_j, Delta_j, Epsilon_ij)
             AddOneDimensionalDecisionVariable("ArrivalTime", ArrivalTime_LB, ArrivalTime_UB, NumVarType.Float, numNonESNodes, out ArrivalTime);
             AddOneDimensionalDecisionVariable("ArrivalSOE", ArrivalSOE_LB, ArrivalSOE_UB, NumVarType.Float, numNonESNodes, out ArrivalSOE);
@@ -274,28 +275,32 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
+            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT) //For a mixed fleet vrp this is not a meaningful objective function
             {
                 for (int i = 0; i < numNonESNodes; i++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         for (int v = 0; v < numVehCategories; v++)
-                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[v]) * Distance(preprocessedSites[i], preprocessedSites[j]), X[i][j][v]);
-                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-                            objFunction.AddTerm(GetVarCostPerMile(vehicleCategories[vIndex_EV]) * nondominatedRPsExceptDirectArcs[i, j][r].TotalDistance, Y[i][j][r]);
+                            objFunction.AddTerm(Distance(preprocessedSites[i], preprocessedSites[j]), X[i][j][v]);
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
+                            objFunction.AddTerm(nondominatedRPsExceptDirectArcs[i, j][r].TotalDistance, Y[i][j][r]);
                     }
             }
             else
             {
-                double EVoffPeakCostPerMile = nighttimeRefuelingCostperkWh * theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate;
-                for (int i = 0; i < numNonESNodes; i++)
+                double refuelCostAtDepotPerKwh = theProblemModel.CRD.RefuelCostAtDepot;
+                double refuelCostAtDepotPerMile = refuelCostAtDepotPerKwh * theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate;
+                double refuelCostOfGasPerGallon = theProblemModel.CRD.RefuelCostofGas;
+                double averageGasCostPerMile = refuelCostOfGasPerGallon * theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).ConsumptionRate;
+                double refuelCostInNetworkPerKwh = theProblemModel.CRD.RefuelCostInNetwork;
+                    for (int i = 0; i < numNonESNodes; i++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
-                        objFunction.AddTerm((daytimeRefuelingCostperkWh - nighttimeRefuelingCostperkWh), RefueledEnergyOnPath[i][j]);
-                        objFunction.AddTerm(EVoffPeakCostPerMile * Distance(preprocessedSites[i], preprocessedSites[j]), X[i][j][vIndex_EV]);
-                        objFunction.AddTerm(GDVcostPerMile * Distance(preprocessedSites[i], preprocessedSites[j]), X[i][j][vIndex_GDV]);
-                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-                            objFunction.AddTerm(EVoffPeakCostPerMile * nondominatedRPsExceptDirectArcs[i, j][r].TotalDistance, Y[i][j][r]);
+                        objFunction.AddTerm((refuelCostInNetworkPerKwh - refuelCostAtDepotPerKwh), RefueledEnergyOnPath[i][j]);
+                        objFunction.AddTerm(refuelCostAtDepotPerMile * Distance(preprocessedSites[i], preprocessedSites[j]), X[i][j][vIndex_EV]);
+                        objFunction.AddTerm(averageGasCostPerMile * Distance(preprocessedSites[i], preprocessedSites[j]), X[i][j][vIndex_GDV]);
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
+                            objFunction.AddTerm(refuelCostAtDepotPerMile * nondominatedRPsExceptDirectArcs[i, j][r].TotalDistance, Y[i][j][r]);
                     }
             }
             //Now adding the objective function to the model
@@ -304,6 +309,9 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void AddAllConstraints()
         {
             allConstraints_list = new List<IRange>();
+
+            //AddKnownSolutionForTesting();
+
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerCustomerNodeIs1();
             AddConstraint_TotalIncomingEVArcsMinusTotalOutgoingEVArcsIs0();
@@ -311,7 +319,7 @@ namespace MPMFEVRP.Models.XCPlex
             
             AddConstraint_ArrivingNumberOfEVsAtDepotCannotExceedLimitm();
             AddConstraint_ArrivingNumberOfGDVsAtDepotCannotExceedLimitm();
-
+            
             AddConstraint_ArrivalTimeRegulationFollowingACustomerAndRefuel();
             AddConstraint_ArrivalTimeRegulationFollowingACustomerDirectly();
 
@@ -329,12 +337,15 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_MinimumArrivalEnergyFollowingTheDepotAndRefuel();
             AddConstraint_MaximumArrivalEnergyAtANodeAfterRefuel();
             AddConstraint_MaximumArrivalEnergyAtANodeWhenArrivedDirectly();
-            //Add cuts
+
+            //Add cut
+            AddConstraint_MinNumberOfVehicles();
 
 
             //All constraints and cuts added
             allConstraints_array = allConstraints_list.ToArray();
         }
+
 
         void AddConstraint_NumberOfVisitsPerCustomerNodeIs1()
         {
@@ -424,7 +435,7 @@ namespace MPMFEVRP.Models.XCPlex
             }
             return NumberOfEVsIncomingToTheDepotIsLimited;
         }
-
+       
         void AddConstraint_ArrivingNumberOfGDVsAtDepotCannotExceedLimitm()
         {
             ILinearNumExpr NumberOfGDVsIncomingToTheDepotIsLimited = CreateCoreOf_Constraint_ArrivingNumberOfGDVsAtDepotCannotExceedLimitm();
@@ -439,6 +450,22 @@ namespace MPMFEVRP.Models.XCPlex
                 NumberOfGDVsIncomingToTheDepotIsLimited.AddTerm(1.0, X[i][0][vIndex_GDV]);
             }
             return NumberOfGDVsIncomingToTheDepotIsLimited;
+        }
+
+        void AddConstraint_MinNumberOfVehicles()
+        {
+            if (numVehicles.Sum() < minNumVeh)
+                return;
+            ILinearNumExpr NumberOfVehiclesOutgoingFromTheDepot = LinearNumExpr();
+            for (int j = 1; j < numNonESNodes; j++)
+            {
+                for (int v = 0; v < numVehCategories; v++)
+                    NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, X[0][j][v]);
+                for (int r = 0; r < nondominatedRPsExceptDirectArcs[0, j].Count; r++)
+                    NumberOfVehiclesOutgoingFromTheDepot.AddTerm(1.0, Y[0][j][r]);
+            }
+            string constraint_name = "Number_of_vehicles_outgoing_from_the_depot_must_be_greater_than_or_equal_to_" + (minNumVeh).ToString();
+            allConstraints_list.Add(AddGe(NumberOfVehiclesOutgoingFromTheDepot, minNumVeh, constraint_name));
         }
 
         void AddConstraint_ArrivalTimeRegulationFollowingACustomerAndRefuel()
@@ -583,11 +610,11 @@ namespace MPMFEVRP.Models.XCPlex
 
         void AddConstraint_ArrivalEnergyRegulationFollowingTheDepotAndRefuel()
         {
-            for (int j = 0; j < numNonESNodes; j++)
+            for (int j = 1; j < numNonESNodes; j++)
                 {
                     ILinearNumExpr ArrivalSOEDifference = CreateCoreOf_Constraint_ArrivalEnergyRegulationFollowingTheDepotAndRefuel(j);
                     string constraint_name = "SOE_Regulation_Following_TheDepot_to_node_" + j.ToString() + "_through_a_refueling_path";
-                    allConstraints_list.Add(AddGe(ArrivalSOEDifference, batteryCapacity, constraint_name));
+                    allConstraints_list.Add(AddLe(ArrivalSOEDifference, batteryCapacity, constraint_name));
                 }
         }
         private ILinearNumExpr CreateCoreOf_Constraint_ArrivalEnergyRegulationFollowingTheDepotAndRefuel(int j)
@@ -701,7 +728,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         void AddConstraint_MaximumArrivalEnergyAtANodeWhenArrivedDirectly()
         {
-            for (int j = 0; j < numNonESNodes; j++)
+            for (int j = 1; j < numNonESNodes; j++)
             {
                 ILinearNumExpr MaximumArrivalSOEAtDestination = CreateCoreOf_MaximumArrivalEnergyAtANodeWhenArrivedDirectly(j);
                 string constraint_name = "Minimum_Arrival_SOE_At_a_Node_" + j.ToString() + "_following_a_refueling_path";
@@ -722,44 +749,46 @@ namespace MPMFEVRP.Models.XCPlex
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
+            GetDecisionVariableValues();
+
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
-            outcome.AddRange(GetVehicleSpecificRoutes());
+            
+            outcome.AddRange(GetVehicleSpecificRoutes(VehicleCategories.EV));
+            outcome.AddRange(GetVehicleSpecificRoutes(VehicleCategories.GDV));
+
             return outcome;
         }
         public List<VehicleSpecificRoute> GetVehicleSpecificRoutes(VehicleCategories vehicleCategory)
         {
             Vehicle theVehicle = theProblemModel.VRD.GetTheVehicleOfCategory(vehicleCategory);
-            GetDecisionVariableValues();
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
             List<List<string>> listOfNonDepotSiteIDs;
             if (vehicleCategory == VehicleCategories.EV)
                 listOfNonDepotSiteIDs = GetListOfNonDepotSiteIDsEV();
             else
                 listOfNonDepotSiteIDs = GetListOfNonDepotSiteIDsGDV();
-
+            int count = 0;
             foreach (List<string> NDSIDs in listOfNonDepotSiteIDs)
-                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, NDSIDs));
+            {
+                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, NDSIDs, allRoutesESVisits[count]));
+                count++;
+            }
             return outcome;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="firstSiteIndices"></param>Can contain one or two elements. If one, it's for an X arc; if two, it's for a Y arc; nothing else is possible!
-        /// <param name="vehicleCategory"></param>Obviously if GDV, there won't be any Y arcs
-        /// <returns></returns>
+        
         public void GetDecisionVariableValues()
         {
             int[,] length3 = new int[numNonESNodes, numNonESNodes];
 
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
-                    length3[i, j] = allNondominatedRPs[i, j].Count;
+                    length3[i, j] = nondominatedRPsExceptDirectArcs[i, j].Count;
 
-            //System.IO.StreamWriter sw = new System.IO.StreamWriter("routes.txt");
             x_ijv_Values = new double[numNonESNodes, numNonESNodes][];
             y_ijp_Values = new double[numNonESNodes, numNonESNodes][];
             DeltaValues = new double[numNonESNodes];
             TauValues = new double[numNonESNodes];
+            EpsilonValues = new double[numNonESNodes, numNonESNodes];
 
             for (int i = 0; i < numNonESNodes; i++)
             {
@@ -767,9 +796,7 @@ namespace MPMFEVRP.Models.XCPlex
                 TauValues[i] = GetValue(ArrivalTime[i]);
 
                 for (int j = 0; j < numNonESNodes; j++)
-                {
-                    EpsilonValues[i,j] = GetValue(RefueledEnergyOnPath[i][j]);
-
+                {                   
                     x_ijv_Values[i, j] = new double[numVehCategories];
                     y_ijp_Values[i, j] = new double[numNondominatedRPs[i, j]];
 
@@ -778,25 +805,83 @@ namespace MPMFEVRP.Models.XCPlex
                     for (int r = 0; r < numNondominatedRPs[i, j]; r++)
                         y_ijp_Values[i, j][r] = GetValue(Y[i][j][r]);
                 }
-            }          
+            }
+            WriteDecisionVariables();
+            
         }
+        void WriteDecisionVariables()
+        {
+            var pathX = @"C:\Users\tha810\Documents\Xvariables.txt";
+            var pathY = @"C:\Users\tha810\Documents\Yvariables.txt";
+            var pathD = @"C:\Users\tha810\Documents\Dvariables.txt";
+            var pathT = @"C:\Users\tha810\Documents\Tvariables.txt";
+            var sw = new System.IO.StreamWriter(pathX);
 
+            for (int i = 0; i < numNonESNodes; i++)
+            {
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        sw.Write(preprocessedSites[i].ID + "\t" + preprocessedSites[j].ID + "\t" + "V:" + v.ToString() + "\t");
+                        sw.WriteLine(x_ijv_Values[i, j][v].ToString());
+                    }
+                }
+            }
+
+            sw.Close();
+            sw = new System.IO.StreamWriter(pathY);
+
+            for (int i = 0; i < numNonESNodes; i++)
+            {
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    for (int p = 0; p < numNondominatedRPs[i, j]; p++)
+                    {
+                        sw.Write(preprocessedSites[i].ID + "\t" + preprocessedSites[j].ID + "\t");
+                        for (int r = 0; r < 5; r++)
+                        {
+                            if (r < nondominatedRPsExceptDirectArcs[i, j][p].RefuelingStops.Count)
+                                sw.Write(nondominatedRPsExceptDirectArcs[i, j][p].RefuelingStops[r].ID + "\t");
+                            else
+                                sw.Write("\t");
+                        }
+                        sw.WriteLine(y_ijp_Values[i, j][p].ToString());
+                    }
+                }
+            }
+            sw.Close();
+            sw = new System.IO.StreamWriter(pathD);
+            for (int i = 0; i < numNonESNodes; i++)
+            {
+                sw.WriteLine(preprocessedSites[i].ID + "\t" + DeltaValues[i].ToString());
+            }
+            sw.Close();
+            sw = new System.IO.StreamWriter(pathT);
+            for (int i = 0; i < numNonESNodes; i++)
+            {
+                sw.WriteLine(preprocessedSites[i].ID + "\t" + TauValues[i].ToString());
+            }
+            sw.Close();
+            Console.WriteLine("data written to file");
+        }
         List<List<string>> GetListOfNonDepotSiteIDsEV()
         {
             List<List<string>> outcome = new List<List<string>>();
-            List<string> singleRoute = new List<string>();
+            List<string> singleRoute;
+            IndividualRouteESVisits routesESVisits;
             List<List<string>> allActiveEVarcs = new List<List<string>>();
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                    for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
                         if (y_ijp_Values[i, j][r] >= 0.5)
                         {
                             List<string> activeArc = new List<string>();
                             activeArc.Add(preprocessedSites[i].ID);
-                            for (int p = 0; p < allNondominatedRPs[i, j][r].RefuelingStops.Count; p++)
+                            for (int p = 0; p < nondominatedRPsExceptDirectArcs[i, j][r].RefuelingStops.Count; p++)
                             {
-                                activeArc.Add(allNondominatedRPs[i, j][r].RefuelingStops[p].ID);
+                                activeArc.Add(nondominatedRPsExceptDirectArcs[i, j][r].RefuelingStops[p].ID);
                             }
                             activeArc.Add(preprocessedSites[j].ID);
                             allActiveEVarcs.Add(activeArc);
@@ -814,12 +899,18 @@ namespace MPMFEVRP.Models.XCPlex
             string lastID = theProblemModel.SRD.GetSingleDepotID();
             while (tempActiveArcs.Count > 0)
             {
+                singleRoute = new List<string>();
+                routesESVisits = new IndividualRouteESVisits();
                 do
                 {
                     for (int i = 0; i < tempActiveArcs.Count; i++)
                     {
                         if (tempActiveArcs[i][0] == lastID)
                         {
+                            if(tempActiveArcs[i].Count>2) //there is at least one ES
+                            {
+                                routesESVisits.AddRange(GetIndividualESVisit(tempActiveArcs[i]));
+                            }
                             tempActiveArcs[i].RemoveAt(0);
                             singleRoute.AddRange(tempActiveArcs[i]);
                             lastID = singleRoute.Last();
@@ -830,8 +921,40 @@ namespace MPMFEVRP.Models.XCPlex
                 } while (lastID != theProblemModel.SRD.GetSingleDepotID());
                 singleRoute.RemoveAt(singleRoute.Count - 1);
                 outcome.Add(singleRoute);
+                allRoutesESVisits.Add(routesESVisits);               
                 lastID = theProblemModel.SRD.GetSingleDepotID();
             }
+            return outcome;
+        }
+        List<IndividualESVisitDataPackage> GetIndividualESVisit(List<string> activeArc)
+        {
+            List<string> tempArc = new List<string>(activeArc);
+            List<IndividualESVisitDataPackage> outcome = new List<IndividualESVisitDataPackage>();
+            string from = tempArc.First();
+            string to = tempArc.Last();
+            tempArc.RemoveAt(0);
+            tempArc.RemoveAt(tempArc.Count - 1);
+            double timeSpentEnRoute = 0;
+            for (int i = 0; i < numNonESNodes; i++)
+                if (preprocessedSites[i].ID == from)
+                {
+                    for (int j = 0; j < numNonESNodes; j++)
+                        if (preprocessedSites[j].ID == to)
+                        {
+                            timeSpentEnRoute = GetValue(ArrivalTime[j]) - ServiceDuration(theProblemModel.SRD.GetSiteByID(from)) - GetValue(ArrivalTime[i]);
+                            double travelTime = TravelTime(theProblemModel.SRD.GetSiteByID(from), theProblemModel.SRD.GetSiteByID(tempArc.First())) + TravelTime(theProblemModel.SRD.GetSiteByID(tempArc.Last()), theProblemModel.SRD.GetSiteByID(to));
+                            while (tempArc.Count > 1)
+                            {
+                                travelTime += TravelTime(theProblemModel.SRD.GetSiteByID(tempArc[0]), theProblemModel.SRD.GetSiteByID(tempArc[1]));
+                                tempArc.RemoveAt(0);
+                            }
+                            timeSpentEnRoute -= travelTime;
+                            break;
+                        }
+                    break;
+                }
+            for(int k=1; k<activeArc.Count-1; k++)
+                outcome.Add(new IndividualESVisitDataPackage(activeArc[k], (timeSpentEnRoute / (activeArc.Count-2)) / RechargingRate(theProblemModel.SRD.GetSiteByID(activeArc[k]))));
             return outcome;
         }
         List<List<string>> GetListOfNonDepotSiteIDsGDV()
@@ -882,118 +1005,6 @@ namespace MPMFEVRP.Models.XCPlex
         {
             return "GVRP Mixed Fleet Multiple ES Visits";
         }
-        //public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence, VehicleSpecificRoute vsr_GDV)
-        //{
-        //    RHS_forNodeCoverage = new double[numNonESNodes];
-        //    for (int i = 0; i < numNonESNodes; i++)
-        //        for (int j = 1; j < numNonESNodes; j++)
-        //        {
-        //            if (cS.Customers.Contains(preprocessedSites[j].ID))
-        //            {
-        //                RHS_forNodeCoverage[j] = 1.0;
-        //                for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                {
-        //                    X[i][j][r][vIndex_EV].UB = 1.0;
-        //                }
-        //                for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
-        //                {
-        //                    X[j][i][r][vIndex_EV].UB = 1.0;
-        //                }
-        //                X[j][i][0][vIndex_GDV].UB = 1.0;
-        //            }
-        //            else
-        //            {
-        //                RHS_forNodeCoverage[j] = 0.0;
-        //                for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                {
-        //                    X[i][j][r][vIndex_EV].UB = 0.0;
-        //                }
-        //                for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
-        //                {
-        //                    X[j][i][r][vIndex_EV].UB = 0.0;
-        //                }
-        //                X[j][i][0][vIndex_GDV].UB = 0.0;
-        //            }
-        //        }
-        //    RefineRightHandSidesOfCustomerVisitationConstraints();
-
-        //    //If we want to preserve the sequence, we must have a gdv optimal route!
-        //    if (preserveCustomerVisitSequence)
-        //    {
-        //        //if (cS.GetVehicleSpecificRouteOptimizationStatus(VehicleCategories.GDV) != VehicleSpecificRouteOptimizationStatus.Optimized)
-        //        //    throw new System.Exception("RefineDecisionVariables of afv solver for single customer set wants to keep the route order but it is not given one!");
-        //        VehicleSpecificRoute vsr = vsr_GDV;
-        //        List<int[]> activeArcs = GetOrderedCustomerIndices(vsr);
-        //        foreach (int[] arc in activeArcs)
-        //            for (int i = 0; i < numNonESNodes; i++)
-        //                for (int j = 0; j < numNonESNodes; j++)
-        //                {
-        //                    if (i != arc[0] || j != arc[1])
-        //                    {
-        //                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                            X[i][j][r][vIndex_EV].UB = 0.0;
-        //                    }
-        //                }
-        //    }
-        //}
-        //public void RefineDecisionVariables(CustomerSet cS, bool preserveCustomerVisitSequence)
-        //{
-        //    RHS_forNodeCoverage = new double[numNonESNodes];
-        //    for (int i = 0; i < numNonESNodes; i++)
-        //        for (int j = 1; j < numNonESNodes; j++)
-        //        {
-        //            if (cS.Customers.Contains(preprocessedSites[j].ID))
-        //            {
-        //                RHS_forNodeCoverage[j] = 1.0;
-        //                for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                {
-        //                    X[i][j][r][vIndex_EV].UB = 1.0;
-        //                }
-        //                for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
-        //                {
-        //                    X[j][i][r][vIndex_EV].UB = 1.0;
-        //                }
-        //                X[j][i][0][vIndex_GDV].UB = 1.0;
-        //            }
-        //            else
-        //            {
-        //                RHS_forNodeCoverage[j] = 0.0;
-        //                for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                {
-        //                    X[i][j][r][vIndex_EV].UB = 0.0;
-        //                }
-        //                for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
-        //                {
-        //                    X[j][i][r][vIndex_EV].UB = 0.0;
-        //                }
-        //                X[j][i][0][vIndex_GDV].UB = 0.0;
-        //            }
-        //        }
-        //    RefineRightHandSidesOfCustomerVisitationConstraints();
-        //}
-        //List<int[]> GetOrderedCustomerIndices(VehicleSpecificRoute vsr)
-        //{
-        //    List<int[]> outcome = new List<int[]>();
-        //    List<string> visitedSiteIDs = vsr.ListOfVisitedNonDepotSiteIDs;
-        //    int[] indices = new int[2];//GDV arcs must have two elements 
-        //    int from = -1;
-        //    for (int i = 0; i < preprocessedSites.Length; i++)
-        //        if (visitedSiteIDs[0] == preprocessedSites[i].ID)
-        //        {
-        //            from = i;
-        //        }
-        //    for (int k = 1; k < visitedSiteIDs.Count; k++)
-        //        for (int j = 0; j < preprocessedSites.Length; j++)
-        //            if (visitedSiteIDs[k] == preprocessedSites[j].ID)
-        //            {
-        //                int to = j;
-        //                indices[0] = from;
-        //                indices[1] = to;
-        //                from = to;
-        //            }
-
-        //    return outcome;
-        //}
         public override void RefineDecisionVariables(CustomerSet cS)
         {
             RHS_forNodeCoverage = new double[numNonESNodes];
@@ -1003,11 +1014,11 @@ namespace MPMFEVRP.Models.XCPlex
                     if (cS.Customers.Contains(preprocessedSites[j].ID))
                     {
                         RHS_forNodeCoverage[j] = 1.0;
-                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
                         {
                             Y[i][j][r].UB = 1.0;
                         }
-                        for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[j, i].Count; r++)
                         {
                             Y[j][i][r].UB = 1.0;
                         }
@@ -1019,11 +1030,11 @@ namespace MPMFEVRP.Models.XCPlex
                     else
                     {
                         RHS_forNodeCoverage[j] = 0.0;
-                        for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
                         {
                             Y[i][j][r].UB = 0.0;
                         }
-                        for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[j, i].Count; r++)
                         {
                             Y[j][i][r].UB = 0.0;
                         }
@@ -1034,7 +1045,6 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
-            //singleRouteESvisits.Clear();
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
@@ -1056,66 +1066,112 @@ namespace MPMFEVRP.Models.XCPlex
             }
 
         }
-        //public void RefineDecisionVariables(CustomerSet cS, double AFV_vmt)
-        //{
-        //    RHS_forNodeCoverage = new double[numNonESNodes];
-        //    for (int i = 0; i < numNonESNodes; i++)
-        //        for (int j = 1; j < numNonESNodes; j++)
-        //        {
-        //            if (cS.Customers.Contains(preprocessedSites[j].ID))
-        //            {
-        //                RHS_forNodeCoverage[j] = 1.0;
-        //                for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                {
-        //                    X[i][j][r].UB = 1.0;
-        //                }
-        //                for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
-        //                {
-        //                    X[j][i][r].UB = 1.0;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                RHS_forNodeCoverage[j] = 0.0;
-        //                for (int r = 0; r < allNondominatedRPs[i, j].Count; r++)
-        //                {
-        //                    X[i][j][r].UB = 0.0;
-        //                }
-        //                for (int r = 0; r < allNondominatedRPs[j, i].Count; r++)
-        //                {
-        //                    X[j][i][r].UB = 0.0;
-        //                }
-        //            }
-        //        }
-        //    RefineRightHandSidesOfCustomerVisitationConstraints();
-        //    allConstraints_array[objUpperBoundConstraintIndex].UB = double.MaxValue;
-        //    allConstraints_array[objUpperBoundConstraintIndex].LB = 0.0;
-        //    if (objUpperBoundConstraintIndex > -1)
-        //    {
-        //        allConstraints_array[objUpperBoundConstraintIndex].UB = AFV_vmt;
-        //        allConstraints_array[objUpperBoundConstraintIndex].LB = AFV_vmt;
-        //    }
-        //}
-        //void RefineRHSofTotalTravelConstraints(CustomerSet cS)
-        //{
-        //    int c = 0;
-        //    if (customerCoverageConstraint != CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce)
-        //    {
-        //        c = totalTravelTimeConstraintIndex;
-        //        allConstraints_array[c].UB = theProblemModel.CRD.TMax - 30.0 * RHS_forNodeCoverage.Sum();//theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
-        //        //allConstraints_array[c].LB = theProblemModel.CRD.TMax - theProblemModel.SRD.GetTotalCustomerServiceTime(cS.Customers);
-        //    }
-        //    if (addTotalNumberOfActiveArcsCut)
-        //    {
-        //        c = totalNumberOfActiveArcsConstraintIndex;
-        //        allConstraints_array[c].UB = theProblemModel.CRD.TMax + cS.NumberOfCustomers;
-        //        //allConstraints_array[c].LB = allConstraints_array[c].LB + cS.NumberOfCustomers;
-        //    }
-        //}
+        
         public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
         {
             throw new NotImplementedException();
         }
+        void AddKnownSolutionForTesting()
+        {
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
+                    {
+                        Y[i][j][r].UB = 0.0;
+                        Y[i][j][r].LB = 0.0;
+                    }
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        X[i][j][v].UB = 0.0;
+                        X[i][j][v].LB = 0.0;
+                    }
+                }
+            //First tour
+            X[0][2][0].UB = 1.0;
+            X[0][2][0].LB = 1.0;
+
+            X[2][16][0].UB = 1.0;
+            X[2][16][0].LB = 1.0;
+
+            X[16][0][0].UB = 1.0;
+            X[16][0][0].LB = 1.0;
+
+            //Second tour
+            X[0][3][0].UB = 1.0;
+            X[0][3][0].LB = 1.0;
+
+            Y[3][9][0].UB = 1.0;
+            Y[3][9][0].LB = 1.0;
+
+            X[9][0][0].UB = 1.0;
+            X[9][0][0].LB = 1.0;
+
+            //Third tour
+            X[0][4][0].UB = 1.0;
+            X[0][4][0].LB = 1.0;
+
+            X[4][8][0].UB = 1.0;
+            X[4][8][0].LB = 1.0;
+
+            X[8][18][0].UB = 1.0;
+            X[8][18][0].LB = 1.0;
+
+            X[18][13][0].UB = 1.0;
+            X[18][13][0].LB = 1.0;
+
+            X[13][12][0].UB = 1.0;
+            X[13][12][0].LB = 1.0;
+
+            X[12][0][0].UB = 1.0;
+            X[12][0][0].LB = 1.0;
+
+            //Fourth tour 
+            X[0][7][0].UB = 1.0;
+            X[0][7][0].LB = 1.0;
+
+            X[7][6][0].UB = 1.0;
+            X[7][6][0].LB = 1.0;
+
+            X[6][10][0].UB = 1.0;
+            X[6][10][0].LB = 1.0;
+
+            X[10][0][0].UB = 1.0;
+            X[10][0][0].LB = 1.0;
+
+            //Fifth tour 
+            X[0][11][0].UB = 1.0;
+            X[0][11][0].LB = 1.0;
+
+            X[11][20][0].UB = 1.0;
+            X[11][20][0].LB = 1.0;
+
+            X[20][14][0].UB = 1.0;
+            X[20][14][0].LB = 1.0;
+
+            X[14][1][0].UB = 1.0;
+            X[14][1][0].LB = 1.0;
+
+            Y[1][0][1].UB = 1.0;
+            Y[1][0][1].LB = 1.0;
+
+            //Sixth tour 
+            X[0][15][0].UB = 1.0;
+            X[0][15][0].LB = 1.0;
+
+            X[15][19][0].UB = 1.0;
+            X[15][19][0].LB = 1.0;
+
+            Y[19][17][0].UB = 1.0;
+            Y[19][17][0].LB = 1.0;
+
+            X[17][5][0].UB = 1.0;
+            X[17][5][0].LB = 1.0;
+
+            X[5][0][0].UB = 1.0;
+            X[5][0][0].LB = 1.0;
+        }
+
     }
 }
 

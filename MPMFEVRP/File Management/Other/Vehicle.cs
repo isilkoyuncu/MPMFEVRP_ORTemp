@@ -8,22 +8,16 @@ namespace Instance_Generation.Other
 {
     public class Vehicle
     {
-        string id;
-        VehicleCategories category;
-        int loadCapacity;
-        double batteryCapacity;
-        double consumptionRate;//Only for electric vehicles
-        double fixedCost;
-        double variableCostPerMile;//per mile
-        double maxChargingRate; //kWh/minute
-        public string ID { get { return id; } }
-        public VehicleCategories Category { get { return category; } }
-        public int LoadCapacity { get { return loadCapacity; } }
-        public double BatteryCapacity { get { return batteryCapacity; } }
-        public double ConsumptionRate { get { return consumptionRate; } }
-        public double FixedCost { get { return fixedCost; } }
-        public double VariableCostPerMile { get { return variableCostPerMile; } }
-        public double MaxChargingRate { get { return maxChargingRate; } }
+        string id; public string ID { get { return id; } }
+        VehicleCategories category; public VehicleCategories Category { get { return category; } }
+        int loadCapacity; public int LoadCapacity { get { return loadCapacity; } }
+        double batteryTankCapacity; public double BatteryCapacity { get { return batteryTankCapacity; } }
+        double consumptionRate; public double ConsumptionRate { get { return consumptionRate; } }
+        double fixedCost; public double FixedCost { get { return fixedCost; } }
+        double variableCostPerMile; public double VariableCostPerMile { get { return variableCostPerMile; } }
+        double maxChargingRate; public double MaxChargingRate { get { return maxChargingRate; } }
+        double fixedRefuelingTimeMins; public double FixedRefuelingTimeMins { get { return fixedRefuelingTimeMins; } }
+        double co2emissionGramsPerMile; public double CO2emissionGramsPerMile { get { return co2emissionGramsPerMile; } }
 
         public Vehicle(Vehicles v)
         {
@@ -33,115 +27,134 @@ namespace Instance_Generation.Other
                     id = "YC AVF 24kWh 0.2kWh/mile";
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
-                    batteryCapacity = 24.0;
+                    batteryTankCapacity = 24.0;
                     consumptionRate = 0.20;
                     fixedCost = 0.0;//40.0
                     variableCostPerMile = 0.5;
                     maxChargingRate = 24.0 / 30.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
                 case Vehicles.YC_1_6L_4cyl_Automatic:
                     id = "YC 1.6L 4cyl Automatic";
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
-                    batteryCapacity = 0;
-                    consumptionRate = 0;
+                    batteryTankCapacity = 0;
+                    consumptionRate = 0; // mpg
                     fixedCost = 0.0;//30.0
                     variableCostPerMile = 1;
                     maxChargingRate = 0.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
                 case Vehicles.EMH_60KWH:
                     id = "EMH AVF 60kWh 0.2kWh/mile";//300 miles range
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
-                    batteryCapacity = 60.0;
+                    batteryTankCapacity = 60.0;
                     consumptionRate = 0.20;
                     fixedCost = 60.0;
                     variableCostPerMile = 0.05;
                     maxChargingRate = 60.0/15.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
                 case Vehicles.EMH_1_6L_4cyl_Automatic:
                     id = "EMH 1.6L 4cyl Automatic";
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
-                    batteryCapacity = 0;
-                    consumptionRate = 0;
+                    batteryTankCapacity = 0;
+                    consumptionRate = 0; // gallons per mile or 1/mpg =
                     fixedCost = 40.0;
                     variableCostPerMile = 0.1;
                     maxChargingRate = 0.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
-                case Vehicles.Ford_Focus_Electric_2016_23KWH:
-                    id = "Ford Focus Electric 2016 w/ 23KWH Battery";
+                case Vehicles.Schneider_60KWH:
+                    id = "Schneider AVF 60kWh 1kWh/mile";//300 miles range
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
-                    batteryCapacity = 23.0;
-                    consumptionRate = 0.30;
-                    fixedCost = 50.0; // TODO Focus Electric might be expensive than Leaf check the price
-                    variableCostPerMile = 0.0400;
-                    maxChargingRate = 6.6 / 60.0; // TODO Focus Electric might be different
+                    batteryTankCapacity = 79.69;
+                    consumptionRate = 1.0;
+                    fixedCost = 60.0;
+                    variableCostPerMile = 0.05;
+                    maxChargingRate = 3.39;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
-                case Vehicles.Ford_Focus_2016_2_0L_4cyl_AutoAM_S6:
-                    id = "Ford Focus 2016 2.0L 4cyl AutoAM S6";
-                    // TODO Update the values below:
+                case Vehicles.Schneider_1_6L_4cyl_Automatic:
+                    id = "Schneider 1.6L 4cyl Automatic";
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
-                    batteryCapacity = 0;
-                    consumptionRate = 0;
-                    fixedCost = 30.0;
-                    variableCostPerMile = 0.0656;
-                    maxChargingRate = 0.0; 
+                    batteryTankCapacity = 0;
+                    consumptionRate = 0; // gallons per mile or 1/mpg =
+                    fixedCost = 40.0;
+                    variableCostPerMile = 0.1;
+                    maxChargingRate = 0.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
-                case Vehicles.Nissan_Leaf_2016_24KWH:
-                    id = "Nissan Leaf 2016 w/ 24KWH Battery";
+                case Vehicles.Nissan_Leaf_2021_40KWH:
+                    id = "Nissan Leaf 2021 w/ 40KWH Battery";
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
-                    batteryCapacity = 24.0;
-                    consumptionRate = 0.30;
-                    fixedCost = 40.0;
+                    batteryTankCapacity = 40.0; //Goes 149 miles with a single charge
+                    consumptionRate = 0.268;
+                    fixedCost = 32000;
                     variableCostPerMile = 0.0388;
                     maxChargingRate = 3.3 / 60.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
-                case Vehicles.Nissan_Leaf_2016_30KWH:
-                    id = "Nissan Leaf 2016 w/ 30KWH Battery";
+                case Vehicles.Nissan_Leaf_2021_62KWH:
+                    id = "Nissan Leaf 2021 w/ 62KWH Battery";
                     category = VehicleCategories.EV;
                     loadCapacity = 200;
-                    batteryCapacity = 30.0;
-                    consumptionRate = 0.30;
-                    fixedCost = 50.0;
+                    batteryTankCapacity = 62.0; //Goes 226 miles with a single charge
+                    consumptionRate = 0.274;
+                    fixedCost = 38000;
                     variableCostPerMile = 0.0400;
                     maxChargingRate = 3.3/60.0;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 0.0;
                     break;
-                case Vehicles.Nissan_Versa_2016_1_6L_4cyl_Automatic:
-                    id = "Nissan Versa 2016 1.6L 4cyl Automatic";
+                case Vehicles.Nissan_Versa_2021_1_6L_4cyl_Automatic:
+                    id = "Nissan Versa 2021 1.6L 4cyl Automatic";
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
-                    batteryCapacity = 0;
-                    consumptionRate = 0;
-                    fixedCost = 30.0;
+                    batteryTankCapacity = 10.8;
+                    consumptionRate = 0.029; //gallons per mile or 1/mpg =(1/35=0.029) 32/40 mpg
+                    fixedCost = 17000;
                     variableCostPerMile = 0.0656;
                     maxChargingRate = 0.0;
-                    break;
+                    fixedRefuelingTimeMins = 0.0;
+                    co2emissionGramsPerMile = 254.0;
+                    break;               
             }
         }
 
         public static string[] GetHeaderRow()
         {
-            return new string[] { "ID", "Category", "Load Capacity", "Battery Capacity", "Consumption Rate", "Fixed Cost", "Variable Cost Per Mile" , "Maximum Charging Rate"};
+            return new string[] { "ID", "Category", "Load Capacity", "Battery Capacity", "Consumption Rate", "Fixed Cost", "Variable Cost Per Mile" , "Maximum Charging Rate", "Fixed Refueling Duration", "CO2 Emission (gr/mile)"};
         }
         public string[] GetIndividualRow()
         {
-            return new string[] { id.ToString(), category.ToString(), loadCapacity.ToString(), batteryCapacity.ToString(), consumptionRate.ToString(), fixedCost.ToString(), variableCostPerMile.ToString(), maxChargingRate.ToString()};
+            return new string[] { id.ToString(), category.ToString(), loadCapacity.ToString(), batteryTankCapacity.ToString(), consumptionRate.ToString(), fixedCost.ToString(), variableCostPerMile.ToString(), maxChargingRate.ToString(), fixedRefuelingTimeMins.ToString(), co2emissionGramsPerMile.ToString()};
         }
 
-        public Vehicle(string id, VehicleCategories category, int loadCapacity, double batteryCapacity, double consumptionRate, double fixedCost, double variableCostPerMile, double maxChargingRate)
+        public Vehicle(string id, VehicleCategories category, int loadCapacity, double batteryTankCapacity, double consumptionRate, double fixedCost, double variableCostPerMile, double maxChargingRate, double fixedRefuelingTimeMins, double co2emissionGramsPerMile)
         {
             this.id = id;
             this.category = category;
             this.loadCapacity = loadCapacity;
-            this.batteryCapacity = batteryCapacity;
+            this.batteryTankCapacity = batteryTankCapacity;
             this.consumptionRate = consumptionRate;
             this.fixedCost = fixedCost;
             this.variableCostPerMile = variableCostPerMile;
             this.maxChargingRate = maxChargingRate;
+            this.fixedRefuelingTimeMins = fixedRefuelingTimeMins;
+            this.co2emissionGramsPerMile = co2emissionGramsPerMile;
         }
     }
 }

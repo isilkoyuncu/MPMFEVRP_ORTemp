@@ -33,8 +33,13 @@ namespace Instance_Generation.FileConverters
         double[] timeWindowEnd; public double[] TimeWindowEnd { get { return timeWindowEnd; } }//[numNodes]
         double[] customerServiceDuration; public double[] CustomerServiceDuration { get { return customerServiceDuration; } }//[numNodes] typically 30-60 (minutes)
         double[] gamma; public double[] Gamma { get { return gamma; } }//[numNodes] Charging rate (KHW/minute)
+        double[] refuelingCostPerKWH; public double[] RefuelingCostPerKWH { get { return refuelingCostPerKWH; } }//[numNodes] refueling cost per kWh
         double[,] prize; public double[,] Prize { get { return prize; } }//[2, numNodes] [vehicle - 0:EV, 1:GDV]
         double travelSpeed; public double TravelSpeed { get { return travelSpeed; } }// miles per minute
+        double refuelCostOfGas; public double RefuelCostOfGas { get { return refuelCostOfGas; } }// dollar per gallon
+        double refuelCostAtDepot; public double RefuelCostAtDepot { get { return refuelCostAtDepot; } }// dollar per kwh
+        double refuelCostInNetwork; public double RefuelCostInNetwork { get { return refuelCostInNetwork; } }// dollar per kwh
+        double refuelCostOutNetwork; public double RefuelCostOutNetwork { get { return refuelCostOutNetwork; } }// dollar per kwh
         double[,] distance; public double[,] Distance { get { return distance; } }
         bool useGeogPosition; public bool UseGeogPosition { get { return useGeogPosition; } }//is needed when calculating the distances
 
@@ -68,93 +73,55 @@ namespace Instance_Generation.FileConverters
         //Main function
         public void Convert()
         {
-            //The ID Column: if there is a file reader, it's just what's in the file; otherwise, it's created from sctratch
             if (reader == null)
+            {
                 PopulateIDColumn();
+                RIG.PopulateXYColumns(numNodes, CCData, out x, out y);
+                PopulateDemands();
+                PopulateTimeWindows();
+                RIG.PopulateServiceDurationColumn(numNodes, CCData, TGPData, out customerServiceDuration);
+                travelSpeed = CCData.TravelSpeed;
+
+            }
             else
             {
+                //The ID Column: if there is a file reader, it's just what's in the file; otherwise, it's created from sctratch
                 nodeID = reader.getIDColumn();
                 if (nodeID == null)
                 {
                     //System.Windows.Forms.MessageBox.Show("reader.getIDColumn() returned null, so we have to create it from scratch!");//TODO After verifying the reader always populates the ID column correctly, delete this conditional code!
                     PopulateIDColumn();
                 }
-            }
-
-            //X&Y Columns
-            if (reader == null)
-            {
-                RIG.PopulateXYColumns(numNodes, CCData, out x, out y);
-            }
-            else
-            {
+                //X&Y Columns
                 x = reader.getXorLongitudeColumn();
                 y = reader.getYorLatitudeColumn();
-            }
-
-            //Demand Column
-            if (reader == null)
-            {
-                PopulateDemands();
-            }
-            else
-            {
+                //Demand Column
                 demand = reader.getDemandColumn();
-            }
-
-            //Time Window Matrix
-            if (reader == null)
-            {
-                PopulateTimeWindows();
-            }
-            else
-            {
+                //Time Window Matrix
                 timeWindowStart = reader.getReadyTimeColumn();
                 timeWindowEnd = reader.getDueDateColumn();
-            }
-
-            //Customer Service Duration Column
-            if (reader == null)
-            {
-                RIG.PopulateServiceDurationColumn(numNodes, CCData, TGPData, out customerServiceDuration);
-            }
-            else
-            {
+                //Customer Service Duration Column
                 customerServiceDuration = reader.getServiceDurationColumn();
-            }
-
-            //Now we need to shuffle the rows
-            if (reader != null)//otherwise we don't need the shuffling at all!
-            {
+                //Now we need to shuffle the rows
                 if (reader.needToShuffleCustomers())
                     RIG.ShuffleRows(reader.getNumESS(), numCustomers, nodeID, x, y, demand, timeWindowStart, timeWindowEnd, customerServiceDuration);
-            }
+                //Travel speed
+                travelSpeed = reader.getTravelSpeed();
+                //Removal of infeasible customers
 
+            }
             //The Type Column:
             PopulateTypeColumn();//TODO Test & compare populated type info with what was in the read file for several examples, if there is any mismatch, we'll have to re-consider how to convert the type info
-
             //Gamma Columns
-            PopulateGammaColumn(); //Since this function depends on type column only, no need to seperate as from reader and from form.
-
+            PopulateGammaColumn(); //Since this function depends on type column only, no need to seperate as from reader and from form.            
+            //Refueling Cost Column
+            PopulateRefuelingCostColumn();
             //Prize Matrix
             PopulatePrizeColumn();
-
-            //Travel speed
-            if (reader == null)
-            {
-                travelSpeed = CCData.TravelSpeed;
-            }
-            else
-            {
-                travelSpeed = reader.getTravelSpeed();
-            }
-
             //Distance
             PopulateDistancesMatrix();
-
-            //Removal of infeasible customers
-            if(reader!=null)
-                if(reader.getInputFileType()== "EMH_12")
+            if (reader != null)
+                if (reader.getInputFileType() == "EMH_12")
                     RemoveInfeasibleCustomers(new List<CustomerRemovalCriteria>() { CustomerRemovalCriteria.CannotBeReachedWithAtMostOneESVisit, CustomerRemovalCriteria.DirectRouteExceedsWorkdayLength });
         }
 
@@ -209,16 +176,7 @@ namespace Instance_Generation.FileConverters
                 }
             }
 
-        }
-        void ManipulateTypeColumn(string[] nodeTypeFromReader)
-        {
-            nodeType = new string[numNodes];
-            int counter = 0;
-            nodeType[counter] = "d";
-            nodeType[++counter] = "e";
-            nodeType[counter] += TGPData.SelectedDepotChargingLvl.ToString();
-            // TODO finish manipulatetype column method
-        }
+        }     
         void PopulateGammaColumn()
         {
             gamma = new double[numNodes];
@@ -231,6 +189,44 @@ namespace Instance_Generation.FileConverters
                 else if (nodeType[i].Contains("L1"))
                     gamma[i] = TGPData.L1kWhPerMinute;
             }
+        }
+        void PopulateRefuelingCostColumn()
+        {
+            refuelCostOfGas = TGPData.GasolineDollarPerGallon;
+            refuelCostAtDepot = TGPData.RefuelingCostAtDepotPerKWH;
+            refuelCostInNetwork = TGPData.InNetworkCostPerKWH;
+            refuelCostOutNetwork = TGPData.OutNetworkCostPerKWH;
+            Random rnd = new Random();
+            List<int> tempIndices = new List<int>();
+            List<int> inNetworkIndices = new List<int>();
+
+            for (int i = 0; i < numNodes; i++)
+                if (nodeType[i].Contains("e"))
+                    if (X[0] != X[i] || Y[0] != Y[i]) //it is not the ES at the depot
+                        tempIndices.Add(i);
+
+            for (int i = 0; i < TGPData.NumInNetworkESs; i++)
+            {
+                int index = rnd.Next(tempIndices.Count);
+                inNetworkIndices.Add(tempIndices[index]);
+                tempIndices.RemoveAt(index);
+            }
+            refuelingCostPerKWH = new double[numNodes];
+            for (int i = 0; i < numNodes; i++)
+                if (nodeType[i].Contains("e"))
+                {
+                    if (inNetworkIndices.Contains(i))
+                        refuelingCostPerKWH[i] = TGPData.InNetworkCostPerKWH;
+                    else
+                    {
+                        if (X[0] != X[i] || Y[0] != Y[i]) //it is not the ES at the depot
+                            refuelingCostPerKWH[i] = TGPData.OutNetworkCostPerKWH;
+                        else
+                            refuelingCostPerKWH[i] = TGPData.InNetworkCostPerKWH;
+                    }
+                }
+                else
+                    refuelingCostPerKWH[i] = 999999.00;
         }
         void PopulatePrizeColumn()
         {

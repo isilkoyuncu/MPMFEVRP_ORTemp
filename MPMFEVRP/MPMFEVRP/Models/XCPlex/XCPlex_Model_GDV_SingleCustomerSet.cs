@@ -543,7 +543,6 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected override void SpecializedInitialize()
         {
-            throw new NotImplementedException();
         }
     }
 }

@@ -9,8 +9,7 @@ namespace Instance_Generation.FormSections
 {
     public class TypeGammaPrize_RelatedData
     {
-        int nEVPremPayCustomers;
-        public int NEVPremPayCustomers { get { return nEVPremPayCustomers; } }
+        int nEVPremPayCustomers;        public int NEVPremPayCustomers { get { return nEVPremPayCustomers; } }
 
         int nISS, nISS_L1, nISS_L2, nISS_L3;
         public int NISS { get { return nISS; } }
@@ -29,23 +28,18 @@ namespace Instance_Generation.FormSections
         public double L2kWhPerMinute { get { return l2kWhPerMinute; } }
         public double L3kWhPerMinute { get { return l3kWhPerMinute; } }
 
-        ChargingLevels selectedDepotChargingLvl;
-        public ChargingLevels SelectedDepotChargingLvl { get { return selectedDepotChargingLvl; } }
+        ChargingLevels selectedDepotChargingLvl;    public ChargingLevels SelectedDepotChargingLvl { get { return selectedDepotChargingLvl; } }
+        BasePricingPolicy basePricingPol;   public BasePricingPolicy BasePricingPol { get { return basePricingPol; } }
+        double basePricingDollar;       public double BasePricingDollar { get { return basePricingDollar; } }
+        TripChargePolicy tripChargePol; public TripChargePolicy TripChargePol { get { return tripChargePol; } }
+        double tripChargeDollar;        public double TripChargeDollar { get { return tripChargeDollar; } }
+        double evPrizeCoefficient;      public double EVPrizeCoefficient { get { return evPrizeCoefficient; } }
+        int numInNetworkESs;            public int NumInNetworkESs { get { return numInNetworkESs; } }
+        double refuelingCostAtDepotPerKWH; public double RefuelingCostAtDepotPerKWH { get { return refuelingCostAtDepotPerKWH; } }
+        double inNetworkCostPerKWH;     public double InNetworkCostPerKWH { get { return inNetworkCostPerKWH; } }
+        double outNetworkCostPerKWH;    public double OutNetworkCostPerKWH { get { return outNetworkCostPerKWH; } }
+        double gasolineDollarPerGallon; public double GasolineDollarPerGallon { get { return gasolineDollarPerGallon; } }
 
-        BasePricingPolicy basePricingPol;
-        public BasePricingPolicy BasePricingPol { get { return basePricingPol; } }
-
-        double basePricingDollar;
-        public double BasePricingDollar { get { return basePricingDollar; } }
-
-        TripChargePolicy tripChargePol;
-        public TripChargePolicy TripChargePol { get { return tripChargePol; } }
-
-        double tripChargeDollar;
-        public double TripChargeDollar { get { return tripChargeDollar; } }
-
-        double evPrizeCoefficient;
-        public double EVPrizeCoefficient { get { return evPrizeCoefficient; } }
 
         public TypeGammaPrize_RelatedData(
             int nEVPremPayCustomers,
@@ -63,7 +57,12 @@ namespace Instance_Generation.FormSections
             double basePricingDollar,
             TripChargePolicy tripChargePol,
             double tripChargeDollar,
-            double evPrizeCoefficient
+            double evPrizeCoefficient,
+            int numInNetworkESs,
+            double refuelingCostAtDepotPerKWH,
+            double inNetworkCostPerKWH,
+            double outNetworkCostPerKWH,
+            double gasolineDollarPerGallon
             )
         {
             this.nEVPremPayCustomers = nEVPremPayCustomers;
@@ -84,6 +83,11 @@ namespace Instance_Generation.FormSections
             this.tripChargePol = tripChargePol;
             this.tripChargeDollar = tripChargeDollar;
             this.evPrizeCoefficient = evPrizeCoefficient;
+            this.numInNetworkESs = numInNetworkESs;
+            this.refuelingCostAtDepotPerKWH = refuelingCostAtDepotPerKWH;
+            this.inNetworkCostPerKWH = inNetworkCostPerKWH;
+            this.outNetworkCostPerKWH = outNetworkCostPerKWH;
+            this.gasolineDollarPerGallon = gasolineDollarPerGallon;
         }
     }
 }

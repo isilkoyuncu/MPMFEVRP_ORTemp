@@ -98,7 +98,7 @@ namespace MPMFEVRP.Models.XCPlex
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
                 {
-                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD);
+                    allNondominatedRPs[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD, theProblemModel.VRD);
                 }
         }
         void SetUndesiredXYVariablesTo0()
@@ -894,7 +894,6 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected override void SpecializedInitialize()
         {
-            throw new NotImplementedException();
         }
     }
 }

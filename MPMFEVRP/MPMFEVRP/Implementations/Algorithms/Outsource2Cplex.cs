@@ -43,13 +43,14 @@ namespace MPMFEVRP.Implementations.Algorithms
         }
         public override void AddSpecializedParameters()
         {
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.ArcDuplicatingwoU, XCPlex_Formulation.MixedEVRPwRefuelingPaths }, XCPlex_Formulation.MixedEVRPwRefuelingPaths, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_FORMULATION, "XCplex formulation", new List<object>() { XCPlex_Formulation.ArcDuplicatingwoU, XCPlex_Formulation.MixedEVRPwRefuelingPaths, XCPlex_Formulation.ETSP, XCPlex_Formulation.TSP }, XCPlex_Formulation.TSP, UserInputObjectType.ComboBox));
             //Optional Cplex parameters. One added as an example, the others can be added here and commented out when not needed
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_THREADS, "# of Threads", ListPossibleNumOfThreads(), 0 ,UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_RELAXATION, "Cplex Relaxation", new List<object>() { XCPlexRelaxation.None, XCPlexRelaxation.LinearProgramming }, XCPlexRelaxation.None, UserInputObjectType.ComboBox));
             algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS, "Tighter Auxiliary Bounds", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_LOG_OUTPUT_TYPE, "CPLEX Log Output Type", new List<object>() { true, false }, true, UserInputObjectType.CheckBox));
-            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_EXPORT_LP_MODEL, "Export LP Model", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_LOG_OUTPUT_TYPE, "CPLEX Log Output Type", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_XCPLEX_OUTPUT_LEVEL, "Cplex Output Level", new List<object>() { XCPlexOutputLevels.NoDisplay, XCPlexOutputLevels.DispIntFeasSolns, XCPlexOutputLevels.DispNodesMIPContrlBasic, XCPlexOutputLevels.DispNodesMIPContrlIntermNodeCuts, XCPlexOutputLevels.DispNodesMIPContrlAdvRootLP, XCPlexOutputLevels.DispNodesMIPContrlAdvPlusAllLP }, XCPlexOutputLevels.DispNodesMIPContrlAdvPlusAllLP, UserInputObjectType.ComboBox));
+            algorithmParameters.AddParameter(new InputOrOutputParameter(ParameterID.ALG_EXPORT_LP_MODEL, "Export LP Model", new List<object>() { true, false }, false, UserInputObjectType.CheckBox));      
         }
 
         public override string GetName()
@@ -72,6 +73,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 relaxation: (XCPlexRelaxation)algorithmParameters.GetParameter(ParameterID.ALG_RELAXATION).Value,
                 tighterAuxBounds: algorithmParameters.GetParameter(ParameterID.ALG_TIGHTER_AUX_BOUNDS).GetBoolValue(),
                 cplexLogOutputFile: algorithmParameters.GetParameter(ParameterID.ALG_LOG_OUTPUT_TYPE).GetBoolValue(),
+                cplexLogDisplay: algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).GetIntValue(),
                 exportLpModel: algorithmParameters.GetParameter(ParameterID.ALG_EXPORT_LP_MODEL).GetBoolValue()
                 );
             
@@ -87,23 +89,17 @@ namespace MPMFEVRP.Implementations.Algorithms
             XCPlexBase model;
             switch ((XCPlex_Formulation)algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value)
             {
-                //case XCPlex_Formulation.NodeDuplicating:
-                //    model = new XCPlex_NodeDuplicatingFormulation(theProblemModel, XcplexParam);
-                //    break;
-                //case XCPlex_Formulation.ArcDuplicating:
-                //    model = new XCPlex_ArcDuplicatingFormulation(theProblemModel, XcplexParam);
-                //    break;
-                //case XCPlex_Formulation.NodeDuplicatingwoU:
-                //    model = new XCPlex_NodeDuplicatingFormulation_woU(theProblemModel, XcplexParam);
-                //    break;
                 case XCPlex_Formulation.MixedEVRPwRefuelingPaths:
-                    model = new XCPlex_HeterogenousEVRPwRefuelingPaths(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
+                    model = new XCPlex_MixedFleetEVRPwRefuelingPathsVP(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 case XCPlex_Formulation.ArcDuplicatingwoU:
                     model = new XCPlex_ArcDuplicatingFormulation_woU(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 case XCPlex_Formulation.ETSP:
-                    model = new XCPlex_Model_AFV_SingleCustomerSet(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
+                    model = new XCPlex_ETSP_VP(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
+                    break;
+                case XCPlex_Formulation.TSP:
+                    model = new XCPlex_TSP(theProblemModel, XcplexParam, theProblemModel.CoverConstraintType);
                     break;
                 default:
                     throw new Exception("XCplex model type does not exist, thus cannot be built.");

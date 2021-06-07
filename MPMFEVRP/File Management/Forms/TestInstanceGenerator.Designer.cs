@@ -109,6 +109,30 @@
             this.button_SelectInputFile = new System.Windows.Forms.Button();
             this.groupBox_AsIsDataFromFile = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBox_gasolineDollarPerGallon = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBox_refuelCostAtDepot = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBox_nInNetworkESS_L1 = new System.Windows.Forms.TextBox();
+            this.textBox_nInNetworkESS_L2 = new System.Windows.Forms.TextBox();
+            this.textBox_nInNetworkESS_L3 = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBox_outNetworkCost = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_inNetworkCost = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBox_NumInNetworkESs = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label_refuelingRate = new System.Windows.Forms.Label();
+            this.textBox_oNPeakCost = new System.Windows.Forms.TextBox();
+            this.textBox_offPeakCost = new System.Windows.Forms.TextBox();
+            this.textBox_superOffPeakCost = new System.Windows.Forms.TextBox();
+            this.oNPeakDollarPerKwh = new System.Windows.Forms.Label();
+            this.offPeakDollarPerKwh = new System.Windows.Forms.Label();
+            this.superOffPeakDollarPerKwh = new System.Windows.Forms.Label();
             this.textBox_L3kwhPerMin = new System.Windows.Forms.TextBox();
             this.textBox_L2kwhPerMin = new System.Windows.Forms.TextBox();
             this.textBox_L1kwhPerMin = new System.Windows.Forms.TextBox();
@@ -123,6 +147,9 @@
             this.groupBox_ExperimentRelated = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button_createMultipleSchneider14 = new System.Windows.Forms.Button();
+            this.label_fixedRefDur = new System.Windows.Forms.Label();
+            this.textBox_GDV_fixedRefDur = new System.Windows.Forms.TextBox();
+            this.textBox_EV_fixedRefDur = new System.Windows.Forms.TextBox();
             this.groupBox_VehicleRelated.SuspendLayout();
             this.groupBox_InputFileSelection.SuspendLayout();
             this.groupBox_AsIsDataFromFile.SuspendLayout();
@@ -450,7 +477,7 @@
             // button_Create_n_Save
             // 
             this.button_Create_n_Save.Enabled = false;
-            this.button_Create_n_Save.Location = new System.Drawing.Point(971, 489);
+            this.button_Create_n_Save.Location = new System.Drawing.Point(971, 734);
             this.button_Create_n_Save.Name = "button_Create_n_Save";
             this.button_Create_n_Save.Size = new System.Drawing.Size(133, 23);
             this.button_Create_n_Save.TabIndex = 45;
@@ -460,7 +487,7 @@
             // 
             // textBox_FilenamePrefix
             // 
-            this.textBox_FilenamePrefix.Location = new System.Drawing.Point(647, 435);
+            this.textBox_FilenamePrefix.Location = new System.Drawing.Point(647, 680);
             this.textBox_FilenamePrefix.Name = "textBox_FilenamePrefix";
             this.textBox_FilenamePrefix.Size = new System.Drawing.Size(382, 20);
             this.textBox_FilenamePrefix.TabIndex = 46;
@@ -469,7 +496,7 @@
             // label_FilenamePrefix
             // 
             this.label_FilenamePrefix.AutoSize = true;
-            this.label_FilenamePrefix.Location = new System.Drawing.Point(561, 438);
+            this.label_FilenamePrefix.Location = new System.Drawing.Point(561, 683);
             this.label_FilenamePrefix.Name = "label_FilenamePrefix";
             this.label_FilenamePrefix.Size = new System.Drawing.Size(80, 13);
             this.label_FilenamePrefix.TabIndex = 47;
@@ -589,7 +616,7 @@
             // label_FullFilename
             // 
             this.label_FullFilename.AutoSize = true;
-            this.label_FullFilename.Location = new System.Drawing.Point(561, 464);
+            this.label_FullFilename.Location = new System.Drawing.Point(561, 709);
             this.label_FullFilename.Name = "label_FullFilename";
             this.label_FullFilename.Size = new System.Drawing.Size(65, 13);
             this.label_FullFilename.TabIndex = 61;
@@ -598,14 +625,14 @@
             // textBox_FullFilename
             // 
             this.textBox_FullFilename.Enabled = false;
-            this.textBox_FullFilename.Location = new System.Drawing.Point(647, 461);
+            this.textBox_FullFilename.Location = new System.Drawing.Point(647, 706);
             this.textBox_FullFilename.Name = "textBox_FullFilename";
             this.textBox_FullFilename.Size = new System.Drawing.Size(457, 20);
             this.textBox_FullFilename.TabIndex = 60;
             // 
             // button_UpdateFilename
             // 
-            this.button_UpdateFilename.Location = new System.Drawing.Point(1035, 435);
+            this.button_UpdateFilename.Location = new System.Drawing.Point(1035, 680);
             this.button_UpdateFilename.Name = "button_UpdateFilename";
             this.button_UpdateFilename.Size = new System.Drawing.Size(68, 20);
             this.button_UpdateFilename.TabIndex = 62;
@@ -643,7 +670,7 @@
             // label_ChargingLevelAtDepot
             // 
             this.label_ChargingLevelAtDepot.AutoSize = true;
-            this.label_ChargingLevelAtDepot.Location = new System.Drawing.Point(6, 141);
+            this.label_ChargingLevelAtDepot.Location = new System.Drawing.Point(204, 153);
             this.label_ChargingLevelAtDepot.Name = "label_ChargingLevelAtDepot";
             this.label_ChargingLevelAtDepot.Size = new System.Drawing.Size(122, 13);
             this.label_ChargingLevelAtDepot.TabIndex = 75;
@@ -652,15 +679,16 @@
             // comboBox_ChargingLevelAtDepot
             // 
             this.comboBox_ChargingLevelAtDepot.FormattingEnabled = true;
-            this.comboBox_ChargingLevelAtDepot.Location = new System.Drawing.Point(159, 138);
+            this.comboBox_ChargingLevelAtDepot.Location = new System.Drawing.Point(332, 148);
             this.comboBox_ChargingLevelAtDepot.Name = "comboBox_ChargingLevelAtDepot";
             this.comboBox_ChargingLevelAtDepot.Size = new System.Drawing.Size(85, 21);
             this.comboBox_ChargingLevelAtDepot.TabIndex = 74;
+            this.comboBox_ChargingLevelAtDepot.SelectedIndexChanged += new System.EventHandler(this.comboBox_ChargingLevelAtDepot_SelectedIndexChanged);
             // 
             // label_EVPrizeCoef
             // 
             this.label_EVPrizeCoef.AutoSize = true;
-            this.label_EVPrizeCoef.Location = new System.Drawing.Point(9, 283);
+            this.label_EVPrizeCoef.Location = new System.Drawing.Point(807, 139);
             this.label_EVPrizeCoef.Name = "label_EVPrizeCoef";
             this.label_EVPrizeCoef.Size = new System.Drawing.Size(127, 13);
             this.label_EVPrizeCoef.TabIndex = 86;
@@ -668,7 +696,7 @@
             // 
             // textBox_EVPrizeCoef
             // 
-            this.textBox_EVPrizeCoef.Location = new System.Drawing.Point(188, 280);
+            this.textBox_EVPrizeCoef.Location = new System.Drawing.Point(986, 136);
             this.textBox_EVPrizeCoef.Name = "textBox_EVPrizeCoef";
             this.textBox_EVPrizeCoef.Size = new System.Drawing.Size(59, 20);
             this.textBox_EVPrizeCoef.TabIndex = 87;
@@ -677,7 +705,7 @@
             // label_TripChargeDollar
             // 
             this.label_TripChargeDollar.AutoSize = true;
-            this.label_TripChargeDollar.Location = new System.Drawing.Point(8, 257);
+            this.label_TripChargeDollar.Location = new System.Drawing.Point(806, 113);
             this.label_TripChargeDollar.Name = "label_TripChargeDollar";
             this.label_TripChargeDollar.Size = new System.Drawing.Size(13, 13);
             this.label_TripChargeDollar.TabIndex = 84;
@@ -685,7 +713,7 @@
             // 
             // textBox_TripChargeDollar
             // 
-            this.textBox_TripChargeDollar.Location = new System.Drawing.Point(188, 254);
+            this.textBox_TripChargeDollar.Location = new System.Drawing.Point(986, 110);
             this.textBox_TripChargeDollar.Name = "textBox_TripChargeDollar";
             this.textBox_TripChargeDollar.Size = new System.Drawing.Size(59, 20);
             this.textBox_TripChargeDollar.TabIndex = 85;
@@ -693,7 +721,7 @@
             // comboBox_TripChargePolicy
             // 
             this.comboBox_TripChargePolicy.FormattingEnabled = true;
-            this.comboBox_TripChargePolicy.Location = new System.Drawing.Point(111, 227);
+            this.comboBox_TripChargePolicy.Location = new System.Drawing.Point(909, 83);
             this.comboBox_TripChargePolicy.Name = "comboBox_TripChargePolicy";
             this.comboBox_TripChargePolicy.Size = new System.Drawing.Size(136, 21);
             this.comboBox_TripChargePolicy.TabIndex = 82;
@@ -702,7 +730,7 @@
             // label_TripChargePolicy
             // 
             this.label_TripChargePolicy.AutoSize = true;
-            this.label_TripChargePolicy.Location = new System.Drawing.Point(8, 230);
+            this.label_TripChargePolicy.Location = new System.Drawing.Point(806, 86);
             this.label_TripChargePolicy.Name = "label_TripChargePolicy";
             this.label_TripChargePolicy.Size = new System.Drawing.Size(93, 13);
             this.label_TripChargePolicy.TabIndex = 83;
@@ -718,7 +746,7 @@
             // 
             // textBox_BasePriceDollar
             // 
-            this.textBox_BasePriceDollar.Location = new System.Drawing.Point(188, 201);
+            this.textBox_BasePriceDollar.Location = new System.Drawing.Point(986, 57);
             this.textBox_BasePriceDollar.Name = "textBox_BasePriceDollar";
             this.textBox_BasePriceDollar.Size = new System.Drawing.Size(59, 20);
             this.textBox_BasePriceDollar.TabIndex = 81;
@@ -726,7 +754,7 @@
             // comboBox_BasePricingPolicy
             // 
             this.comboBox_BasePricingPolicy.FormattingEnabled = true;
-            this.comboBox_BasePricingPolicy.Location = new System.Drawing.Point(111, 174);
+            this.comboBox_BasePricingPolicy.Location = new System.Drawing.Point(909, 30);
             this.comboBox_BasePricingPolicy.Name = "comboBox_BasePricingPolicy";
             this.comboBox_BasePricingPolicy.Size = new System.Drawing.Size(136, 21);
             this.comboBox_BasePricingPolicy.TabIndex = 78;
@@ -735,7 +763,7 @@
             // label_BasePricingPolicy
             // 
             this.label_BasePricingPolicy.AutoSize = true;
-            this.label_BasePricingPolicy.Location = new System.Drawing.Point(8, 177);
+            this.label_BasePricingPolicy.Location = new System.Drawing.Point(806, 33);
             this.label_BasePricingPolicy.Name = "label_BasePricingPolicy";
             this.label_BasePricingPolicy.Size = new System.Drawing.Size(97, 13);
             this.label_BasePricingPolicy.TabIndex = 79;
@@ -752,8 +780,11 @@
             // 
             // groupBox_VehicleRelated
             // 
+            this.groupBox_VehicleRelated.Controls.Add(this.label_fixedRefDur);
             this.groupBox_VehicleRelated.Controls.Add(this.label_nVehicleTypes);
+            this.groupBox_VehicleRelated.Controls.Add(this.textBox_GDV_fixedRefDur);
             this.groupBox_VehicleRelated.Controls.Add(this.label_EV);
+            this.groupBox_VehicleRelated.Controls.Add(this.textBox_EV_fixedRefDur);
             this.groupBox_VehicleRelated.Controls.Add(this.label_GDV);
             this.groupBox_VehicleRelated.Controls.Add(this.comboBox_EV);
             this.groupBox_VehicleRelated.Controls.Add(this.label_Vehicle);
@@ -775,7 +806,7 @@
             this.groupBox_VehicleRelated.Controls.Add(this.textBox_EV_VariableCost);
             this.groupBox_VehicleRelated.Location = new System.Drawing.Point(555, 13);
             this.groupBox_VehicleRelated.Name = "groupBox_VehicleRelated";
-            this.groupBox_VehicleRelated.Size = new System.Drawing.Size(474, 215);
+            this.groupBox_VehicleRelated.Size = new System.Drawing.Size(474, 238);
             this.groupBox_VehicleRelated.TabIndex = 77;
             this.groupBox_VehicleRelated.TabStop = false;
             this.groupBox_VehicleRelated.Text = "Vehicle-Related Inputs";
@@ -880,6 +911,30 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.textBox_gasolineDollarPerGallon);
+            this.groupBox2.Controls.Add(this.label10);
+            this.groupBox2.Controls.Add(this.textBox_refuelCostAtDepot);
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Controls.Add(this.textBox_nInNetworkESS_L1);
+            this.groupBox2.Controls.Add(this.textBox_nInNetworkESS_L2);
+            this.groupBox2.Controls.Add(this.textBox_nInNetworkESS_L3);
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.label6);
+            this.groupBox2.Controls.Add(this.label5);
+            this.groupBox2.Controls.Add(this.textBox_outNetworkCost);
+            this.groupBox2.Controls.Add(this.label4);
+            this.groupBox2.Controls.Add(this.textBox_inNetworkCost);
+            this.groupBox2.Controls.Add(this.label3);
+            this.groupBox2.Controls.Add(this.textBox_NumInNetworkESs);
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.label_refuelingRate);
+            this.groupBox2.Controls.Add(this.textBox_oNPeakCost);
+            this.groupBox2.Controls.Add(this.textBox_offPeakCost);
+            this.groupBox2.Controls.Add(this.textBox_superOffPeakCost);
+            this.groupBox2.Controls.Add(this.oNPeakDollarPerKwh);
+            this.groupBox2.Controls.Add(this.offPeakDollarPerKwh);
+            this.groupBox2.Controls.Add(this.superOffPeakDollarPerKwh);
             this.groupBox2.Controls.Add(this.textBox_L3kwhPerMin);
             this.groupBox2.Controls.Add(this.textBox_L2kwhPerMin);
             this.groupBox2.Controls.Add(this.textBox_L1kwhPerMin);
@@ -916,10 +971,216 @@
             this.groupBox2.Controls.Add(this.textBox_nESS_L3);
             this.groupBox2.Location = new System.Drawing.Point(13, 257);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(536, 304);
+            this.groupBox2.Size = new System.Drawing.Size(1090, 417);
             this.groupBox2.TabIndex = 80;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Type, Gamma and Prize related data";
+            // 
+            // textBox_gasolineDollarPerGallon
+            // 
+            this.textBox_gasolineDollarPerGallon.Location = new System.Drawing.Point(635, 242);
+            this.textBox_gasolineDollarPerGallon.Name = "textBox_gasolineDollarPerGallon";
+            this.textBox_gasolineDollarPerGallon.Size = new System.Drawing.Size(74, 20);
+            this.textBox_gasolineDollarPerGallon.TabIndex = 117;
+            this.textBox_gasolineDollarPerGallon.Text = "2.871";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(469, 245);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(163, 13);
+            this.label10.TabIndex = 116;
+            this.label10.Text = "Refeul cost of gasoline ($/gallon)";
+            // 
+            // textBox_refuelCostAtDepot
+            // 
+            this.textBox_refuelCostAtDepot.Location = new System.Drawing.Point(635, 164);
+            this.textBox_refuelCostAtDepot.Name = "textBox_refuelCostAtDepot";
+            this.textBox_refuelCostAtDepot.Size = new System.Drawing.Size(74, 20);
+            this.textBox_refuelCostAtDepot.TabIndex = 115;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(469, 167);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(146, 13);
+            this.label9.TabIndex = 114;
+            this.label9.Text = "Refuel cost at depot ($/kWh)";
+            // 
+            // textBox_nInNetworkESS_L1
+            // 
+            this.textBox_nInNetworkESS_L1.Enabled = false;
+            this.textBox_nInNetworkESS_L1.Location = new System.Drawing.Point(224, 130);
+            this.textBox_nInNetworkESS_L1.Name = "textBox_nInNetworkESS_L1";
+            this.textBox_nInNetworkESS_L1.Size = new System.Drawing.Size(21, 20);
+            this.textBox_nInNetworkESS_L1.TabIndex = 111;
+            this.textBox_nInNetworkESS_L1.Text = "0";
+            // 
+            // textBox_nInNetworkESS_L2
+            // 
+            this.textBox_nInNetworkESS_L2.Enabled = false;
+            this.textBox_nInNetworkESS_L2.Location = new System.Drawing.Point(197, 130);
+            this.textBox_nInNetworkESS_L2.Name = "textBox_nInNetworkESS_L2";
+            this.textBox_nInNetworkESS_L2.Size = new System.Drawing.Size(21, 20);
+            this.textBox_nInNetworkESS_L2.TabIndex = 112;
+            this.textBox_nInNetworkESS_L2.Text = "0";
+            // 
+            // textBox_nInNetworkESS_L3
+            // 
+            this.textBox_nInNetworkESS_L3.Enabled = false;
+            this.textBox_nInNetworkESS_L3.Location = new System.Drawing.Point(170, 130);
+            this.textBox_nInNetworkESS_L3.Name = "textBox_nInNetworkESS_L3";
+            this.textBox_nInNetworkESS_L3.Size = new System.Drawing.Size(21, 20);
+            this.textBox_nInNetworkESS_L3.TabIndex = 113;
+            this.textBox_nInNetworkESS_L3.Text = "0";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(801, 14);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(144, 13);
+            this.label8.TabIndex = 110;
+            this.label8.Text = "REVENUE RELATED DATA";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(539, 14);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(121, 13);
+            this.label7.TabIndex = 109;
+            this.label7.Text = "COST RELATED DATA";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(618, 105);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(77, 52);
+            this.label6.TabIndex = 108;
+            this.label6.Text = "Super off-peak\r\nOff-peak\r\nOn-peak\r\nOff-peak";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(493, 105);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(102, 52);
+            this.label5.TabIndex = 107;
+            this.label5.Text = "11:00 PM - 7:00 AM\r\n7:00 AM - 2:00 PM\r\n2:00 PM - 7:00 PM\r\n7:00 PM - 11:00 PM";
+            // 
+            // textBox_outNetworkCost
+            // 
+            this.textBox_outNetworkCost.Location = new System.Drawing.Point(635, 216);
+            this.textBox_outNetworkCost.Name = "textBox_outNetworkCost";
+            this.textBox_outNetworkCost.Size = new System.Drawing.Size(74, 20);
+            this.textBox_outNetworkCost.TabIndex = 106;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(469, 219);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(131, 13);
+            this.label4.TabIndex = 105;
+            this.label4.Text = "Out-network cost ($/kWh)";
+            // 
+            // textBox_inNetworkCost
+            // 
+            this.textBox_inNetworkCost.Location = new System.Drawing.Point(635, 190);
+            this.textBox_inNetworkCost.Name = "textBox_inNetworkCost";
+            this.textBox_inNetworkCost.Size = new System.Drawing.Size(74, 20);
+            this.textBox_inNetworkCost.TabIndex = 104;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(469, 193);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(123, 13);
+            this.label3.TabIndex = 103;
+            this.label3.Text = "In-network cost ($/kWh)";
+            // 
+            // textBox_NumInNetworkESs
+            // 
+            this.textBox_NumInNetworkESs.Location = new System.Drawing.Point(142, 130);
+            this.textBox_NumInNetworkESs.Name = "textBox_NumInNetworkESs";
+            this.textBox_NumInNetworkESs.Size = new System.Drawing.Size(22, 20);
+            this.textBox_NumInNetworkESs.TabIndex = 102;
+            this.textBox_NumInNetworkESs.Text = "3";
+            this.textBox_NumInNetworkESs.TextChanged += new System.EventHandler(this.textBox_NumInNetworkESs_TextChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 139);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(142, 39);
+            this.label2.TabIndex = 101;
+            this.label2.Text = "Number of in-network ESs\r\n(excluding the depot,\r\nthe depot always in-network)";
+            // 
+            // label_refuelingRate
+            // 
+            this.label_refuelingRate.AutoSize = true;
+            this.label_refuelingRate.Location = new System.Drawing.Point(270, 38);
+            this.label_refuelingRate.Name = "label_refuelingRate";
+            this.label_refuelingRate.Size = new System.Drawing.Size(131, 13);
+            this.label_refuelingRate.TabIndex = 100;
+            this.label_refuelingRate.Text = "Refueling Rate (kWh/min)";
+            // 
+            // textBox_oNPeakCost
+            // 
+            this.textBox_oNPeakCost.Location = new System.Drawing.Point(621, 74);
+            this.textBox_oNPeakCost.Name = "textBox_oNPeakCost";
+            this.textBox_oNPeakCost.Size = new System.Drawing.Size(88, 20);
+            this.textBox_oNPeakCost.TabIndex = 99;
+            this.textBox_oNPeakCost.Text = "0.203217";
+            // 
+            // textBox_offPeakCost
+            // 
+            this.textBox_offPeakCost.Location = new System.Drawing.Point(621, 52);
+            this.textBox_offPeakCost.Name = "textBox_offPeakCost";
+            this.textBox_offPeakCost.Size = new System.Drawing.Size(88, 20);
+            this.textBox_offPeakCost.TabIndex = 98;
+            this.textBox_offPeakCost.Text = "0.066846";
+            // 
+            // textBox_superOffPeakCost
+            // 
+            this.textBox_superOffPeakCost.Location = new System.Drawing.Point(621, 30);
+            this.textBox_superOffPeakCost.Name = "textBox_superOffPeakCost";
+            this.textBox_superOffPeakCost.Size = new System.Drawing.Size(88, 20);
+            this.textBox_superOffPeakCost.TabIndex = 97;
+            this.textBox_superOffPeakCost.Text = "0.01437";
+            // 
+            // oNPeakDollarPerKwh
+            // 
+            this.oNPeakDollarPerKwh.AutoSize = true;
+            this.oNPeakDollarPerKwh.Location = new System.Drawing.Point(488, 77);
+            this.oNPeakDollarPerKwh.Name = "oNPeakDollarPerKwh";
+            this.oNPeakDollarPerKwh.Size = new System.Drawing.Size(91, 13);
+            this.oNPeakDollarPerKwh.TabIndex = 96;
+            this.oNPeakDollarPerKwh.Text = "On-peak ($/kWh)";
+            // 
+            // offPeakDollarPerKwh
+            // 
+            this.offPeakDollarPerKwh.AutoSize = true;
+            this.offPeakDollarPerKwh.Location = new System.Drawing.Point(486, 55);
+            this.offPeakDollarPerKwh.Name = "offPeakDollarPerKwh";
+            this.offPeakDollarPerKwh.Size = new System.Drawing.Size(91, 13);
+            this.offPeakDollarPerKwh.TabIndex = 95;
+            this.offPeakDollarPerKwh.Text = "Off-peak ($/kWh)";
+            // 
+            // superOffPeakDollarPerKwh
+            // 
+            this.superOffPeakDollarPerKwh.AutoSize = true;
+            this.superOffPeakDollarPerKwh.Location = new System.Drawing.Point(486, 33);
+            this.superOffPeakDollarPerKwh.Name = "superOffPeakDollarPerKwh";
+            this.superOffPeakDollarPerKwh.Size = new System.Drawing.Size(120, 13);
+            this.superOffPeakDollarPerKwh.TabIndex = 94;
+            this.superOffPeakDollarPerKwh.Text = "Super off-peak ($/kWh)";
             // 
             // textBox_L3kwhPerMin
             // 
@@ -1035,7 +1296,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(568, 257);
+            this.label1.Location = new System.Drawing.Point(10, 744);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(232, 13);
             this.label1.TabIndex = 81;
@@ -1043,7 +1304,7 @@
             // 
             // button_createMultipleSchneider14
             // 
-            this.button_createMultipleSchneider14.Location = new System.Drawing.Point(948, 246);
+            this.button_createMultipleSchneider14.Location = new System.Drawing.Point(390, 733);
             this.button_createMultipleSchneider14.Name = "button_createMultipleSchneider14";
             this.button_createMultipleSchneider14.Size = new System.Drawing.Size(72, 24);
             this.button_createMultipleSchneider14.TabIndex = 82;
@@ -1051,11 +1312,36 @@
             this.button_createMultipleSchneider14.UseVisualStyleBackColor = true;
             this.button_createMultipleSchneider14.Click += new System.EventHandler(this.button_createMultipleSchneider14_Click);
             // 
+            // label_fixedRefDur
+            // 
+            this.label_fixedRefDur.AutoSize = true;
+            this.label_fixedRefDur.Location = new System.Drawing.Point(6, 210);
+            this.label_fixedRefDur.Name = "label_fixedRefDur";
+            this.label_fixedRefDur.Size = new System.Drawing.Size(123, 13);
+            this.label_fixedRefDur.TabIndex = 85;
+            this.label_fixedRefDur.Text = "Fixed Refueling Duration";
+            // 
+            // textBox_GDV_fixedRefDur
+            // 
+            this.textBox_GDV_fixedRefDur.Enabled = false;
+            this.textBox_GDV_fixedRefDur.Location = new System.Drawing.Point(315, 207);
+            this.textBox_GDV_fixedRefDur.Name = "textBox_GDV_fixedRefDur";
+            this.textBox_GDV_fixedRefDur.Size = new System.Drawing.Size(85, 20);
+            this.textBox_GDV_fixedRefDur.TabIndex = 84;
+            // 
+            // textBox_EV_fixedRefDur
+            // 
+            this.textBox_EV_fixedRefDur.Enabled = false;
+            this.textBox_EV_fixedRefDur.Location = new System.Drawing.Point(159, 207);
+            this.textBox_EV_fixedRefDur.Name = "textBox_EV_fixedRefDur";
+            this.textBox_EV_fixedRefDur.Size = new System.Drawing.Size(85, 20);
+            this.textBox_EV_fixedRefDur.TabIndex = 83;
+            // 
             // TestInstanceGenerator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1116, 572);
+            this.ClientSize = new System.Drawing.Size(1116, 769);
             this.Controls.Add(this.button_createMultipleSchneider14);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox2);
@@ -1183,5 +1469,32 @@
         private System.Windows.Forms.Label label_level1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_createMultipleSchneider14;
+        private System.Windows.Forms.TextBox textBox_outNetworkCost;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBox_inNetworkCost;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox_NumInNetworkESs;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_refuelingRate;
+        private System.Windows.Forms.TextBox textBox_oNPeakCost;
+        private System.Windows.Forms.TextBox textBox_offPeakCost;
+        private System.Windows.Forms.TextBox textBox_superOffPeakCost;
+        private System.Windows.Forms.Label oNPeakDollarPerKwh;
+        private System.Windows.Forms.Label offPeakDollarPerKwh;
+        private System.Windows.Forms.Label superOffPeakDollarPerKwh;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_nInNetworkESS_L1;
+        private System.Windows.Forms.TextBox textBox_nInNetworkESS_L2;
+        private System.Windows.Forms.TextBox textBox_nInNetworkESS_L3;
+        private System.Windows.Forms.TextBox textBox_gasolineDollarPerGallon;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textBox_refuelCostAtDepot;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label_fixedRefDur;
+        private System.Windows.Forms.TextBox textBox_GDV_fixedRefDur;
+        private System.Windows.Forms.TextBox textBox_EV_fixedRefDur;
     }
 }

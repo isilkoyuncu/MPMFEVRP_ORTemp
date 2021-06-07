@@ -48,7 +48,7 @@ namespace MPMFEVRP.Models.Tests
                 for (int j = 0; j < numNonESNodes; j++)
                 {
                     SiteWithAuxiliaryVariables to = preprocessedSites[j];
-                    rpl[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(from, to, theProblemModel.SRD);
+                    rpl[i, j] = rpg.GenerateNonDominatedBetweenODPairIK(from, to, theProblemModel.SRD, theProblemModel.VRD);
                 }
             }
 
@@ -70,7 +70,7 @@ namespace MPMFEVRP.Models.Tests
                     SiteWithAuxiliaryVariables to = preprocessedSites[j];
                     if (from.ID == "C6" && to.ID == "C19")
                     {
-                        rplC6C19 = rpg.GenerateNonDominatedBetweenODPairIK(from, to, theProblemModel.SRD);
+                        rplC6C19 = rpg.GenerateNonDominatedBetweenODPairIK(from, to, theProblemModel.SRD, theProblemModel.VRD);
                     }
                 }
             }

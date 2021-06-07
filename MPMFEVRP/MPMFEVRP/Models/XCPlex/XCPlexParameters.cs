@@ -16,6 +16,8 @@ namespace MPMFEVRP.Models.XCPlex
         VehicleCategories vehCategory; public VehicleCategories VehCategory { get { return vehCategory; } }
         bool tighterAuxBounds; public bool TighterAuxBounds{get {return tighterAuxBounds;} }
         bool cplexLogOutputFile; public bool CplexLogOutputFile {get { return cplexLogOutputFile;}}
+        int cplexLogDisplay; public int CplexLogDisplay { get { return cplexLogDisplay; } }
+
         bool exportLpModel; public bool ExportLpModel { get { return exportLpModel; } }
 
 
@@ -32,6 +34,7 @@ namespace MPMFEVRP.Models.XCPlex
             Dictionary<ParameterID, InputOrOutputParameter> optionalCPlexParameters = null,
             bool tighterAuxBounds = false,
             bool cplexLogOutputFile = false,
+            int cplexLogDisplay = 5,
             bool exportLpModel = false
             )
         {
@@ -46,6 +49,7 @@ namespace MPMFEVRP.Models.XCPlex
                 this.optionalCPlexParameters = new Dictionary<ParameterID, InputOrOutputParameter>();
             this.tighterAuxBounds = tighterAuxBounds;
             this.cplexLogOutputFile = cplexLogOutputFile;
+            this.cplexLogDisplay = cplexLogDisplay;
             this.exportLpModel = exportLpModel;
         }
 

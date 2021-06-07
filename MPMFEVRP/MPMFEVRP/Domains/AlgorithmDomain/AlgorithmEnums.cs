@@ -15,10 +15,6 @@
     //enum values:
     //Unsolved until Solve() is tried, the other four are the same as AlgorithmSolutionStatus
 
-    public enum XGurobiSolutionStatus { NotYetSolved = 1, Optimal, Infeasible, Inf_or_Unbd, Unbounded, Cutoff, Iteration_Limit, Node_Limit, Time_Limit, Solution_Limit, Interrupted, Numeric, Suboptimal, Inprogress };
-    //enum values:
-    //Unsolved until Solve() is tried
-
     public enum AlgorithmSolutionStatus { NotYetSolved = -2, Infeasible, NoFeasibleSolutionFound, Feasible, Optimal };
     //enum values:
     //Infeasible (-1): An exhaustive search proved that no feasible solution exists
@@ -26,14 +22,9 @@
     //Feasible (1): At least one feasible solution was found, however whether an optimal solution has been found is unknown because the search didn't exhaust the solution space
     //Optimal (2): An exhaustive search proved that the optimal solution has been obtained
 
-    public enum XCPlex_Formulation { MixedEVRPwRefuelingPaths, ArcDuplicatingwoU, ETSP, NodeDuplicatingwoU, ArcDuplicating };
-
+    public enum XCPlex_Formulation { MixedEVRPwRefuelingPaths, ArcDuplicatingwoU, ETSP, TSP, NodeDuplicatingwoU, ArcDuplicating };
+    public enum XCPlexOutputLevels { NoDisplay=0, DispIntFeasSolns=1, DispNodesMIPContrlBasic = 2, DispNodesMIPContrlIntermNodeCuts = 3, DispNodesMIPContrlAdvRootLP = 4, DispNodesMIPContrlAdvPlusAllLP=5 }
     public enum XCPlexRelaxation { None, LinearProgramming };
-    //enum values:
-    // None: Full IP with integer variables
-    // LinearProgramming: full formulation, only the variables are relaxed to be continuous
-
-    public enum XGurobiRelaxation { None, LinearProgramming };
     //enum values:
     // None: Full IP with integer variables
     // LinearProgramming: full formulation, only the variables are relaxed to be continuous
@@ -75,25 +66,6 @@
     //    _1,
     //    [Description("Dynamic: Apply dynamic search")]
     //    _2
-    //};
-    public enum Gurobi_MIPFocusSwitch
-    {
-        _0,
-        _1,
-        _2,
-        _3
-    };
-
-    //public enum Gurobi_MIPFocusSwitch
-    //{
-    //    [Description("Balanced")]
-    //    _0,
-    //    [Description("Feasibility")]
-    //    _1,
-    //    [Description("Optimality")]
-    //    _2,
-    //    [Description("Best bound")]
-    //    _3,
     //};
 
 }

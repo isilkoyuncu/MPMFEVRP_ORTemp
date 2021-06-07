@@ -19,7 +19,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 {
     class RandomizedCustomerSetExplorer : AlgorithmBase
     {
-        //        XCPlexParameters xCplexParam;
         Vehicle theGDV;
         Vehicle theEV;
 
@@ -78,18 +77,7 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override string[] GetOutputSummary()
         {
             List<string> list = new List<string>{
-                //Algorithm Name has to be the first entry for output file name purposes
-                //"Algorithm Name: " + GetName()+ "-" +algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value.ToString(),
-                //Run time limit has to be the second entry for output file name purposes
                 "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Value.ToString(),
-                
-                //Optional
-                //"Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_XCPLEX_FORMULATION).Value.ToString(),
-                //algorithmParameters.GetAllParameters();
-                //var asString = string.Join(";", algorithmParameters.GetAllParameters());
-                //list.Add(asString);
-                
-                //Necessary statistics
                 "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
                 "avgTimePerGDVOptimalTSPSolution: " + avgTimePerGDVOptimalTSPSolution,
                 "avgTimePerGDVInfeasibleTSPSolution" + avgTimePerGDVInfeasibleTSPSolution,
@@ -108,23 +96,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 "Total # of EV optimal (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
                 "Total # of EV infeasible (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
                 "Solution Status: " + status.ToString()
-            };
-            //list.Add("Optimal Comp Time Avgs by Level");
-            //Dictionary<int, Tuple<int, double>> optimalCompTimeAvgsByLevel = exploredFeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
-            //foreach (int l in optimalCompTimeAvgsByLevel.Keys)
-            //{
-            //    list.Add(l.ToString());
-            //    list.Add(optimalCompTimeAvgsByLevel[l].Item1.ToString());
-            //    list.Add(optimalCompTimeAvgsByLevel[l].Item2.ToString());
-            //}
-            //list.Add("Infeasible Comp Time Avgs by Level");
-            //Dictionary<int, Tuple<int, double>> infeasibleCompTimeAvgsByLevel = exploredInfeasibleCustomerSets.GetSolutionTimeStatisticsByLevel(VehicleCategories.EV);
-            //foreach (int l in infeasibleCompTimeAvgsByLevel.Keys)
-            //{
-            //    list.Add(l.ToString());
-            //    list.Add(infeasibleCompTimeAvgsByLevel[l].Item1.ToString());
-            //    list.Add(infeasibleCompTimeAvgsByLevel[l].Item2.ToString());
-            //}
+            };          
 
             list.Add(Environment.NewLine);
             list.Add(tripleSolveOutcomeStats.GetSummaryData(theProblemModel.InputFileName));
@@ -149,19 +121,15 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedConclude()
         {
-            //System.Windows.Forms.MessageBox.Show("RandomizedCustomerSetExplorerViaTreeSearch algorithm run successfully, now it's time to conclude by reporting some statistics!");
-
             //The following assumes no div/zero error is possible, will have to come back to make this code robust
-            avgTimePerGDVOptimalTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
-            avgTimePerGDVInfeasibleTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+            //avgTimePerGDVOptimalTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            //avgTimePerGDVInfeasibleTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
 
-            avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
-            avgTimePerEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+            //avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            //avgTimePerEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
 
-            avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
-            avgTimePerTheOtherEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
-
-
+            //avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            //avgTimePerTheOtherEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
 
             _OptimizationComparisonStatistics.WriteToFile(StringOperations.AppendToFilename(theProblemModel.InputFileName,"_OptimizationComparisonStatistics"));
         }
@@ -285,14 +253,10 @@ namespace MPMFEVRP.Implementations.Algorithms
         public override void SpecializedRun()
         {
             int numCustomerSetsToReport = algorithmParameters.GetParameter(ParameterID.ALG_NUM_CUSTOMER_SETS_TO_REPORT_PER_CATEGORY).GetIntValue();
-            Random random = new Random(1);
-            string[] csTripleSolveOutcome;
-
-            int beamWidth = 1;// algorithmParameters.GetParameter(ParameterID.ALG_BEAM_WIDTH).GetIntValue();
+            int beamWidth = 1;
             int currentLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;
             int nOptimizedCustomerSets = 0;
-            RouteOptimizationStatus ros;
             while ((unexploredCustomerSets.TotalCount > 0) && (nOptimizedCustomerSets < numCustomerSetsToReport))
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
@@ -320,34 +284,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                             continue;
 
                         _OptimizationComparisonStatistics.RecordObservation(candidate.Customers.Count, candidate.RouteOptimizationOutcome, candidate.Customers);
-                        ////Triple solve
-                        //csTripleSolveOutcome = theProblemModel.TripleSolve(candidate);
-                        ////Place in the proper list
-                        //if (csTripleSolveOutcome[0] != "Infeasible")
-                        //    unexploredCustomerSets.Add(candidate);
-                        //allStats_formatted += Environment.NewLine + theProblemModel.InputFileName
-                        //    + "\t" + candidate.NumberOfCustomers.ToString()
-                        //    + "\t" + Utils.StringOperations.CombineAndSpaceSeparateArray(candidate.Customers.ToArray())
-                        //    + "\t" + csTripleSolveOutcome[0]
-                        //    + "\t" + csTripleSolveOutcome[1]
-                        //    + "\t" + csTripleSolveOutcome[2]
-                        //    + "\t" + csTripleSolveOutcome[3];
 
-                        //ros = InterpretTripleSolutionStatus(csTripleSolveOutcome[0]);
-                        //switch (ros)
-                        //{
-                        //    case RouteOptimizationStatus.InfeasibleForBothGDVandEV:
-                        //        customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros));
-                        //        break;
-                        //    case RouteOptimizationStatus.OptimizedForGDVButInfeasibleForEV:
-                        //        customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4])));
-                        //        break;
-                        //    case RouteOptimizationStatus.OptimizedForBothGDVandEV:
-                        //        customerSetsWithVMTs.Add(new CustomerSetWithVMTs(candidate, ros, vmt_GDV: double.Parse(csTripleSolveOutcome[4]), vmt_EV: double.Parse(csTripleSolveOutcome[5])));
-                        //        break;
-                        //    default:
-                        //        throw new Exception("This should never happen!");
-                        //}
 
                         if (candidate.NumberOfCustomers >= algorithmParameters.GetParameter(ParameterID.ALG_MIN_NUM_CUSTOMERS_IN_A_SET).GetValue<int>())
                         {
@@ -355,43 +292,12 @@ namespace MPMFEVRP.Implementations.Algorithms
                             if (nOptimizedCustomerSets >= numCustomerSetsToReport)
                                 break;
                         }
-
-                        //tripleSolveOutcomeStats.AddToData(candidate.NumberOfCustomers, csTripleSolveOutcome);
-                        }//foreach (string customerID in remainingCustomers)
+                    }//foreach (string customerID in remainingCustomers)
 
                     //end of the level, moving on to the next level
                     currentLevel++;
                 }
-            }//while(exploredInfeasibleCustomerSets.TotalCount< minNumInfeasibles)
-
-            //string[] tripleOrienteeringSolutionOutcome;
-            //int numRandomSubsets = algorithmParameters.GetParameter(ParameterID.ALG_NUM_RANDOM_SUBSETS_OF_CUSTOMER_SETS).GetIntValue();
-            //for (int index_RandomSubset=0;index_RandomSubset< numRandomSubsets; index_RandomSubset++)//TODO Consider making the random thing be performed a different number of times, which is a separate parameter from numCustomerSetsToReport
-            //{
-            //    //Select the subset of customer sets to use
-            //    randomSubsetOfCustomerSetsWithVMTs = new RandomSubsetOfCustomerSetsWithVMTs(theProblemModel.SRD.GetCustomerIDs(), customerSetsWithVMTs, 1, new Random(index_RandomSubset), customerSetSelectionProbability);
-
-            //    //Set covering model --> shadow prices
-            //    setCoveringModel = new XCPlex_SetCovering_wSetOfCustomerSetswVMTs(theProblemModel, setCoverXCplexParameters, randomSubsetOfCustomerSetsWithVMTs, noGDVUnlimitedEV: (theProblemModel is EMH_ProblemModel), unlimitedGDVAndEV: (theProblemModel is EVvsGDV_MinCost_VRP_Model));
-            //    setCoveringModel.Solve_and_PostProcess();
-            //    //CustomerSetBasedSolution csbs = (CustomerSetBasedSolution)setCoveringModel.GetCompleteSolution(typeof(CustomerSetBasedSolution));
-            //    Dictionary<string, double> customerCoverageConstraintShadowPrices = setCoveringModel.GetCustomerCoverageConstraintShadowPrices();
-
-            //    //Solve a new model with a single vehicle to selectively visit some (out of all) customers in order to find a negative reduced cost route.
-
-            //    Console.WriteLine();
-            //    Console.WriteLine("*******************************************************************");
-            //    Console.WriteLine("Pricing problem: #" + index_RandomSubset.ToString());
-            //    Console.WriteLine("*******************************************************************");
-            //    Console.WriteLine();
-
-            //    tripleOrienteeringSolutionOutcome = theProblemModel.TripleOrienteeringSolve(customerCoverageConstraintShadowPrices, useRuntimeLimit: usePricingRuntimeLimit, runTimeLimit: pricingRuntimeLimit, compareToGDV: compareToGDV_CG, compareToEV_NDF: compareToEV_NDF_CG);
-            //    orienteeringresults_formatted += Environment.NewLine + theProblemModel.InputFileName
-            //                + "\t" + index_RandomSubset.ToString();
-            //    for (int i = 0; i < tripleOrienteeringSolutionOutcome.Length; i++)
-            //        orienteeringresults_formatted += "\t" + tripleOrienteeringSolutionOutcome[i];
-            //}
-            
+            }          
         }
 
         RouteOptimizationStatus InterpretTripleSolutionStatus(string tripleSolutionStatus)
@@ -423,8 +329,6 @@ namespace MPMFEVRP.Implementations.Algorithms
             }
             return outcome;
         }
-
-        //string
     }
 
     class TripleSolveOutComeStatistics

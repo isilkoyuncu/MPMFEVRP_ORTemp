@@ -208,7 +208,7 @@ namespace MPMFEVRP.Models.XCPlex
                     if (i != j)
                     {
                         Console.WriteLine("i = " + i.ToString() + ", j = " + j.ToString());
-                        RefuelingPathList refuelingPaths = refuelingPathGenerator.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD, ExternalStations, minNumberOfRefuelingStops: 0, maxNumberOfRefuelingStops: 4);
+                        RefuelingPathList refuelingPaths = refuelingPathGenerator.GenerateNonDominatedBetweenODPair(preprocessedSites[i], preprocessedSites[j], theProblemModel.SRD, ExternalStations, theProblemModel.VRD, minNumberOfRefuelingStops: 0, maxNumberOfRefuelingStops: 4);
                         Dictionary<int, int> tempCountByNumberOfRefuelingStops = refuelingPaths.CountByNumberOfRefuelingStops();
                         foreach (int k in tempCountByNumberOfRefuelingStops.Keys)
                         {

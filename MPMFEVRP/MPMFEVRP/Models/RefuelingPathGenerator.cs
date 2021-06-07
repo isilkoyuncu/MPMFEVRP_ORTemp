@@ -36,7 +36,7 @@ namespace MPMFEVRP.Models
             apss.InitializeAndSolveAPSS(distances, theProblemModel.SRD.GetESIDs().ToArray());
             GenerateRefuelingStops(theProblemModel.SRD.GetSWAVsList(SiteTypes.ExternalStation));
         }
-        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
+        public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations,VehicleRelatedData VRD, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
         {
             //verification: 
             int nUB = Math.Min(maxNumberOfRefuelingStops, maxPossibleNumberOfRefuelingStops);
@@ -62,7 +62,7 @@ namespace MPMFEVRP.Models
                             continue;
                     }
 
-                    RefuelingPath refuelingPath = new RefuelingPath(origin, destination, refuelingStops, SRD);
+                    RefuelingPath refuelingPath = new RefuelingPath(origin, destination, refuelingStops, SRD, VRD);
                     if (refuelingPath.Feasible)
                     {
                         int addResult = outcome.AddIfNondominated(refuelingPath);
@@ -137,7 +137,7 @@ namespace MPMFEVRP.Models
         /// <param name="externalStations"></param>
         /// <param name="SRD"></param>
         /// <returns></returns>
-        public RefuelingPathList GenerateNonDominatedBetweenODPairIK(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD)
+        public RefuelingPathList GenerateNonDominatedBetweenODPairIK(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, VehicleRelatedData VRD)
         {
             RefuelingPathList outcome = new RefuelingPathList();
             RefuelingPath refuelingPath;
@@ -146,7 +146,7 @@ namespace MPMFEVRP.Models
                 //Add direct arc
                 if (origin.DeltaPrimeMax - SRD.GetEVEnergyConsumption(origin.ID, destination.ID) + epsilon >= destination.DeltaMin)
                 {
-                    refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables>() { }, SRD);
+                    refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables>() { }, SRD, VRD);
                     int addResult = outcome.AddIfNondominated(refuelingPath);
                 }
                 //Add one-or-more-stop refueling paths
@@ -158,7 +158,7 @@ namespace MPMFEVRP.Models
                     }
                     else
                     {
-                        refuelingPath = new RefuelingPath(origin, destination, rs, SRD);
+                        refuelingPath = new RefuelingPath(origin, destination, rs, SRD, VRD);
                         if (refuelingPath.Feasible)
                         {
                             int addResult = outcome.AddIfNondominated(refuelingPath);
@@ -169,13 +169,13 @@ namespace MPMFEVRP.Models
             return outcome;
         }
 
-        public RefuelingPathList GenerateSingleESNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD)
+        public RefuelingPathList GenerateSingleESNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, List<SiteWithAuxiliaryVariables> externalStations, SiteRelatedData SRD, VehicleRelatedData VRD)
         {
             RefuelingPathList outcome = new RefuelingPathList();
             RefuelingPath refuelingPath;
             foreach (SiteWithAuxiliaryVariables ES in externalStations)
             {
-                refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables> {ES}, SRD);
+                refuelingPath = new RefuelingPath(origin, destination, new List<SiteWithAuxiliaryVariables> {ES}, SRD, VRD);
                 if (refuelingPath.Feasible)
                 {
                     int addResult = outcome.AddIfNondominated(refuelingPath);

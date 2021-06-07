@@ -425,7 +425,7 @@ namespace MPMFEVRP.Models.XCPlex
 
             //SetParam(Cplex.Param.MIP.Tolerances.Integrality, 0.001);
             //SetParam(Cplex.Param.Simplex.Tolerances.Feasibility, 0.00001);
-            SetParam(Cplex.Param.MIP.Display, 0);
+            SetParam(Cplex.Param.MIP.Display, 5);//xCplexParam.CplexLogDisplay);
             //SetParam(Cplex.Param.Threads, 8);
         }
         protected void InitializeOutputVariables()
@@ -468,9 +468,10 @@ namespace MPMFEVRP.Models.XCPlex
             }
             else
             {
-                SetOut(System.IO.TextWriter.Null);
+                //SetOut(System.IO.TextWriter.Null);
             }
             //ExportModel("model.lp");
+            
             Solve();
             if (xCplexParam.CplexLogOutputFile)
             {
