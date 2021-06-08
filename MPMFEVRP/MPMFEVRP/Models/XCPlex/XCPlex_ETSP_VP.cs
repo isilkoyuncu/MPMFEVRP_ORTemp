@@ -752,7 +752,7 @@ namespace MPMFEVRP.Models.XCPlex
                         y_ijp_Values[i, j][r] = GetValue(Y[i][j][r]);
                 }
             }
-            WriteDecisionVariables();
+            //WriteDecisionVariables();
 
         }
         void WriteDecisionVariables()
