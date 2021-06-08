@@ -504,6 +504,7 @@ namespace MPMFEVRP.Models.XCPlex
             else //Minimize
             {
                 AddConstraint_MaxNumberOfEVs();//4
+                AddConstraint_MaxNumberOfGDVs();//5
 
                 AddConstraint_MinNumberOfVehicles();//4-5 b                
             }
@@ -1495,7 +1496,7 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected override void SpecializedInitialize()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }

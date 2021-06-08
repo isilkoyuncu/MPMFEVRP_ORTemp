@@ -14,6 +14,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Utils;
+using System.Diagnostics;
+
 
 namespace MPMFEVRP.Implementations.Algorithms
 {
@@ -23,6 +25,9 @@ namespace MPMFEVRP.Implementations.Algorithms
         Vehicle theEV;
 
         CustomerSetList.CustomerListPopStrategy popStrategy;
+
+        double runtimeLimit = 0.0;
+        Stopwatch sw = new Stopwatch();
 
         PartitionedCustomerSetList unexploredCustomerSets;
         PartitionedCustomerSetList exploredFeasibleCustomerSets;
@@ -136,7 +141,6 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override void SpecializedInitialize(EVvsGDV_ProblemModel theProblemModel)
         {
-            //            xCplexParam = new XCPlexParameters();
             theGDV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV);
             theEV = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV);
 
@@ -165,6 +169,8 @@ namespace MPMFEVRP.Implementations.Algorithms
                 customerSetsWithVMTs.Add(new CustomerSetWithVMTs(unexpCS, unexpCS.RouteOptimizationOutcome.Status, vmt_GDV: unexpCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).VSOptimizedRoute.GetVehicleMilesTraveled(), vmt_EV: unexpCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetVehicleMilesTraveled()));//TODO This code is not robust, it assumes that each customer can be visited directly by either type of vehicles.
 
             setCoverXCplexParameters = new XCPlexParameters(relaxation: XCPlexRelaxation.LinearProgramming);
+
+            runtimeLimit = algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).GetDoubleValue();
 
             customerSetSelectionProbability = algorithmParameters.GetParameter(ParameterID.ALG_PROB_SELECTING_A_CUSTOMER_SET).GetDoubleValue();
             usePricingRuntimeLimit = algorithmParameters.GetParameter(ParameterID.ALG_PROB_PRICING_USE_RUNTIME_LIMIT).GetBoolValue();
@@ -257,11 +263,12 @@ namespace MPMFEVRP.Implementations.Algorithms
             int currentLevel;
             int deepestPossibleLevel = theProblemModel.SRD.NumCustomers - 1;
             int nOptimizedCustomerSets = 0;
-            while ((unexploredCustomerSets.TotalCount > 0) && (nOptimizedCustomerSets < numCustomerSetsToReport))
+            sw = Stopwatch.StartNew();
+            while ((unexploredCustomerSets.TotalCount > 0) && (nOptimizedCustomerSets < numCustomerSetsToReport) && (sw.Elapsed.TotalSeconds < runtimeLimit))
             {
                 currentLevel = unexploredCustomerSets.GetHighestNonemptyLevel();
 
-                while ((currentLevel <= deepestPossibleLevel) && (nOptimizedCustomerSets < numCustomerSetsToReport))
+                while ((currentLevel <= deepestPossibleLevel) && (nOptimizedCustomerSets < numCustomerSetsToReport) && (sw.Elapsed.TotalSeconds < runtimeLimit))
                 {
                     //Take the parents from the current level
                     if (currentLevel > unexploredCustomerSets.GetDeepestNonemptyLevel())
@@ -275,6 +282,8 @@ namespace MPMFEVRP.Implementations.Algorithms
 
                     foreach (string customerID in possibleOtherCustomers)
                     {
+                        if (sw.Elapsed.TotalSeconds > runtimeLimit)
+                            break;
                         CustomerSet candidate = new CustomerSet(theParent);
                         candidate.Extend(customerID);
                         theParent.MakeCustomerImpossible(customerID);
@@ -292,12 +301,13 @@ namespace MPMFEVRP.Implementations.Algorithms
                             if (nOptimizedCustomerSets >= numCustomerSetsToReport)
                                 break;
                         }
+
                     }//foreach (string customerID in remainingCustomers)
 
                     //end of the level, moving on to the next level
                     currentLevel++;
                 }
-            }          
+            }
         }
 
         RouteOptimizationStatus InterpretTripleSolutionStatus(string tripleSolutionStatus)

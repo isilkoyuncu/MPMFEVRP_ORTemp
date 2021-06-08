@@ -40,7 +40,7 @@ namespace Instance_Generation.Other
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
                     batteryTankCapacity = 0;
-                    consumptionRate = 0; // mpg
+                    consumptionRate = 0.029; // gallons per mile
                     fixedCost = 0.0;//30.0
                     variableCostPerMile = 1;
                     maxChargingRate = 0.0;
@@ -64,7 +64,7 @@ namespace Instance_Generation.Other
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
                     batteryTankCapacity = 0;
-                    consumptionRate = 0; // gallons per mile or 1/mpg =
+                    consumptionRate = 0.029; // gallons per mile
                     fixedCost = 40.0;
                     variableCostPerMile = 0.1;
                     maxChargingRate = 0.0;
@@ -88,7 +88,7 @@ namespace Instance_Generation.Other
                     category = VehicleCategories.GDV;
                     loadCapacity = 200;
                     batteryTankCapacity = 0;
-                    consumptionRate = 0; // gallons per mile or 1/mpg =
+                    consumptionRate = 0.029; // gallons per mile
                     fixedCost = 40.0;
                     variableCostPerMile = 0.1;
                     maxChargingRate = 0.0;

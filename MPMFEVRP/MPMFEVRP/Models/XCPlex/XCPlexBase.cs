@@ -57,7 +57,10 @@ namespace MPMFEVRP.Models.XCPlex
 
         protected CustomerCoverageConstraint_EachCustomerMustBeCovered customerCoverageConstraint;
 
+        protected INumVar[] startVarCplex;
+        protected double[] startValCplex;
         public System.IO.TextWriter TWoutput;
+
         public XCPlexBase()
         {
             numberOfTimesSolveFoundStatus = new Dictionary<string, int>();

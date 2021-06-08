@@ -17,6 +17,7 @@ namespace MPMFEVRP.Models.XCPlex
         double batteryCapacity; //kWh
         double refuelingRate;
         double planningHorizonLength; //mins
+        int totalTravelTimeConstraintIndex = -1;
 
         RefuelingPathGenerator rpg;
         RefuelingPathList[,] allNondominatedRPs;
@@ -324,6 +325,9 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_MinimumArrivalEnergyFollowingTheDepotAndRefuel();
             AddConstraint_MaximumArrivalEnergyAtANodeAfterRefuel();
             AddConstraint_MaximumArrivalEnergyAtANodeWhenArrivedDirectly();
+
+
+            AddConstraint_TotalTravelTime();
 
             //All constraints and cuts added
             allConstraints_array = allConstraints_list.ToArray();
@@ -668,6 +672,33 @@ namespace MPMFEVRP.Models.XCPlex
             return MaximumArrivalSOEAtDestination;
         }
 
+        void AddConstraint_TotalTravelTime()
+        {
+            totalTravelTimeConstraintIndex = allConstraints_list.Count;
+
+            if (RHS_forNodeCoverage != null)
+            {
+                ILinearNumExpr TotalTravelTime = LinearNumExpr();
+                for (int i = 0; i < numNonESNodes; i++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sFrom = preprocessedSites[i];
+                        Site sTo = preprocessedSites[j];
+                        TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j]);
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
+                        {
+                            TotalTravelTime.AddTerm(nondominatedRPsExceptDirectArcs[i, j][r].TotalTravelTime, Y[i][j][r]);
+                        }
+                    }
+                string constraint_name = "Total_Travel_Time";
+                double totalServiceTime = 0;
+                for (int i = 0; i < numNonESNodes; i++)
+                    totalServiceTime += RHS_forNodeCoverage[i] * preprocessedSites[i].ServiceDuration;
+                double rhs = theProblemModel.CRD.TMax - totalServiceTime;
+                allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+            }
+        }
+
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
 
@@ -914,6 +945,7 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
+            RefineTotalTravelTimeConstraints();
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
@@ -934,6 +966,16 @@ namespace MPMFEVRP.Models.XCPlex
                 c++;
             }
 
+        }
+        void RefineTotalTravelTimeConstraints()
+        {
+            double rhs = 0.0;
+            for (int j = 1; j < numNonESNodes; j++)
+                if (RHS_forNodeCoverage[j] == 1)
+                    rhs += preprocessedSites[j].ServiceDuration;
+
+            allConstraints_array[totalTravelTimeConstraintIndex].LB = rhs;
+            allConstraints_array[totalTravelTimeConstraintIndex].UB = rhs;
         }
         public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
         {

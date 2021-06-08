@@ -16,6 +16,7 @@ namespace MPMFEVRP.Models.XCPlex
         int numNonESNodes;
         double planningHorizonLength; //mins
         double[] RHS_forNodeCoverage; //For different customer coverage constraints and solving TSP we need this preprocessed RHS values based on customer sets
+        int totalTravelTimeConstraintIndex = -1;
 
         //Decision Variables
         INumVar[][] X; double[][] X_LB, X_UB;    //X_ij
@@ -166,8 +167,11 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_ArrivingNumberOfGDVsAtDepotMustBeOne();
 
             AddConstraint_ArrivalTimeRegulationFollowingACustomerDirectly();
-
             AddConstraint_ArrivalTimeRegulationFollowingTheDepotDirectly();
+
+            AddConstraint_TotalTravelTime();
+
+            //AddKnownSolutionForTesting_Route();
 
             //All constraints and cuts added
             allConstraints_array = allConstraints_list.ToArray();
@@ -270,7 +274,70 @@ namespace MPMFEVRP.Models.XCPlex
             TimeDifference.AddTerm(1.0, ArrivalTime[j]);
             TimeDifference.AddTerm(-1.0 * totalArcTravelTime, X[0][j]);
             return TimeDifference;
-        }              
+        }
+
+        void AddConstraint_TotalTravelTime()
+        {
+            totalTravelTimeConstraintIndex = allConstraints_list.Count;
+
+            if (RHS_forNodeCoverage != null)
+            {
+                ILinearNumExpr TotalTravelTime = LinearNumExpr();
+                for (int i = 0; i < numNonESNodes; i++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sFrom = preprocessedSites[i];
+                        Site sTo = preprocessedSites[j];
+                        TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j]);                        
+                    }
+                string constraint_name = "Total_Travel_Time";
+                double totalServiceTime = 0;
+                for (int i = 0; i < numNonESNodes; i++)
+                    totalServiceTime += RHS_forNodeCoverage[i] * preprocessedSites[i].ServiceDuration;
+                double rhs = theProblemModel.CRD.TMax - totalServiceTime;
+                allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+            }
+        }
+
+        void AddKnownSolutionForTesting_Route()
+        {
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {               
+                    X[i][j].UB = 0.0;
+                    X[i][j].LB = 0.0;
+                }
+            //First tour
+            X[0][1].UB = 1.0;
+            X[0][1].LB = 1.0;
+
+            X[1][2].UB = 1.0;
+            X[1][2].LB = 1.0;
+
+            X[2][3].UB = 1.0;
+            X[2][3].LB = 1.0;
+
+            X[3][4].UB = 1.0;
+            X[3][4].LB = 1.0;
+
+            X[4][5].UB = 1.0;
+            X[4][5].LB = 1.0;
+
+            X[5][6].UB = 1.0;
+            X[5][6].LB = 1.0;
+
+            X[6][7].UB = 1.0;
+            X[6][7].LB = 1.0;
+
+            X[7][8].UB = 1.0;
+            X[7][8].LB = 1.0;
+
+            X[8][0].UB = 1.0;
+            X[8][0].LB = 1.0;
+        }
+
+
+
 
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
@@ -403,6 +470,7 @@ namespace MPMFEVRP.Models.XCPlex
                     }
                 }
             RefineRightHandSidesOfCustomerVisitationConstraints();
+            RefineTotalTravelTimeConstraints();
         }
         void RefineRightHandSidesOfCustomerVisitationConstraints()
         {
@@ -423,6 +491,16 @@ namespace MPMFEVRP.Models.XCPlex
                 c++;
             }
 
+        }
+        void RefineTotalTravelTimeConstraints()
+        {
+            double rhs = 0.0;
+            for (int j = 1; j < numNonESNodes; j++)
+                if (RHS_forNodeCoverage[j] == 1)
+                    rhs += preprocessedSites[j].ServiceDuration;
+
+            allConstraints_array[totalTravelTimeConstraintIndex].LB = rhs;
+            allConstraints_array[totalTravelTimeConstraintIndex].UB = rhs;
         }
         public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
         {

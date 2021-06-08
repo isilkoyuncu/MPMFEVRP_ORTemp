@@ -293,7 +293,7 @@ namespace MPMFEVRP.Models.XCPlex
                 double refuelCostOfGasPerGallon = theProblemModel.CRD.RefuelCostofGas;
                 double averageGasCostPerMile = refuelCostOfGasPerGallon * theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).ConsumptionRate;
                 double refuelCostInNetworkPerKwh = theProblemModel.CRD.RefuelCostInNetwork;
-                    for (int i = 0; i < numNonESNodes; i++)
+                for (int i = 0; i < numNonESNodes; i++)
                     for (int j = 0; j < numNonESNodes; j++)
                     {
                         objFunction.AddTerm((refuelCostInNetworkPerKwh - refuelCostAtDepotPerKwh), RefueledEnergyOnPath[i][j]);
@@ -309,9 +309,6 @@ namespace MPMFEVRP.Models.XCPlex
         protected override void AddAllConstraints()
         {
             allConstraints_list = new List<IRange>();
-
-            //AddKnownSolutionForTesting();
-
             //Now adding the constraints one (family) at a time
             AddConstraint_NumberOfVisitsPerCustomerNodeIs1();
             AddConstraint_TotalIncomingEVArcsMinusTotalOutgoingEVArcsIs0();
@@ -338,9 +335,10 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_MaximumArrivalEnergyAtANodeAfterRefuel();
             AddConstraint_MaximumArrivalEnergyAtANodeWhenArrivedDirectly();
 
+            AddConstraint_TotalTravelTime();
+
             //Add cut
             AddConstraint_MinNumberOfVehicles();
-
 
             //All constraints and cuts added
             allConstraints_array = allConstraints_list.ToArray();
@@ -747,6 +745,34 @@ namespace MPMFEVRP.Models.XCPlex
             return MaximumArrivalSOEAtDestination;
         }
 
+        void AddConstraint_TotalTravelTime()
+        {
+            if (RHS_forNodeCoverage != null)
+            {
+                ILinearNumExpr TotalTravelTime = LinearNumExpr();
+                for (int i = 0; i < numNonESNodes; i++)
+                    for (int j = 0; j < numNonESNodes; j++)
+                    {
+                        Site sFrom = preprocessedSites[i];
+                        Site sTo = preprocessedSites[j];
+                        for (int v = 0; v < numVehCategories; v++)
+                        {
+                            TotalTravelTime.AddTerm(TravelTime(sFrom, sTo), X[i][j][v]);
+                        }
+                        for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
+                        {
+                            TotalTravelTime.AddTerm(nondominatedRPsExceptDirectArcs[i, j][r].TotalTravelTime, Y[i][j][r]);
+                        }
+                    }
+                string constraint_name = "Total_Travel_Time";
+                double totalServiceTime = 0;
+                for (int i = 0; i < numNonESNodes; i++)
+                    totalServiceTime += RHS_forNodeCoverage[i] * preprocessedSites[i].ServiceDuration;
+                double rhs = (theProblemModel.GetNumVehicles(VehicleCategories.EV) + theProblemModel.GetNumVehicles(VehicleCategories.GDV))*theProblemModel.CRD.TMax - totalServiceTime;
+                allConstraints_list.Add(AddLe(TotalTravelTime, rhs, constraint_name));
+            }
+        }
+
         public override List<VehicleSpecificRoute> GetVehicleSpecificRoutes()
         {
             GetDecisionVariableValues();
@@ -764,14 +790,22 @@ namespace MPMFEVRP.Models.XCPlex
             List<VehicleSpecificRoute> outcome = new List<VehicleSpecificRoute>();
             List<List<string>> listOfNonDepotSiteIDs;
             if (vehicleCategory == VehicleCategories.EV)
-                listOfNonDepotSiteIDs = GetListOfNonDepotSiteIDsEV();
-            else
-                listOfNonDepotSiteIDs = GetListOfNonDepotSiteIDsGDV();
-            int count = 0;
-            foreach (List<string> NDSIDs in listOfNonDepotSiteIDs)
             {
-                outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, NDSIDs, allRoutesESVisits[count]));
-                count++;
+                listOfNonDepotSiteIDs = GetListOfNonDepotSiteIDsEV();
+                int count = 0;
+                foreach (List<string> NDSIDs in listOfNonDepotSiteIDs)
+                {
+                    outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, NDSIDs, allRoutesESVisits[count]));
+                    count++;
+                }
+            }
+            else
+            {
+                listOfNonDepotSiteIDs = GetListOfNonDepotSiteIDsGDV();
+                foreach (List<string> NDSIDs in listOfNonDepotSiteIDs)
+                {
+                    outcome.Add(new VehicleSpecificRoute(theProblemModel, theVehicle, NDSIDs));
+                }
             }
             return outcome;
         }
@@ -960,29 +994,33 @@ namespace MPMFEVRP.Models.XCPlex
         List<List<string>> GetListOfNonDepotSiteIDsGDV()
         {
             List<List<string>> outcome = new List<List<string>>();
-            List<string> singleRoute = new List<string>();
-            List<List<string>> allActiveArcsGDV = new List<List<string>>();
+            List<string> singleRoute;
+            List<List<string>> allActiveGDVarcs = new List<List<string>>();
             for (int i = 0; i < numNonESNodes; i++)
                 for (int j = 0; j < numNonESNodes; j++)
+                {
                     if (x_ijv_Values[i, j][vIndex_GDV] >= 0.5)
                     {
                         List<string> activeArc = new List<string>();
                         activeArc.Add(preprocessedSites[i].ID);
                         activeArc.Add(preprocessedSites[j].ID);
-                        allActiveArcsGDV.Add(activeArc);
+                        allActiveGDVarcs.Add(activeArc);
                     }
+                }
 
-            List<List<string>> tempActiveArcs = new List<List<string>>(allActiveArcsGDV);
+            List<List<string>> tempActiveArcs = new List<List<string>>(allActiveGDVarcs);
             string lastID = theProblemModel.SRD.GetSingleDepotID();
             while (tempActiveArcs.Count > 0)
             {
+                singleRoute = new List<string>();
                 do
                 {
                     for (int i = 0; i < tempActiveArcs.Count; i++)
                     {
                         if (tempActiveArcs[i][0] == lastID)
                         {
-                            singleRoute.Add(tempActiveArcs[i][1]);
+                            tempActiveArcs[i].RemoveAt(0);
+                            singleRoute.AddRange(tempActiveArcs[i]);
                             lastID = singleRoute.Last();
                             tempActiveArcs.RemoveAt(i);
                             break;
@@ -994,7 +1032,6 @@ namespace MPMFEVRP.Models.XCPlex
                 lastID = theProblemModel.SRD.GetSingleDepotID();
             }
             return outcome;
-
         }
 
         public override SolutionBase GetCompleteSolution(Type SolutionType)
@@ -1172,6 +1209,86 @@ namespace MPMFEVRP.Models.XCPlex
             X[5][0][0].LB = 1.0;
         }
 
+        void AddKnownSolutionForTesting_Route()
+        {
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                {
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        X[i][j][v].UB = 0.0;
+                        X[i][j][v].LB = 0.0;
+                    }
+                    for (int r = 0; r < nondominatedRPsExceptDirectArcs[i, j].Count; r++)
+                    {
+                        Y[i][j][r].UB = 0.0;
+                        Y[i][j][r].LB = 0.0;
+                    }
+                }
+
+            X[0][1][vIndex_GDV].UB = 1.0;
+            X[0][1][vIndex_GDV].LB = 1.0;
+
+            X[1][2][vIndex_GDV].UB = 1.0;
+            X[1][2][vIndex_GDV].LB = 1.0;
+
+            X[2][3][vIndex_GDV].UB = 1.0;
+            X[2][3][vIndex_GDV].LB = 1.0;
+
+            X[3][4][vIndex_GDV].UB = 1.0;
+            X[3][4][vIndex_GDV].LB = 1.0;
+
+            X[4][5][vIndex_GDV].UB = 1.0;
+            X[4][5][vIndex_GDV].LB = 1.0;
+
+            X[5][6][vIndex_GDV].UB = 1.0;
+            X[5][6][vIndex_GDV].LB = 1.0;
+
+            X[6][7][vIndex_GDV].UB = 1.0;
+            X[6][7][vIndex_GDV].LB = 1.0;
+
+            X[7][8][vIndex_GDV].UB = 1.0;
+            X[7][8][vIndex_GDV].LB = 1.0;
+
+            X[8][0][vIndex_GDV].UB = 1.0;
+            X[8][0][vIndex_GDV].LB = 1.0;
+        }
+
+
+        void WarmStart()
+        {
+            double[,,] values = new double[numNonESNodes,numNonESNodes,numVehCategories];
+            for (int i = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)             
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        values[i,j,v] = 0.0;
+                    }
+            //values[i, j, v]
+
+
+
+
+
+
+
+            startVarCplex = new INumVar[numNonESNodes*numNonESNodes * numVehCategories];
+            startValCplex = new double[numNonESNodes * numNonESNodes * numVehCategories];
+
+            for (int i = 0, idx = 0; i < numNonESNodes; i++)
+                for (int j = 0; j < numNonESNodes; j++)
+                    for (int v = 0; v < numVehCategories; v++)
+                    {
+                        startVarCplex[idx] = X[i][j][v];
+                        startValCplex[idx] = values[i,j,v];
+                        idx++;
+                    }
+
+            startVarCplex = null;
+            startValCplex = null;
+
+            AddMIPStart(startVarCplex, startValCplex, MIPStartEffort.SolveMIP);
+        }
     }
 }
 
