@@ -494,13 +494,12 @@ namespace MPMFEVRP.Models.XCPlex
         }
         void RefineTotalTravelTimeConstraints()
         {
-            double rhs = 0.0;
+            double totalServiceTime = 0.0;
             for (int j = 1; j < numNonESNodes; j++)
                 if (RHS_forNodeCoverage[j] == 1)
-                    rhs += preprocessedSites[j].ServiceDuration;
+                    totalServiceTime += preprocessedSites[j].ServiceDuration;
 
-            allConstraints_array[totalTravelTimeConstraintIndex].LB = rhs;
-            allConstraints_array[totalTravelTimeConstraintIndex].UB = rhs;
+            allConstraints_array[totalTravelTimeConstraintIndex].UB = theProblemModel.CRD.TMax - totalServiceTime;
         }
         public override void RefineObjectiveFunctionCoefficients(Dictionary<string, double> customerCoverageConstraintShadowPrices)
         {

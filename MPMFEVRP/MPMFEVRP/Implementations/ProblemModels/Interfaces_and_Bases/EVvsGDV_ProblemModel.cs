@@ -237,12 +237,12 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             XCPlexVRPBase solver = (vehicle.Category == VehicleCategories.GDV ? GDV_TSPSolver : EV_TSPSolver);
             // TO DO massive issue here you cannot leave it like this!!!!
             /**************************************************************/
-            solver.SetParam(ILOG.CPLEX.Cplex.Param.TimeLimit, 1200.0);
+            //solver.SetParam(ILOG.CPLEX.Cplex.Param.TimeLimit, 1200.0);
             /**************************************************************/
             solver.RefineDecisionVariables(CS);
             solver.Solve_and_PostProcess();
             VehicleSpecificRouteOptimizationOutcome vsroo;
-            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible || solver.SolutionStatus==XCPlexSolutionStatus.NoFeasibleSolutionFound)
+            if (solver.SolutionStatus == XCPlexSolutionStatus.Infeasible)// || solver.SolutionStatus==XCPlexSolutionStatus.NoFeasibleSolutionFound)
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else //if (solver.SolutionStatus == XCPlexSolutionStatus.Optimal)//optimal
                 vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicle.Category, solver.CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: solver.GetVehicleSpecificRoutes().First()); //TODO unit test if GetVehicleSpecificRoutes returns only 1 VSR when TSP is chosen.
