@@ -103,7 +103,7 @@ namespace Instance_Generation.FileReaders
             r = double.Parse(allRows[vehInfoRow + 2].Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries)[1]);
             velocity = double.Parse(allRows[vehInfoRow + 4].Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries)[1]);
             Vehicle ev = new Vehicle("Schneider EV", VehicleCategories.EV, C, Q, r, 40.0, 0.1, g, 0.0, 0.0);
-            Vehicle gdv = new Vehicle("Schneider CV", VehicleCategories.GDV, C, 0.0, 0.0, 60.0, 0.05, 0.0, 0.0, 0.0);
+            Vehicle gdv = new Vehicle("Schneider CV", VehicleCategories.GDV, C, 0.0, 0.029, 60.0, 0.05, 0.0, 0.0, 0.0);
             V = new Vehicle[2] { ev, gdv };
         }
         public string getRecommendedOutputFileFullName()

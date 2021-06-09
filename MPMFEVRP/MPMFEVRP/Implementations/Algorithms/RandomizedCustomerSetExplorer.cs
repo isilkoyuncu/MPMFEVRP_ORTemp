@@ -35,7 +35,7 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         PartitionedCustomerSetList InfeasibleCustomerSets, OnlyGDVFeasibleCustomerSets, EVFeasibleCustomerSets;
 
-        double avgTimePerGDVOptimalTSPSolution, avgTimePerGDVInfeasibleTSPSolution, avgTimePerEVOptimalTSPSolution, avgTimePerEVInfeasibleTSPSolution, avgTimePerTheOtherEVOptimalTSPSolution, avgTimePerTheOtherEVInfeasibleTSPSolution;
+        double avgTimePerGDVOptimalTSPSolution, avgTimePerGDVInfeasibleTSPSolution, avgTimePerEVOptimalTSPSolution, avgTimePerEVInfeasibleTSPSolution;//, avgTimePerTheOtherEVOptimalTSPSolution, avgTimePerTheOtherEVInfeasibleTSPSolution;
         TripleSolveOutComeStatistics tripleSolveOutcomeStats;
         string allStats_formatted;
         string orienteeringresults_formatted;
@@ -81,6 +81,17 @@ namespace MPMFEVRP.Implementations.Algorithms
 
         public override string[] GetOutputSummary()
         {
+            double gdvInfTimeSpent = 0.0;
+            int gdvInfNumCustInSet = 0;
+            try
+            {
+                gdvInfTimeSpent = theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"];
+                gdvInfNumCustInSet = theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+            }
+            catch
+            {
+
+            }
             List<string> list = new List<string>{
                 "Parameter: " + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Description + "-" + algorithmParameters.GetParameter(ParameterID.ALG_RUNTIME_SECONDS).Value.ToString(),
                 "CPU Run Time(sec): " + stats.RunTimeMilliSeconds.ToString(),
@@ -89,17 +100,17 @@ namespace MPMFEVRP.Implementations.Algorithms
                 "avgTimePerEVOptimalTSPSolution" + avgTimePerEVOptimalTSPSolution,
                 "avgTimePerEVInfeasibleTSPSolution" + avgTimePerEVInfeasibleTSPSolution,
                 "Total GDV time spent on optimal: "+ theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"],
-                "Total GDV time spent on infeasible: "+ theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"],
+                "Total GDV time spent on infeasible: "+ gdvInfTimeSpent,
                 "Total EV time spent on optimal (NDF): " + theProblemModel.EV_TSP_TimeSpentAccount["Optimal"],
                 "Total EV time spent on infeasible (NDF): " + theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"],
-                "Total EV time spent on optimal (ADF): " + theProblemModel.TheOtherEV_TSP_TimeSpentAccount["Optimal"],
-                "Total EV time spent on infeasible (ADF): " + theProblemModel.TheOtherEV_TSP_TimeSpentAccount["Infeasible"],
+                //"Total EV time spent on optimal (ADF): " + theProblemModel.TheOtherEV_TSP_TimeSpentAccount["Optimal"],
+                //"Total EV time spent on infeasible (ADF): " + theProblemModel.TheOtherEV_TSP_TimeSpentAccount["Infeasible"],
                 "Total # of GDV optimal: "+ theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
-                "Total # of GDV infeasible: "+ theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
+                "Total # of GDV infeasible: "+ gdvInfNumCustInSet,
                 "Total # of EV optimal (NDF): "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
                 "Total # of EV infeasible (NDF): "+ theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
-                "Total # of EV optimal (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
-                "Total # of EV infeasible (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
+                //"Total # of EV optimal (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"],
+                //"Total # of EV infeasible (ADF): "+ theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"],
                 "Solution Status: " + status.ToString()
             };          
 
@@ -128,13 +139,19 @@ namespace MPMFEVRP.Implementations.Algorithms
         {
             //The following assumes no div/zero error is possible, will have to come back to make this code robust
             avgTimePerGDVOptimalTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
-            avgTimePerGDVInfeasibleTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
-
-            avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            try
+            {
+                avgTimePerGDVInfeasibleTSPSolution = theProblemModel.GDV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.GDV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+            }
+            catch
+            {
+                avgTimePerGDVInfeasibleTSPSolution = 0.0;
+            }
+            avgTimePerEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Optimal"];           
             avgTimePerEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.EV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
 
-            avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
-            avgTimePerTheOtherEVInfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
+            //avgTimePerTheOtherEVOptimalTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Optimal"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Optimal"];
+            //InfeasibleTSPSolution = theProblemModel.EV_TSP_TimeSpentAccount["Infeasible"] / theProblemModel.TheOtherEV_TSP_NumberOfCustomerSetsByStatus["Infeasible"];
 
             _OptimizationComparisonStatistics.WriteToFile(StringOperations.AppendToFilename(theProblemModel.InputFileName,"_OptimizationComparisonStatistics"));
         }
