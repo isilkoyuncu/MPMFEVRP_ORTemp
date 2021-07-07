@@ -190,3 +190,13 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /MPMFEVRP/packages
+MPMFEVRP/MPMFEVRP.sln
+*.csproj
+*.csproj
+*.csproj
+*.csproj
+MPMFEVRP/MPMFEVRP.sln
+MPMFEVRP/MPMFEVRP/MPMFEVRP.csproj
+MPMFEVRP/MPMFEVRPTests/MPMFEVRPTests.csproj
+MPMFEVRP/MPMFEVRPTests1/MPMFEVRPTests1.csproj
+MPMFEVRP/RunFromConsole/RunFromConsole.csproj
