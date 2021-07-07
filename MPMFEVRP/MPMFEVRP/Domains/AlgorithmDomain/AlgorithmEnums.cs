@@ -7,6 +7,8 @@
 
     public enum Selection_Criteria { CompleteUniform, UniformAmongTheBestPercentage, WightedProbSelecAmongTheBestPercentage, WeightedNormalizedProbSelection, UsingShadowPrices, NearestNeighbor };
 
+    public enum CustomerGrouping_Metric { ClosestCustomers }
+    
     public enum Stopping_Criteria {IterationNumber, TimeLimit};
 
     public enum TSPSolverType { GDVExploiter,PlainAFVSolver,OldiesADF};

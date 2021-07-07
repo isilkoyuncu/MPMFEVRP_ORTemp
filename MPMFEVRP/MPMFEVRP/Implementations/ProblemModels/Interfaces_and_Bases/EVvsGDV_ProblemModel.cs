@@ -507,6 +507,50 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
 
             return eMinToDepot;
         }
+        public double[] CalculateTheCenterOfGravity(CustomerSet CS)
+        {
+            double[] COGcoordinates = new double[2] { 0.0, 0.0};    //either x,y or lon,lat does not matter, double[2] array COGcoordinates[0] = x (or lon), COGcoordinates[1]= y (or lat)
+
+            List<double[]> coordinates = new List<double[]>();
+            List<Site> customers = SRD.GetSitesList(SiteTypes.Customer);
+            foreach (string csID in CS.Customers)
+                for (int i = 0; i < customers.Count; i++)
+                {
+                    if (csID == customers[i].ID)
+                    {
+                        coordinates.Add(new double[2] { customers[i].X, customers[i].Y });
+                        break;
+                    }
+                }
+            for(int i=0; i<coordinates.Count; i++)
+            {
+                COGcoordinates[0] += coordinates[i][0];
+                COGcoordinates[1] += coordinates[i][1];
+            }
+            COGcoordinates[0] = COGcoordinates[0] / (double)coordinates.Count;
+            COGcoordinates[1] = COGcoordinates[1] / (double)coordinates.Count;
+            return COGcoordinates;
+        }
+        public double GetDistanceToCenterOfGravity(double[] centerOfGravityCoordinates, double[] siteXY)
+        {
+            if(CRD.IsLongLat)
+                return Calculators.HaversineDistance(centerOfGravityCoordinates[0], centerOfGravityCoordinates[1], siteXY[0], siteXY[1]);
+            else
+                return Calculators.EuclideanDistance(centerOfGravityCoordinates[0], siteXY[0], centerOfGravityCoordinates[1], siteXY[1]);
+        }
+        public double[,] GetCustomerPariwiseInteractionMatrix(CustomerGrouping_Metric metric= CustomerGrouping_Metric.ClosestCustomers)
+        {
+            double[,] outcome = new double[SRD.NumCustomers + 1, SRD.NumCustomers + 1]; //num customers + 1 for the depot
+            switch (metric)
+            {
+                case CustomerGrouping_Metric.ClosestCustomers:
+                    break;
+                default:
+                    break;
+            }
+           
+        }
+
 
         public void SetNumVehicles()
         {
@@ -810,5 +854,6 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         {
             return thePlainAFVSolver.optimizationStatstics;
         }
+
     }
 }

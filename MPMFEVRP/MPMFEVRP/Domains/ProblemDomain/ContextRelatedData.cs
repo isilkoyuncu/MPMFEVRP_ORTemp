@@ -8,6 +8,7 @@
         double refuelCostAtDepot;
         double refuelCostInNetwork;
         double refuelCostOutNetwork;
+        bool isLongLat;
 
         ////ISSUE (#6): The following are all public and what's even more dangerous is that they all have setters (only used by ProblemDataPackage). This must be corrected by forcing the ProblemDataPackage to use the full constructor below from its internally kept data. As for giving these fields to outside, new public Get...() methods must be developed and then used as the only way.
         public double TravelSpeed { get { return travelSpeed; } set { travelSpeed = value; } }
@@ -16,9 +17,9 @@
         public double RefuelCostAtDepot { get { return refuelCostAtDepot; } set { refuelCostAtDepot = value; } }
         public double RefuelCostInNetwork { get { return refuelCostInNetwork; } set { refuelCostInNetwork = value; } }
         public double RefuelCostOutNetwork { get { return refuelCostOutNetwork; } set { refuelCostOutNetwork = value; } }
-        
+        public bool IsLongLat { get { return isLongLat; } set { isLongLat = value; } }
         public ContextRelatedData() { }
-        public ContextRelatedData(double travelSpeed,double tMax, double refuelCostofGas, double refuelCostAtDepot, double refuelCostInNetwork, double refuelCostOutNetwork)
+        public ContextRelatedData(double travelSpeed,double tMax, double refuelCostofGas, double refuelCostAtDepot, double refuelCostInNetwork, double refuelCostOutNetwork, bool isLongLat)
         {
             this.travelSpeed = travelSpeed;
             this.tMax = tMax;
@@ -26,6 +27,7 @@
             this.refuelCostAtDepot = refuelCostAtDepot;
             this.refuelCostInNetwork = refuelCostInNetwork;
             this.refuelCostOutNetwork = refuelCostOutNetwork;
+            this.isLongLat = isLongLat;
         }
         public ContextRelatedData(ContextRelatedData twinCRD)
         {
@@ -35,6 +37,7 @@
             refuelCostAtDepot = twinCRD.refuelCostAtDepot;
             refuelCostInNetwork = twinCRD.refuelCostInNetwork;
             refuelCostOutNetwork = twinCRD.refuelCostOutNetwork;
+            isLongLat = twinCRD.isLongLat;
         }
     }
 }
