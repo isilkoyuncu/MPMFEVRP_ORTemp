@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Domains\AlgorithmDomain\AlgorithmEnums.cs" />
     <Compile Include="Domains\AlgorithmDomain\AlgorithmStatistics.cs" />
+    <Compile Include="Domains\AlgorithmDomain\Column.cs" />
     <Compile Include="Domains\ProblemDomain\Arc.cs" />
     <Compile Include="Domains\ProblemDomain\ProblemDataPackage.cs" />
     <Compile Include="Domains\ProblemDomain\ContextRelatedData.cs" />

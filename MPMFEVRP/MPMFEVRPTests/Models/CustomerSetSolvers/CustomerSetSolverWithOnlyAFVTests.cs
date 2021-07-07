@@ -52,9 +52,9 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
         public void SolveForFourCustomersTest()
         {
             CustomerSet cs = new CustomerSet("C6", theProblemModel.SRD.GetCustomerIDs());
-            cs.NewExtend("C8");
-            cs.NewExtend("C14");
-            cs.NewExtend("C19");
+            cs.Extend("C8");
+            cs.Extend("C14");
+            cs.Extend("C19");
 
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs,false);
 
@@ -90,8 +90,8 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             theSolver = new CustomerSetSolverWithOnlyAFV(theProblemModel);
 
             CustomerSet cs = new CustomerSet("C6", theProblemModel.SRD.GetCustomerIDs());
-            cs.NewExtend("C13");
-            cs.NewExtend("C19");
+            cs.Extend("C13");
+            cs.Extend("C19");
 
             VehicleSpecificRouteOptimizationOutcome vsrooGDV = theGDVSolver.Solve(cs, false);
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs, false, vsrooGDV.VSOptimizedRoute);       
@@ -119,7 +119,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             {
                 if (c != allCustomers.First())
                 {
-                    cs.NewExtend(c);
+                    cs.Extend(c);
                 }
             }
 

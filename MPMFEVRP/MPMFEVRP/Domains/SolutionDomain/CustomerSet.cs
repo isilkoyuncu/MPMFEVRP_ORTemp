@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using MPMFEVRP.Models;
 using MPMFEVRP.Domains.AlgorithmDomain;
 using System.Linq;
-
+using MPMFEVRP.Utils;
 
 namespace MPMFEVRP.Domains.SolutionDomain
 {
@@ -15,28 +15,21 @@ namespace MPMFEVRP.Domains.SolutionDomain
     /// </summary>
     public class CustomerSet
     {
-        public string CustomerSetID { get { return customerSetID; } }
-        string customerSetID;
-        List<string> customers = new List<string>();
-        public List<string> Customers { get { return customers; } }
+        string customerSetID;   public string CustomerSetID { get { return customerSetID; } }
+        List<string> customers = new List<string>();    public List<string> Customers { get { return customers; } }
         public int NumberOfCustomers { get { return (customers == null) ? 0 : customers.Count; } }
-        List<string> possibleOtherCustomers = new List<string>();
-        public List<string> PossibleOtherCustomers { get { return possibleOtherCustomers; } }
-        Dictionary<string, double> minAdditionalDistanceForPossibleOtherCustomer = new Dictionary<string, double>();
-        public Dictionary<string, double> MinAdditionalDistanceForPossibleOtherCustomer { get { return minAdditionalDistanceForPossibleOtherCustomer; } }
-        Dictionary<string, double> minAdditionalTimeForPossibleOtherCustomer = new Dictionary<string, double>();
-        public Dictionary<string, double> MinAdditionalTimeForPossibleOtherCustomer { get { return minAdditionalTimeForPossibleOtherCustomer; } }
-        List<string> impossibleOtherCustomers = new List<string>();
-        public List<string> ImpossibleOtherCustomers { get { return impossibleOtherCustomers; } }
+        List<string> possibleOtherCustomers = new List<string>();   public List<string> PossibleOtherCustomers { get { return possibleOtherCustomers; } }
+        Dictionary<string, double> minAdditionalDistanceForPossibleOtherCustomer = new Dictionary<string, double>();    public Dictionary<string, double> MinAdditionalDistanceForPossibleOtherCustomer { get { return minAdditionalDistanceForPossibleOtherCustomer; } }
+        Dictionary<string, double> minAdditionalTimeForPossibleOtherCustomer = new Dictionary<string, double>();        public Dictionary<string, double> MinAdditionalTimeForPossibleOtherCustomer { get { return minAdditionalTimeForPossibleOtherCustomer; } }
+        List<string> impossibleOtherCustomers = new List<string>();        public List<string> ImpossibleOtherCustomers { get { return impossibleOtherCustomers; } }
+        double[] centerOfGravityCoordinates = new double[2];    public double[] CenterOfGravityCoordinates { get { return centerOfGravityCoordinates; } }
 
-        RouteOptimizationOutcome routeOptimizationOutcome;
-        public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
+
+        RouteOptimizationOutcome routeOptimizationOutcome;        public RouteOptimizationOutcome RouteOptimizationOutcome { get { return routeOptimizationOutcome; } set { routeOptimizationOutcome = value; } }
         public VehicleSpecificRouteOptimizationStatus GetVehicleSpecificRouteOptimizationStatus(VehicleCategories vehCategory) { return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vehCategory).Status; }
-
         bool retrievedFromArchive; public bool RetrievedFromArchive { get { return retrievedFromArchive; } }
-
         public ObjectiveFunctionInputDataPackage OFIDP { get { return routeOptimizationOutcome.OFIDP; } }
-
+        
         double swapInsertCPUtime;
 
         public CustomerSet()
@@ -47,6 +40,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             impossibleOtherCustomers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
             retrievedFromArchive = false;
+            centerOfGravityCoordinates = new double[2] { 999999, 999999 };
         }
         public CustomerSet(string customerID, List<string> allCustomers, bool retrievedFromArchive = false)
         {
@@ -59,6 +53,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             impossibleOtherCustomers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
             this.retrievedFromArchive = retrievedFromArchive;
+            centerOfGravityCoordinates = new double[2] { 999999, 999999 };
         }
 
         public CustomerSet(bool isEmpty, List<string> allCustomers)
@@ -74,6 +69,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             impossibleOtherCustomers = new List<string>();
             routeOptimizationOutcome = new RouteOptimizationOutcome();
             retrievedFromArchive = false;
+            centerOfGravityCoordinates = new double[2] { 999999, 999999 };
         }
 
         public CustomerSet(CustomerSet twinCS, EVvsGDV_ProblemModel theProblemModel = null, bool copyROO = false)
@@ -106,6 +102,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                 UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
                 IdentifyNewImpossibleOtherCustomers(theProblemModel);
             }
+            centerOfGravityCoordinates = new double[2] { twinCS.centerOfGravityCoordinates[0], twinCS.centerOfGravityCoordinates[1] };
         }
 
         public CustomerSet(CustomerSet twinCS, EVvsGDV_ProblemModel theProblemModel, RouteOptimizationOutcome newROO)
@@ -127,13 +124,12 @@ namespace MPMFEVRP.Domains.SolutionDomain
             {
                 impossibleOtherCustomers.Add(c);
             }
-                routeOptimizationOutcome = new RouteOptimizationOutcome(newROO);
-            
-                UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
-                IdentifyNewImpossibleOtherCustomers(theProblemModel);
-            
-        }
+            routeOptimizationOutcome = new RouteOptimizationOutcome(newROO);
 
+            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
+            IdentifyNewImpossibleOtherCustomers(theProblemModel);
+            centerOfGravityCoordinates = new double[2] { twinCS.centerOfGravityCoordinates[0], twinCS.centerOfGravityCoordinates[1] };
+        }
 
         public CustomerSet(List<string> customers, double computationTime = 0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
@@ -147,6 +143,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicleCategory, computationTime, vsros, vehicleSpecificRoute);
             routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
             retrievedFromArchive = false;
+            centerOfGravityCoordinates = new double[2] { 999999, 999999 };
         }
 
         public bool IsIdentical(CustomerSet otherCS)
@@ -195,34 +192,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
             else
                 throw new Exception("Customer is already in the set, know before asking to extend!");
-        }
 
-        public void Extend(string customer)
-        {
-            if (!customers.Contains(customer))
-            {
-                if (!impossibleOtherCustomers.Contains(customer))
-                {
-                    possibleOtherCustomers.Remove(customer);
-                    customers.Add(customer);
-                    customers.Sort();
-                    customerSetID = String.Join(",", customers.OrderBy(x => x));
-
-                    routeOptimizationOutcome = new RouteOptimizationOutcome();
-                }
-                else
-                    throw new Exception("Customer was placed in the impossible list before, know before asking to extend!");
-            }
-            else
-                throw new Exception("Customer is already in the set, know before asking to extend!");
         }
-
-        public void Optimize(EVvsGDV_ProblemModel theProblemModel)
-        {
-            routeOptimizationOutcome = theProblemModel.RouteOptimize(this);
-            UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
-            IdentifyNewImpossibleOtherCustomers(theProblemModel);
-        }
+       
         public void Optimize(EVvsGDV_ProblemModel theProblemModel, Vehicle vehicle, VehicleSpecificRouteOptimizationOutcome vsroo_GDV = null, bool requireGDVSolutionBeforeEV = true)
         {
             //This method makes heavy use of the problem model
@@ -255,16 +227,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
             IdentifyNewImpossibleOtherCustomers(theProblemModel);
         }
 
-        public void NewExtend(string customer)
+        public void Extend(string customer)
         {
             possibleOtherCustomers.Remove(customer);
             customers.Add(customer);
             customers.Sort();
             customerSetID = String.Join(",", customers.OrderBy(x => x));
+            centerOfGravityCoordinates = new double[2] { 0.0, 0.0 };
 
             routeOptimizationOutcome = new RouteOptimizationOutcome();
         }
-        public void NewOptimize(EVvsGDV_ProblemModel theProblemModel)
+        public void Optimize(EVvsGDV_ProblemModel theProblemModel)
         {
             routeOptimizationOutcome = theProblemModel.NewRouteOptimize(this);
             UpdateMinAdditionalsForAllPossibleOtherCustomers(theProblemModel);
@@ -351,16 +324,16 @@ namespace MPMFEVRP.Domains.SolutionDomain
             c2 = CS2.customers[j];
             CS1.RemoveAt(i);
             CS2.RemoveAt(j);
-            CS2.NewExtend(c1);
+            CS2.Extend(c1);
             if (!exploredCustomerSetMasterList.Includes(CS2))
             {
-                CS2.NewOptimize(theProblemModel);
+                CS2.Optimize(theProblemModel);
                 exploredCustomerSetMasterList.Add(CS2);
             }
-            CS1.NewExtend(c2);
+            CS1.Extend(c2);
             if (!exploredCustomerSetMasterList.Includes(CS1))
             {
-                CS1.NewOptimize(theProblemModel);
+                CS1.Optimize(theProblemModel);
                 exploredCustomerSetMasterList.Add(CS1);
             }
         }
@@ -533,7 +506,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         }
         public double GetTwoLongestArcs(VehicleCategories vc = VehicleCategories.EV)
         {
-            return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).VSOptimizedRoute.GetLongestTwoArcsLength();
+            return routeOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(vc).VSOptimizedRoute.GetLongestTwoArcsLength();
         }
         public double GetShortestTwoArcsToCSfromCustomerID (string customerID, EVvsGDV_ProblemModel theProblemModel)
         {
@@ -553,6 +526,11 @@ namespace MPMFEVRP.Domains.SolutionDomain
             for (int i = 0; i < Math.Min(3, arcLengthsToCustomerSet.Count); i++)
                 outcome[i] = Math.Max(0, arcLengthsToCustomerSet[i]);
             return outcome;
+        }
+    
+        public void CalculateCenterOfGravity(EVvsGDV_ProblemModel theProblemModel) //Run this method after extending a customer set.
+        {
+            centerOfGravityCoordinates = theProblemModel.CalculateTheCenterOfGravity(this);
         }
     }
 

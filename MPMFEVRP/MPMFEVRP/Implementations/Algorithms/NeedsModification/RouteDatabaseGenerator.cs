@@ -114,7 +114,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 string[] customerSet = allRows[i].Split('\t')[0].Split('-');
                 CustomerSet cs = new CustomerSet(customerSet[0], allCustomerIDs);
                 for (int c = 1; c < customerSet.Count(); c++)
-                    cs.NewExtend(customerSet[c]);
+                    cs.Extend(customerSet[c]);
                 exploredCustomerSetMasterListsAtStart.Add(cs);
             }
         }
@@ -148,7 +148,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 for(int k=0; k<customersToBeAdded.Count; k++)
                 {
                     CustomerSet tempCS = new CustomerSet(exploredCustomerSetMasterListsAtEachLevel[i][j]);
-                    tempCS.NewExtend(customersToBeAdded[k]);
+                    tempCS.Extend(customersToBeAdded[k]);
                     if (!exploredCustomerSetMasterListsAtEachLevel[i + 1].ContainsAnIdenticalCustomerSet(tempCS))
                     {
                         tempCS.OptimizeByExploitingGDVs(theProblemModel, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes, preserveCustomerVisitSequence);
@@ -174,7 +174,7 @@ namespace MPMFEVRP.Implementations.Algorithms
                 if (customersToBeAdded != null && customersToBeAdded.Count != 0)
                 {
                     CustomerSet tempCS = new CustomerSet(currentCS);
-                    tempCS.NewExtend(customersToBeAdded.First());
+                    tempCS.Extend(customersToBeAdded.First());
                     if (!exploredCustomerSetMasterListsAtEachLevel[i + 1].ContainsAnIdenticalCustomerSet(tempCS))
                     {
                         tempCS.OptimizeByExploitingGDVs(theProblemModel, Exploiting_GDVs_Flowchart.d_PathInsertedAndSwappedRoutes, preserveCustomerVisitSequence);

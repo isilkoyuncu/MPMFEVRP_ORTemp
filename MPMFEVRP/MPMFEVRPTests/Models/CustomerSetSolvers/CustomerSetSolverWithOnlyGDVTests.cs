@@ -47,9 +47,9 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
         public void SolveForFourCustomersTest()
         {
             CustomerSet cs = new CustomerSet("C6", theProblemModel.SRD.GetCustomerIDs());
-            cs.NewExtend("C8");
-            cs.NewExtend("C14");
-            cs.NewExtend("C19");
+            cs.Extend("C8");
+            cs.Extend("C14");
+            cs.Extend("C19");
 
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs);
 
@@ -63,8 +63,8 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
         public void SolveForThreeCustomersTest()
         {
             CustomerSet cs = new CustomerSet("C4", theProblemModel.SRD.GetCustomerIDs());
-            cs.NewExtend("C11");
-            cs.NewExtend("C3");
+            cs.Extend("C11");
+            cs.Extend("C3");
 
             VehicleSpecificRouteOptimizationOutcome vsroo = theSolver.Solve(cs);
             Assert.AreEqual(VehicleSpecificRouteOptimizationStatus.Optimized, vsroo.Status);
@@ -81,7 +81,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers.Tests
             {
                 if(c!= allCustomers.First())
                 {
-                    cs.NewExtend(c);
+                    cs.Extend(c);
                 }
             }
 
