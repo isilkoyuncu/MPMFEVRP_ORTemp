@@ -128,6 +128,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             int numberOfVehiclesUsed_GDV=0;
             double VMT_EV=0.0;
             double VMT_GDV=0.0;
+            double cplexObjective_EV = 0.0;
+            double cplexObjective_GDV = 0.0;
             //Aggregation:
             if (IndividualOFIDPs_EV != null)
             {
@@ -165,6 +167,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
             int numberOfVehiclesUsed_GDV = 0;
             double VMT_EV = 0.0;
             double VMT_GDV = 0.0;
+            double cplexObjective_EV = 0.0;
+            double cplexObjective_GDV = 0.0;
             //Aggregation:
             foreach (ObjectiveFunctionInputDataPackage OFIDP in IndividualOFIDPs)
             {

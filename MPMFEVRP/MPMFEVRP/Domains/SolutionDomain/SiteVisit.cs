@@ -23,7 +23,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         //the cumulatives (for statistics)
         double cumulativeTravelDistance; //(by arrival at this site)
         public double CumulativeTravelDistance { get { return cumulativeTravelDistance; } }
-
+        
         //feasibility
         public bool GetTimeFeasible(double Tmax) { return arrivalTime <= Tmax+ mipErrorTime; }
         public bool GetSOCFeasible() { return arrivalSOC + mipErrorSOE >= 0.0; }

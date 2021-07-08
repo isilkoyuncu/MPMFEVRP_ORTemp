@@ -149,7 +149,7 @@
     <Compile Include="Implementations\Algorithms\HybridTreeSearchAndSetPartition.cs" />
     <Compile Include="Implementations\Algorithms\NeedsModification\PathBasedApproach.cs" />
     <Compile Include="Implementations\Algorithms\RandomizedCustomerSetExplorer.cs" />
-    <Compile Include="Implementations\Algorithms\NeedsModification\RndomizedCSExplorerWithExploitingGDVs.cs" />
+    <Compile Include="Implementations\Algorithms\RndomizedCSExplorerWithExploitingGDVs.cs" />
     <Compile Include="Implementations\Algorithms\NeedsModification\RouteDatabaseGenerator.cs" />
     <Compile Include="Implementations\ProblemModels\EMH_ProblemModel.cs" />
     <Compile Include="Implementations\ProblemModels\EVvsGDV_MinCost_VRP_Model.cs" />
@@ -210,6 +210,7 @@
     <Compile Include="Models\RefuelingPath.cs" />
     <Compile Include="Models\RefuelingPathGenerator.cs" />
     <Compile Include="Models\RefuelingPathList.cs" />
+    <Compile Include="Models\XCPlex\XCPlex_SetCoveringMasterProblem_wColumns.cs" />
     <Compile Include="Models\XCPlex\XCPlex_ETSP_VP.cs" />
     <Compile Include="Models\XCPlex\XCPlex_MixedFleetEVRPwRefuelingPathsVP.cs" />
     <Compile Include="Models\XCPlex\XCPlex_Model_AFV_SingleCustomerSet.cs" />

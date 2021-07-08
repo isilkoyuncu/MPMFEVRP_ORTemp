@@ -9,7 +9,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
 
         double computationTime;
         public double ComputationTime { get { return computationTime; } }
-
+        
         VehicleSpecificRouteOptimizationStatus status;
         public VehicleSpecificRouteOptimizationStatus Status { get { return status; } }
 
@@ -55,7 +55,8 @@ namespace MPMFEVRP.Domains.SolutionDomain
                                                              vsOptimizedRoute.NumberOfCustomersVisited,
                                                              vsOptimizedRoute.GetPrizeCollected(),
                                                              1,
-                                                             vsOptimizedRoute.GetVehicleMilesTraveled());
+                                                             vsOptimizedRoute.GetVehicleMilesTraveled()
+                                                             );
             else
                 return new ObjectiveFunctionInputDataPackage();
         }

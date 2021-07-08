@@ -33,7 +33,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
         double iSTotalRechargeAmount = 0.0;
         double eSTotalRechargeAmount = 0.0;
         double eodTotalRechargeAmount = 0.0;//end-of-day
-
+        
         //constructors
         //public VehicleSpecificRoute() { }//empty constructor, make accessible when needed, hopefully never
         public VehicleSpecificRoute(EVvsGDV_ProblemModel problemModel, Vehicle vehicle, bool alwaysClosedLoop = true)
@@ -116,7 +116,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             if (alwaysClosedLoop)
                 siteVisits.Add(new SiteVisit(siteVisits.Last(), theProblemModel.SRD.GetSingleDepotSite(), theProblemModel.SRD.GetDistance(siteVisits.Last().SiteID, theProblemModel.SRD.GetSingleDepotID()), theProblemModel.SRD.GetTravelTime(siteVisits.Last().SiteID, theProblemModel.SRD.GetSingleDepotID()), vehicle, energyConsumption: theProblemModel.SRD.GetEVEnergyConsumption(siteVisits.Last().SiteID, theProblemModel.SRD.GetSingleDepotID())));
         }
-            public VehicleSpecificRoute(VehicleSpecificRoute twinVSR)
+        public VehicleSpecificRoute(VehicleSpecificRoute twinVSR)
         {
             problemModel = twinVSR.problemModel;
             vehicle = twinVSR.vehicle;

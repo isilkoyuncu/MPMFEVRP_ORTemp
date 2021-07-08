@@ -496,9 +496,9 @@ namespace MPMFEVRP.Domains.SolutionDomain
             else throw new Exception("CustomerSet. called to make impossible a customer that wasn't possible!");
         }
 
-        public double GetVMT()
+        public double GetVMT(VehicleCategories vc)
         {
-            return routeOptimizationOutcome.OFIDP.GetVMT(VehicleCategories.EV);
+            return routeOptimizationOutcome.OFIDP.GetVMT(vc);
         }
         public double GetLongestArc(VehicleCategories vc = VehicleCategories.EV)
         {
