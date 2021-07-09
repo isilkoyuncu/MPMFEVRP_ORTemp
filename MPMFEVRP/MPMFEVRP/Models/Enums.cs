@@ -2,7 +2,7 @@
 {
     public enum ObjectiveFunctionTypes { Minimize, Maximize };
 
-    public enum ObjectiveFunctions { MinimizeVMT, MinimizeVariableCost, MinimizeTotalCost, MaximizeProfit };
+    public enum ObjectiveFunctions { MinimizeVMT, MinimizeVariableCost, MinimizeTotalCost, MaximizeProfit, MinimizeFuelCost };
 
     public enum ParameterID//When adding a new optional Cplex parameter, make sure to add it to the public static list in the XCplexParameters class and make a note next to it so we can double-check!
     {

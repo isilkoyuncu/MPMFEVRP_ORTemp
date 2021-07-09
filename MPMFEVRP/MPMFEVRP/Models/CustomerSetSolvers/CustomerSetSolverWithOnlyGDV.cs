@@ -19,9 +19,8 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
         //Constructors
         public CustomerSetSolverWithOnlyGDV() : base() { }
-        public CustomerSetSolverWithOnlyGDV(EVvsGDV_ProblemModel theProblemModel) :base(theProblemModel, new XCPlexParameters(tSP:true, limitComputationTime: true, runtimeLimit_Seconds: 120.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
+        public CustomerSetSolverWithOnlyGDV(EVvsGDV_ProblemModel theProblemModel) :base(theProblemModel, new XCPlexParameters(tSP:true, limitComputationTime: false, runtimeLimit_Seconds: 36000.0), CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce)
         {
-
         }
 
         //Other methods
@@ -37,20 +36,30 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
             //Solve & Post-process
             Solve_and_PostProcess();
+            
+            double varCostPerMile = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile;
+            double fuelCost = -1;
+            if (theProblemModel.ObjectiveFunction==ObjectiveFunctions.MinimizeFuelCost)
+            {
+                if(GetBestObjValue() == GetObjValue())
+                    fuelCost = GetObjValue();
+                else
+                    fuelCost = GetBestObjValue();
+            }
 
             //Return the desired outcome
             if (SolutionStatus == XCPlexSolutionStatus.Infeasible)
             {
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, varCostPerMile, VehicleSpecificRouteOptimizationStatus.Infeasible);
             }
             else if (SolutionStatus == XCPlexSolutionStatus.Optimal)
             {
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First());
+                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, varCostPerMile, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First(), fuelCost);
             }
-            else if (SolutionStatus == XCPlexSolutionStatus.Feasible)
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First());
-            else if (SolutionStatus == XCPlexSolutionStatus.NoFeasibleSolutionFound)
-                return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, VehicleSpecificRouteOptimizationStatus.Infeasible);
+            //else if (SolutionStatus == XCPlexSolutionStatus.Feasible)
+            //    return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, varCostPerMile, VehicleSpecificRouteOptimizationStatus.Optimized, vsOptimizedRoute: GetVehicleSpecificRoutes(VehicleCategory).First(), fuelCost);
+            //else if (SolutionStatus == XCPlexSolutionStatus.NoFeasibleSolutionFound)
+            //    return new VehicleSpecificRouteOptimizationOutcome(VehicleCategory, CPUtime, varCostPerMile, VehicleSpecificRouteOptimizationStatus.Infeasible);
             else
                 throw new System.Exception("The TSPsolverEV.SolutionStatus is neither infeasible nor optimal for vehicle category: " + VehicleCategory.ToString());
         }

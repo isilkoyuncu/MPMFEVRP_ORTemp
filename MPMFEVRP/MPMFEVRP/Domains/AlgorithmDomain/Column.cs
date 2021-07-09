@@ -38,7 +38,8 @@ namespace MPMFEVRP.Domains.AlgorithmDomain
             id = optimizedCS.CustomerSetID;
             AFVvmt = optimizedCS.GetVMT(VehicleCategories.EV);
             GDVvmt = optimizedCS.GetVMT(VehicleCategories.EV);
-            AFVfuelCost = optimizedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).
+            AFVfuelCost = optimizedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV).FuelCost;
+            GDVfuelCost = optimizedCS.RouteOptimizationOutcome.GetVehicleSpecificRouteOptimizationOutcome(VehicleCategories.GDV).FuelCost;
             AFVprofit = optimizedCS.OFIDP.GetPrizeCollected(VehicleCategories.EV) - AFVfuelCost - theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost;
             GDVprofit = optimizedCS.OFIDP.GetPrizeCollected(VehicleCategories.EV) - GDVfuelCost - theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost;
 
