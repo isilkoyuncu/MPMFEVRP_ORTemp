@@ -135,7 +135,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT) //For a mixed fleet vrp this is not a meaningful objective function
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeVMT) //For a mixed fleet vrp this is not a meaningful objective function
             {
                 for (int i = 0; i < numNonESNodes; i++)
                     for (int j = 0; j < numNonESNodes; j++)

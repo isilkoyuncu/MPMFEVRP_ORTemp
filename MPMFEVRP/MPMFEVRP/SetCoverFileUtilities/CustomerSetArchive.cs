@@ -67,7 +67,7 @@ namespace MPMFEVRP.SetCoverFileUtilities
                 string[] entriesInLine = line.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 VehicleSpecificRouteOptimizationStatus vsrossss = (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]);
                 VehicleSpecificRoute vsr = new VehicleSpecificRoute(theProblemModel, theGDV);
-                CustomerSet cs = new CustomerSet(RemoveSpacesAndConvertToList(entriesInLine[0]), vsros: (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]), vehicleSpecificRoute: vsr);
+                CustomerSet cs = new CustomerSet(RemoveSpacesAndConvertToList(entriesInLine[0]), theProblemModel, vsros: (VehicleSpecificRouteOptimizationStatus)Enum.Parse(typeof(VehicleSpecificRouteOptimizationStatus), entriesInLine[1]), vehicleSpecificRoute: vsr);
                 outcome.Add(cs);
             }
             sr.Close();

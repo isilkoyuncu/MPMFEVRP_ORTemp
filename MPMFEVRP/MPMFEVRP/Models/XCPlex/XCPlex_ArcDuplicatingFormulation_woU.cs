@@ -422,7 +422,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
             {
                 //Second term Part I: distance-based costs from customer to customer directly
                 for (int i = 0; i < numNonESNodes; i++)
@@ -493,7 +493,7 @@ namespace MPMFEVRP.Models.XCPlex
             AddConstraint_IncomingXYTotalEqualsOutgoingXYTotalforEV();//2
             AddConstraint_IncomingXTotalEqualsOutgoingXTotalforGDV();//3
 
-            if ((xCplexParam.TSP) || (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT))//This is the case for both TSP and Orienteering models encountered. For the broader model, we don't impose any constraints. MinimizeVMT objective check is made to simply understand the EMH problems.
+            if ((xCplexParam.TSP) || (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeVMT))//This is the case for both TSP and Orienteering models encountered. For the broader model, we don't impose any constraints. MinimizeVMT objective check is made to simply understand the EMH problems.
                 AddConstraint_MaxNumberOfGDVs();//5
 
             if (theProblemModel.ObjectiveFunctionType == ObjectiveFunctionTypes.Maximize)

@@ -53,6 +53,24 @@ namespace MPMFEVRP.Domains.SolutionDomain
             }
         }
 
+        public VehicleSpecificRouteOptimizationOutcome(VehicleCategories vehicleCategory, double computationTime, VehicleSpecificRouteOptimizationStatus status, VehicleSpecificRoute vsOptimizedRoute = null)
+        {
+            this.vehicleCategory = vehicleCategory;
+            this.computationTime = computationTime;
+            this.status = status;
+
+            switch (status)
+            {
+                case VehicleSpecificRouteOptimizationStatus.NotYetOptimized:
+                    break;
+                case VehicleSpecificRouteOptimizationStatus.Infeasible:
+                    break;
+                case VehicleSpecificRouteOptimizationStatus.Optimized:
+                    this.vsOptimizedRoute = vsOptimizedRoute;
+                    break;
+            }
+        }
+
         public ObjectiveFunctionInputDataPackage GetObjectiveFunctionInputDataPackage()
         {
             if (vsOptimizedRoute != null)

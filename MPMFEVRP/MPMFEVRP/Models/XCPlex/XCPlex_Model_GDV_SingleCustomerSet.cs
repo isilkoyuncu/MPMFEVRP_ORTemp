@@ -135,7 +135,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeVMT)//TODO: This code was written just to save the day, must be reconsidered in relation to the problem model's objective function calculation method
             {
                 //Second term Part I: distance-based costs from customer to customer directly
                 for (int i = 0; i < numNonESNodes; i++)

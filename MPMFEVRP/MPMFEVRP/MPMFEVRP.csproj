@@ -194,6 +194,13 @@
     <Compile Include="Implementations\Algorithms\Outsource2Cplex.cs" />
     <Compile Include="Implementations\Problems\Interfaces_and_Bases\EVvsGDV_Problem.cs" />
     <Compile Include="Implementations\ProblemModels\Interfaces_and_Bases\EVvsGDV_ProblemModel.cs" />
+    <Compile Include="MFGVRPCGH\Factory\MinCostMFGVRPCGHSolnFactory.cs" />
+    <Compile Include="MFGVRPCGH\FinalProduct\GVRPSolution.cs" />
+    <Compile Include="MFGVRPCGH\RawMaterial\EnumeratedParameters.cs" />
+    <Compile Include="MFGVRPCGH\RawMaterial\MixedFleetGVRPMaterial.cs" />
+    <Compile Include="MFGVRPCGH\RawMaterial\ExperimentationParameters.cs" />
+    <Compile Include="MFGVRPCGH\WorkersAndTools\CGMatheuristicForMinCostMFGVRP.cs" />
+    <Compile Include="MFGVRPCGH\WorkersAndTools\MFGVRPMILP.cs" />
     <Compile Include="Models\ColumnGeneration\ColumnGenerationAlgorithm.cs" />
     <Compile Include="Models\ColumnGeneration\LabelingAlgMaxProfitNoIS.cs" />
     <Compile Include="Models\ColumnGeneration\Labels.cs" />
@@ -373,6 +380,7 @@
       <Version>2.4.3</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

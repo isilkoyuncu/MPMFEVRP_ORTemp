@@ -17,7 +17,7 @@ namespace MPMFEVRP.Implementations.Problems
         public EVvsGDV_MaxProfit_VRP()
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
-            objectiveFunction = ObjectiveFunctions.MaximizeProfit;
+            objectiveFunction = OldObjectiveFunctions.MaximizeProfit;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Problems
         public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP) : base(PDP) 
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
-            objectiveFunction = ObjectiveFunctions.MaximizeProfit;
+            objectiveFunction = OldObjectiveFunctions.MaximizeProfit;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 1, 1, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
         }
@@ -33,7 +33,7 @@ namespace MPMFEVRP.Implementations.Problems
         public EVvsGDV_MaxProfit_VRP(ProblemDataPackage PDP, int numberOfEVs) : base(PDP)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Maximize;
-            objectiveFunction = ObjectiveFunctions.MaximizeProfit;
+            objectiveFunction = OldObjectiveFunctions.MaximizeProfit;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0, 0, 1, 1, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).FixedCost, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.GDV).VariableCostPerMile);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.AtMostOnce;
             problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);

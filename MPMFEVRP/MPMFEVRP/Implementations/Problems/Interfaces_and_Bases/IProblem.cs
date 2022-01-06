@@ -6,7 +6,7 @@ namespace MPMFEVRP.Implementations.Problems.Interfaces_and_Bases
     public interface IProblem
     {
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
-        ObjectiveFunctions ObjectiveFunction { get; }
+        OldObjectiveFunctions ObjectiveFunction { get; }
         ObjectiveFunctionCoefficientsPackage ObjectiveFunctionCoefficientsPackage { get; }
 
         ProblemDataPackage PDP { get; }

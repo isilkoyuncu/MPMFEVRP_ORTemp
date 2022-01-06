@@ -131,7 +131,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
             centerOfGravityCoordinates = new double[2] { twinCS.centerOfGravityCoordinates[0], twinCS.centerOfGravityCoordinates[1] };
         }
 
-        public CustomerSet(List<string> customers, double computationTime = 0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
+        public CustomerSet(List<string> customers, EVvsGDV_ProblemModel theProblemModel, double computationTime = 0.0, VehicleSpecificRouteOptimizationStatus vsros = VehicleSpecificRouteOptimizationStatus.NotYetOptimized, VehicleSpecificRoute vehicleSpecificRoute = null)
         {
             this.customers = customers;
             this.customers.Sort();//just in case
@@ -142,6 +142,17 @@ namespace MPMFEVRP.Domains.SolutionDomain
             VehicleCategories vehicleCategory = (vehicleSpecificRoute == null ? VehicleCategories.GDV : vehicleSpecificRoute.VehicleCategory);
             VehicleSpecificRouteOptimizationOutcome vsroo = new VehicleSpecificRouteOptimizationOutcome(vehicleCategory, computationTime, vsros, vehicleSpecificRoute);
             routeOptimizationOutcome = new RouteOptimizationOutcome(new List<VehicleSpecificRouteOptimizationOutcome>() { vsroo });
+            retrievedFromArchive = false;
+            centerOfGravityCoordinates = new double[2] { 999999, 999999 };
+        }
+        public CustomerSet(List<string> customers)
+        {
+            this.customers = customers;
+            this.customers.Sort();//just in case
+            customerSetID = String.Join(",", customers.OrderBy(x => x));
+
+            possibleOtherCustomers = new List<string>();
+            impossibleOtherCustomers = new List<string>();
             retrievedFromArchive = false;
             centerOfGravityCoordinates = new double[2] { 999999, 999999 };
         }
@@ -177,7 +188,7 @@ namespace MPMFEVRP.Domains.SolutionDomain
                     if (vsroo_GDV.Status == VehicleSpecificRouteOptimizationStatus.Infeasible)
                     {
                         // Do not try to optimize for EV
-                        vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
+                        vsroo_EV = new VehicleSpecificRouteOptimizationOutcome(VehicleCategories.EV, 0.0, 0.0, VehicleSpecificRouteOptimizationStatus.Infeasible);
                     }
                     else
                     {

@@ -7,6 +7,7 @@ using MPMFEVRP.Domains.ProblemDomain;
 using Facet.Combinatorics;
 using MPMFEVRP.Utils;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.MFGVRPCGH.RawMaterial;
 
 namespace MPMFEVRP.Models
 {
@@ -35,6 +36,13 @@ namespace MPMFEVRP.Models
             double[,] distances = apss.ModifyDistanceMatrix(theProblemModel.SRD.GetES2ESDistanceMatrix(), theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate);
             apss.InitializeAndSolveAPSS(distances, theProblemModel.SRD.GetESIDs().ToArray());
             GenerateRefuelingStops(theProblemModel.SRD.GetSWAVsList(SiteTypes.ExternalStation));
+        }
+        public RefuelingPathGenerator(MixedFleetGVRPMaterial theMaterial)
+        {
+            apss = new AllPairsShortestPaths();
+            double[,] distances = apss.ModifyDistanceMatrix(theMaterial.SRD.GetES2ESDistanceMatrix(), theMaterial.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / theMaterial.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate);
+            apss.InitializeAndSolveAPSS(distances, theMaterial.SRD.GetESIDs().ToArray());
+            GenerateRefuelingStops(theMaterial.SRD.GetSWAVsList(SiteTypes.ExternalStation));
         }
         public RefuelingPathList GenerateNonDominatedBetweenODPair(SiteWithAuxiliaryVariables origin, SiteWithAuxiliaryVariables destination, SiteRelatedData SRD, List<SiteWithAuxiliaryVariables> externalStations,VehicleRelatedData VRD, int minNumberOfRefuelingStops = 0, int maxNumberOfRefuelingStops = int.MaxValue)
         {

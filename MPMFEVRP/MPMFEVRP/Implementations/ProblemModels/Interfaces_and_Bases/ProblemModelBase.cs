@@ -16,8 +16,8 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
         protected ObjectiveFunctionTypes objectiveFunctionType;
         public ObjectiveFunctionTypes ObjectiveFunctionType { get { return objectiveFunctionType; } }
 
-        protected ObjectiveFunctions objectiveFunction;
-        public ObjectiveFunctions ObjectiveFunction { get { return objectiveFunction; } }
+        protected OldObjectiveFunctions objectiveFunction;
+        public OldObjectiveFunctions ObjectiveFunction { get { return objectiveFunction; } }
 
         protected ObjectiveFunctionCoefficientsPackage objectiveFunctionCoefficientsPackage;
         public ObjectiveFunctionCoefficientsPackage ObjectiveFunctionCoefficientsPackage { get { return objectiveFunctionCoefficientsPackage; } }

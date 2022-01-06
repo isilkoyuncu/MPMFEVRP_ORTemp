@@ -10,7 +10,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
     {
         string InputFileName { get; }
         ObjectiveFunctionTypes ObjectiveFunctionType { get; }
-        ObjectiveFunctions ObjectiveFunction { get; }
+        OldObjectiveFunctions ObjectiveFunction { get; }
         ObjectiveFunctionCoefficientsPackage ObjectiveFunctionCoefficientsPackage { get; }
         InputOrOutputParameterSet ProblemCharacteristics { get; }
 

@@ -10,14 +10,14 @@ namespace MPMFEVRP.Implementations.Problems
         public FleetCompositionProblemUnderCarbonRegulations()
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = ObjectiveFunctions.MinimizeTotalCost;
+            objectiveFunction = OldObjectiveFunctions.MinimizeTotalCost;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();//Because the problem should not depend on the problem and/or its model for this, but will have to create its own as part of experimentation to draw those frontiers
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
         public FleetCompositionProblemUnderCarbonRegulations(ProblemDataPackage pdp) : base(pdp)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = ObjectiveFunctions.MinimizeTotalCost;
+            objectiveFunction = OldObjectiveFunctions.MinimizeTotalCost;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();//Because the problem should not depend on the problem and/or its model for this, but will have to create its own as part of experimentation to draw those frontiers
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
@@ -25,7 +25,7 @@ namespace MPMFEVRP.Implementations.Problems
         public FleetCompositionProblemUnderCarbonRegulations(ProblemDataPackage pdp, int numberOfEVs) : base(pdp)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = ObjectiveFunctions.MinimizeTotalCost;
+            objectiveFunction = OldObjectiveFunctions.MinimizeTotalCost;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();//Because the problem should not depend on the problem and/or its model for this, but will have to create its own as part of experimentation to draw those frontiers
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
             problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);

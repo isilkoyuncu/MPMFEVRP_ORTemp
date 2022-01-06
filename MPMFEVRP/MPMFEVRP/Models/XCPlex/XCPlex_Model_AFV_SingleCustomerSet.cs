@@ -182,7 +182,7 @@ namespace MPMFEVRP.Models.XCPlex
         void AddMinTypeObjectiveFunction()
         {
             ILinearNumExpr objFunction = LinearNumExpr();
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeVMT)
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeVMT)
             {
                 for (int i = 0; i < numNonESNodes; i++)
                     for (int j = 0; j < numNonESNodes; j++)

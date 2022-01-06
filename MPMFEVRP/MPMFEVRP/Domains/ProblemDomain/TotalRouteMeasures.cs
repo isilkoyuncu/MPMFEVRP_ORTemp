@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases;
+using MPMFEVRP.MFGVRPCGH.RawMaterial;
 
 namespace MPMFEVRP.Domains.ProblemDomain
 {
@@ -18,6 +19,7 @@ namespace MPMFEVRP.Domains.ProblemDomain
         double dMax;
         double tMax;
         EVvsGDV_ProblemModel theProblemModel;
+        MixedFleetGVRPMaterial theMaterial;
         Site theDepot;
         List<SiteWithAuxiliaryVariables> ESs, customers;
         List<string> roundTripVisitDepot = new List<string>();
@@ -36,6 +38,19 @@ namespace MPMFEVRP.Domains.ProblemDomain
             SetListOfShortestTimeAndDistanceOfEsVisitPairs();
             numVehicles[0] = theProblemModel.GetNumVehicles(VehicleCategories.EV);
             numVehicles[1] = theProblemModel.GetNumVehicles(VehicleCategories.GDV);
+        }
+        public TotalRouteMeasures(MixedFleetGVRPMaterial theMaterial, Site theDepot, List<SiteWithAuxiliaryVariables> ESs, List<SiteWithAuxiliaryVariables> customers)
+        {
+            this.theMaterial = theMaterial;
+            this.theDepot = theDepot;
+            this.ESs = ESs;
+            this.customers = customers;
+            dMax = theMaterial.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).BatteryCapacity / theMaterial.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).ConsumptionRate;
+            tMax = theDepot.DueDate;
+            numCustomers = theMaterial.SRD.NumCustomers;
+            SetListOfShortestTimeAndDistanceOfEsVisitPairs();
+            numVehicles[0] = theMaterial.ExperimentationParameters.NumberOfEVs;
+            numVehicles[1] = theMaterial.ExperimentationParameters.NumberOfGDVs;
         }
         public void SetNumberOfVehiclesNeeded()
         {

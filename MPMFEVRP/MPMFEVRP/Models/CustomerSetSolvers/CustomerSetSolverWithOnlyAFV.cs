@@ -40,7 +40,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             
             double varCostPerMile = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile;
             double fuelCost = -1;
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeFuelCost)
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeFuelCost)
             {
                 if (GetBestObjValue() == GetObjValue())
                     fuelCost = GetObjValue();
@@ -75,7 +75,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
 
             double varCostPerMile = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile;
             double fuelCost = -1;
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeFuelCost)
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeFuelCost)
             {
                 if (GetBestObjValue() == GetObjValue())
                     fuelCost = GetObjValue();
@@ -113,7 +113,7 @@ namespace MPMFEVRP.Models.CustomerSetSolvers
             Solve_and_PostProcess();
             double varCostPerMile = theProblemModel.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile;
             double fuelCost = -1;
-            if (theProblemModel.ObjectiveFunction == ObjectiveFunctions.MinimizeFuelCost)
+            if (theProblemModel.ObjectiveFunction == OldObjectiveFunctions.MinimizeFuelCost)
             {
                 if (GetBestObjValue() == GetObjValue())
                     fuelCost = GetObjValue();

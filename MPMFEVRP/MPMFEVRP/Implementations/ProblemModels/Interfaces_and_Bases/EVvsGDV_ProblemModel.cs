@@ -538,18 +538,18 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             else
                 return Calculators.EuclideanDistance(centerOfGravityCoordinates[0], siteXY[0], centerOfGravityCoordinates[1], siteXY[1]);
         }
-        public double[,] GetCustomerPariwiseInteractionMatrix(CustomerGrouping_Metric metric= CustomerGrouping_Metric.ClosestCustomers)
-        {
-            double[,] outcome = new double[SRD.NumCustomers + 1, SRD.NumCustomers + 1]; //num customers + 1 for the depot
-            switch (metric)
-            {
-                case CustomerGrouping_Metric.ClosestCustomers:
-                    break;
-                default:
-                    break;
-            }
+        //public double[,] GetCustomerPariwiseInteractionMatrix(CustomerGrouping_Metric metric= CustomerGrouping_Metric.ClosestCustomers)
+        //{
+        //    double[,] outcome = new double[SRD.NumCustomers + 1, SRD.NumCustomers + 1]; //num customers + 1 for the depot
+        //    switch (metric)
+        //    {
+        //        case CustomerGrouping_Metric.ClosestCustomers:
+        //            break;
+        //        default:
+        //            break;
+        //    }
            
-        }
+        //}
 
 
         public void SetNumVehicles()
@@ -641,7 +641,7 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
             List<VehicleCategories> vcList = new List<VehicleCategories>() { VehicleCategories.EV, VehicleCategories.GDV };
             switch (objectiveFunction)
             {
-                case ObjectiveFunctions.MaximizeProfit:
+                case OldObjectiveFunctions.MaximizeProfit:
                     foreach (VehicleCategories vc in vcList)
                     {
                         outcome += OFIDP.GetPrizeCollected(vc);
@@ -656,16 +656,16 @@ namespace MPMFEVRP.Implementations.ProblemModels.Interfaces_and_Bases
                         //outcome -= objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
                     }
                     break;
-                case ObjectiveFunctions.MinimizeVMT:
+                case OldObjectiveFunctions.MinimizeVMT:
                     outcome += OFIDP.GetTotalVMT();
                     break;
-                case ObjectiveFunctions.MinimizeVariableCost:
+                case OldObjectiveFunctions.MinimizeVariableCost:
                     foreach (VehicleCategories vc in vcList)
                     {
                         outcome += objectiveFunctionCoefficientsPackage.GetCostPerMileOfTravel(vc) * OFIDP.GetVMT(vc);
                     }
                     break;
-                case ObjectiveFunctions.MinimizeTotalCost:
+                case OldObjectiveFunctions.MinimizeTotalCost:
                     foreach (VehicleCategories vc in vcList)
                     {
                         outcome += objectiveFunctionCoefficientsPackage.GetFixedCostPerVehicle(vc) * OFIDP.GetNumberOfVehiclesUsed(vc);

@@ -16,7 +16,7 @@ namespace MPMFEVRP.Implementations.Problems
         public EMH_Problem()
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = ObjectiveFunctions.MinimizeVMT;
+            objectiveFunction = OldObjectiveFunctions.MinimizeVMT;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage();
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
@@ -24,7 +24,7 @@ namespace MPMFEVRP.Implementations.Problems
         public EMH_Problem(ProblemDataPackage PDP) : base(PDP)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = ObjectiveFunctions.MinimizeVMT;
+            objectiveFunction = OldObjectiveFunctions.MinimizeVMT;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, 0.0);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
         }
@@ -32,7 +32,7 @@ namespace MPMFEVRP.Implementations.Problems
         public EMH_Problem(ProblemDataPackage PDP, int numberOfEVs) : base(PDP)
         {
             objectiveFunctionType = ObjectiveFunctionTypes.Minimize;
-            objectiveFunction = ObjectiveFunctions.MinimizeVMT;
+            objectiveFunction = OldObjectiveFunctions.MinimizeVMT;
             objectiveFunctionCoefficientsPackage = new ObjectiveFunctionCoefficientsPackage(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, pdp.VRD.GetTheVehicleOfCategory(VehicleCategories.EV).VariableCostPerMile, 0.0);
             coverConstraintType = CustomerCoverageConstraint_EachCustomerMustBeCovered.ExactlyOnce;
             problemCharacteristics.UpdateParameter(ParameterID.PRB_NUM_EV, numberOfEVs);
